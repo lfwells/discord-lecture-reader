@@ -15,3 +15,6 @@ Lachee: <:catloser:770049584566370304>
 Lachee: code it how you like, its d.js... its not know for good practices.
 If you want one that is more defined, try detritus (js) or another language entirely.
 Lachee: i like d.js cause it is quick to hook into events.. t ahts about it tho
+giantlindsay: a couple more tests
+giantlindsay: and a bit more
+giantlindsay: okay i think we're good
