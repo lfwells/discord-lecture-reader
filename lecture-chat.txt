@@ -1,0 +1,17 @@
+318204205435322368: with a bit more spamgiantlindsay: spammgiantlindsay: i spammedgiantlindsay: goodgiantlindsay: blah
+giantlindsay: [b]a few more blags[/b]
+giantlindsay: <b>i am so smort</b>
+giantlindsay: ***vwhat***( about really long messageswhat about really long messageswhat about really long messageswhat about really long messageswhat about really long messageswhat about really long messageswhat about really long messageswhat about really long messages
+giantlindsay: can't believe i got this working, discord is awesome
+giantlindsay: 
+giantlindsay: ***bold text***
+giantlindsay: emjoi 🙂
+Lachee: <:cathammer:770049584651042836>
+giantlindsay: sorry haha, was testing something with ian
+giantlindsay: he has the bot too now
+giantlindsay: (and is probably reading this as we speak)
+giantlindsay: I don't know if its how the bot is supposed to be coded, but I am going to add commandline arg to filter by server, and to choose channel
+Lachee: <:catloser:770049584566370304>
+Lachee: code it how you like, its d.js... its not know for good practices.
+If you want one that is more defined, try detritus (js) or another language entirely.
+Lachee: i like d.js cause it is quick to hook into events.. t ahts about it tho
