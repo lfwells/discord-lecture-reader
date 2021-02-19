@@ -31,5 +31,5 @@ client.on('message', msg => {
   }
 });
 
-//lol at leaving this login token lying around on github (proceeds to not care)
-client.login('ODExOTU4MzQwOTY3MDcxNzQ1.YC5xIQ.gHTqtOTdgZM-l0lRyQKGvKgXQf4');
+var token = fs.readFileSync("token.txt", "utf8")
+client.login(token);
