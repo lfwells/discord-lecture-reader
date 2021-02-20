@@ -83,8 +83,10 @@ client.on('message', msg => {
 
   if(msg.channel.guild.name == myArgs[0])
   {
-    if (msg.content === 'ping') {
-      msg.reply('pong');
+    if (msg.content === '/clearpoll') {
+      fs.writeFileSync("poll.txt", "", function (err) {   
+      });
+      msg.reply('Cleared poll from stream');
     }
       
     if (msg.channel.name == myArgs[1])

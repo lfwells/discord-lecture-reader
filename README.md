@@ -22,7 +22,8 @@ e.g.
 Then use the channel-name.txt file in OBS.
 For the poll, use poll.txt file in OBS.
 
+To remove the poll from the screen, just type `/clearpoll` into the channel
+
 ## TODO
 Output file as parameter
 Graphics / browser source for OBS
-bot command to clear poll from screen /clearpoll
