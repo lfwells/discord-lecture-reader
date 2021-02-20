@@ -27,3 +27,4 @@ To remove the poll from the screen, just type `/clearpoll` into the channel
 ## TODO
 Output file as parameter
 Graphics / browser source for OBS
+On startup to ignore any polls before any /clearpoll messages
