@@ -1,2 +1,8 @@
 giantlindsay: /clearpoll
 Lecture Helper: <@!318204205435322368>, Cleared poll from stream
+giantlindsay: /clearpoll
+Lecture Helper: <@!318204205435322368>, Cleared poll from stream
+giantlindsay: /clearpoll
+Lecture Helper: <@!318204205435322368>, Cleared poll from stream
+giantlindsay: /poll "test" "a" "b"
+Simple Poll: **:bar_chart: test**

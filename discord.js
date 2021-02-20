@@ -43,12 +43,24 @@ function PollDetails()
   var output = "";
   messagesManager.fetch()
         .then(messages => {
+          var latestClearMessage = messages.filter(m => m.content.startsWith("/clearpoll")).first(); 
+          //
+  //createdTimestamp: 1613824248721,
+  //                  1613824667593
           var pollMessages = messages.filter(m => m.author.username.startsWith("Simple Poll"));
           //console.log(pollMessages);
           //console.log(`${pollMessages.size} poll messages`);
-          var latestPoll = pollMessages.last();
+          var latestPoll = pollMessages.first();
           if (latestPoll)
           {
+            if (latestClearMessage && latestPoll.createdTimestamp < latestClearMessage.createdTimestamp) 
+            {
+              console.log("latest pool was before most recent /clearpoll");
+              fs.writeFile("poll.txt", "", function (err) {   
+              });
+              return;
+            }
+
             var question = latestPoll.content;
             question = question.replace("**", "");
             question = question.replace(":bar_chart: ", "");
