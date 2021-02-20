@@ -1,3 +1,4 @@
-8 Android
-4 iOS
-9 Cross-Platform (Flutter)
+Poll: Just doing a simple poll
+0 ignore
+0 me
+0 pls

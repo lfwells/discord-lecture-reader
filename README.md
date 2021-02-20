@@ -23,7 +23,6 @@ Then use the channel-name.txt file in OBS.
 For the poll, use poll.txt file in OBS.
 
 ## TODO
-Channel id and simplebot id as params not ignored
 Output file as parameter
 Graphics / browser source for OBS
 bot command to clear poll from screen /clearpoll

@@ -7,32 +7,54 @@ console.log('run with args: ', myArgs);
 fs = require('fs');
 
 var messagesManager;
+var channel;
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
   var channelManager = client.channels;
-  channelManager.fetch("802055032257511424")
-    .then(channel => {
-      messagesManager = channel.messages;
-      PollDetails();
-      //setInterval(PollDetails, 500);
-    });
+  channel = channelManager.cache.filter(c => c.name == myArgs[1] && c.guild.name == myArgs[0]).first();
+  if (channel)
+  {
+    console.log(`Checking for polls in channel ${channel.name}`);
+    messagesManager = channel.messages;
+    PollDetails();
+  }
+  else
+  {
+    console.error("Couldn't find channel "+myArgs[1]);
+  }
 });
 
-client.on('messageReactionAdd', PollDetails);
-client.on('messageReactionRemove', PollDetails);
+client.on('messageReactionAdd', (e) => {
+  if (e.message.channel == channel)
+  {
+    PollDetails();
+  }
+});
+client.on('messageReactionRemove', (e) => {
+  if (e.message.channel == channel)
+  {
+    PollDetails();
+  }
+});
 
 function PollDetails()
 {
   var output = "";
   messagesManager.fetch()
         .then(messages => {
-          var pollMessages = messages.filter(m => m.author.id === '324631108731928587');
+          var pollMessages = messages.filter(m => m.author.username.startsWith("Simple Poll"));
           //console.log(pollMessages);
           //console.log(`${pollMessages.size} poll messages`);
           var latestPoll = pollMessages.last();
           if (latestPoll)
           {
+            var question = latestPoll.content;
+            question = question.replace("**", "");
+            question = question.replace(":bar_chart: ", "");
+            question = question.replace("**", "");
+            output = "Poll: "+question+"\n";
+
             var results = [];
             description = latestPoll.embeds[0].description.split("\n");
             //console.log(description);
@@ -45,7 +67,7 @@ function PollDetails()
             var reactions = latestPoll.reactions.cache;
             var i = 0;
             reactions.each((data,key) => {
-              output += data.count +" "+results[i]+"\n";
+              output += (parseInt(data.count)-1) +" "+results[i]+"\n";
               i++;
             });
           }
