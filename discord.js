@@ -111,16 +111,20 @@ function PollDetails()
             var results = [];
             description = latestPoll.embeds[0].description.split("\n");
             //console.log(description);
+            var longestOption = 0;
             for (var i = 0; i < description.length; i++)
             {
               if (description[i] == "") break;
-              results.push(description[i].substr(3));
+              var option = description[i].substr(3);
+              longestOption = Math.max(longestOption, option.length);
+              results.push(option);
             }
 
             var reactions = latestPoll.reactions.cache;
             var i = 0;
             reactions.each((data,key) => {
-              output += (parseInt(data.count)-1) +" "+results[i]+"\n";
+              var votes = parseInt(data.count)-1;
+              output += results[i].padEnd(longestOption + 3)+"█".repeat(votes)+" "+votes.toString().padEnd(3)+"\n";
               i++;
             });
           }

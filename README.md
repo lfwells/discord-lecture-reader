@@ -49,3 +49,8 @@ You can clear the poll on this page by clicking the button or navigating to `htt
 Output file as parameter
 Graphics / browser source for OBS
 For fun: "latest vote: XX for YY"
+
+but im thinking about a longer term solution where we effectively have a "dashboard" that can do heaps of stuff, like:
+- a list of polls you can just click on to post
+- a button for enabling/disabling breakout rooms
+- a button for clearing a channel, or posting an announcement or all sorts of cool shit
