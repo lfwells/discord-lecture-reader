@@ -1,4 +1,5 @@
-Poll: 
-Android                    ███████ 7  
-iOS                        ████ 4  
-Cross-Platform (Flutter)   ██████████ 10 
+Poll: Test Scheduled Polls are great?
+yes      0  
+no      █ 1  
+maybe   █ 1  
+giantlindsay voted for null

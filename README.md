@@ -46,7 +46,7 @@ Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
 You can clear the poll on this page by clicking the button or navigating to `http://localhost:1090/?/clearpoll`.
 
 ## TODO
-Output file as parameter
+Param for right align / other formatting
 Graphics / browser source for OBS
 For fun: "latest vote: XX for YY"
 

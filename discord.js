@@ -66,9 +66,20 @@ client.on('ready', () => {
   }
 });
 
+var mostRecent = null; 
 client.on('messageReactionAdd', (e) => {
   if (e.message.channel == channel)
   {
+    e.users.fetch().then(users =>
+      {
+        var userWhoVoted = users.first();
+        if (userWhoVoted)
+        {
+          //doesnt work sadly
+          //console.log(e);
+          //mostRecent = userWhoVoted.username+" voted for "+e._emoji;
+        } 
+      });
     PollDetails();
   }
 });
@@ -106,11 +117,13 @@ function PollDetails()
             question = question.replace("**", "");
             question = question.replace(":bar_chart: ", "");
             question = question.replace("**", "");
+
+            //display question
             output = "Poll: "+question+"\n";
 
+            //display graph (TODO: right align?)
             var results = [];
             description = latestPoll.embeds[0].description.split("\n");
-            //console.log(description);
             var longestOption = 0;
             for (var i = 0; i < description.length; i++)
             {
@@ -128,6 +141,14 @@ function PollDetails()
               i++;
             });
           }
+
+          //display last voter (TODO: an option)
+          if (mostRecent)
+          {
+            output += mostRecent;
+          }
+
+          //write it out to file, for use in OBS
           console.log(output);
           fs.writeFile("poll.txt", output, function (err) {   
           });
