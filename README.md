@@ -39,6 +39,10 @@ e.g.
 
 `http://localhost:1090/?/poll%20%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
 
+(if making this link in powerpoint etc, you don't need to write `%20` or `%25` yourself, these are just spaces and double-quotes that will get automatically changed)
+
+Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
+
 You can clear the poll on this page by clicking the button or navigating to `http://localhost:1090/?/clearpoll`.
 
 ## TODO
