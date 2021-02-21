@@ -10,6 +10,9 @@ Dependencies
 
 `npm install discord.js`
 
+Add bot to your server with invite link
+[https://discord.com/api/oauth2/authorize?client_id=811958340967071745&permissions=8&redirect_uri=https%3A%2F%2Fplayur.io&scope=bot]
+
 ## Usage
 `node discord.js server_name channel name`
 
@@ -27,3 +30,4 @@ To remove the poll from the screen, just type `/clearpoll` into the channel
 ## TODO
 Output file as parameter
 Graphics / browser source for OBS
+For fun: "latest vote: XX for YY"
