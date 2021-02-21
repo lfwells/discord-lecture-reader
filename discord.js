@@ -4,7 +4,48 @@ const client = new Discord.Client();
 var myArgs = process.argv.slice(2);
 console.log('run with args: ', myArgs);
 
+var port = 1090;
+var host = "localhost";
+
 fs = require('fs');
+
+//create a server to listen to requests
+var http = require('http');
+http.createServer(function (req, res) {
+  var url = req.url;
+  url = url.replace("/?", "");
+  var pollText = decodeURI(url);
+  console.log(pollText);
+  
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  
+  if (pollText.startsWith("/clearpoll"))
+  {
+    //send the clear message on discord
+    channel.send("/clearpoll");
+
+    //show webpage
+    res.write("Poll Cleared. Close browser tab yourself.");
+  }
+  else if (pollText.startsWith("/poll"))
+  {
+    //send the message on discord
+    channel.send(pollText);
+
+    //show web page
+    res.write(fs.readFileSync("scheduledPoll.html", "utf8"));
+  }
+  else
+  {
+    //show web page
+    res.write("Unknown command sent. Check syntax.");
+  }
+  
+  res.end();
+}).listen(port, host, () => {
+  console.log(`Server is running on http://${host}:${port}`);
+});
+
 
 var messagesManager;
 var channel;

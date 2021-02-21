@@ -18,3 +18,8 @@ Lachee: i like d.js cause it is quick to hook into events.. t ahts about it tho
 giantlindsay: a couple more tests
 giantlindsay: and a bit more
 giantlindsay: okay i think we're good
+Lecture Helper: \poll "Test Scheduled Polls are great?" "yes" "no" "maybe"
+Lecture Helper: /favicon.ico
+Lecture Helper: \poll "Test Scheduled Polls are great?" "yes" "no" "maybe"
+Lecture Helper: /poll "Test Scheduled Polls are great?" "yes" "no" "maybe"
+Simple Poll: **:bar_chart: Test Scheduled Polls are great?**
