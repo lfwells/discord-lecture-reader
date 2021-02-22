@@ -3,6 +3,7 @@ const client = new Discord.Client();
 
 var myArgs = process.argv.slice(2);
 console.log('run with args: ', myArgs);
+if (myArgs.length < 2) return;
 
 var rightAlign = myArgs.length > 2 && myArgs[2] == "right";
 
@@ -12,7 +13,9 @@ var host = "localhost";
 fs = require('fs');
 
 //clear old chat
-fs.writeFile(myArgs[1]+'.txt', "Welcome to the Lecture Chat!\n", function (err) {   
+fs.writeFile(myArgs[1]+'.txt', "Welcome to "+myArgs[1]+"!\n", function (err) {   
+});
+fs.writeFile('poll.txt', "", function (err) {   
 });
 
 //create a server to listen to requests
@@ -188,6 +191,7 @@ client.on('message', msg => {
     if (msg.channel.name == myArgs[1])
     {
           var text = msg.author.username +": "+msg.content+"\n"
+          if (msg.author.id == "811958340967071745") return;
           if (msg.author.username == "Simple Poll") return;
           if (msg.author.username == "Lecture Helper") return;
           if (text.indexOf("/poll") >= 0) return;

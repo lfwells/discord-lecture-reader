@@ -1,2 +1,2 @@
-Welcome to the Lecture Chat!
-giantlindsay: Yay chat will appear here
+Welcome to lecture-chat!
+giantlindsay: test
