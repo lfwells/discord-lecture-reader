@@ -1,5 +1,3 @@
-Poll: Test Scheduled Polls are great?
-yes      0  
-no      █ 1  
-maybe   █ 1  
-giantlindsay voted for null
+Poll: Used Discord before?
+Yes    0  
+No    █ 1  

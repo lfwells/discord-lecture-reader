@@ -4,10 +4,16 @@ const client = new Discord.Client();
 var myArgs = process.argv.slice(2);
 console.log('run with args: ', myArgs);
 
+var rightAlign = myArgs.length > 2 && myArgs[2] == "right";
+
 var port = 1090;
 var host = "localhost";
 
 fs = require('fs');
+
+//clear old chat
+fs.writeFile(myArgs[1]+'.txt', "Welcome to the Lecture Chat!\n", function (err) {   
+});
 
 //create a server to listen to requests
 var http = require('http');
@@ -70,6 +76,7 @@ var mostRecent = null;
 client.on('messageReactionAdd', (e) => {
   if (e.message.channel == channel)
   {
+    console.log("Detected a vote?");
     e.users.fetch().then(users =>
       {
         var userWhoVoted = users.first();
@@ -134,10 +141,20 @@ function PollDetails()
             }
 
             var reactions = latestPoll.reactions.cache;
+
+            var mostVotes = 0;
+            reactions.each((data,key) => {
+              var votes = parseInt(data.count)-1;
+              mostVotes = Math.max(mostVotes, votes);
+            });
+
             var i = 0;
             reactions.each((data,key) => {
               var votes = parseInt(data.count)-1;
-              output += results[i].padEnd(longestOption + 3)+"█".repeat(votes)+" "+votes.toString().padEnd(3)+"\n";
+              if (rightAlign)
+                output += votes.toString().padStart(3)+" "+"█".repeat(votes).padStart(mostVotes)+" "+results[i].padStart(longestOption)+"\n\r";
+              else
+                output += results[i].padEnd(longestOption + 3)+"█".repeat(votes)+" "+votes.toString().padEnd(3)+"\n";
               i++;
             });
           }
@@ -151,6 +168,7 @@ function PollDetails()
           //write it out to file, for use in OBS
           console.log(output);
           fs.writeFile("poll.txt", output, function (err) {   
+            if (err) console.error(err)
           });
 
         })
@@ -170,6 +188,10 @@ client.on('message', msg => {
     if (msg.channel.name == myArgs[1])
     {
           var text = msg.author.username +": "+msg.content+"\n"
+          if (msg.author.username == "Simple Poll") return;
+          if (msg.author.username == "Lecture Helper") return;
+          if (text.indexOf("/poll") >= 0) return;
+          
           console.log(text)
 
           fs.appendFile(myArgs[1]+'.txt', text, function (err) {   
