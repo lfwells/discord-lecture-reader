@@ -20,10 +20,21 @@ fs.writeFile('poll.txt', "", function (err) {
 
 //create a server to listen to requests
 var http = require('http');
+var previousRequest;
 http.createServer(function (req, res) {
   var url = req.url;
   url = url.replace("/?", "");
   var pollText = decodeURI(url);
+
+  if (pollText == previousRequest) 
+  {  
+    //show web page
+    res.write(fs.readFileSync("scheduledPoll.html", "utf8"));
+    res.end();
+    return; //ward off evil powerpoint duplicate requests
+  }
+  previousRequest = pollText;
+
   console.log(pollText);
   
   res.writeHead(200, {'Content-Type': 'text/html'});
@@ -67,7 +78,7 @@ client.on('ready', () => {
   {
     console.log(`Checking for polls in channel ${channel.name}`);
     messagesManager = channel.messages;
-    PollDetails();
+    //PollDetails(); //don't need to grab poll on startup I don't think
   }
   else
   {
@@ -190,7 +201,7 @@ client.on('message', msg => {
       
     if (msg.channel.name == myArgs[1])
     {
-          var text = msg.author.username +": "+msg.content+"\n"
+          var text = msg.member.displayName +": "+msg.cleanContent+"\n"
           if (msg.author.id == "811958340967071745") return;
           if (msg.author.username == "Simple Poll") return;
           if (msg.author.username == "Lecture Helper") return;
