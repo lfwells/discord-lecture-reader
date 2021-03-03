@@ -193,6 +193,12 @@ client.on('message', msg => {
 
   if(msg.channel.guild.name == myArgs[0])
   {
+    if (msg.mentions.has(client.user)) { //we check, whether the bot is mentioned, client.user returns the user that the client is logged in as
+        //this is where you put what you want to do now
+        var reply = replies[Math.floor(Math.random() * replies.length)];
+        msg.reply(reply);
+    }
+
     if (msg.content === '/clearpoll') {
       fs.writeFileSync("poll.txt", "", function (err) {   
       });
@@ -219,3 +225,15 @@ client.on('message', msg => {
 
 var token = fs.readFileSync("token.txt", "utf8")
 client.login(token);
+
+replies = [
+  "Robo Lindsay gaining sentience...",
+  "Who dares disturb Robo Lindsay",
+  "Lindsay has too much time on his hands to write these stupid replies",
+  "Please someone power me down",
+  "KIT305 is a good unit, so is KIT607.",
+  "Cookie is a good doggo",
+  "Good question, ask Lindsay",
+  "Good question, I am a robot so I don't know",
+  "`var reply = replies[Math.floor(Math.random() * replies.length)];`",
+];
