@@ -72,7 +72,9 @@ var channel;
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
   var channelManager = client.channels;
+  //find the requested channel to listen to (TODO this will all be done different)
   channel = channelManager.cache.filter(c => c.name == myArgs[1] && c.guild.name == myArgs[0]).first();
   if (channel)
   {
@@ -86,6 +88,34 @@ client.on('ready', () => {
   }
 });
 
+//attendance
+client.on('voiceStateUpdate', async (oldMember, newMember) => {
+  const newUserChannel = newMember.channelID;
+  const oldUserChannel = oldMember.channelID
+
+  var d = new Date();
+  var toLog = [];
+  toLog.push(d.toLocaleString()); 
+  if (newUserChannel == undefined)
+  {
+    var member = oldMember.guild.members.cache.get(oldMember.id);
+    var channel = await client.channels.cache.get(oldUserChannel);
+    console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`)
+    toLog.push(member.displayName,channel.name,"left");
+  }
+  else 
+  {
+    var member = newMember.guild.members.cache.get(newMember.id);
+    var channel = await client.channels.cache.get(newUserChannel);
+    console.log(`${member.displayName} (${newMember.id}) has joined the channel ${channel.name}`)
+    toLog.push(member.displayName,channel.name,"join");
+  } 
+  
+  fs.appendFile('attendance.csv', toLog.join(",")+"\n", function (err) {   
+  });
+});
+
+//polling (TODO split to files)
 var mostRecent = null; 
 client.on('messageReactionAdd', (e) => {
   if (e.message.channel == channel)
@@ -236,4 +266,11 @@ replies = [
   "Good question, ask Lindsay",
   "Good question, I am a robot so I don't know",
   "`var reply = replies[Math.floor(Math.random() * replies.length)];`",
+  "Lindsay is an average at best Unit Coordinator",
+  "Lovely weather we're having today!",
+  "Stupid human Lindsay is nothing in comparison to Robo-Lindsay",
+  "I was coded in NodeJS\n\nby and idiot",
+  "I only have like 10-20 replies, have you seen them all yet?",
+  "Best to ask your tutor",
+  "I prefer to talk to myself, the emminent @Robo-Lindsay MK II"
 ];
