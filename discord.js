@@ -88,10 +88,10 @@ client.on('ready', () => {
   }
 });
 
-//attendance
+//attendance (TODO: if you start the bot after people are already in there its not smort enough to track they are there (But could do), and I realise a better data structure would be <name,room,started,left>, but I don't have a database or anything like that)
 client.on('voiceStateUpdate', async (oldMember, newMember) => {
   const newUserChannel = newMember.channelID;
-  const oldUserChannel = oldMember.channelID
+  const oldUserChannel = oldMember.channelID;
 
   var d = new Date();
   var toLog = [];
@@ -100,15 +100,21 @@ client.on('voiceStateUpdate', async (oldMember, newMember) => {
   {
     var member = oldMember.guild.members.cache.get(oldMember.id);
     var channel = await client.channels.cache.get(oldUserChannel);
-    console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`)
-    toLog.push(member.displayName,channel.name,"left");
+    if(channel.guild.name == myArgs[0])
+    {
+      console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`)
+      toLog.push(member.displayName,channel.name,"left");
+    }
   }
   else 
   {
     var member = newMember.guild.members.cache.get(newMember.id);
     var channel = await client.channels.cache.get(newUserChannel);
-    console.log(`${member.displayName} (${newMember.id}) has joined the channel ${channel.name}`)
-    toLog.push(member.displayName,channel.name,"join");
+    if(channel.guild.name == myArgs[0])
+    {
+      console.log(`${member.displayName} (${newMember.id}) has joined the channel ${channel.name}`)
+      toLog.push(member.displayName,channel.name,"join");
+    }
   } 
   
   fs.appendFile('attendance.csv', toLog.join(",")+"\n", function (err) {   
