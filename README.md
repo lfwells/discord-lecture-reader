@@ -1,56 +1,63 @@
-# A really basic channel reader for Discord
-This app is just to write the contents of a given channel to file, for use in OBS
+# A slightly-less basic teaching tool for Discord
+This node.js app can:
+- Read a lecture chat for polls and display in HTML for OBS
+- Post saved polls
+- Track attendance
+- Respond snarkily to those who @ it (later will see if people are @ing ian or lindsay when they are away)
 
-It could be so much more ;)
+It will hopefullys be so much more ;)
 
 ## Installation
 Requires node.js
 
 Dependencies
 
-`npm install discord.js`
+`npm install`
+
+`sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080`
 
 Add bot to your server with invite link
 [https://discord.com/api/oauth2/authorize?client_id=811958340967071745&permissions=8&redirect_uri=https%3A%2F%2Fplayur.io&scope=bot]
 
+In the root directory, you will need a token.txt file containing your discord token.
+In the root directory, you will need a `users.js` file with the users and passwords. It should look like:
+`module.exports = {
+    users: { 'username': 'password' },
+    challenge: true 
+}`
+
 ## Usage
-`node discord.js server_name channel_name`
+`sudo forever start -o out.log -e err.log discord/discord.js`
 
-e.g.
+```
+screen -S <process description>	start a session
+Ctrl+A Ctrl+D				detach from a session
+screen -ls				list sessions
+screen -r <process description>	        reattach a session
+```
 
-`node discord.js "KIT305-607 2021" lecture-chat`
-
-`node discord.js "KIT109 2020" lecture-chat`
-
-### Reading a channel (NB: Discord has an official better one)
-Use the `<channel_name>.txt` file in OBS.
-
-### Reading a poll 
-Use the poll.txt file in OBS.
-
-To remove the poll from the screen, just type `/clearpoll` into the channel.
+You can monitor the log with:
+`tail -n 15 -F out.log`
 
 ### Triggering a pre-defined poll via URL
 Navigate to:
 
-`http://localhost:1090/?<poll info here>`
+`http://144.6.230.199/guild/<guild_id>/poll/<poll info here>`
 
 e.g.
 
-`http://localhost:1090/?/poll%20%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
+`http://144.6.230.199/guild/<guild_id>/poll/%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
 
 (if making this link in powerpoint etc, you don't need to write `%20` or `%25` yourself, these are just spaces and double-quotes that will get automatically changed)
 
 Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
 
-You can clear the poll on this page by clicking the button or navigating to `http://localhost:1090/?/clearpoll`.
+You can clear the poll on this page by clicking the button or navigating to `http://144.6.230.199/guild/<guild_id>/clearpoll`.
 
 ## TODO
-Graphics / browser source for OBS, or just ignore formatting
 For fun: "latest vote: XX for YY" (actually is hard)
 
 but im thinking about a longer term solution where we effectively have a "dashboard" that can do heaps of stuff, like:
-- a list of polls you can just click on to post
 - a button for enabling/disabling breakout rooms
 - a button for clearing a channel, or posting an announcement or all sorts of cool shit
 

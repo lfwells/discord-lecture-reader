@@ -1,0 +1,19 @@
+<%- include('header.html') %>
+
+<h2>Attendance</h2>
+
+<nav><a href="csv/">Download CSV</a></nav>
+
+<table border="1" cellpadding="8">
+  <% data.forEach(function(row){ 
+    %>
+    <tr>
+        <td><%= row.date %></td>
+        <td><%= row.name %></td>
+        <td><%= row.channel %></td>
+        <td><%= row.action %></td>
+    </tr>
+  <% }) %>
+</table>
+
+<%- include('footer.html') %>

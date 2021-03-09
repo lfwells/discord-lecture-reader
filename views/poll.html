@@ -1,0 +1,36 @@
+<%- include('header.html') %>
+
+<style>
+    h1 { display:none; }
+    .question { font-size:16pt; }
+    th { text-align: left; padding-right: 1ex; }
+    .votes { padding-left: 1ex; text-align: center; }
+    * {
+        text-shadow: 0px 0px 4px #2C2F33;
+    }
+    .bar {
+        box-shadow: 0px 0px 4px #2C2F33;
+    }
+    /* add this rule to custom css for bottom align *//*
+    #results {
+        position:absolute;
+        bottom:1em;
+    }*/
+</style>
+
+<div id="results">
+
+</div>
+<script type="text/javascript">
+    $(async function()
+    {
+        while (true)
+        {
+            var data = await $.ajax("data/");
+            $("#results").html(data);
+            await setTimeout(1000);
+        }
+    });
+</script>
+
+<%- include('footer.html') %>

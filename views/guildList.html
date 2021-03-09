@@ -1,0 +1,16 @@
+<%- include('header.html') %>
+
+<h1>Servers</h1>
+<p><% if (testMode) { %>
+    Test Mode ON. <a href="/testMode/false">Turn OFF</a>
+<% } else { %>
+    Test Mode OFF. <a href="/testMode/true">Turn ON</a>
+<% } %> (Test mode limits the bot to only respond and post on the test server)</p>
+<ul id="guilds">
+  <% guilds.forEach(function(guild){ %>
+    <li><a href="/guild/<%= guild.id %>/"><%= guild.name %> &lt;<%= guild.id %>&gt;</a></li>
+  <% }) %>
+  <li><a href="https://discord.com/api/oauth2/authorize?client_id=811958340967071745&permissions=8&redirect_uri=https%3A%2F%2Fplayur.io&scope=bot">Add Your Server</a></li>
+</ul>
+
+<%- include('footer.html') %>

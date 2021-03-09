@@ -1,0 +1,13 @@
+<h2 class="question"><%= question %></h2>
+
+<table class="results">
+  <% results.forEach(function(result){ %>
+    <tr>
+        <th class="answer"><%= result.answer %></th>
+        <td>
+            <div class="bar <%= result.votes == mostVotes ? 'leading' : '' %>" style="width: <%= oneVoteSize * result.votes %>">&nbsp;</div>
+        </td>
+        <td class="votes"><%= result.votes %></td>
+    </tr>
+  <% }) %>
+</table> 

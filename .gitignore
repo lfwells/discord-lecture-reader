@@ -1,1 +1,4 @@
 token.txt
+*firebase-adminsdk*
+node_modules
+users.js
