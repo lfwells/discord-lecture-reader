@@ -186,7 +186,7 @@ async function loadPoll(req,res,next)
       res.end("");
       return;
     }
-    if (latestClearPoll && latestPoll.createdTimestamp < latestClearMessage.createdTimestamp) 
+    if (latestClearMessage && latestPoll.createdTimestamp < latestClearMessage.createdTimestamp) 
     {
       console.log("latest pool was before most recent clearpoll message");
       res.end("");
