@@ -13,3 +13,7 @@
         <% if (locals.guild) { %>
             <h1><a href="/guild/<%= guild.id %>/"><%= guild.name %></a> <a href="/" style="font-size:small">Change Server</a></h1>
         <% } %>
+        
+        <% if (locals.query.message) { %>
+            <p><strong><%= locals.query.message %></strong></p>
+        <% } %>

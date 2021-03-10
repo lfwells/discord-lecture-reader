@@ -66,6 +66,12 @@ app.engine('.html', require('ejs').__express);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
 app.use('/static', express.static(path.join(__dirname, 'www')))
+app.use(function(req, res, next) {
+  res.locals.query = req.query;
+  res.locals.url   = req.originalUrl;
+
+  next();
+});
 
 //use this handie little tool to allow question marks in poll urls
 function removeQuestionMark(req, res, next)
@@ -81,6 +87,9 @@ function removeQuestionMark(req, res, next)
 
 function redirectToMainPage(req,res, message){
   res.redirect("/guild/"+req.params.guildID+"/?message="+message);
+}
+function redirectToWhereWeCameFrom(req,res,message) {
+  res.redirect(req.headers.referer+"?message="+message);
 }
 
 //TODO: these two need to return error if not authed or wrong id
@@ -303,7 +312,8 @@ app.get("/guild/:guildID/clearpoll/", loadGuild, loadLectureChannel(false), asyn
   //old way 
   //await req.lectureChannel.send("/clearpoll");
   //res.end("Poll cleared, please close browser window yourself");
-  return redirectToMainPage(req, res, "Poll Cleared!");
+  return redirectToWhereWeCameFrom(req, res, "Poll Cleared!");
+  //return redirectToMainPage(req, res, "Poll Cleared!");
 });
 
 
@@ -421,7 +431,8 @@ async function getStatus(id, guild)
   if (custom)
   {
     custom = custom[0];
-    return { available:parseClientStatus(user.presence.clientStatus), status:custom.state }
+    if (custom)
+      return { available:parseClientStatus(user.presence.clientStatus), status:custom.state }
   }
   return { available:parseClientStatus(user.presence.clientStatus) }
 }
