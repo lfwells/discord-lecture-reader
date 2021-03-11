@@ -683,6 +683,7 @@ client.on('ready', async () => {
     if (guild.id == TEST_SERVER_ID)
     {
       console.log(await getStatus(LINDSAY_ID, guild));
+      throw Error("??!") 
     }
     console.log("initialised Guild",guild.name, guild.id);
   });
@@ -696,7 +697,7 @@ process.on('uncaughtException', async function(err) {
   var errorChannel = await client.channels.fetch(ERROR_LOG_CHANNEL_ID);
   if(errorChannel)
   {
-    errorChannel.send("```"+JSON.stringify(err, Object.getOwnPropertyNames(err))+"```");
+    errorChannel.send("<@"+LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err))+"```");
   }
   process.nextTick(function() { process.exit(1) })
 });
@@ -706,7 +707,7 @@ process.on('unhandledRejection', async function(err) {
   var errorChannel = await client.channels.fetch(ERROR_LOG_CHANNEL_ID);
   if(errorChannel)
   {
-    errorChannel.send("```"+JSON.stringify(err, Object.getOwnPropertyNames(err))+"```");
+    errorChannel.send("<@"+LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err))+"```");
   }
 
 });
