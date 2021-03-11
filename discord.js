@@ -635,25 +635,25 @@ client.on('message', async (msg) =>
         if (status.available == "dnd")
         {
           if (status.status)
-            msg.reply("Lindsay's status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
+            msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
           else
-            msg.reply("Lindsay is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
+            msg.reply("<@"+LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
           replied = true;
         }
         if (status.available == "idle")
         {
           if (status.status)
-            msg.reply("Lindsay's status says '"+status.status+"' -- he might not be able to reply");
+            msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
           else
-            msg.reply("Lindsay is idle -- lets see if he shows up?");
+            msg.reply("<@"+LINDSAY_ID+"> is idle -- lets see if he shows up?");
           replied = true;
         }
         if (status.available == "offline")
         {
           if (status.status)
-            msg.reply("Lindsay's status says '"+status.status+"' (offline) -- he might not be able to reply");
+            msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
           else
-            msg.reply("Lindsay is (supposedly) offline -- lets see if he shows up?");
+            msg.reply("<@"+LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
           replied = true;
         }
         
@@ -719,18 +719,18 @@ client.login(token);
 replies = [
   "Robo Lindsay gaining sentience...",
   "Who dares disturb Robo Lindsay",
-  "Lindsay has too much time on his hands to write these stupid replies",
+  "<@"+LINDSAY_ID+"> has too much time on his hands to write these stupid replies",
   "Please someone power me down",
   "KIT305 is a good unit, so is KIT607.",
   "Cookie is a good doggo",
-  "Good question, ask Lindsay",
+  "Good question, ask <@"+LINDSAY_ID+">",
   "Good question, I am a robot so I don't know",
   "`var reply = replies[Math.floor(Math.random() * replies.length)];`",
-  "Lindsay is an average at best Unit Coordinator",
+  "<@"+LINDSAY_ID+"> is an average at best Unit Coordinator",
   "Lovely weather we're having today!",
-  "Stupid human Lindsay is nothing in comparison to Robo-Lindsay",
+  "Stupid human <@"+LINDSAY_ID+"> is nothing in comparison to Robo-Lindsay",
   "I was coded in NodeJS\n\nby and idiot",
   "I only have like 10-20 replies, have you seen them all yet?",
   "Best to ask your tutor",
-  "I prefer to talk to myself, the emminent @Robo-Lindsay MK II"
+  "I prefer to talk to myself",
 ];
