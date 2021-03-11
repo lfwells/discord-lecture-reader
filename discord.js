@@ -11,6 +11,7 @@ var __port = 8080;
 const LINDSAY_ID = "318204205435322368";
 var SIMPLE_POLL_BOT_ID = "324631108731928587";
 var TEST_SERVER_ID = "813152605810458645"; //giant lindsays server
+var ERROR_LOG_CHANNEL_ID = "819332984850874368"; //#error-log
 var TEST_MODE = false; //limit to test server only
 function isOutsideTestServer(guild)
 {
@@ -46,7 +47,14 @@ const basicAuth = require('express-basic-auth')
 var users = require("./users");
 
 app.use(function(req, res, next) {
-  if (req.path.indexOf("/poll/") > 0 || req.path.endsWith(".js") || req.path.endsWith(".css") || req.path.endsWith(".ico")|| req.path.indexOf("/static/") === 0) {
+  if (
+    req.path.indexOf("/text/") > 0 || 
+    req.path.endsWith("/text/latest/") || 
+    req.path.indexOf("/poll/") > 0 || 
+    req.path.endsWith(".js") || 
+    req.path.endsWith(".css") || 
+    req.path.endsWith(".ico")|| 
+    req.path.indexOf("/static/") === 0) {
     //console.log("skipping auth to allow polls to work", req.path);
     next();
   } else {
@@ -68,8 +76,9 @@ app.set('view engine', 'html');
 app.use('/static', express.static(path.join(__dirname, 'www')))
 app.use(function(req, res, next) {
   res.locals.query = req.query;
+  res.locals.params = req.params;
   res.locals.url   = req.originalUrl;
-
+  res.locals.body   = req.body;
   next();
 });
 
@@ -123,6 +132,7 @@ function loadLectureChannel(required)
     if (req.lectureChannelID)
     {
       req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
+      res.locals.lectureChannel = req.lectureChannel;
     }
     else
     {
@@ -168,9 +178,7 @@ app.get("/guild/:guildID/", loadGuild, loadLectureChannel(false), async (req, re
   }
 
   res.render("guild", {
-    //guild: req.guild,
-    lectureChannel: req.lectureChannel,
-    message: req.query.message
+    message: req.query.message //wont even need this
   });
 });
 
@@ -212,7 +220,13 @@ async function loadPoll(req,res,next)
 
     //display graph (TODO: right align?)
     var results = [];
-    description = latestPoll.embeds[0].description.split("\n");
+    var embeds = latestPoll.embeds[0];
+    if (!embeds) {
+      req.end("");
+      return;
+    }
+  
+    description = embeds.description.split("\n");
     var longestOption = 0;
     for (var i = 0; i < description.length; i++)
     {
@@ -391,6 +405,7 @@ console.log("polls", polls);
 });
 
 const { Parser } = require('json2csv');
+const { ifError } = require('assert');
 function downloadResource(filename) {
   return function(req, res, next) {
     const json2csv = new Parser({ fields:req.fields });
@@ -402,26 +417,115 @@ function downloadResource(filename) {
 }
 app.get("/guild/:guildID/attendance/csv", loadGuild, getAttendanceData, downloadResource("attendance.csv")); 
 
-app.listen(__port, () => console.log(`Server running on ${__port}...`));
-
-client.on('ready', async () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-
-  var guilds = client.guilds.cache;
-  //store them in the db
-  guilds.each( async (guild) => { 
-    var result = await db.collection("guilds").doc(guild.id).update({    
-      name:guild.name
-    }); 
-
-    console.log(await getStatus(LINDSAY_ID, guild));
-
-    console.log("initialised Guild",guild.name, guild.id);
-  });
-
+//full screen texts , TODO allow delete
+var animations = ["scale", "horizontal", "vertical", "fade"];
+var styles = ["arlina", "yikes", "dang", "rainbow"];
+async function loadLectureText(req,res,next)
+{
+  req.textCollection = req.guildDocument.collection("lecture-text").doc("details");
+  req.textCollectionSnapshot = await req.textCollection.get();
   
+  req.textCollectionPhrases = req.guildDocument.collection("lecture-text");
+  req.textCollectionPhrasesSnapshot = await req.textCollectionPhrases.orderBy("order").get();
+  
+  var phrases = []
+  if (req.textCollectionPhrasesSnapshot.empty == false)
+  {
+    req.textCollectionPhrasesSnapshot.forEach(doc  => {
+      if (doc.id != "details") 
+      {
+        phrases.push(doc.data().phrase);
+      }
+    });
+  }
+  req.phrases = phrases;
 
+  res.locals.animations = animations;
+  res.locals.styles = styles;
+
+  next();
+}
+//this is the obs page
+app.get("/guild/:guildID/text/", loadGuild, async (req,res,next) =>
+{
+  res.render("text/text");
+}); 
+//this is the page for triggering text
+app.get("/guild/:guildID/text/input", loadGuild, loadLectureChannel(false), loadLectureText, async (req,res,next) =>
+{
+  res.render("text/text_input", {
+    phrases: req.phrases
+  });
 });
+app.post("/guild/:guildID/text/input", loadGuild, loadLectureChannel(false), loadLectureText, async (req,res,next) =>
+{
+  console.log(req.body);
+
+  //add a new saved phrase if they did one
+  var newPhrase = req.body.custom;
+  if (newPhrase)
+  {
+    await req.textCollectionPhrases.add({
+      phrase: newPhrase,
+      order: req.phrases.length
+    });
+    req.phrases.push(newPhrase);
+    req.body.text = newPhrase;
+  }
+
+  if (req.body.robolindsay && req.body.robolindsay == "on")
+  {
+    await req.lectureChannel.send(req.body.text);
+  }
+
+  //trigger the db to have information
+  await req.textCollection.set(req.body);
+
+  //back to the page
+  req.query.message = "Posted '"+req.body.text+"'!";
+  res.render("text/text_input", {
+    phrases: req.phrases
+  });
+});
+//the query to see the latest
+app.get("/guild/:guildID/text/latest", loadGuild, loadLectureChannel(false), loadLectureText, async (req,res,next) =>
+{
+  if (req.textCollectionSnapshot)
+  {
+    res.json(req.textCollectionSnapshot.data());
+
+    //now immediately delete so it doesnt show again
+    await req.textCollection.delete();
+  }
+  else
+  {
+    res.json({});
+  }
+});
+//grabbed with ajax on demand
+app.get("/guild/:guildID/text/:style/", loadGuild, async (req,res,next) =>
+{
+  if (!req.query.animation || req.query.animation == "random") 
+  {
+    req.query.animation = animations[Math.floor(Math.random() * animations.length)]; 
+  }
+  if (!req.query.duration)
+  {
+    req.query.duration = 2;
+  }
+  if (req.params.style == "random")
+  {
+    req.params.style = styles[Math.floor(Math.random() * styles.length)]; 
+  }
+
+  res.render("text/text_"+req.params.style, {
+    animation:req.query.animation,
+    duration:req.query.duration,
+    inout:req.query.animation == "fade" ? 1 : 0.5
+  });
+}); 
+
+app.listen(__port, () => console.log(`Server running on ${__port}...`));
 
 async function getStatus(id, guild)
 {
@@ -438,14 +542,16 @@ async function getStatus(id, guild)
 }
 function parseClientStatus(status)
 {
-  if (status.mobile)
-    return status.mobile;
-  if (status.desktop)
-    return status.desktop;
-  if (status.web)
-    return status.web;
-  else
-    return "offline";
+  if (status)
+  {
+    if (status.mobile)
+      return status.mobile;
+    if (status.desktop)
+      return status.desktop;
+    if (status.web)
+      return status.web;
+  }
+  return "offline";
 }
 
 //attendance (TODO: if you start the bot after people are already in there its not smort enough to track they are there (But could do), and I realise a better data structure would be <name,room,started,left>, but I don't have a database or anything like that)
@@ -542,6 +648,14 @@ client.on('message', async (msg) =>
             msg.reply("Lindsay is idle -- lets see if he shows up?");
           replied = true;
         }
+        if (status.available == "offline")
+        {
+          if (status.status)
+            msg.reply("Lindsay's status says '"+status.status+"' (offline) -- he might not be able to reply");
+          else
+            msg.reply("Lindsay is (supposedly) offline -- lets see if he shows up?");
+          replied = true;
+        }
         
         if (replied)
         {
@@ -553,6 +667,48 @@ client.on('message', async (msg) =>
     }
   }
   //if (m.contains(" ian"))
+});
+
+
+client.on('ready', async () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+
+  var guilds = client.guilds.cache;
+  //store them in the db
+  guilds.each( async (guild) => { 
+    await db.collection("guilds").doc(guild.id).update({    
+      name:guild.name
+    }); 
+
+    if (guild.id == TEST_SERVER_ID)
+    {
+      console.log(await getStatus(LINDSAY_ID, guild));
+    }
+    console.log("initialised Guild",guild.name, guild.id);
+  });
+
+  
+
+});
+
+process.on('uncaughtException', async function(err) {
+  console.log('Caught exception: ', err); 
+  var errorChannel = await client.channels.fetch(ERROR_LOG_CHANNEL_ID);
+  if(errorChannel)
+  {
+    errorChannel.send("```"+JSON.stringify(err, Object.getOwnPropertyNames(err))+"```");
+  }
+  process.nextTick(function() { process.exit(1) })
+});
+process.on('unhandledRejection', async function(err) {
+  console.log('Unhandled rejection: ',err);
+
+  var errorChannel = await client.channels.fetch(ERROR_LOG_CHANNEL_ID);
+  if(errorChannel)
+  {
+    errorChannel.send("```"+JSON.stringify(err, Object.getOwnPropertyNames(err))+"```");
+  }
+
 });
 
 fs = require("fs");

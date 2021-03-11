@@ -1,0 +1,35 @@
+<%- include('../header.html') %>
+
+<form method="post">
+    <% if (locals.lectureChannel) { %>
+        <p><label><input type="checkbox" name="robolindsay" 
+            <% if (locals.body.robolindsay && locals.body.robolindsay == 
+            "on") { %>
+                checked
+            <% } %>
+             /> Allow Robo Lindsay to echo this into #<%=locals.lectureChannel.name%>?</label></p>
+    <% } 
+    //TODO: need to pre-fill values from post, and possibly get from array
+    %>
+    <p>
+        Duration:<input type="text" name="duration" 
+            value="<%= (locals.body.duration ?? 2) %>" />
+        Style: <select name="style">
+            <option>random</option>
+            <% for (var i in locals.styles) { %>
+                <option <%=(locals.styles[i]  == locals.body.style) ? "selected" : "" %>><%=locals.styles[i] %></option>
+            <% } %>
+        </select>
+        Animation: <select name="animation">
+            <option>random</option>
+            <% for (var i in locals.animations) { %>
+                <option <%=(locals.animations[i]  == locals.body.animation) ? "selected" : "" %>><%=locals.animations[i] %></option>
+            <% } %>
+        </select>
+    </p>
+    <p><input type="text" name="custom" placeholder="Add New" /> <input type="submit" value="Add" /></p>
+    <% for (var i in phrases) { %>
+        <p><input type="submit" name="text" value="<%= phrases[i] %>" /></p>
+    <% } %>
+        
+</form>

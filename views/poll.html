@@ -28,7 +28,7 @@
         {
             var data = await $.ajax("data/");
             $("#results").html(data);
-            await setTimeout(1000);
+            await new Promise(r => setTimeout(r, 1000));
         }
     });
 </script>

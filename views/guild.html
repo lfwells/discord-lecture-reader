@@ -2,22 +2,24 @@
 
 <nav>
     <ul>
-        <% if (lectureChannel) { %>
+        <% if (locals.lectureChannel) { %>
             <li><a href="poll/">Show Current Poll</a> (use this url for OBS)</li>
             <li><a href="clearpoll/">Clear Current Poll</a></li>
             <li><a href="pollSchedule/">Scheduled Polls</a></li>
         <% } %>
+        <li><a href="text/">Show Lecture Full-Screen Text</a> (use this url for OBS)</li>
+        <li><a href="text/input/">Lecture Full-Screen Texts</a></li>
         <li><a href="attendance/">Attendance</a></li>
     </ul>
 </nav>
 
 <h2>Channel List</h2>
-<% if (lectureChannel) { %>
-    <p>Lecture Channel: <%= lectureChannel.name %></p>
+<% if (locals.lectureChannel) { %>
+    <p>Lecture Channel: #<%= locals.lectureChannel.name %></p>
 <% } %>
 <ul id="channels">
   <% guild.channels.cache.forEach(function(channel){ %>
-    <% if (lectureChannel && channel.id == lectureChannel.id) { %>
+    <% if (locals.lectureChannel && channel.id == locals.lectureChannel.id) { %>
         <li><b><%= channel.name %></b> Lecture Channel</li>
     <% } else { %>
         <li><%= channel.name %> [ <a href="?setLectureChannelID=<%= channel.id %>">Set as Lecture Channel</a> ]</li>
