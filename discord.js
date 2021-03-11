@@ -683,7 +683,6 @@ client.on('ready', async () => {
     if (guild.id == TEST_SERVER_ID)
     {
       console.log(await getStatus(LINDSAY_ID, guild));
-      throw Error("??!") 
     }
     console.log("initialised Guild",guild.name, guild.id);
   });
