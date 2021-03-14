@@ -11,6 +11,7 @@ var __port = 8080;
 const LINDSAY_ID = "318204205435322368";
 var SIMPLE_POLL_BOT_ID = "324631108731928587";
 var TEST_SERVER_ID = "813152605810458645"; //giant lindsays server
+var KIT305_SERVER = "801006169496748063";
 var ERROR_LOG_CHANNEL_ID = "819332984850874368"; //#error-log
 var TEST_MODE = false; //limit to test server only
 function isOutsideTestServer(guild)
@@ -612,56 +613,59 @@ client.on('message', async (msg) =>
     
     //detect ian or lindsay in the chat
     var m = msg.cleanContent.toLowerCase();
-    if (m.indexOf("lindsay") >= 0 || msg.mentions.has(LINDSAY_ID))
+    if (msg.guild.id == KIT305_SERVER)
     {
-      var status = await getStatus(LINDSAY_ID, msg.guild);
-      
-      var guildDocument = guildsCollection.doc(msg.guild.id);
-      var guildDocumentSnapshot = await guildDocument.get();
-      var lastAutoReply = await guildDocumentSnapshot.get("lastAutoReply");
-      if (!lastAutoReply)
-        lastAutoReply = 0;
-
-      var d = new Date();
-      var now = d.getTime();
-      var AUTO_REPLY_TIMEOUT = 1000 * 60 * 60; //every hr
-
-      console.log("detect a lindsay mention", status, now - lastAutoReply);
-
-      //TODO this timeout should be per channel, but is currently per server
-      if ((now - lastAutoReply) > AUTO_REPLY_TIMEOUT)
+      if (msg.mentions.everyone == false  && (m.indexOf("lindsay") >= 0 || msg.mentions.has(LINDSAY_ID)))
       {
-        var replied = false;
-        if (status.available == "dnd")
-        {
-          if (status.status)
-            msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
-          else
-            msg.reply("<@"+LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
-          replied = true;
-        }
-        if (status.available == "idle")
-        {
-          if (status.status)
-            msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
-          else
-            msg.reply("<@"+LINDSAY_ID+"> is idle -- lets see if he shows up?");
-          replied = true;
-        }
-        if (status.available == "offline")
-        {
-          if (status.status)
-            msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
-          else
-            msg.reply("<@"+LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
-          replied = true;
-        }
+        var status = await getStatus(LINDSAY_ID, msg.guild);
         
-        if (replied)
+        var guildDocument = guildsCollection.doc(msg.guild.id);
+        var guildDocumentSnapshot = await guildDocument.get();
+        var lastAutoReply = await guildDocumentSnapshot.get("lastAutoReply");
+        if (!lastAutoReply)
+          lastAutoReply = 0;
+
+        var d = new Date();
+        var now = d.getTime();
+        var AUTO_REPLY_TIMEOUT = 1000 * 60 * 60; //every hr
+
+        console.log("detect a lindsay mention", status, now - lastAutoReply);
+
+        //TODO this timeout should be per channel, but is currently per server
+        if ((now - lastAutoReply) > AUTO_REPLY_TIMEOUT)
         {
-          guildDocument.update({
-            lastAutoReply:now
-          });
+          var replied = false;
+          if (status.available == "dnd")
+          {
+            if (status.status)
+              msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
+            else
+              msg.reply("<@"+LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
+            replied = true;
+          }
+          if (status.available == "idle")
+          {
+            if (status.status)
+              msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
+            else
+              msg.reply("<@"+LINDSAY_ID+"> is idle -- lets see if he shows up?");
+            replied = true;
+          }
+          if (status.available == "offline")
+          {
+            if (status.status)
+              msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
+            else
+              msg.reply("<@"+LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
+            replied = true;
+          }
+          
+          if (replied)
+          {
+            guildDocument.update({
+              lastAutoReply:now
+            });
+          }
         }
       }
     }
