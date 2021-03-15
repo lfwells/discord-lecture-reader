@@ -30,7 +30,7 @@ $(async function()
         try
         {
             var data = await $.ajax("latest/");
-            if (data && data != "")
+            if (data && data != "" && data.text)
             {
                 console.log(data);
                 showText(data.text, data.style, data.animation, data.duration);

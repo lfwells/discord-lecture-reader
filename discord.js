@@ -493,19 +493,28 @@ app.get("/guild/:guildID/text/latest", loadGuild, loadLectureChannel(false), loa
 {
   if (req.textCollectionSnapshot)
   {
-    res.json(req.textCollectionSnapshot.data());
+    var data = req.textCollectionSnapshot.data();
+    if (data)
+    {
+      console.log("found latest full screen text", data);
+      res.json(data);
 
-    //now immediately delete so it doesnt show again
-    await req.textCollection.delete();
+      //now immediately delete so it doesnt show again
+      await req.textCollection.delete();
+      return;
+    }
   }
-  else
-  {
-    res.json({});
-  }
+  //otherwise just empty data
+  res.json({});
 });
 //grabbed with ajax on demand
 app.get("/guild/:guildID/text/:style/", loadGuild, async (req,res,next) =>
 {
+  if (req.params.style == "") 
+  {
+    res.end("");
+    return;
+  }
   if (!req.query.animation || req.query.animation == "random") 
   {
     req.query.animation = animations[Math.floor(Math.random() * animations.length)]; 
