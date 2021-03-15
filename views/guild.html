@@ -17,14 +17,25 @@
 <% if (locals.lectureChannel) { %>
     <p>Lecture Channel: #<%= locals.lectureChannel.name %></p>
 <% } %>
-<ul id="channels">
-  <% guild.channels.cache.forEach(function(channel){ %>
-    <% if (locals.lectureChannel && channel.id == locals.lectureChannel.id) { %>
-        <li><b><%= channel.name %></b> Lecture Channel</li>
-    <% } else { %>
-        <li><%= channel.name %> [ <a href="?setLectureChannelID=<%= channel.id %>">Set as Lecture Channel</a> ]</li>
-    <% } %>
-  <% }) %>
+<ul id="channels">  
+    <%
+    var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
+    categoryChannels.forEach(cat => { %>
+        <li>
+            <strong><%= cat.name %></strong>
+            <ul>
+                <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
+                sortedChannels.forEach(function(channel)
+                { 
+                    if (locals.lectureChannel && channel.id == locals.lectureChannel.id) { %>
+                        <li><b><%= channel.name %></b> Lecture Channel</li>
+                    <% } else { %>
+                        <li><%= channel.name %> [ <a href="?setLectureChannelID=<%= channel.id %>">Set as Lecture Channel</a> ]</li>
+                    <% }
+                }) %>
+            </ul>
+        </li>
+    <% }); %>
 </ul>
 
 <%- include('footer.html') %>
