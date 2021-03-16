@@ -26,14 +26,19 @@ function isOutsideTestServer(guild)
   }
 }
 
-//database
-var admin = require("firebase-admin");
+var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
-var serviceAccount = require(path.join(__dirname, "partygolflite-firebase-adminsdk-dfc3p-8e78d63026.json"));
+
+//database
+var admin = require("firebase-admin"); 
+
+//var serviceAccount = require(path.join(__dirname, "partygolflite-firebase-adminsdk-dfc3p-8e78d63026.json"));
+var serviceAccount = require(path.join(__dirname, "carers-care-firebase-adminsdk-sp7cd-1a37ad2d83.json"));
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://partygolflite.firebaseio.com"
+  //databaseURL: "https://partygolflite.firebaseio.com"
+  databaseURL: "https://carers-care.firebaseio.com"
 });
 
 const db = admin.firestore();
@@ -72,7 +77,7 @@ var previousRequest;
 app.engine('.html', require('ejs').__express);
 
 // Optional since express defaults to CWD/views
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'views')); 
 app.set('view engine', 'html');
 app.use('/static', express.static(path.join(__dirname, 'www')))
 app.use(function(req, res, next) {
@@ -103,35 +108,50 @@ function redirectToWhereWeCameFrom(req,res,message) {
 }
 
 //TODO: these two need to return error if not authed or wrong id
-async function loadGuild(req, res, next)
-{
-  var guildID = req.params.guildID;
-  req.guild = await client.guilds.fetch(guildID);
-  req.guildDocument = await guildsCollection.doc(guildID);
-  req.guildDocumentSnapshot = await req.guildDocument.get();
+function loadGuild() {
+  return async function(req, res, next)
+  {
+    var guildID = req.params.guildID;
+    req.guild = await client.guilds.fetch(guildID);
+    req.guildDocument = await guildsCollection.doc(guildID);
 
-  if (req.guild == undefined)
-  {
-    res.end("Guild not found");
-    return;
-  }
+    if (req.guild == undefined)
+    {
+      res.end("Guild not found");
+      return;
+    }
 
-  if (isOutsideTestServer(req.guild))
-  {
-    res.end("Tried to use non-test server in test mode. Disable test mode.");
-  }
-  else
-  {
-    res.locals.guild = req.guild;
-    next();
+    if (isOutsideTestServer(req.guild))
+    {
+      res.end("Tried to use non-test server in test mode. Disable test mode.");
+    }
+    else
+    {
+      res.locals.guild = req.guild;
+      next();
+    }
   }
 }
 function loadLectureChannel(required)  
 {
-  return async function(req,res,next) {
-    req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
+  return async function(req,res,next)  
+  {
+    if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].lectureChannelID)
+    {
+      req.lectureChannelID = GUILD_CACHE[req.guild.id].lectureChannelID;
+    }
+
+    if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].lectureChannelID))
+    {
+      req.guildDocumentSnapshot = await req.guildDocument.get();
+      req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
+      console.log("got req.lectureChannelID", req.lectureChannelID);
+      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+      GUILD_CACHE[req.guild.id].lectureChannelID = req.lectureChannelID;
+    } 
     if (req.lectureChannelID)
     {
+      console.log("req.lectureChannelID", req.lectureChannelID);
       req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
       res.locals.lectureChannel = req.lectureChannel;
     }
@@ -161,10 +181,10 @@ app.get("/testmode/:onoff", (req, res, next) =>
 {
   TEST_MODE = req.params.onoff == "true"
   res.redirect("/");
-})
+}) 
 
 //guild home page (dashboard)
-app.get("/guild/:guildID/", loadGuild, loadLectureChannel(false), async (req, res) => 
+app.get("/guild/:guildID/", loadGuild(), loadLectureChannel(false), async (req, res) => 
 {  
   var setLectureChannelID = req.query.setLectureChannelID;
   if (setLectureChannelID)
@@ -173,6 +193,8 @@ app.get("/guild/:guildID/", loadGuild, loadLectureChannel(false), async (req, re
       lectureChannelID: setLectureChannelID
     });
     req.lectureChannelID = setLectureChannelID;
+    GUILD_CACHE[req.guild.id].lectureChannelID = setLectureChannelID;
+
     req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
   
     console.log("set the lecture channel to", req.lectureChannelID);
@@ -191,7 +213,8 @@ async function loadPoll(req,res,next)
   var messages = await messagesManager.fetch();//get 100 most recent messages, is possible poll could be lost, so we need to search more, also uncertain if this uses cache or not
   
   var latestClearMessage = messages.filter(m => m.content.startsWith("/clearpoll")).first(); 
-  var latestClearPoll = parseInt(await req.guildDocumentSnapshot.get("latestClearPoll"));
+  //var latestClearPoll = parseInt(await req.guildDocumentSnapshot.get("latestClearPoll"));
+  var latestClearPoll = GUILD_CACHE[req.guild.id].latestClearPoll;
   var pollMessages = messages.filter(m => m.author.id == SIMPLE_POLL_BOT_ID);
   //console.log(pollMessages);
   //console.log(`${pollMessages.size} poll messages`);
@@ -255,7 +278,7 @@ async function loadPoll(req,res,next)
   }
   next();
 } 
-app.get("/guild/:guildID/poll/", loadGuild, loadLectureChannel(true), loadPoll, async (req, res) =>
+app.get("/guild/:guildID/poll/", loadGuild(), loadLectureChannel(true), loadPoll, async (req, res) =>
 {
   if (req.question == undefined)
   {
@@ -268,7 +291,7 @@ app.get("/guild/:guildID/poll/", loadGuild, loadLectureChannel(true), loadPoll, 
     question: req.question,
   });
 });
-app.get("/guild/:guildID/poll/data/", loadGuild, loadLectureChannel(true), loadPoll, async (req, res) =>
+app.get("/guild/:guildID/poll/data/", loadGuild(), loadLectureChannel(true), loadPoll, async (req, res) =>
 {
   if (req.question == undefined)
   {
@@ -292,7 +315,7 @@ app.get("/guild/:guildID/poll/data/", loadGuild, loadLectureChannel(true), loadP
 });
 
 //send poll (uses get, so that we can do the cool powerpoint links)
-app.get("/guild/:guildID/poll/:pollText/", removeQuestionMark, loadGuild, loadLectureChannel(true), async (req, res) => 
+app.get("/guild/:guildID/poll/:pollText/", removeQuestionMark, loadGuild(), loadLectureChannel(true), async (req, res) => 
 {
   var pollText = req.params.pollText;
   
@@ -316,7 +339,7 @@ app.get("/guild/:guildID/poll/:pollText/", removeQuestionMark, loadGuild, loadLe
   res.end(`Poll ${pollText} sent to ${req.lectureChannel.name}`);
 }); 
 //clear a poll display (not implemented)
-app.get("/guild/:guildID/clearpoll/", loadGuild, loadLectureChannel(false), async (req, res) => 
+app.get("/guild/:guildID/clearpoll/", loadGuild(), loadLectureChannel(false), async (req, res) => 
 {
   console.log("clear poll command");
 
@@ -324,6 +347,7 @@ app.get("/guild/:guildID/clearpoll/", loadGuild, loadLectureChannel(false), asyn
   await req.guildDocument.update({
     latestClearPoll: d.getTime()
   })
+  GUILD_CACHE[req.guild.id].latestClearPoll = d.getTime();
   //old way 
   //await req.lectureChannel.send("/clearpoll");
   //res.end("Poll cleared, please close browser window yourself");
@@ -346,7 +370,7 @@ async function getAttendanceData(req,res,next)
   });
   next();
 }
-app.get("/guild/:guildID/attendance/", loadGuild, getAttendanceData, async (req, res, next) => 
+app.get("/guild/:guildID/attendance/", loadGuild(), getAttendanceData, async (req, res, next) => 
 {
   //show web page
   res.render("attendance", {
@@ -364,13 +388,13 @@ async function loadScheduledPolls(req,res,next) {
   req.pollsSnapshot.forEach(poll => req.polls.push(poll.data()));
   next();
 }
-app.get("/guild/:guildID/pollSchedule", loadGuild, loadScheduledPolls, async (req,res,next) =>
+app.get("/guild/:guildID/pollSchedule", loadGuild(), loadScheduledPolls, async (req,res,next) =>
 {
   res.render("pollSchedule", {
     polls: req.polls
   });
 });
-app.post("/guild/:guildID/pollSchedule", loadGuild, loadScheduledPolls, async (req,res,next) =>
+app.post("/guild/:guildID/pollSchedule", loadGuild(), loadScheduledPolls, async (req,res,next) =>
 {
   //TODO: preserver order :(
   var polls = req.body.polls;
@@ -416,7 +440,7 @@ function downloadResource(filename) {
     return res.send(csv);
   }
 }
-app.get("/guild/:guildID/attendance/csv", loadGuild, getAttendanceData, downloadResource("attendance.csv")); 
+app.get("/guild/:guildID/attendance/csv", loadGuild(), getAttendanceData, downloadResource("attendance.csv")); 
 
 //full screen texts , TODO allow delete
 var animations = ["scale", "horizontal", "vertical", "fade"];
@@ -424,11 +448,14 @@ var styles = ["arlina", "yikes", "dang", "rainbow"];
 async function loadLectureText(req,res,next)
 {
   req.textCollection = req.guildDocument.collection("lecture-text").doc("details");
-  req.textCollectionSnapshot = await req.textCollection.get();
+  try {
+    req.textCollectionSnapshot = await req.textCollection.get();
   
   req.textCollectionPhrases = req.guildDocument.collection("lecture-text");
   req.textCollectionPhrasesSnapshot = await req.textCollectionPhrases.orderBy("order").get();
-  
+  }
+  catch {}
+
   var phrases = []
   if (req.textCollectionPhrasesSnapshot.empty == false)
   {
@@ -447,18 +474,18 @@ async function loadLectureText(req,res,next)
   next();
 }
 //this is the obs page
-app.get("/guild/:guildID/text/", loadGuild, async (req,res,next) =>
+app.get("/guild/:guildID/text/", loadGuild(), async (req,res,next) =>
 {
   res.render("text/text");
 }); 
 //this is the page for triggering text
-app.get("/guild/:guildID/text/input", loadGuild, loadLectureChannel(false), loadLectureText, async (req,res,next) =>
+app.get("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), loadLectureText, async (req,res,next) =>
 {
   res.render("text/text_input", {
     phrases: req.phrases
   });
 });
-app.post("/guild/:guildID/text/input", loadGuild, loadLectureChannel(false), loadLectureText, async (req,res,next) =>
+app.post("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), loadLectureText, async (req,res,next) =>
 {
   console.log(req.body);
 
@@ -481,6 +508,7 @@ app.post("/guild/:guildID/text/input", loadGuild, loadLectureChannel(false), loa
 
   //trigger the db to have information
   await req.textCollection.set(req.body);
+  GUILD_CACHE[req.guild.id].latestText = req.body;
 
   //back to the page
   req.query.message = "Posted '"+req.body.text+"'!";
@@ -489,9 +517,15 @@ app.post("/guild/:guildID/text/input", loadGuild, loadLectureChannel(false), loa
   });
 });
 //the query to see the latest
-app.get("/guild/:guildID/text/latest", loadGuild, loadLectureChannel(false), loadLectureText, async (req,res,next) =>
+app.get("/guild/:guildID/text/latest", loadGuild(), /*loadLectureText,*/ async (req,res,next) =>
 {
-  if (req.textCollectionSnapshot)
+  if (GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].latestText)
+  {
+    res.json(GUILD_CACHE[req.guild.id].latestText);
+    GUILD_CACHE[req.guild.id].latestText = null;
+    return;
+  }
+  else if (req.textCollectionSnapshot)
   {
     var data = req.textCollectionSnapshot.data();
     if (data)
@@ -508,7 +542,7 @@ app.get("/guild/:guildID/text/latest", loadGuild, loadLectureChannel(false), loa
   res.json({});
 });
 //grabbed with ajax on demand
-app.get("/guild/:guildID/text/:style/", loadGuild, async (req,res,next) =>
+app.get("/guild/:guildID/text/:style/", loadGuild(), async (req,res,next) =>
 {
   if (req.params.style == "") 
   {
@@ -689,9 +723,11 @@ client.on('ready', async () => {
   var guilds = client.guilds.cache;
   //store them in the db
   guilds.each( async (guild) => { 
-    await db.collection("guilds").doc(guild.id).update({    
+    await db.collection("guilds").doc(guild.id).set({    
       name:guild.name
     }); 
+
+    GUILD_CACHE[guild.id] = {};
 
     if (guild.id == TEST_SERVER_ID)
     {
@@ -700,7 +736,8 @@ client.on('ready', async () => {
     console.log("initialised Guild",guild.name, guild.id);
   });
 
-  
+  //just testin
+  handleAwardNicknames();
 
 });
 
@@ -746,3 +783,53 @@ replies = [
   "Best to ask your tutor",
   "I prefer to talk to myself",
 ];
+
+
+var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
+var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
+
+async function handleAwardNicknames()
+{
+  var offtopiclistschannel = await client.channels.cache.get("814020643711746068");
+  
+  var awardedMembers = {};
+  
+  var messages = await offtopiclistschannel.messages.fetch();
+  messages.forEach(message => 
+  {
+    var content = message.cleanContent;
+    content = content.substr(0, content.indexOf("@"));
+
+    var emoji;
+    if (content.match(reg)) {
+      emoji = content.match(reg)[0];
+      //console.log(emoji);
+    
+      var mentions = message.mentions.members;
+      mentions.forEach(member => {
+        var key = baseName(member.nickname);
+        //console.log("'",key,"'");
+        //console.log(key); 
+        //console.log(member.nickname);
+        if (awardedMembers[key] == undefined)
+        {
+          awardedMembers[key] = [];
+        }
+        if (awardedMembers[key].indexOf(emoji) <= 0)
+        {
+          awardedMembers[key].push(emoji);
+        }
+      });
+    }
+    //console.log(awardedMembers);
+  });
+}
+
+function baseName(nickname)
+{
+  return nickname.replace(reg, "").trim();
+  while ((result = reg.exec(nickname)) !== null) {
+    return nickname.substr(0, result.index-1).trim();
+  }
+  return nickname;
+}
