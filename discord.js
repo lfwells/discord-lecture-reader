@@ -12,6 +12,7 @@ const LINDSAY_ID = "318204205435322368";
 var SIMPLE_POLL_BOT_ID = "324631108731928587";
 var TEST_SERVER_ID = "813152605810458645"; //giant lindsays server
 var KIT305_SERVER = "801006169496748063";
+var KIT109_SERVER = "801757073083203634";
 var ERROR_LOG_CHANNEL_ID = "819332984850874368"; //#error-log
 var TEST_MODE = false; //limit to test server only
 function isOutsideTestServer(guild)
@@ -145,13 +146,12 @@ function loadLectureChannel(required)
     {
       req.guildDocumentSnapshot = await req.guildDocument.get();
       req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
-      console.log("got req.lectureChannelID", req.lectureChannelID);
       if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
       GUILD_CACHE[req.guild.id].lectureChannelID = req.lectureChannelID;
     } 
     if (req.lectureChannelID)
     {
-      console.log("req.lectureChannelID", req.lectureChannelID);
+      //console.log("req.lectureChannelID", req.lectureChannelID);
       req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
       res.locals.lectureChannel = req.lectureChannel;
     }
@@ -223,13 +223,13 @@ async function loadPoll(req,res,next)
   { 
     if (latestClearPoll && latestPoll.createdTimestamp < latestClearPoll) 
     {
-      console.log("latest pool was before most recent clearpoll");
+      //console.log("latest pool was before most recent clearpoll");
       res.end("");
       return;
     }
     if (latestClearMessage && latestPoll.createdTimestamp < latestClearMessage.createdTimestamp) 
     {
-      console.log("latest pool was before most recent clearpoll message");
+      //console.log("latest pool was before most recent clearpoll message");
       res.end("");
       return;
     }
@@ -246,7 +246,7 @@ async function loadPoll(req,res,next)
     var results = [];
     var embeds = latestPoll.embeds[0];
     if (!embeds) {
-      req.end("");
+      res.end("");
       return;
     }
   
@@ -713,7 +713,33 @@ client.on('message', async (msg) =>
       }
     }
   }
+
+  //detect update to awards (add)
+  if (msg.channel.id == OFF_TOPIC_LISTS_CHANNEL_ID)
+  {
+    console.log("message added in off topics list");
+    handleAwardNicknames();
+  }
   //if (m.contains(" ian"))
+});
+
+client.on('messageUpdate', async(msg) =>
+{
+  //detect update to awards (edit)
+  if (msg.channel.id == OFF_TOPIC_LISTS_CHANNEL_ID)
+  {
+    console.log("message update in off topics list");
+    handleAwardNicknames();
+  }
+});
+client.on('messageDelete', async(msg) =>
+{
+  //detect update to awards (delete)
+  if (msg.channel.id == OFF_TOPIC_LISTS_CHANNEL_ID)
+  {
+    console.log("message delete in off topics list");
+    handleAwardNicknames();
+  }
 });
 
 
@@ -725,7 +751,7 @@ client.on('ready', async () => {
   guilds.each( async (guild) => { 
     await db.collection("guilds").doc(guild.id).set({    
       name:guild.name
-    }); 
+    }, {merge:true}); 
 
     GUILD_CACHE[guild.id] = {};
 
@@ -788,11 +814,14 @@ replies = [
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
 
+var OFF_TOPIC_LISTS_CHANNEL_ID = "814020643711746068";
+//giant lindsayys off topic "821597975166976030"
+//kit109 IRL off topic "814020643711746068"
 async function handleAwardNicknames()
 {
-  var offtopiclistschannel = await client.channels.cache.get("814020643711746068");
+  var offtopiclistschannel = await client.channels.cache.get(OFF_TOPIC_LISTS_CHANNEL_ID);
   
-  var awardedMembers = {};
+  var awardedMembers = {}; 
   
   var messages = await offtopiclistschannel.messages.fetch();
   messages.forEach(message => 
@@ -803,11 +832,11 @@ async function handleAwardNicknames()
     var emoji;
     if (content.match(reg)) {
       emoji = content.match(reg)[0];
-      //console.log(emoji);
+      //console.log(emoji, emoji.length);
     
       var mentions = message.mentions.members;
       mentions.forEach(member => {
-        var key = baseName(member.nickname);
+        var key = member.id;//baseName(member.nickname ?? member.user.username);
         //console.log("'",key,"'");
         //console.log(key); 
         //console.log(member.nickname);
@@ -821,15 +850,73 @@ async function handleAwardNicknames()
         }
       });
     }
-    //console.log(awardedMembers);
   });
-}
+  var guild = await client.guilds.cache.get(KIT109_SERVER);
+  for (var memberID in awardedMembers) {
+    if (memberID == guild.ownerID) continue; //cannot modify guild owner nickname
 
+    var member = await guild.members.cache.get(memberID);
+    //console.log("member", baseName(member.nickname ?? member.user.username));
+    var awards = awardedMembers[memberID]; 
+    //console.log("awards", awards);
+    if (member)
+    {
+      //setNickname(member, baseName(member.nickname ?? member.user.username)+" "+awards.join(""))
+      //this way may look dumb, but we dont want to split the last emoji in two 
+      var newNickname = baseName(member.nickname ?? member.user.username);
+      for (var a in awards)
+      {
+        var emoji = awards[a];
+        var newLengthAfterAddingEmoji = newNickname.length+emoji.length;
+        if (newLengthAfterAddingEmoji < 32)
+        {
+          newNickname = newNickname + emoji;
+        }
+        else {
+          //console.log(emoji, emoji.length, newNickname.length, newLengthAfterAddingEmoji);
+          break;
+        }
+      }
+      setNickname(member, newNickname);
+    }
+  }
+  return awardedMembers;
+}
+async function setNickname(member, nickname)
+{
+  //console.log(nickname.length); 
+  //console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
+  //we can only set the nickname if the role is lower than us
+  var us = await member.guild.members.cache.get(client.user.id);
+  var ourHighestRole = us.roles.highest;
+  var theirHighestRole = member.roles.highest;
+  if (ourHighestRole.position >= theirHighestRole.position)
+  {
+    await member.setNickname(nickname);
+  }
+}
 function baseName(nickname)
 {
-  return nickname.replace(reg, "").trim();
+  return nickname.replace(reg, "").trim(); 
   while ((result = reg.exec(nickname)) !== null) {
     return nickname.substr(0, result.index-1).trim();
   }
   return nickname;
 }
+
+//todo: summary (public?) pages that list achievements?
+app.get("/namesTest/", async (req,res,next) =>
+{
+  var awardedMembers = await handleAwardNicknames();
+  
+  console.log(awardedMembers);
+
+  res.json(awardedMembers);
+}); 
+app.get("/namesBackup/", async (req,res,next) =>
+{
+  var guild = await client.guilds.cache.get("801757073083203634");
+  var membersData = await guild.members.fetch();
+  var members = membersData.map(m => [m.id, m.nickname ?? m.user.username]);
+  res.json(members);
+}); 
