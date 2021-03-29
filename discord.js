@@ -196,13 +196,12 @@ app.get("/guild/:guildID/", loadGuild(), loadLectureChannel(false), async (req, 
     GUILD_CACHE[req.guild.id].lectureChannelID = setLectureChannelID;
 
     req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
-  
-    console.log("set the lecture channel to", req.lectureChannelID);
+    res.locals.lectureChannel = req.lectureChannel;
+
+    req.query.message = "set the lecture channel to #"+req.lectureChannel.name;
   }
 
-  res.render("guild", {
-    message: req.query.message //wont even need this
-  });
+  res.render("guild");
 });
 
 //poll display details

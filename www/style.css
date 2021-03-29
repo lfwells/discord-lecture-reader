@@ -82,7 +82,7 @@
     textarea {
         font-family: 'Courier New', Courier, monospace;
     }
-    select, option { color:#2C2F33;}
+    select, option, optgroup { color:#2C2F33;}
     
 
     tr .bar {

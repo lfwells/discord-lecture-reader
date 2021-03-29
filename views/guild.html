@@ -14,28 +14,28 @@
 </nav>
 
 <h2>Channel List</h2>
-<% if (locals.lectureChannel) { %>
-    <p>Lecture Channel: #<%= locals.lectureChannel.name %></p>
-<% } %>
-<ul id="channels">  
-    <%
-    var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
-    categoryChannels.forEach(cat => { %>
-        <li>
-            <strong><%= cat.name %></strong>
-            <ul>
+<p>Lecture Channel:  
+    <select id="setLectureChannel">
+        <%
+        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
+        categoryChannels.forEach(cat => { %>
+            <optgroup label="<%= cat.name %>">
                 <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
                 sortedChannels.forEach(function(channel)
                 { 
-                    if (locals.lectureChannel && channel.id == locals.lectureChannel.id) { %>
-                        <li><b><%= channel.name %></b> Lecture Channel</li>
-                    <% } else { %>
-                        <li><%= channel.name %> [ <a href="?setLectureChannelID=<%= channel.id %>">Set as Lecture Channel</a> ]</li>
-                    <% }
+                    %><option value="<%= channel.id %>"
+                        <% if (locals.lectureChannel && channel.id == locals.lectureChannel.id) { %>selected<% } %>>
+                        <%= channel.name %>
+                    </option><%
                 }) %>
-            </ul>
-        </li>
-    <% }); %>
-</ul>
+            </optgroup>
+        <% }); %>
+    </select></p>
+<script>
+    $("#setLectureChannel").on("change", (e) =>
+    {
+        document.location.href = "?setLectureChannelID="+$("#setLectureChannel").val();
+    });
+</script>
 
 <%- include('footer.html') %>
