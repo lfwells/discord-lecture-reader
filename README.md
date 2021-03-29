@@ -68,3 +68,5 @@ but im thinking about a longer term solution where we effectively have a "dashbo
 - a button for enabling/disabling breakout rooms
 - a button for clearing a channel, or posting an announcement or all sorts of cool shit
 
+
+full screen emoji?

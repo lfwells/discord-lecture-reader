@@ -399,16 +399,16 @@ app.post("/guild/:guildID/pollSchedule", loadGuild(), loadScheduledPolls, async 
   //TODO: preserver order :(
   var polls = req.body.polls;
   polls = polls.split("\r\n").filter(l => l.trim() != "");
-  polls = polls.map(line => line.replace(" /poll ", ""));
   var i = 0;
   polls = polls.map(line => {
-    var pivot = line.indexOf('"');
+    var pivot = line.indexOf('/poll');
     return { 
       order: i++,
-      note: line.substr(0, pivot), 
-      poll: line.substr(pivot)
+      note: line.substr(0, pivot).replace(" /poll ", "").trim(), 
+      poll: line.substr(pivot).trim()
     };
   })
+  
 console.log("polls", polls);
   // Delete documents in a batch
   const batch = db.batch();
