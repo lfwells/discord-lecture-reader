@@ -27,9 +27,25 @@
             <% } %>
         </select>
     </p>
-    <p><input type="text" name="custom" placeholder="Add New" /> <input type="submit" value="Add" /></p>
-    <% for (var i in phrases) { %>
-        <p><input type="submit" name="text" value="<%= phrases[i] %>" /></p>
-    <% } %>
+    <table>
+        <tr>
+            <td valign="top">
+                <p><input type="text" name="custom" id="custom" placeholder="Add New" /> <input type="submit" value="Add" /></p>
+                <% for (var i in phrases) { %>
+                    <p><input type="submit" name="text" value="<%= phrases[i] %>" /></p>
+                <% } %>
+            </td>
+            <td valign="top">
+                <% for (var i in emoji) { %>
+                    <p>
+                        <input type="submit" name="customemoji" value="<%= emoji[i].char %>" />
+                        <input type="submit" name="customemoji" value="<%= emoji[i].char %><%= emoji[i].char %><%= emoji[i].char %>" />
+                        <input type="text" value="<%= emoji[i].char %>text<%= emoji[i].char %>" style="width:100px" />
+                         <%= emoji[i].name %></p>
+                <% } %>
+            </td>
+        </tr>
+    </table>
+    
         
 </form>

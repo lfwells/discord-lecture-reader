@@ -29,6 +29,7 @@ function isOutsideTestServer(guild)
 
 var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
+var emoji = require('emoji.json')
 
 //database
 var admin = require("firebase-admin"); 
@@ -489,7 +490,8 @@ app.get("/guild/:guildID/text/", loadGuild(), async (req,res,next) =>
 app.get("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), loadLectureText, async (req,res,next) =>
 {
   res.render("text/text_input", {
-    phrases: req.phrases
+    phrases: req.phrases,
+    emoji: emoji
   });
 });
 app.post("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), loadLectureText, async (req,res,next) =>
@@ -497,6 +499,7 @@ app.post("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), l
   console.log(req.body);
 
   //add a new saved phrase if they did one
+  if (req.body.customemoji) req.body.custom = req.body.customemoji;
   var newPhrase = req.body.custom;
   if (newPhrase)
   {
@@ -518,9 +521,10 @@ app.post("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), l
   GUILD_CACHE[req.guild.id].latestText = req.body;
 
   //back to the page
-  req.query.message = "Posted '"+req.body.text+"'!";
+  req.query.message = "Posted '"+req.body.text+"'!"; 
   res.render("text/text_input", {
-    phrases: req.phrases
+    phrases: req.phrases,
+    emoji: emoji
   });
 });
 //the query to see the latest
