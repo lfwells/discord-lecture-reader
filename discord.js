@@ -244,20 +244,28 @@ async function loadPoll(req,res,next)
 
     //display graph (TODO: right align?)
     var results = [];
-    var embeds = latestPoll.embeds[0];
-    if (!embeds) {
-      res.end("");
-      return;
-    }
-  
-    description = embeds.description.split("\n");
-    var longestOption = 0;
-    for (var i = 0; i < description.length; i++)
+    if (latestPoll.embeds.length == 0) //yes/no poll
     {
-      if (description[i] == "") break;
-      var option = description[i].substr(3);
-      longestOption = Math.max(longestOption, option.length);
-      results.push({ answer: option });
+      results.push({ answer:"Yes" });
+      results.push({ answer:"No" });
+    }
+    else
+    {
+      var embeds = latestPoll.embeds[0];
+      if (!embeds) {
+        res.end("");
+        return;
+      }
+    
+      description = embeds.description.split("\n");
+      var longestOption = 0;
+      for (var i = 0; i < description.length; i++)
+      {
+        if (description[i] == "") break;
+        var option = description[i].substr(3);
+        longestOption = Math.max(longestOption, option.length);
+        results.push({ answer: option });
+      }
     }
 
     var reactions = latestPoll.reactions.cache;
