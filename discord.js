@@ -890,33 +890,14 @@ client.on('ready', async () => {
 
 });
 
-process.on('uncaughtException', async function(err) {
-  return;
-  console.log('Caught exception: ', err); 
-  var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
-  if(errorChannel)
-  {
-    errorChannel.send("<@"+config.LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700)+"```");
-  }
-  process.nextTick(function() { process.exit(1) })
-});
-process.on('unhandledRejection', async function(err) {
-  return;
-  console.log('Unhandled rejection: ',err);
-
-  var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
-  if(errorChannel)
-  {
-    errorChannel.send("<@"+config.LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700)+"```");
-  }
-
-});
 
 
 import * as award_routes from './awards/routes.js';
 app.get("/namesTest/", award_routes.namesTest); 
 app.get("/namesBackup/", award_routes.namesBackup); 
 
+
+import * as errors from './core/errors.js';
 
 
 import token from './core/token.js';
