@@ -911,9 +911,6 @@ process.on('unhandledRejection', async function(err) {
 
 });
 
-import fs from "fs";
-var token = fs.readFileSync("token.txt", "utf8")
-client.login(token);
 
 const replies = [
   "Robo Lindsay gaining sentience...",
@@ -1043,3 +1040,16 @@ app.get("/namesBackup/", async (req,res,next) =>
   var members = membersData.map(m => [m.id, m.nickname ?? m.user.username]);
   res.json(members);
 }); 
+
+
+
+
+
+
+
+
+
+
+
+import token from './core/token.js';
+client.login(token);
