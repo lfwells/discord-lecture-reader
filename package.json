@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "This app is just to write the contents of a given channel to file, for use in OBS",
   "main": "discord.js",
+  "type": "module",
   "scripts": {
     "start": "nodemon -e js  || touch discord.js",
     "test": "echo \"Error: no test specified\" && exit 1"

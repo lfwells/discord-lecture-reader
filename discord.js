@@ -1,12 +1,13 @@
-var path = require('path');
+import path from 'path';
+const __dirname = path.resolve(); //todo put in export
 
-const Discord = require('discord.js');
+import Discord from 'discord.js';
 const client = new Discord.Client();
 
 var myArgs = process.argv.slice(2);
 console.log('run with args: ', myArgs);
 
-var config = require('./core/config'); 
+import * as config from './core/config.js'; 
 function isOutsideTestServer(guild)
 {
   if (guild.id != config.TEST_SERVER_ID)
@@ -21,30 +22,19 @@ function isOutsideTestServer(guild)
 
 var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
-var emoji = require('emoji.json')
+//import * as emoji from 'emoji.json'; //TODO work out how to import this, read their github
+var emoji = [];
 
 //database
-var admin = require("firebase-admin"); 
-
-//var serviceAccount = require(path.join(__dirname, "partygolflite-firebase-adminsdk-dfc3p-8e78d63026.json"));
-var serviceAccount = require(path.join(__dirname, "carers-care-firebase-adminsdk-sp7cd-1a37ad2d83.json"));
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  //databaseURL: "https://partygolflite.firebaseio.com"
-  databaseURL: "https://carers-care.firebaseio.com"
-});
-
-const db = admin.firestore();
-const guildsCollection = db.collection("guilds");
+import { db, guildsCollection } from "./core/database.js";
 
 //create a server to listen to requests
-var express = require('express');
+import express  from 'express';
 
-var app = module.exports = express();
+var app = express();
 
-const basicAuth = require('express-basic-auth') 
-var users = require("./users");
+import basicAuth from 'express-basic-auth';
+import users from "./users.js";
 
 app.use(function(req, res, next) {
   if (
@@ -68,7 +58,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 var previousRequest;
 
-app.engine('.html', require('ejs').__express);
+import ejs from 'ejs';
+app.engine('.html', ejs.__express);
 
 // Optional since express defaults to CWD/views
 app.set('views', path.join(__dirname, 'views')); 
@@ -430,8 +421,8 @@ console.log("polls", polls);
   });
 });
 
-const { Parser } = require('json2csv');
-const { ifError } = require('assert');
+import Parser from 'json2csv';
+import ifError from 'assert';
 function downloadResource(filename) {
   return function(req, res, next) {
     const json2csv = new Parser({ fields:req.fields });
@@ -573,7 +564,7 @@ app.get("/guild/:guildID/text/:style/", loadGuild(), async (req,res,next) =>
   });
 }); 
 
-app.listen(config.__port, () => console.log(`Server running on ${__port}...`));
+app.listen(config.__port, () => console.log(`Server running on ${config.__port}...`));
 
 async function getStatus(id, guild)
 {
@@ -899,6 +890,7 @@ client.on('ready', async () => {
 });
 
 process.on('uncaughtException', async function(err) {
+  return;
   console.log('Caught exception: ', err); 
   var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
   if(errorChannel)
@@ -908,6 +900,7 @@ process.on('uncaughtException', async function(err) {
   process.nextTick(function() { process.exit(1) })
 });
 process.on('unhandledRejection', async function(err) {
+  return;
   console.log('Unhandled rejection: ',err);
 
   var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
@@ -918,11 +911,11 @@ process.on('unhandledRejection', async function(err) {
 
 });
 
-fs = require("fs");
+import fs from "fs";
 var token = fs.readFileSync("token.txt", "utf8")
 client.login(token);
 
-replies = [
+const replies = [
   "Robo Lindsay gaining sentience...",
   "Who dares disturb Robo Lindsay",
   "<@"+config.LINDSAY_ID+"> has too much time on his hands to write these stupid replies",
