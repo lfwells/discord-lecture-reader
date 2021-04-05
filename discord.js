@@ -1,8 +1,7 @@
 import path from 'path';
 const __dirname = path.resolve(); //todo put in export
 
-import Discord from 'discord.js';
-const client = new Discord.Client();
+import client from './core/client.js';
 
 var myArgs = process.argv.slice(2);
 console.log('run with args: ', myArgs);
@@ -841,7 +840,7 @@ client.on('message', async (msg) =>
   if (msg.channel.id == config.OFF_TOPIC_LISTS_CHANNEL_ID)
   {
     console.log("message added in off topics list");
-    handleAwardNicknames();
+    handleAwardNicknames(client);
   }
   //if (m.contains(" ian"))
 });
@@ -852,7 +851,7 @@ client.on('messageUpdate', async(msg) =>
   if (msg.channel.id == config.OFF_TOPIC_LISTS_CHANNEL_ID)
   {
     console.log("message update in off topics list");
-    handleAwardNicknames();
+    handleAwardNicknames(client);
   }
 });
 client.on('messageDelete', async(msg) =>
@@ -861,11 +860,12 @@ client.on('messageDelete', async(msg) =>
   if (msg.channel.id == config.OFF_TOPIC_LISTS_CHANNEL_ID)
   {
     console.log("message delete in off topics list");
-    handleAwardNicknames();
+    handleAwardNicknames(client);
   }
 });
 
 
+import { handleAwardNicknames } from './awards/awards.js';
 client.on('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
@@ -886,7 +886,7 @@ client.on('ready', async () => {
   });
 
   //just testin
-  handleAwardNicknames();
+  handleAwardNicknames(client);
 
 });
 
@@ -913,125 +913,9 @@ process.on('unhandledRejection', async function(err) {
 });
 
 
-
-
-
-var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
-var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
-
-//giant lindsayys off topic "821597975166976030"
-//kit109 IRL off topic "814020643711746068"
-async function handleAwardNicknames()
-{
-  var offtopiclistschannel = await client.channels.cache.get(config.OFF_TOPIC_LISTS_CHANNEL_ID);
-  
-  var awardedMembers = {}; 
-  
-  var messages = await offtopiclistschannel.messages.fetch();
-  messages.forEach(message => 
-  {
-    var content = message.cleanContent;
-    content = content.substr(0, content.indexOf("@"));
-
-    var emoji;
-    if (content.match(reg)) {
-      emoji = content.match(reg)[0];
-      //console.log(emoji, emoji.length);
-    
-      var mentions = message.mentions.members;
-      mentions.forEach(member => {
-        var key = member.id;//baseName(member.nickname ?? member.user.username);
-        //console.log("'",key,"'");
-        //console.log(key); 
-        //console.log(member.nickname);
-        if (awardedMembers[key] == undefined)
-        {
-          awardedMembers[key] = [];
-        }
-        if (awardedMembers[key].indexOf(emoji) <= 0)
-        {
-          awardedMembers[key].push(emoji);
-        }
-      });
-    }
-  });
-  var guild = await client.guilds.cache.get(config.KIT109_SERVER);
-  for (var memberID in awardedMembers) {
-    if (memberID == guild.ownerID) continue; //cannot modify guild owner nickname
-
-    var member = await guild.members.cache.get(memberID);
-    //console.log("member", baseName(member.nickname ?? member.user.username));
-    var awards = awardedMembers[memberID]; 
-    //console.log("awards", awards);
-    if (member)
-    {
-      //setNickname(member, baseName(member.nickname ?? member.user.username)+" "+awards.join(""))
-      //this way may look dumb, but we dont want to split the last emoji in two 
-      var newNickname = baseName(member.nickname ?? member.user.username);
-      for (var a in awards)
-      {
-        var emoji = awards[a];
-        var newLengthAfterAddingEmoji = newNickname.length+emoji.length;
-        if (newLengthAfterAddingEmoji < 32)
-        {
-          newNickname = newNickname + emoji;
-        }
-        else {
-          //console.log(emoji, emoji.length, newNickname.length, newLengthAfterAddingEmoji);
-          break;
-        }
-      }
-      setNickname(member, newNickname);
-    }
-  }
-  return awardedMembers;
-}
-async function setNickname(member, nickname)
-{
-  //console.log(nickname.length); 
-  //console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
-  //we can only set the nickname if the role is lower than us
-  var us = await member.guild.members.cache.get(client.user.id);
-  var ourHighestRole = us.roles.highest;
-  var theirHighestRole = member.roles.highest;
-  if (ourHighestRole.position >= theirHighestRole.position)
-  {
-    await member.setNickname(nickname);
-  }
-}
-function baseName(nickname)
-{
-  return nickname.replace(reg, "").trim(); 
-  while ((result = reg.exec(nickname)) !== null) {
-    return nickname.substr(0, result.index-1).trim();
-  }
-  return nickname;
-}
-
-//todo: summary (public?) pages that list achievements?
-app.get("/namesTest/", async (req,res,next) =>
-{
-  var awardedMembers = await handleAwardNicknames();
-  
-  console.log(awardedMembers);
-
-  res.json(awardedMembers);
-}); 
-app.get("/namesBackup/", async (req,res,next) =>
-{
-  var guild = await client.guilds.cache.get("801757073083203634");
-  var membersData = await guild.members.fetch();
-  var members = membersData.map(m => [m.id, m.nickname ?? m.user.username]);
-  res.json(members);
-}); 
-
-
-
-
-
-
-
-
+import * as award_routes from './awards/routes.js';
+app.get("/namesTest/", award_routes.namesTest); 
+app.get("/namesBackup/", award_routes.namesBackup); 
 
 
 
