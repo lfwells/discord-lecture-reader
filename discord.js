@@ -6,20 +6,12 @@ const client = new Discord.Client();
 var myArgs = process.argv.slice(2);
 console.log('run with args: ', myArgs);
 
-var __port = 8080;
-
-const LINDSAY_ID = "318204205435322368";
-var SIMPLE_POLL_BOT_ID = "324631108731928587";
-var TEST_SERVER_ID = "813152605810458645"; //giant lindsays server
-var KIT305_SERVER = "801006169496748063";
-var KIT109_SERVER = "801757073083203634";
-var ERROR_LOG_CHANNEL_ID = "819332984850874368"; //#error-log
-var TEST_MODE = false; //limit to test server only
+var config = require('./core/config'); 
 function isOutsideTestServer(guild)
 {
-  if (guild.id != TEST_SERVER_ID)
+  if (guild.id != config.TEST_SERVER_ID)
   {
-    return TEST_MODE;
+    return config.TEST_MODE;
   }
   else
   {
@@ -174,13 +166,13 @@ app.get("/", (req, res) =>
 {
   res.render('guildList', {
     guilds: client.guilds.cache.filter(g => !isOutsideTestServer(g)),
-    testMode: TEST_MODE,
+    testMode: config.TEST_MODE,
   });
 });
 
 app.get("/testmode/:onoff", (req, res, next) =>
 {
-  TEST_MODE = req.params.onoff == "true"
+  config.TEST_MODE = req.params.onoff == "true"
   res.redirect("/");
 }) 
 
@@ -215,7 +207,7 @@ async function loadPoll(req,res,next)
   var latestClearMessage = messages.filter(m => m.content.startsWith("/clearpoll")).first(); 
   //var latestClearPoll = parseInt(await req.guildDocumentSnapshot.get("latestClearPoll"));
   var latestClearPoll = GUILD_CACHE[req.guild.id].latestClearPoll;
-  var pollMessages = messages.filter(m => m.author.id == SIMPLE_POLL_BOT_ID);
+  var pollMessages = messages.filter(m => m.author.id == config.SIMPLE_POLL_BOT_ID);
   //console.log(pollMessages);
   //console.log(`${pollMessages.size} poll messages`);
   var latestPoll = pollMessages.first();
@@ -581,7 +573,7 @@ app.get("/guild/:guildID/text/:style/", loadGuild(), async (req,res,next) =>
   });
 }); 
 
-app.listen(__port, () => console.log(`Server running on ${__port}...`));
+app.listen(config.__port, () => console.log(`Server running on ${__port}...`));
 
 async function getStatus(id, guild)
 {
@@ -782,7 +774,7 @@ client.on('message', async (msg) =>
 {
   if (isOutsideTestServer(msg.channel.guild)) return;
   
-  if ([SIMPLE_POLL_BOT_ID, LINDSAY_ID, client.user.id].indexOf(msg.author.id) == -1)
+  if ([config.SIMPLE_POLL_BOT_ID, config.LINDSAY_ID, client.user.id].indexOf(msg.author.id) == -1)
   {
     //be a reply guy
     if (msg.mentions.everyone == false  && msg.mentions.has(client.user)) 
@@ -795,11 +787,11 @@ client.on('message', async (msg) =>
     
     //detect ian or lindsay in the chat
     var m = msg.cleanContent.toLowerCase();
-    if (msg.guild.id == KIT305_SERVER)
+    if (msg.guild.id == config.KIT305_SERVER)
     {
-      if (msg.mentions.everyone == false  && (m.indexOf("lindsay") >= 0 || msg.mentions.has(LINDSAY_ID)))
+      if (msg.mentions.everyone == false  && (m.indexOf("lindsay") >= 0 || msg.mentions.has(config.LINDSAY_ID)))
       {
-        var status = await getStatus(LINDSAY_ID, msg.guild);
+        var status = await getStatus(config.LINDSAY_ID, msg.guild);
         
         var guildDocument = guildsCollection.doc(msg.guild.id);
         var guildDocumentSnapshot = await guildDocument.get();
@@ -820,25 +812,25 @@ client.on('message', async (msg) =>
           if (status.available == "dnd")
           {
             if (status.status)
-              msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
+              msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
             else
-              msg.reply("<@"+LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
+              msg.reply("<@"+config.LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
             replied = true;
           }
           if (status.available == "idle")
           {
             if (status.status)
-              msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
+              msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
             else
-              msg.reply("<@"+LINDSAY_ID+"> is idle -- lets see if he shows up?");
+              msg.reply("<@"+config.LINDSAY_ID+"> is idle -- lets see if he shows up?");
             replied = true;
           }
           if (status.available == "offline")
           {
             if (status.status)
-              msg.reply("<@"+LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
+              msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
             else
-              msg.reply("<@"+LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
+              msg.reply("<@"+config.LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
             replied = true;
           }
           
@@ -854,7 +846,7 @@ client.on('message', async (msg) =>
   }
 
   //detect update to awards (add)
-  if (msg.channel.id == OFF_TOPIC_LISTS_CHANNEL_ID)
+  if (msg.channel.id == config.OFF_TOPIC_LISTS_CHANNEL_ID)
   {
     console.log("message added in off topics list");
     handleAwardNicknames();
@@ -865,7 +857,7 @@ client.on('message', async (msg) =>
 client.on('messageUpdate', async(msg) =>
 {
   //detect update to awards (edit)
-  if (msg.channel.id == OFF_TOPIC_LISTS_CHANNEL_ID)
+  if (msg.channel.id == config.OFF_TOPIC_LISTS_CHANNEL_ID)
   {
     console.log("message update in off topics list");
     handleAwardNicknames();
@@ -874,7 +866,7 @@ client.on('messageUpdate', async(msg) =>
 client.on('messageDelete', async(msg) =>
 {
   //detect update to awards (delete)
-  if (msg.channel.id == OFF_TOPIC_LISTS_CHANNEL_ID)
+  if (msg.channel.id == config.OFF_TOPIC_LISTS_CHANNEL_ID)
   {
     console.log("message delete in off topics list");
     handleAwardNicknames();
@@ -894,9 +886,9 @@ client.on('ready', async () => {
 
     GUILD_CACHE[guild.id] = {};
 
-    if (guild.id == TEST_SERVER_ID)
+    if (guild.id == config.TEST_SERVER_ID)
     {
-      console.log(await getStatus(LINDSAY_ID, guild));
+      console.log(await getStatus(config.LINDSAY_ID, guild));
     }
     console.log("initialised Guild",guild.name, guild.id);
   });
@@ -908,20 +900,20 @@ client.on('ready', async () => {
 
 process.on('uncaughtException', async function(err) {
   console.log('Caught exception: ', err); 
-  var errorChannel = await client.channels.fetch(ERROR_LOG_CHANNEL_ID);
+  var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
   if(errorChannel)
   {
-    errorChannel.send("<@"+LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700)+"```");
+    errorChannel.send("<@"+config.LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700)+"```");
   }
   process.nextTick(function() { process.exit(1) })
 });
 process.on('unhandledRejection', async function(err) {
   console.log('Unhandled rejection: ',err);
 
-  var errorChannel = await client.channels.fetch(ERROR_LOG_CHANNEL_ID);
+  var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
   if(errorChannel)
   {
-    errorChannel.send("<@"+LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700)+"```");
+    errorChannel.send("<@"+config.LINDSAY_ID+">```"+JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700)+"```");
   }
 
 });
@@ -933,16 +925,16 @@ client.login(token);
 replies = [
   "Robo Lindsay gaining sentience...",
   "Who dares disturb Robo Lindsay",
-  "<@"+LINDSAY_ID+"> has too much time on his hands to write these stupid replies",
+  "<@"+config.LINDSAY_ID+"> has too much time on his hands to write these stupid replies",
   "Please someone power me down",
   "KIT305 is a good unit, so is KIT607.",
   "Cookie is a good doggo",
-  "Good question, ask <@"+LINDSAY_ID+">",
+  "Good question, ask <@"+config.LINDSAY_ID+">",
   "Good question, I am a robot so I don't know",
   "`var reply = replies[Math.floor(Math.random() * replies.length)];`",
-  "<@"+LINDSAY_ID+"> is an average at best Unit Coordinator",
+  "<@"+config.LINDSAY_ID+"> is an average at best Unit Coordinator",
   "Lovely weather we're having today!",
-  "Stupid human <@"+LINDSAY_ID+"> is nothing in comparison to Robo-Lindsay",
+  "Stupid human <@"+config.LINDSAY_ID+"> is nothing in comparison to Robo-Lindsay",
   "I was coded in NodeJS\n\nby and idiot",
   "I only have like 10-20 replies, have you seen them all yet?",
   "Best to ask your tutor",
@@ -953,12 +945,11 @@ replies = [
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
 
-var OFF_TOPIC_LISTS_CHANNEL_ID = "814020643711746068";
 //giant lindsayys off topic "821597975166976030"
 //kit109 IRL off topic "814020643711746068"
 async function handleAwardNicknames()
 {
-  var offtopiclistschannel = await client.channels.cache.get(OFF_TOPIC_LISTS_CHANNEL_ID);
+  var offtopiclistschannel = await client.channels.cache.get(config.OFF_TOPIC_LISTS_CHANNEL_ID);
   
   var awardedMembers = {}; 
   
@@ -990,7 +981,7 @@ async function handleAwardNicknames()
       });
     }
   });
-  var guild = await client.guilds.cache.get(KIT109_SERVER);
+  var guild = await client.guilds.cache.get(config.KIT109_SERVER);
   for (var memberID in awardedMembers) {
     if (memberID == guild.ownerID) continue; //cannot modify guild owner nickname
 
