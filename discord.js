@@ -760,9 +760,11 @@ client.on('voiceStateUpdate', async (oldMember, newMember) =>
 
 //respond to mentions
 import replies from './responder/replies.js';
+
 //not @everyone
 client.on('message', async (msg) => 
 {
+  console.log("two");
   if (isOutsideTestServer(msg.channel.guild)) return;
   
   if ([config.SIMPLE_POLL_BOT_ID, config.LINDSAY_ID, client.user.id].indexOf(msg.author.id) == -1)
@@ -865,9 +867,12 @@ client.on('messageDelete', async(msg) =>
 });
 
 
+import award_events from './awards/events.js';
 import { handleAwardNicknames } from './awards/awards.js';
 client.on('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
+  
 
   var guilds = client.guilds.cache;
   //store them in the db
@@ -886,16 +891,13 @@ client.on('ready', async () => {
   });
 
   //just testin
+  award_events(client);
   handleAwardNicknames(client);
 
 });
 
-
-
-import * as award_routes from './awards/routes.js';
-app.get("/namesTest/", award_routes.namesTest); 
-app.get("/namesBackup/", award_routes.namesBackup); 
-
+import init_routes from './core/routes.js';
+init_routes(app);
 
 import * as errors from './core/errors.js';
 
