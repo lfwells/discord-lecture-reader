@@ -388,18 +388,6 @@ console.log("polls", polls);
   });
 });
 
-import Parser from 'json2csv';
-import ifError from 'assert';
-function downloadResource(filename) {
-  return function(req, res, next) {
-    const json2csv = new Parser({ fields:req.fields });
-    const csv = json2csv.parse(req.data);
-    res.header('Content-Type', 'text/csv');
-    res.attachment(filename);
-    return res.send(csv);
-  }
-}
-app.get("/guild/:guildID/attendance/csv", loadGuild(), getAttendanceData, downloadResource("attendance.csv")); 
 
 //full screen texts , TODO allow delete
 var animations = ["scale", "horizontal", "vertical", "fade"];

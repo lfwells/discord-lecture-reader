@@ -38,3 +38,16 @@ export function parseClientStatus(status)
   }
   return "offline";
 }
+
+
+import Parser from 'json2csv';
+import ifError from 'assert';
+export function downloadResource(filename) {
+  return function(req, res, next) {
+    const json2csv = new Parser({ fields:req.fields });
+    const csv = json2csv.parse(req.data);
+    res.header('Content-Type', 'text/csv');
+    res.attachment(filename);
+    return res.send(csv);
+  }
+}
