@@ -1,5 +1,8 @@
 import { send } from "../core/client.js";
 
+import { getGuildCache } from "../guild/guild.js";
+var GUILD_CACHE = getGuildCache();
+
 //import * as emoji from 'emoji.json'; //TODO work out how to import this, read their github
 var emoji = [];
 

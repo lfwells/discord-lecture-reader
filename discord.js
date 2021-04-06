@@ -1,5 +1,5 @@
 //discord
-import client from './core/client.js'; 
+import getClient from './core/client.js'; 
 
 //web server
 import { app } from "./core/server.js";
@@ -15,6 +15,7 @@ import init_responder_events from './responder/events.js';
 import init_attendance_events from './attendance/events.js';
 
 //listen for when discord is logged in
+const client = getClient();
 client.on('ready', async () => 
 {
 	console.log(`Logged in as ${client.user.tag}!`);

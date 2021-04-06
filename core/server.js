@@ -50,9 +50,9 @@ app.use(function(req, res, next) {
 
 app.get("/testmode/:onoff", (req, res, next) =>
 {
-  config.TEST_MODE = req.params.onoff == "true"
+  config.setTestMode(req.params.onoff == "true");
   res.redirect("/");
-}) 
+});
 
 app.listen(config.__port, () => console.log(`Server running on ${config.__port}...`));
 

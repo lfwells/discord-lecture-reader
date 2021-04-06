@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
-var client = new Discord.Client();
-export default client;
+const client = new Discord.Client();
+export default function getClient() { return client };
 
 import * as config from "./config.js";
 

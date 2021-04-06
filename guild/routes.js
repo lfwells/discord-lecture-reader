@@ -1,8 +1,18 @@
+import * as config from "../core/config.js";
+import { isOutsideTestServer } from "../core/utils.js";
+
+import getClient from "../core/client.js";
+var client = getClient();
+
+import { getGuildCache } from "./guild.js";
+var GUILD_CACHE = getGuildCache();
+
 export function guildList(req, res) 
 {
+    
   res.render('guildList', {
     guilds: client.guilds.cache.filter(g => !isOutsideTestServer(g)),
-    testMode: config.TEST_MODE,
+    testMode: config.getTestMode(),
   });
 }
 

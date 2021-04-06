@@ -1,4 +1,8 @@
 import { send } from "../core/client.js";
+import * as config from "../core/config.js";
+
+import { getGuildCache } from "../guild/guild.js";
+var GUILD_CACHE = getGuildCache();
 
 //poll display details
 //TODO: this not really poll discord constantly if we can avoid

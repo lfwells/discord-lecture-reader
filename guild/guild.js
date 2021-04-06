@@ -1,8 +1,12 @@
 import * as config from '../core/config.js'; 
-import { db } from "../core/database.js";
-import { getStatus } from "../core/utils.js";
+import { db, guildsCollection } from "../core/database.js";
+import { getStatus, isOutsideTestServer } from "../core/utils.js";
+
+import getClient from "../core/client.js";
+var client = getClient();
 
 var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
+export function getGuildCache() { return GUILD_CACHE; }
 
 export async function init(client)
 {
