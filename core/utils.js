@@ -51,3 +51,24 @@ export function downloadResource(filename) {
     return res.send(csv);
   }
 }
+
+//middleware helpers
+
+//use this handie little tool to allow question marks in poll urls
+export function removeQuestionMark(req, res, next)
+{
+  console.log("index of q", req.originalUrl.indexOf("?"));
+  if (req.originalUrl.indexOf("?") > 0)
+  {
+    res.redirect(req.originalUrl.replace("?", "%3F"));
+  }
+  else
+    next();
+}
+
+export function redirectToMainPage(req,res, message){
+  res.redirect("/guild/"+req.params.guildID+"/?message="+message);
+}
+export function redirectToWhereWeCameFrom(req,res,message) {
+  res.redirect(req.headers.referer+"?message="+message);
+}
