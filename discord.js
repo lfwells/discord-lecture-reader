@@ -338,30 +338,6 @@ app.get("/guild/:guildID/clearpoll/", loadGuild(), loadLectureChannel(false), as
 });
 
 
-//display attendance
-async function getAttendanceData(req,res,next)
-{
-  var data = await req.guildDocument.collection("attendance").orderBy("joined").get();
-  req.data = [];
-  data.forEach(doc =>
-  {
-    var d = doc.data();
-    d.id = doc.id;
-    d.joined = new Date(d.joined).toUTCString();
-    d.left = d.left ? new Date(d.left).toUTCString() : "";
-    req.data.push(d);
-  });
-  next();
-}
-app.get("/guild/:guildID/attendance/", loadGuild(), getAttendanceData, async (req, res, next) => 
-{
-  //show web page
-  res.render("attendance", {
-    //guild:req.guild,
-    data:req.data
-  });
-  next()
-}); 
 
 //scheduled polls
 async function loadScheduledPolls(req,res,next) {
