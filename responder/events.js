@@ -1,5 +1,5 @@
 import * as config from '../core/config.js';
-import { isOutsideTestServer } from '../core/utils.js';
+import { isOutsideTestServer, getStatus } from '../core/utils.js';
 import replies from './replies.js';
 
 //lindsay in the chat (KIT305 only)
@@ -20,7 +20,7 @@ export default function(client)
                 var reply = replies[Math.floor(Math.random() * replies.length)];
                 msg.reply(reply);
             }
-            
+
             var m = msg.cleanContent.toLowerCase();
             if (msg.guild.id == config.KIT305_SERVER)
             {
