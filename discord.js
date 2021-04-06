@@ -9,10 +9,7 @@ console.log('run with args: ', myArgs);
 import * as config from './core/config.js'; 
 
 
-var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
-
-//import * as emoji from 'emoji.json'; //TODO work out how to import this, read their github
-var emoji = [];
+var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
 //database
 import { db, guildsCollection } from "./core/database.js";
@@ -387,137 +384,6 @@ console.log("polls", polls);
     polls: polls
   });
 });
-
-
-//full screen texts , TODO allow delete
-var animations = ["scale", "horizontal", "vertical", "fade"];
-var styles = ["arlina", "yikes", "dang", "rainbow"];
-async function loadLectureText(req,res,next)
-{
-  req.textCollection = req.guildDocument.collection("lecture-text").doc("details");
-  try {
-    req.textCollectionSnapshot = await req.textCollection.get();
-  
-  req.textCollectionPhrases = req.guildDocument.collection("lecture-text");
-  req.textCollectionPhrasesSnapshot = await req.textCollectionPhrases.orderBy("order").get();
-  }
-  catch {}
-
-  var phrases = []
-  if (req.textCollectionPhrasesSnapshot.empty == false)
-  {
-    req.textCollectionPhrasesSnapshot.forEach(doc  => {
-      if (doc.id != "details") 
-      {
-        phrases.push(doc.data().phrase);
-      }
-    });
-  }
-  req.phrases = phrases;
-
-  res.locals.animations = animations;
-  res.locals.styles = styles;
-
-  next();
-}
-//this is the obs page
-app.get("/guild/:guildID/text/", loadGuild(), async (req,res,next) =>
-{
-  res.render("text/text");
-}); 
-//this is the page for triggering text
-app.get("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), loadLectureText, async (req,res,next) =>
-{
-  res.render("text/text_input", {
-    phrases: req.phrases,
-    emoji: emoji
-  });
-});
-app.post("/guild/:guildID/text/input", loadGuild(), loadLectureChannel(false), loadLectureText, async (req,res,next) =>
-{
-  console.log(req.body);
-
-  //add a new saved phrase if they did one
-  if (req.body.customemoji) req.body.custom = req.body.customemoji;
-  var newPhrase = req.body.custom;
-  if (newPhrase)
-  {
-    await req.textCollectionPhrases.add({
-      phrase: newPhrase,
-      order: req.phrases.length
-    });
-    req.phrases.push(newPhrase);
-    req.body.text = newPhrase;
-  }
-
-  if (req.body.robolindsay && req.body.robolindsay == "on")
-  {
-    await req.lectureChannel.send(req.body.text);
-  }
-
-  //trigger the db to have information
-  await req.textCollection.set(req.body);
-  GUILD_CACHE[req.guild.id].latestText = req.body;
-
-  //back to the page
-  req.query.message = "Posted '"+req.body.text+"'!"; 
-  res.render("text/text_input", {
-    phrases: req.phrases,
-    emoji: emoji
-  });
-});
-//the query to see the latest
-app.get("/guild/:guildID/text/latest", loadGuild(), /*loadLectureText,*/ async (req,res,next) =>
-{
-  if (GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].latestText)
-  {
-    res.json(GUILD_CACHE[req.guild.id].latestText);
-    GUILD_CACHE[req.guild.id].latestText = null;
-    return;
-  }
-  else if (req.textCollectionSnapshot)
-  {
-    var data = req.textCollectionSnapshot.data();
-    if (data)
-    {
-      console.log("found latest full screen text", data);
-      res.json(data);
-
-      //now immediately delete so it doesnt show again
-      await req.textCollection.delete();
-      return;
-    }
-  }
-  //otherwise just empty data
-  res.json({});
-});
-//grabbed with ajax on demand
-app.get("/guild/:guildID/text/:style/", loadGuild(), async (req,res,next) =>
-{
-  if (req.params.style == "") 
-  {
-    res.end("");
-    return;
-  }
-  if (!req.query.animation || req.query.animation == "random") 
-  {
-    req.query.animation = animations[Math.floor(Math.random() * animations.length)]; 
-  }
-  if (!req.query.duration)
-  {
-    req.query.duration = 2;
-  }
-  if (req.params.style == "random")
-  {
-    req.params.style = styles[Math.floor(Math.random() * styles.length)]; 
-  }
-
-  res.render("text/text_"+req.params.style, {
-    animation:req.query.animation,
-    duration:req.query.duration,
-    inout:req.query.animation == "fade" ? 1 : 0.5
-  });
-}); 
 
 app.listen(config.__port, () => console.log(`Server running on ${config.__port}...`));
 
