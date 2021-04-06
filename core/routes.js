@@ -1,4 +1,4 @@
-import { downloadResource } from "./utils.js";
+import { downloadResource, removeQuestionMark } from "./utils.js";
 
 import * as guild from "../guild/guild.js";
 
@@ -15,7 +15,7 @@ export default function(app)
     app.get("/", guild_routes.guildList);
 
     //guild home page (dashboard)
-    app.get("/guild/:guildID/", guild.load(), guildloadLectureChannel(false), guild_routes.guildHome);
+    app.get("/guild/:guildID/", guild.load(), guild.loadLectureChannel(false), guild_routes.guildHome);
 
     //awards
     app.get("/namesTest/", award_routes.namesTest); 
@@ -26,7 +26,7 @@ export default function(app)
     app.get("/guild/:guildID/attendance/csv", guild.load(), attendance_routes.getAttendanceData, downloadResource("attendance.csv")); 
 
     //lecture text
-    app.get("/guild/:guildID/text/", guild.load(), obs); //this is the obs page
+    app.get("/guild/:guildID/text/", guild.load(), lecture_text_routes.obs); //this is the obs page
     app.get("/guild/:guildID/text/input", guild.load(), guild.loadLectureChannel(false), lecture_text_routes.load, lecture_text_routes.inputGet); //this is the page for triggering text 
     app.post("/guild/:guildID/text/input", guild.load(), guild.loadLectureChannel(false), lecture_text_routes.load, lecture_text_routes.inputPost);
     app.get("/guild/:guildID/text/latest", guild.load(), lecture_text_routes.getLatest); //the query to see the latest
@@ -35,7 +35,7 @@ export default function(app)
     //polls    
     app.get("/guild/:guildID/poll/", guild.load(), guild.loadLectureChannel(true), poll_routes.load, poll_routes.obs); //obs page
     app.get("/guild/:guildID/poll/data/", guild.load(), guild.loadLectureChannel(true), poll_routes.load, poll_routes.pollData); //json data for obs page
-    app.get("/guild/:guildID/poll/:pollText/", removeQuestionMark, guild.load(), loadLectureChannel(true), poll_routes.postPoll);  //send poll (uses get, so that we can do the cool powerpoint links)
+    app.get("/guild/:guildID/poll/:pollText/", removeQuestionMark, guild.load(), guild.loadLectureChannel(true), poll_routes.postPoll);  //send poll (uses get, so that we can do the cool powerpoint links)
     app.get("/guild/:guildID/clearpoll/", guild.load(), guild.loadLectureChannel(false), poll_routes.clearPoll);
 
     //scheduled polls

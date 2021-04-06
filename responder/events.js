@@ -6,7 +6,7 @@ import replies from './replies.js';
 //TODO: make this configurable etc
 export default function(client)
 {
-    client.on(function(msg) 
+    client.on('message', async (msg) =>
     {
         if (isOutsideTestServer(msg.channel.guild)) return;
         

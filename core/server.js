@@ -1,11 +1,12 @@
+import * as config from './config.js'; 
 
 //create a server to listen to requests
 import express  from 'express';
 
-var app = express();
+export const app = express();
 
 import basicAuth from 'express-basic-auth';
-import users from "./users.js";
+import users from "../users.js";
 
 app.use(function(req, res, next) {
   if (
@@ -54,3 +55,4 @@ app.get("/testmode/:onoff", (req, res, next) =>
 }) 
 
 app.listen(config.__port, () => console.log(`Server running on ${config.__port}...`));
+

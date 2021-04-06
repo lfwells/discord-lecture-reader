@@ -1,8 +1,5 @@
 //discord
-import client from './core/client.js';
-
-//database
-import { db } from "./core/database.js";
+import client from './core/client.js'; 
 
 //web server
 import { app } from "./core/server.js";
@@ -20,15 +17,15 @@ import init_attendance_events from './attendance/events.js';
 //listen for when discord is logged in
 client.on('ready', async () => 
 {
-  console.log(`Logged in as ${client.user.tag}!`);
+	console.log(`Logged in as ${client.user.tag}!`);
 
-  //save all the guilds etc to db
-  guild.init();
+	//save all the guilds etc to db
+	guild.init(client);
 
-  //register the appropriate discord event listeners
-  init_award_events(client);
-  init_responder_events(client);
-  init_attendance_events(client);
+	//register the appropriate discord event listeners
+	init_award_events(client);
+	init_responder_events(client);
+	init_attendance_events(client);
 });
 
 //login with discord auth token
