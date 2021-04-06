@@ -7,17 +7,7 @@ var myArgs = process.argv.slice(2);
 console.log('run with args: ', myArgs);
 
 import * as config from './core/config.js'; 
-function isOutsideTestServer(guild)
-{
-  if (guild.id != config.TEST_SERVER_ID)
-  {
-    return config.TEST_MODE;
-  }
-  else
-  {
-    return false;
-  }
-}
+
 
 var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -91,6 +81,8 @@ function redirectToWhereWeCameFrom(req,res,message) {
   res.redirect(req.headers.referer+"?message="+message);
 }
 
+
+import { isOutsideTestServer } from './core/utils.js';
 //TODO: these two need to return error if not authed or wrong id
 function loadGuild() {
   return async function(req, res, next)
@@ -758,90 +750,8 @@ client.on('voiceStateUpdate', async (oldMember, newMember) =>
   } 
 });
 
-//respond to mentions
-import replies from './responder/replies.js';
-
-//not @everyone
-client.on('message', async (msg) => 
-{
-  console.log("two");
-  if (isOutsideTestServer(msg.channel.guild)) return;
-  
-  if ([config.SIMPLE_POLL_BOT_ID, config.LINDSAY_ID, client.user.id].indexOf(msg.author.id) == -1)
-  {
-    //be a reply guy
-    if (msg.mentions.everyone == false  && msg.mentions.has(client.user)) 
-    { 
-      //we check, whether the bot is mentioned, client.user returns the user that the client is logged in as
-      //this is where you put what you want to do now
-      var reply = replies[Math.floor(Math.random() * replies.length)];
-      msg.reply(reply);
-    }
-    
-    //detect ian or lindsay in the chat
-    var m = msg.cleanContent.toLowerCase();
-    if (msg.guild.id == config.KIT305_SERVER)
-    {
-      if (msg.mentions.everyone == false  && (m.indexOf("lindsay") >= 0 || msg.mentions.has(config.LINDSAY_ID)))
-      {
-        var status = await getStatus(config.LINDSAY_ID, msg.guild);
-        
-        var guildDocument = guildsCollection.doc(msg.guild.id);
-        var guildDocumentSnapshot = await guildDocument.get();
-        var lastAutoReply = await guildDocumentSnapshot.get("lastAutoReply");
-        if (!lastAutoReply)
-          lastAutoReply = 0;
-
-        var d = new Date();
-        var now = d.getTime();
-        var AUTO_REPLY_TIMEOUT = 1000 * 60 * 60; //every hr
-
-        console.log("detect a lindsay mention", status, now - lastAutoReply);
-
-        //TODO this timeout should be per channel, but is currently per server
-        if ((now - lastAutoReply) > AUTO_REPLY_TIMEOUT)
-        {
-          var replied = false;
-          if (status.available == "dnd")
-          {
-            if (status.status)
-              msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
-            else
-              msg.reply("<@"+config.LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
-            replied = true;
-          }
-          if (status.available == "idle")
-          {
-            if (status.status)
-              msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
-            else
-              msg.reply("<@"+config.LINDSAY_ID+"> is idle -- lets see if he shows up?");
-            replied = true;
-          }
-          if (status.available == "offline")
-          {
-            if (status.status)
-              msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
-            else
-              msg.reply("<@"+config.LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
-            replied = true;
-          }
-          
-          if (replied)
-          {
-            guildDocument.update({
-              lastAutoReply:now
-            });
-          }
-        }
-      }
-    }
-  }
-});
-
-
-import award_events from './awards/events.js';
-import { handleAwardNicknames } from './awards/awards.js';
+import init_award_events from './awards/events.js';
+import init_responder_events from './responder/events.js';
 client.on('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
@@ -864,9 +774,8 @@ client.on('ready', async () => {
   });
 
   //just testin
-  award_events(client);
-  handleAwardNicknames(client);
-
+  init_award_events(client);
+  init_responder_events(client);
 });
 
 import init_routes from './core/routes.js';
