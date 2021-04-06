@@ -1,3 +1,4 @@
+import { send } from "../core/client.js";
 
 //import * as emoji from 'emoji.json'; //TODO work out how to import this, read their github
 var emoji = [];
@@ -68,7 +69,7 @@ export async function inputPost(req,res,next)
 
   if (req.body.robolindsay && req.body.robolindsay == "on")
   {
-    await req.lectureChannel.send(req.body.text);
+    await send(req.lectureChannel, req.body.text);
   }
 
   //trigger the db to have information

@@ -1,4 +1,5 @@
 import * as config from '../core/config.js';
+import { reply } from '../core/client.js';
 import { isOutsideTestServer, getStatus } from '../core/utils.js';
 import replies from './replies.js';
 
@@ -17,8 +18,8 @@ export default function(client)
             { 
                 //we check, whether the bot is mentioned, client.user returns the user that the client is logged in as
                 //this is where you put what you want to do now
-                var reply = replies[Math.floor(Math.random() * replies.length)];
-                msg.reply(reply);
+                var replyMessage = replies[Math.floor(Math.random() * replies.length)];
+                await reply(replyMessage);
             }
 
             var m = msg.cleanContent.toLowerCase();
@@ -47,25 +48,25 @@ export default function(client)
                     if (status.available == "dnd")
                     {
                         if (status.status)
-                        msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
+                            await reply(msg, "<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (do not disturb)-- he might not be able to reply");
                         else
-                        msg.reply("<@"+config.LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
+                            await reply(msg, "<@"+config.LINDSAY_ID+"> is set to Do Not Disturb, he may be busy -- perhaps someone here can help?");
                         replied = true;
                     }
                     if (status.available == "idle")
                     {
                         if (status.status)
-                        msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
+                            await reply(msg, "<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' -- he might not be able to reply");
                         else
-                        msg.reply("<@"+config.LINDSAY_ID+"> is idle -- lets see if he shows up?");
+                            await reply(msg, "<@"+config.LINDSAY_ID+"> is idle -- lets see if he shows up?");
                         replied = true;
                     }
                     if (status.available == "offline")
                     {
                         if (status.status)
-                        msg.reply("<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
+                            await reply(msg, "<@"+config.LINDSAY_ID+">'s status says '"+status.status+"' (offline) -- he might not be able to reply");
                         else
-                        msg.reply("<@"+config.LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
+                            await reply(msg, "<@"+config.LINDSAY_ID+"> is (supposedly) offline -- lets see if he shows up?");
                         replied = true;
                     }
                     

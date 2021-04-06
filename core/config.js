@@ -1,5 +1,7 @@
 export const __port = 8080;
 
+export const enableSendMessagesAndReplies = true; //mute robo lindsay here
+
 export const LINDSAY_ID = "318204205435322368";
 export const SIMPLE_POLL_BOT_ID = "324631108731928587";
 export const TEST_SERVER_ID = "813152605810458645"; //giant lindsays server

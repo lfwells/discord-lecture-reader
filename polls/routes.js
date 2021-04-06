@@ -1,3 +1,4 @@
+import { send } from "../core/client.js";
 
 //poll display details
 //TODO: this not really poll discord constantly if we can avoid
@@ -135,7 +136,7 @@ export async function postPoll(req, res)
   previousRequest = pollText;
 
   //send the message on discord
-  var message = await req.lectureChannel.send(pollText);
+  var message = await send(req.lectureChannel, pollText);
   message.delete();
 
   //show web page
