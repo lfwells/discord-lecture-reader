@@ -91,3 +91,32 @@
     tr .bar.leading {
         background-color: #7289DA;
     }
+
+    #exportTutorial > div {
+        margin:1em auto;
+        max-width:800px;
+    }
+
+    #exportTutorial h1, 
+    #exportTutorial h2, 
+    #exportTutorial h3,
+    #exportTutorial h4,
+    #exportTutorial .description,
+    #exportTutorial .backToTop
+    {
+        display:block;
+        text-align: center;
+    }  
+    #exportTutorial ul, #exportTutorial pre {
+        background-color:slategray;
+        padding: 1em;
+    }
+    #exportTutorial pre {
+        font-family: consolas;
+    }
+    #exportTutorial #toc * {
+        font-size:1.15em;
+    }
+    #exportTutorial p {
+        text-align: justify;
+    }

@@ -8,6 +8,10 @@ export const app = express();
 import basicAuth from 'express-basic-auth';
 import users from "../users.js";
 
+import cors from "cors"; 
+
+app.use(cors())
+
 app.use(function(req, res, next) {
   if (
     req.path.indexOf("/text/") > 0 || 
