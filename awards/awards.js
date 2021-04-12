@@ -1,14 +1,13 @@
 import * as config from '../core/config.js';
+import { guildsCollection } from "../core/database.js";
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
 
 //giant lindsayys off topic "821597975166976030"
 //kit109 IRL off topic "814020643711746068"
-export async function handleAwardNicknames(client)
-{
-  var offtopiclistschannel = await client.channels.cache.get(config.OFF_TOPIC_LISTS_CHANNEL_ID);
-  
+export async function handleAwardNicknames(client, offtopiclistschannel)
+{  
   var awardedMembers = {}; 
   
   var messages = await offtopiclistschannel.messages.fetch();
@@ -73,7 +72,7 @@ export async function handleAwardNicknames(client)
 async function setNickname(client, member, nickname)
 {
   //console.log(nickname.length); 
-  //console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
+  console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
   //we can only set the nickname if the role is lower than us
   var us = await member.guild.members.cache.get(client.user.id);
   var ourHighestRole = us.roles.highest;
@@ -90,4 +89,12 @@ function baseName(nickname)
     return nickname.substr(0, result.index-1).trim();
   }
   return nickname;
+}
+
+export async function isAwardChannelID(fromInChannel)
+{
+    var channel = await fromInChannel.fetch();
+    var guildSnapshot = await guildsCollection.doc(channel.guild.id).get();
+    var awardChannelID = await guildSnapshot.get("awardChannelID");
+    return channel.id == awardChannelID;
 }

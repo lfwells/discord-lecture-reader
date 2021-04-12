@@ -12,5 +12,3 @@ export const ERROR_LOG_CHANNEL_ID = "819332984850874368"; //#error-log
 var _TEST_MODE = false; //limit to test server only
 export function getTestMode() { return _TEST_MODE; }
 export function setTestMode(enabled) { _TEST_MODE = enabled; }
-    
-export const OFF_TOPIC_LISTS_CHANNEL_ID = "814020643711746068"; //TODO: make not hard-coded
