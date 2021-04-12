@@ -1,9 +1,13 @@
 import { handleAwardNicknames } from "./awards.js";
+import getClient from "../core/client.js";
+var client = getClient();
 
 //todo: summary (public?) pages that list achievements?
 export async function namesTest(req,res,next) 
 {
-  var awardedMembers = await handleAwardNicknames();
+  console.log(req.awardChannelID);
+  console.log(req.awardChannel);
+  var awardedMembers = await handleAwardNicknames(client, req.awardChannel);
   
   console.log(awardedMembers);
 
@@ -12,8 +16,7 @@ export async function namesTest(req,res,next)
 
 export async function namesBackup(req,res,next)
 {
-  var guild = await client.guilds.cache.get("801757073083203634");
-  var membersData = await guild.members.fetch();
+  var membersData = await req.guild.members.fetch();
   var members = membersData.map(m => [m.id, m.nickname ?? m.user.username]);
   res.json(members);
 }

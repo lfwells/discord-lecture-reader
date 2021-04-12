@@ -107,7 +107,7 @@ export function loadAwardChannel(required)
       if (req.awardChannelID)
       {
         //console.log("req.awardChannelID", req.awardChannelID);
-        req.lectureChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
+        req.awardChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
         res.locals.awardChannel = req.awardChannel;
       }
       else

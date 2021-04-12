@@ -18,8 +18,8 @@ export default function(app)
     app.get("/guild/:guildID/", guild.load(), guild.loadLectureChannel(false), guild.loadAwardChannel(false), guild_routes.guildHome);
 
     //awards
-    app.get("/namesTest/", award_routes.namesTest); 
-    app.get("/namesBackup/", award_routes.namesBackup); 
+    app.get("/guild/:guildID/namesTest/", guild.load(), guild.loadAwardChannel(true), award_routes.namesTest); 
+    app.get("/guild/:guildID/namesBackup/", guild.load(), guild.loadAwardChannel(true),award_routes.namesBackup); 
 
     //attendance
     app.get("/guild/:guildID/attendance/", guild.load(), attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
