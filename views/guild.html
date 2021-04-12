@@ -13,9 +13,9 @@
     </ul>
 </nav>
 
-<h2>Channel List</h2>
 <p>Lecture Channel:  
     <select id="setLectureChannel">
+        <option>Please Select Channel</option>
         <%
         var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
         categoryChannels.forEach(cat => { %>
@@ -35,6 +35,32 @@
     $("#setLectureChannel").on("change", (e) =>
     {
         document.location.href = "?setLectureChannelID="+$("#setLectureChannel").val();
+    });
+</script>
+
+
+<p>Awards Channel:  
+    <select id="setAwardChannel">
+        <option>Please Select Channel</option>
+        <%
+        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
+        categoryChannels.forEach(cat => { %>
+            <optgroup label="<%= cat.name %>">
+                <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
+                sortedChannels.forEach(function(channel)
+                { 
+                    %><option value="<%= channel.id %>"
+                        <% if (locals.awardChannel && channel.id == locals.awardChannel.id) { %>selected<% } %>>
+                        <%= channel.name %>
+                    </option><%
+                }) %>
+            </optgroup>
+        <% }); %>
+    </select></p>
+<script>
+    $("#setAwardChannel").on("change", (e) =>
+    {
+        document.location.href = "?setAwardChannelID="+$("#setAwardChannel").val();
     });
 </script>
 

@@ -32,6 +32,20 @@ export async function guildHome(req, res)
 
     req.query.message = "set the lecture channel to #"+req.lectureChannel.name;
   }
+  var setAwardChannelID = req.query.setAwardChannelID;
+  if (setAwardChannelID)
+  {
+    await req.guildDocument.update({
+      awardChannelID: setAwardChannelID
+    });
+    req.awardChannelID = setAwardChannelID;
+    GUILD_CACHE[req.guild.id].awardChannelID = setAwardChannelID;
+
+    req.awardChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
+    res.locals.awardChannel = req.awardChannel;
+
+    req.query.message = "set the award channel to #"+req.awardChannel.name;
+  }
 
   res.render("guild");
 }

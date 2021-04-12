@@ -53,38 +53,73 @@ export function load() {
     }
   }
 
-export function loadLectureChannel(required)  
+  export function loadLectureChannel(required)  
+  {
+      return async function(req,res,next)  
+      {
+        if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].lectureChannelID)
+        {
+          req.lectureChannelID = GUILD_CACHE[req.guild.id].lectureChannelID;
+        }
+    
+        if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].lectureChannelID))
+        {
+          req.guildDocumentSnapshot = await req.guildDocument.get();
+          req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
+          if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+          GUILD_CACHE[req.guild.id].lectureChannelID = req.lectureChannelID;
+        } 
+        if (req.lectureChannelID)
+        {
+          //console.log("req.lectureChannelID", req.lectureChannelID);
+          req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
+          res.locals.lectureChannel = req.lectureChannel;
+        }
+        else
+        {
+          //no lecture channel defined
+          if (required)
+          {
+            res.end("No lecture channel set. Please set one on dashboard page.");
+            return;
+          }
+        }
+        next(); 
+      }
+  }
+  
+export function loadAwardChannel(required)  
 {
     return async function(req,res,next)  
     {
-      if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].lectureChannelID)
+      if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].awardChannelID)
       {
-        req.lectureChannelID = GUILD_CACHE[req.guild.id].lectureChannelID;
+        req.awardChannelID = GUILD_CACHE[req.guild.id].awardChannelID;
       }
   
-      if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].lectureChannelID))
+      if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].awardChannelID))
       {
         req.guildDocumentSnapshot = await req.guildDocument.get();
-        req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
+        req.awardChannelID = await req.guildDocumentSnapshot.get("awardChannelID");
         if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-        GUILD_CACHE[req.guild.id].lectureChannelID = req.lectureChannelID;
+        GUILD_CACHE[req.guild.id].awardChannelID = req.awardChannelID;
       } 
-      if (req.lectureChannelID)
+      if (req.awardChannelID)
       {
-        //console.log("req.lectureChannelID", req.lectureChannelID);
-        req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
-        res.locals.lectureChannel = req.lectureChannel;
+        //console.log("req.awardChannelID", req.awardChannelID);
+        req.lectureChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
+        res.locals.awardChannel = req.awardChannel;
       }
       else
       {
         //no lecture channel defined
         if (required)
         {
-          res.end("No lecture channel set. Please set one on dashboard page.");
+          res.end("No award channel set. Please set one on dashboard page.");
           return;
         }
       }
       next(); 
     }
 }
-  
+    

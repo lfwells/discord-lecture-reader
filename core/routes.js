@@ -15,7 +15,7 @@ export default function(app)
     app.get("/", guild_routes.guildList);
 
     //guild home page (dashboard)
-    app.get("/guild/:guildID/", guild.load(), guild.loadLectureChannel(false), guild_routes.guildHome);
+    app.get("/guild/:guildID/", guild.load(), guild.loadLectureChannel(false), guild.loadAwardChannel(false), guild_routes.guildHome);
 
     //awards
     app.get("/namesTest/", award_routes.namesTest); 
