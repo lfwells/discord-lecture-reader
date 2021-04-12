@@ -2,12 +2,13 @@ import * as config from '../core/config.js';
 import { reply } from '../core/client.js';
 import { isOutsideTestServer, getStatus } from '../core/utils.js';
 import replies from './replies.js';
+import { guildsCollection } from "../core/database.js";
 
 //lindsay in the chat (KIT305 only)
 //TODO: make this configurable etc
 export default function(client)
 {
-    client.on('message', async (msg) =>
+    client.on('message', async (msg) =>  
     {
         if (isOutsideTestServer(msg.channel.guild)) return;
         
@@ -19,7 +20,7 @@ export default function(client)
                 //we check, whether the bot is mentioned, client.user returns the user that the client is logged in as
                 //this is where you put what you want to do now
                 var replyMessage = replies[Math.floor(Math.random() * replies.length)];
-                await reply(replyMessage);
+                await reply(msg, replyMessage);
             }
 
             var m = msg.cleanContent.toLowerCase();

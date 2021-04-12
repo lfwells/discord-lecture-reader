@@ -34,4 +34,5 @@ import token from './core/token.js';
 client.login(token);
 
 //register for errors to be posted to test server
-import * as errors from './core/errors.js';
+import { initErrorHandler } from './core/errors.js';
+initErrorHandler(client);

@@ -24,11 +24,11 @@ export async function send(channel, message)
     if (config.enableSendMessagesAndReplies)
     {
         result = await channel.send(message);
-        console.log("SENT: "+reply);
+        console.log("SENT: "+message);
     } 
     else
     {
-        console.log("(would have) SENT: "+reply);
+        console.log("(would have) SENT: "+message);
     }
     return result;
 }
