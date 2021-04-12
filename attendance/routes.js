@@ -10,7 +10,7 @@ export async function displayAttendance(req, res, next)
 //display attendance
 export async function getAttendanceData(req,res,next)
 {
-    var data = await req.guildDocument.collection("attendance").orderBy("joined").get();
+    var data = await req.guildDocument.collection("attendance").orderBy("joined", "desc").get();
     req.data = [];
     data.forEach(doc =>
     {
