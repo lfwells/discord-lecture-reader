@@ -1,5 +1,6 @@
 import { send } from "../core/client.js";
 import * as config from "../core/config.js";
+import { redirectToWhereWeCameFrom } from "../core/utils.js";
 
 import { getGuildCache } from "../guild/guild.js";
 var GUILD_CACHE = getGuildCache();
@@ -57,7 +58,7 @@ export async function load(req,res,next)
         return;
       }
     
-      description = embeds.description.split("\n");
+      var description = embeds.description.split("\n");
       var longestOption = 0;
       for (var i = 0; i < description.length; i++)
       {

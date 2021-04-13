@@ -38,16 +38,16 @@ export async function handleAwardNicknames(client, offtopiclistschannel)
       });
     }
   });
-  var guild = await client.guilds.cache.get(config.KIT109_SERVER);
+  var guild = offtopiclistschannel.guild;
   for (var memberID in awardedMembers) {
     if (memberID == guild.ownerID) continue; //cannot modify guild owner nickname
 
     var member = await guild.members.cache.get(memberID);
-    //console.log("member", baseName(member.nickname ?? member.user.username));
     var awards = awardedMembers[memberID]; 
     //console.log("awards", awards);
     if (member)
     {
+      console.log("member", baseName(member.nickname ?? member.user.username));
       //setNickname(member, baseName(member.nickname ?? member.user.username)+" "+awards.join(""))
       //this way may look dumb, but we dont want to split the last emoji in two 
       var newNickname = baseName(member.nickname ?? member.user.username);
@@ -79,7 +79,10 @@ async function setNickname(client, member, nickname)
   var theirHighestRole = member.roles.highest;
   if (ourHighestRole.position >= theirHighestRole.position)
   {
-    //await member.setNickname(nickname);
+    if (!config.getTestMode())
+    {
+      await member.setNickname(nickname);
+    }
   }
 }
 function baseName(nickname)
