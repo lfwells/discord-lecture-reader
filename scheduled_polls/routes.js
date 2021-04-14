@@ -1,3 +1,4 @@
+import { db } from "../core/database.js";
 
 //scheduled polls
 export async function load(req,res,next) {
