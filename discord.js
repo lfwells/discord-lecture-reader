@@ -24,7 +24,7 @@ client.on('ready', async () =>
 	guild.init(client);
 
 	//register the appropriate discord event listeners
-	init_award_events(client);
+	await init_award_events(client);
 	init_responder_events(client);
 	init_attendance_events(client);
 });

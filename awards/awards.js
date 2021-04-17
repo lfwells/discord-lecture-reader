@@ -97,7 +97,12 @@ function baseName(nickname)
 export async function isAwardChannelID(fromInChannel)
 {
     var channel = await fromInChannel.fetch();
-    var guildSnapshot = await guildsCollection.doc(channel.guild.id).get();
-    var awardChannelID = await guildSnapshot.get("awardChannelID");
+    var awardChannelID = await getAwardChannelID(channel.guild.id);
     return channel.id == awardChannelID;
+}
+export async function getAwardChannelID(forGuildID)
+{
+  var guildSnapshot = await guildsCollection.doc(forGuildID).get();
+  var awardChannelID = await guildSnapshot.get("awardChannelID");
+  return awardChannelID;
 }

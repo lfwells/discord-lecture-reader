@@ -1,5 +1,8 @@
 import Discord from 'discord.js';
-const client = new Discord.Client();
+const client = new Discord.Client({ 
+    intents: Discord.Intents.ALL,
+    fetchAllMembers: true
+});
 export default function getClient() { return client };
 
 import * as config from "./config.js";
