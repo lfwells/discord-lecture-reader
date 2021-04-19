@@ -195,7 +195,7 @@ export default async function(client)
             }
             else
             {
-                interaction.reply("You don't have permission to /award achievements.");
+                interaction.reply("You don't have permission to /award achievements.\nSuggesting award details to <@"+config.LINDSAY_ID+">:"+interaction.options.map(o => o.value).join(" "));
             }
         }
 
