@@ -20,6 +20,7 @@ export default function(app)
     //awards
     app.get("/guild/:guildID/namesTest/", guild.load(), guild.loadAwardChannel(true), award_routes.namesTest); 
     app.get("/guild/:guildID/namesBackup/", guild.load(), guild.loadAwardChannel(true),award_routes.namesBackup); 
+    app.get("/guild/:guildID/awardsList/", guild.load(), guild.loadAwardChannel(true),award_routes.getAwardsList); 
 
     //attendance
     app.get("/guild/:guildID/attendance/", guild.load(), attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 

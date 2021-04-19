@@ -106,3 +106,64 @@ export async function getAwardChannelID(forGuildID)
   var awardChannelID = await guildSnapshot.get("awardChannelID");
   return awardChannelID;
 }
+export async function getAwardChannel(guild)
+{
+  var awardChannelID = await getAwardChannelID(guild.id);
+  var awardChannel = await guild.client.channels.cache.get(awardChannelID);
+  return awardChannel;
+}
+
+export async function getAwardList(guild, member) //optionally get award list for member
+{
+  var awards = {};
+  var awardChannel = await getAwardChannel(guild);
+  var messages = await awardChannel.messages.fetch();
+  messages.forEach(award => 
+  {
+    var emoji = getAwardEmoji(award);
+    //check that they have the award
+    if (!member || award.mentions.users.has(member.user.id))
+    {
+      awards[emoji] = getAwardName(award);
+    }
+  });
+  return awards;
+}
+export async function getAwardByEmoji(guild, emoji)
+{
+  var result;
+  var awardChannelID = await getAwardChannelID(guild.id);
+  var awardChannel = await guild.client.channels.cache.get(awardChannelID);
+  var messages = await awardChannel.messages.fetch();
+  messages.forEach(award => 
+  {
+    var thisEmoji = getAwardEmoji(award);
+    if (emoji == thisEmoji)
+    {
+      result = award;
+    }
+  });
+  return result;
+}
+export function getAwardEmoji(award)
+{
+  var content = award.cleanContent;
+  var newLinePos = content.indexOf("\n");
+  if (newLinePos > 0)
+      content = content.substr(0, newLinePos);
+  var match = content.match(reg);
+  if (match)
+  {
+    var emoji = match[0];
+    return emoji;
+  }
+  return "";
+}
+export function getAwardName(award)
+{
+  var content = award.cleanContent;
+  var newLinePos = content.indexOf("\n");
+  if (newLinePos > 0)
+      content = content.substr(0, newLinePos);
+  return content.replace(getAwardEmoji(award), "").trim();
+}

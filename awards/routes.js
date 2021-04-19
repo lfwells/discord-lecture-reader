@@ -1,4 +1,4 @@
-import { handleAwardNicknames } from "./awards.js";
+import { handleAwardNicknames, getAwardList } from "./awards.js";
 import getClient from "../core/client.js";
 var client = getClient();
 
@@ -19,4 +19,10 @@ export async function namesBackup(req,res,next)
   var membersData = await req.guild.members.fetch();
   var members = membersData.map(m => [m.id, m.nickname ?? m.user.username]);
   res.json(members);
+}
+
+export async function getAwardsList(req,res,next)
+{
+  var awards = await getAwardList(req.guild);
+  res.json(awards);
 }
