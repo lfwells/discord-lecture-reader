@@ -24,7 +24,7 @@ export default function(client)
             }
 
             var m = msg.cleanContent.toLowerCase();
-            if (msg.guild.id == config.KIT305_SERVER)
+            if (msg.guild.id == config.KIT305_SERVER || msg.guild.id == config.KIT109_S2_2021_SERVER) //TODO: this will get out of hand
             {
                 if (msg.mentions.everyone == false  && (m.indexOf("lindsay") >= 0 || msg.mentions.has(config.LINDSAY_ID)))
                 {

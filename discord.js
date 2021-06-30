@@ -13,6 +13,7 @@ import * as guild from "./guild/guild.js";
 import init_award_events from './awards/events.js';
 import init_responder_events from './responder/events.js';
 import init_attendance_events from './attendance/events.js';
+import init_invite_events from './invite/events.js';
 
 //listen for when discord is logged in
 const client = getClient();
@@ -27,6 +28,7 @@ client.on('ready', async () =>
 	await init_award_events(client);
 	init_responder_events(client);
 	init_attendance_events(client);
+	init_invite_events(client);
 });
 
 //login with discord auth token

@@ -195,9 +195,17 @@ export default async function(client)
             }
             else
             {
-                interaction.reply("You don't have permission to /award achievements.\nSuggesting award details to <@"+config.LINDSAY_ID+">:"+interaction.options.map(o => o.value).join(" "));
+                interaction.reply("You don't have permission to /award achievements.\nSuggesting award details to <@"+config.LINDSAY_ID+">:"+interaction.options.map(o => {
+                    return isNumeric(o.value) ? "<@"+o.value+">" : o.value
+                }).join("\n")); 
             }
         }
 
     });
 }
+
+function isNumeric(str) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+  }

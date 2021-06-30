@@ -49,17 +49,17 @@ You can monitor the log with:
 ### Triggering a pre-defined poll via URL
 Navigate to:
 
-`http://144.6.230.199/guild/<guild_id>/poll/<poll info here>`
+`http://131.217.172.176/guild/<guild_id>/poll/<poll info here>`
 
 e.g.
 
-`http://144.6.230.199/guild/<guild_id>/poll/%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
+`http://131.217.172.176/guild/<guild_id>/poll/%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
 
 (if making this link in powerpoint etc, you don't need to write `%20` or `%25` yourself, these are just spaces and double-quotes that will get automatically changed)
 
 Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
 
-You can clear the poll on this page by clicking the button or navigating to `http://144.6.230.199/guild/<guild_id>/clearpoll`.
+You can clear the poll on this page by clicking the button or navigating to `http://131.217.172.176/guild/<guild_id>/clearpoll`.
 
 ## TODO
 For fun: "latest vote: XX for YY" (actually is hard)
