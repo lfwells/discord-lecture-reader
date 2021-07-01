@@ -1,3 +1,5 @@
+import { guildsCollection } from "../core/database.js";
+
 export async function displayAttendance(req, res, next) 
 {
     res.render("attendance", {
@@ -22,3 +24,17 @@ export async function getAttendanceData(req,res,next)
     });
     next();
 }
+
+//marking, mashing that in here
+export async function recordProgress(req, res, next) 
+{
+    var d = new Date();
+    req.query.timestamp = d.getTime();
+
+    console.log(req.query);
+
+    await req.guildDocument.collection("progress").add(req.query);
+    res.json({"success": true});
+    next()
+}
+   

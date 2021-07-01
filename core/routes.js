@@ -26,6 +26,8 @@ export default function(app)
     app.get("/guild/:guildID/attendance/", guild.load(), attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
     app.get("/guild/:guildID/attendance/csv", guild.load(), attendance_routes.getAttendanceData, downloadResource("attendance.csv")); 
 
+    app.get("/guild/:guildID/recordProgress/", guild.load(), attendance_routes.recordProgress); 
+
     //lecture text
     app.get("/guild/:guildID/text/", guild.load(), lecture_text_routes.obs); //this is the obs page
     app.get("/guild/:guildID/text/input", guild.load(), guild.loadLectureChannel(false), lecture_text_routes.load, lecture_text_routes.inputGet); //this is the page for triggering text 
