@@ -35,7 +35,7 @@ export default async function(client)
                 }
                 else if (member.guild.id == config.KIT109_S2_2021_SERVER)
                 {
-                    if (invite.code == "UU6T65YEGB") //this is the one in the unit outline and mylo etc
+                    if (invite.code == "UU6T65YEGB" || invite.code == "JMGu3s3pNg") //this is the one in the unit outline and mylo etc
                     {
                         var role= member.guild.roles.cache.find(role => role.name === "Current Student");
                         member.roles.add(role); //current student, but TODO other roles
