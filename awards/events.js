@@ -68,7 +68,7 @@ export default async function(client)
             description: 'The emoji to represent the award',
             required: true,
         }],
-    };
+    }; 
     const awardNewCommand = {
         name: 'awardnew', 
         description: 'Gives an award to a user',
