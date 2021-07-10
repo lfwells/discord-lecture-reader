@@ -40,7 +40,7 @@ export function parseClientStatus(status)
 }
 
 
-import Parser from 'json2csv';
+import { Parser } from 'json2csv';
 import ifError from 'assert';
 export function downloadResource(filename) {
   return function(req, res, next) {
