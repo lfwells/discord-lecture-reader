@@ -1,5 +1,4 @@
 import * as config from './config.js';
-import client from './client.js';
 import { send } from "./client.js";
 
 export function initErrorHandler(client) {

@@ -3,7 +3,7 @@ import { db, guildsCollection } from "../core/database.js";
 import { getStatus, isOutsideTestServer } from "../core/utils.js";
 import { init_invites } from "../invite/invite.js";
 
-import getClient from "../core/client.js";
+import { getClient } from "../core/client.js";
 var client = getClient();
 
 var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s

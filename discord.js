@@ -1,5 +1,5 @@
 //discord
-import getClient from './core/client.js'; 
+import { getClient, init_client } from './core/client.js'; 
 
 //web server
 import { app } from "./core/server.js";
@@ -10,12 +10,6 @@ init_routes(app);
 
 //import things need to initialize discord
 import * as guild from "./guild/guild.js";
-import init_award_events from './awards/events.js';
-import init_responder_events from './responder/events.js';
-import init_attendance_events from './attendance/events.js';
-import init_invite_events from './invite/events.js';
-import init_analytics_events from './analytics/events.js';
-import init_guild_events from './guild/events.js';
 
 //listen for when discord is logged in
 const client = getClient();
@@ -26,13 +20,7 @@ client.on('ready', async () =>
 	//save all the guilds etc to db
 	guild.init(client);
 
-	//register the appropriate discord event listeners
-	await init_guild_events(client);
-	await init_award_events(client);
-	init_responder_events(client);
-	init_attendance_events(client);
-	init_invite_events(client);
-	init_analytics_events(client); 
+	init_client(client);
 });
 
 //login with discord auth token

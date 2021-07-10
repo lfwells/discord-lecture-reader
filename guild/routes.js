@@ -1,7 +1,7 @@
 import * as config from "../core/config.js";
 import { isOutsideTestServer } from "../core/utils.js";
 
-import getClient from "../core/client.js";
+import { getClient } from "../core/client.js";
 var client = getClient();
 
 import { getGuildCache } from "./guild.js";

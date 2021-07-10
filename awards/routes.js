@@ -1,5 +1,5 @@
 import { handleAwardNicknames, getAwardList } from "./awards.js";
-import getClient from "../core/client.js";
+import { getClient } from "../core/client.js";
 var client = getClient();
 
 //todo: summary (public?) pages that list achievements?

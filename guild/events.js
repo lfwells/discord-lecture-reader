@@ -1,4 +1,5 @@
 import { db, guildsCollection } from "../core/database.js";
+import { init_client } from '../core/client.js';
 
 export default async function(client)
 {
@@ -9,6 +10,7 @@ export default async function(client)
         guildDocument.set({
             name:guild.name
         });
+        init_client(client);
     });
 
     client.on("guildUpdate", (oldGuild, newGuild) => {
@@ -17,5 +19,6 @@ export default async function(client)
         guildDocument.set({
             name:newGuild.name
         });
+        init_client(client);
     });
 }
