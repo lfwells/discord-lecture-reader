@@ -37,4 +37,27 @@ export async function recordProgress(req, res, next)
     res.json({"success": true});
     next()
 }
+
+export async function displayProgress(req, res, next) 
+{
+    res.render("progress", {
+        data:req.data
+    });
+    next()
+}
+
+export async function getProgressData(req,res,next)
+{
+    var data = await req.guildDocument.collection("progress").orderBy("timestamp", "desc").get();
+    req.data = [];
+    data.forEach(doc =>
+    {
+        var d = doc.data();
+        d.id = doc.id;
+        d.timestamp = new Date(d.timestamp).toUTCString();
+        req.data.push(d);
+    });
+    next();
+}
+
    

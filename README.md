@@ -71,4 +71,3 @@ but im thinking about a longer term solution where we effectively have a "dashbo
 
 TODO:
 - lecturechannel can be set with extra query string junk on end
-- kraxxi server didnt get a document, mustn't have been created on join

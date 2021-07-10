@@ -26,6 +26,8 @@ export default function(app)
     app.get("/guild/:guildID/attendance/", guild.load(), attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
     app.get("/guild/:guildID/attendance/csv", guild.load(), attendance_routes.getAttendanceData, downloadResource("attendance.csv")); 
 
+    app.get("/guild/:guildID/progress/", guild.load(), attendance_routes.getProgressData, attendance_routes.displayProgress); 
+    app.get("/guild/:guildID/progress/csv", guild.load(), attendance_routes.getProgressData, downloadResource("progress.csv"));
     app.get("/guild/:guildID/recordProgress/", guild.load(), attendance_routes.recordProgress); 
 
     //lecture text
