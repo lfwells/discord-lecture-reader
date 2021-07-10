@@ -107,9 +107,14 @@
         display:block;
         text-align: center;
     }  
-    #exportTutorial ul, #exportTutorial pre {
+    #exportTutorial ul, #exportTutorial ol, #exportTutorial pre, #exportTutorial .instruction {
         background-color:slategray;
         padding: 1em;
+        margin: 1em;
+    }
+    #exportTutorial ul, #exportTutorial ol
+    {
+        padding-left:6ex;
     }
     #exportTutorial pre {
         font-family: consolas;
@@ -119,4 +124,12 @@
     }
     #exportTutorial p {
         text-align: justify;
+    }
+
+    #exportTutorial .img { width:100%; text-align:center }
+    #exportTutorial img { width:100% }
+    #exportTutorial .tabChar { display:inline-block; width:4ex; }
+
+    #exportTutorial footer {
+        text-align: center;
     }
