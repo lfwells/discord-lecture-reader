@@ -85,7 +85,7 @@ async function setNickname(client, member, nickname)
     }
   }
 }
-function baseName(nickname)
+export function baseName(nickname)
 {
   return nickname.replace(reg, "").trim(); 
   while ((result = reg.exec(nickname)) !== null) {

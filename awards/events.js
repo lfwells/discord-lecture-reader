@@ -1,7 +1,8 @@
 import e from 'express';
 import * as config from '../core/config.js';
 import { send } from "../core/client.js";
-import { handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList } from "./awards.js";
+import { showText } from "../lecture_text/routes.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList } from "./awards.js";
 
 export default async function(client)
 {
@@ -98,17 +99,17 @@ export default async function(client)
         }],
     };
   
-    // Creating a guild-specific command
     var guilds = client.guilds.cache;
-    //store them in the db
-    guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch();
-        await commands.each(async (c) => {
-            await c.delete();
-        });
-        await guild.commands.create(flexCommand); 
-        await guild.commands.create(awardCommand); 
-        await guild.commands.create(awardNewCommand); 
+
+    await guilds.each( async (guild) => { 
+        var commands = await guild.commands.fetch(); 
+            for (const command in commands)
+            {
+                console.log(guild.name+"delete "+await command.delete());
+            }
+        /*console.log(guild.name+"add "+*/await guild.commands.create(flexCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(awardCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(awardNewCommand);//); 
     });
 
     client.on('interaction', async function(interaction) 
@@ -173,6 +174,12 @@ export default async function(client)
                             await award.edit(content);
                         }
                         var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
+                        var awardNameForShow = getAwardName(award);
+                        if (awardNameForShow.lastIndexOf("*") > 0)
+                            awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
+                        if (awardNameForShow.length > 32)
+                            awardNameForShow = awardNameForShow.substring(0, 32)+"...";
+                        showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+getAwardEmoji(award)+" "+awardNameForShow+"!", style:"yikes" });
                         await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                     }
                     else
@@ -184,6 +191,12 @@ export default async function(client)
                             await send(awardChannel, emoji+" ***"+award_text+"***\n<@"+member.id+">");
 
                             var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
+                            var awardNameForShow = award_text;
+                            if (awardNameForShow.lastIndexOf("*") > 0)
+                                awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
+                            if (awardNameForShow.length > 32)
+                                awardNameForShow = awardNameForShow.substring(0, 32)+"...";
+                            showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
                             await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                         }
                         else

@@ -71,14 +71,10 @@ export async function inputPost(req,res,next)
     req.body.text = newPhrase;
   }
 
-  if (req.body.robolindsay && req.body.robolindsay == "on")
-  {
-    await send(req.lectureChannel, req.body.text);
-  }
 
   //trigger the db to have information
   await req.textCollection.set(req.body);
-  GUILD_CACHE[req.guild.id].latestText = req.body;
+  showText(req, req.body);
 
   //back to the page
   req.query.message = "Posted '"+req.body.text+"'!"; 
@@ -86,6 +82,15 @@ export async function inputPost(req,res,next)
     phrases: req.phrases,
     emoji: emoji
   });
+}
+export async function showText(req, data) //expects { text: "text", style, animation, robolindsay }
+{
+  GUILD_CACHE[req.guild.id].latestText = data;
+
+  if (data.robolindsay && data.robolindsay == "on")
+  {
+    await send(req.lectureChannel, data.text);
+  }
 }
 export async function getLatest(req,res,next) 
 {

@@ -4,7 +4,6 @@ import { getStatus, isOutsideTestServer } from "../core/utils.js";
 import { init_invites } from "../invite/invite.js";
 
 import { getClient } from "../core/client.js";
-var client = getClient();
 
 var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 export function getGuildCache() { return GUILD_CACHE; }
@@ -35,6 +34,7 @@ export function load() {
     return async function(req, res, next)
     {
       var guildID = req.params.guildID;
+      var client = getClient();
       req.guild = await client.guilds.fetch(guildID);
       req.guildDocument = await guildsCollection.doc(guildID);
   
@@ -60,6 +60,7 @@ export function load() {
   {
       return async function(req,res,next)  
       {
+        var client = getClient();
         if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].lectureChannelID)
         {
           req.lectureChannelID = GUILD_CACHE[req.guild.id].lectureChannelID;
@@ -95,6 +96,7 @@ export function loadAwardChannel(required)
 {
     return async function(req,res,next)  
     {
+      var client = getClient();
       if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].awardChannelID)
       {
         req.awardChannelID = GUILD_CACHE[req.guild.id].awardChannelID;
