@@ -1,3 +1,5 @@
+//NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
+
 import { isOutsideTestServer } from "../core/utils.js"
 import { guildsCollection } from "../core/database.js"
 

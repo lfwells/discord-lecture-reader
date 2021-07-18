@@ -25,11 +25,12 @@ export default function(app)
     app.get("/guild/:guildID/awardsList/", guild.load(), guild.loadAwardChannel(true),award_routes.getAwardsList); 
 
     //attendance
-    app.get("/guild/:guildID/attendance/", guild.load(), attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
-    app.get("/guild/:guildID/attendance/csv", guild.load(), attendance_routes.getAttendanceData, downloadResource("attendance.csv")); 
+    app.get("/guild/:guildID/attendance/", guild.load(), loadClassList, attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
+    app.get("/guild/:guildID/attendanceOld/", guild.load(), attendance_routes.getAttendanceDataOld, attendance_routes.displayAttendanceOld); 
+    app.get("/guild/:guildID/attendanceOld/csv", guild.load(), attendance_routes.getAttendanceDataOld, downloadResource("attendance.csv")); 
 
-    app.get("/guild/:guildID/progress/", guild.load(), loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress); 
-    app.get("/guild/:guildID/progress/csv", guild.load(), loadClassList, attendance_routes.getProgressData, downloadResource("progress.csv"));
+    //progress
+    app.get("/guild/:guildID/progress/", guild.load(), loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress);
     app.get("/guild/:guildID/progressOld/", guild.load(), attendance_routes.getProgressDataOld, attendance_routes.displayProgressOld); 
     app.get("/guild/:guildID/progressOld/csv", guild.load(), attendance_routes.getProgressDataOld, downloadResource("progress.csv"));
     app.get("/guild/:guildID/recordProgress/", guild.load(), attendance_routes.recordProgress); 

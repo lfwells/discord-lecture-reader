@@ -1,9 +1,15 @@
+//NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
+
+
+
 import { guildsCollection } from "../core/database.js";
 import { filter, paginate } from "../core/pagination.js"; 
+import * as config from "../core/config.js";
+import moment from "moment";
 
-export async function displayAttendance(req, res, next) 
+export async function displayAttendanceOld(req, res, next) 
 {
-    res.render("attendance", {
+    res.render("attendanceOld", {
         data:req.data
     });
     next()
@@ -11,7 +17,7 @@ export async function displayAttendance(req, res, next)
     
 
 //display attendance
-export async function getAttendanceData(req,res,next)
+export async function getAttendanceDataOld(req,res,next)
 {
     var data = await req.guildDocument.collection("attendance").orderBy("joined", "desc").get();
     req.data = [];
@@ -19,6 +25,7 @@ export async function getAttendanceData(req,res,next)
     {
         var d = doc.data();
         d.id = doc.id;
+        d.timestamp = d.joined;
         d.joined = new Date(d.joined).toUTCString();
         d.left = d.left ? new Date(d.left).toUTCString() : "";
         req.data.push(d);
@@ -250,5 +257,240 @@ export async function getProgressData(req,res,next)
 export async function displayProgress(req, res, next) 
 {
     res.render("progress"); //TODO use middleware properly here instead zz
+    next()
+}
+
+
+//fancy session-based view
+var earlyTime = 5;//minutes
+export async function getAttendanceData(req,res,next)
+{
+    var data = await req.guildDocument.collection("attendance").get();
+    req.attendanceData = [];
+    data.forEach(doc =>
+    {
+        var d = doc.data();
+        d.id = doc.id;
+        d.timestamp = d.joined;
+        d.leftTimestamp = d.left;
+        d.joined = new Date(d.joined).toUTCString();
+        d.left = d.left ? new Date(d.left).toUTCString() : "";
+        req.attendanceData.push(d);
+    });
+    //console.log(req.attendanceData);
+
+    res.locals.weeks = [];
+
+    //TODO: an interface for defining sessions and names? for now just auto-gen
+    var semesterStart = moment("2021-07-11"); //start of the week of SUNDAY 11 July 2021
+    var weekStart = semesterStart;
+    if (req.guild.id == config.KIT109_S2_2021_SERVER)
+    {
+        for (var w = 1; w <= 13; w++)
+        {
+            var week = {
+                name: "Week "+w,
+                weekStart: weekStart,
+                sessions: [] 
+            };
+
+            if (w > 1) //no pracs in week 1
+            {
+                var sessionTime = moment(weekStart);
+                sessionTime.day(2); //Tuesday
+                sessionTime.hour(15);
+                week.sessions.push({
+                    name:"Practical",
+                    time:sessionTime,
+                    duration:2,
+                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
+                });
+            }
+
+            var sessionTime = moment(weekStart);
+            sessionTime.day(3); //Wednesday
+            sessionTime.hour(12);
+            week.sessions.push({
+                name:"Lecture",
+                time:sessionTime,
+                duration:2,
+                room:"Lecture Room"
+            });
+
+            var sessionTime = moment(weekStart);
+            sessionTime.day(4); //Thursday
+            sessionTime.hour(9);
+            week.sessions.push({
+                name:"Tutorial",
+                time:sessionTime,
+                duration:4,
+                room:"Tutorial Main Room"
+            });
+
+            week.colspan = week.sessions.length;
+            res.locals.weeks.push(week);
+
+            //add on one week
+            weekStart = moment(weekStart);
+            weekStart.add(7, 'days');
+            //semester break, add on another
+            if (w == 7)
+                weekStart.add(7, 'days');
+        }
+    }
+    else if (req.guild.id == config.KIT207_S2_2021_SERVER)
+    {
+        for (var w = 1; w <= 13; w++)
+        {
+            var week = {
+                name: "Week "+w,
+                weekStart: weekStart,
+                sessions: [] 
+            };
+
+            if (w > 1) //no pracs in week 1
+            {
+                var sessionTime = moment(weekStart);
+                sessionTime.day(2); //Tuesday
+                sessionTime.hour(15);
+                week.sessions.push({
+                    name:"Practical",
+                    time:sessionTime,
+                    duration:2,
+                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
+                });
+            }
+
+            var sessionTime = moment(weekStart);
+            sessionTime.day(2); //Tuesday
+            sessionTime.hour(13);
+            week.sessions.push({
+                name:"Lecture",
+                time:sessionTime,
+                duration:2,
+                room:"Lecture Room"
+            });
+
+
+            week.colspan = week.sessions.length;
+            res.locals.weeks.push(week);
+
+            //add on one week
+            weekStart = moment(weekStart);
+            weekStart.add(7, 'days');
+            //semester break, add on another
+            if (w == 7)
+                weekStart.add(7, 'days');
+        }
+    }
+    else if (req.guild.id == config.KIT308_S2_2021_SERVER)
+    {
+        for (var w = 1; w <= 13; w++)
+        {
+            var week = {
+                name: "Week "+w,
+                weekStart: weekStart,
+                sessions: [] 
+            };
+
+            if (w > 1) //no pracs in week 1
+            {
+                var sessionTime = moment(weekStart);
+                sessionTime.day(3); //Wednesday
+                sessionTime.hour(15);
+                week.sessions.push({
+                    name:"Tutorial",
+                    time:sessionTime,
+                    duration:2,
+                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
+                });
+
+                var sessionTime = moment(weekStart);
+                sessionTime.day(4); //Thursday
+                sessionTime.hour(14);
+                week.sessions.push({
+                    name:"Workshop",
+                    time:sessionTime,
+                    duration:2,
+                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
+                });
+            }
+
+            var sessionTime = moment(weekStart);
+            sessionTime.day(1); //Monday
+            sessionTime.hour(13);
+            week.sessions.push({
+                name:"Lecture",
+                time:sessionTime,
+                duration:2,
+                room:"Lecture Room"
+            });
+             
+            var sessionTime = moment(weekStart);
+            sessionTime.day(3); //Wednesday
+            sessionTime.hour(15);
+            week.sessions.push({
+                name:"Lecture",
+                time:sessionTime,
+                duration:2,
+                room:"Lecture Room"
+            });
+
+
+            week.colspan = week.sessions.length;
+            res.locals.weeks.push(week);
+
+            //add on one week
+            weekStart = moment(weekStart);
+            weekStart.add(7, 'days');
+            //semester break, add on another
+            if (w == 7)
+                weekStart.add(7, 'days');
+        }
+    }
+
+    //cache some maths (TODO: Sort too?)
+    res.locals.weeks.forEach(week => {
+        week.sessions.forEach(session => {
+            var time = moment(session.time);
+            var start = moment(time);
+            var end = moment(time);
+            session.startTimestamp = start.subtract(earlyTime, "minutes");
+            session.endTimestamp = end.add(session.duration, "hours");
+        });
+    });
+
+    res.locals.checkAttendance = function(student, session)
+    {
+        var complete = false;
+        var data = null;
+        for (var i in req.attendanceData)
+        {
+            var row = req.attendanceData[i];
+            if (row.memberID == student.discordID) //AND check room? shouldn't matter
+            {
+                var time = moment(row.timestamp);
+                var leftTime = moment(row.leftTimestamp);
+                /*if (student.username == "lfwells" && session == res.locals.weeks[0].sessions[0])
+                {
+                    console.log(row.timestamp, time, session.startTimestamp, session.endTimestamp, time.isBetween(session.startTimestamp, session.endTimestamp));
+                }*/
+                if (time.isBetween(session.startTimestamp, session.endTimestamp) || leftTime.isBetween(session.startTimestamp, session.endTimestamp)) 
+                {
+                    complete = true;
+                    data = row;
+                    break;
+                }
+            }
+        }
+        //TODO: any info about the row?, maybe in title
+        return '<td title="'+session.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'">&nbsp;</td>';
+    };
+    next();
+}
+
+export async function displayAttendance(req, res, next) 
+{
+    res.render("attendance");
     next()
 }

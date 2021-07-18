@@ -1,0 +1,35 @@
+<%- include('header.html') %>
+
+<h2>Attendance</h2>
+
+<nav><a href="csv/">Download CSV</a></nav>
+
+<table border="1" cellpadding="8">
+  <tr>
+    <th>Name</th>
+    <th>Channel</th>
+    <th>Timestamp</th>
+    <th>Joined</th>
+    <th>Left</th>
+    <th>Unmutes</th>
+    <th>Deafens</th>
+    <th>Screen Shares</th>
+    <th>Video Shares</th>
+  </tr>
+  <% data.forEach(function(row){ 
+    %>
+    <tr>
+        <td><%= row.name %></td>
+        <td><%= row.channel %></td>
+        <td><%= row.timestamp %></td>
+        <td><%= row.joined %></td>
+        <td><%= row.left %></td>
+        <td><%= row.unmutes %></td>
+        <td><%= row.deafens %></td>
+        <td><%= row.screenShares %></td>
+        <td><%= row.videoShares %></td>
+    </tr>
+  <% }) %>
+</table>
+
+<%- include('footer.html') %>

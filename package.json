@@ -25,7 +25,7 @@
   "dependencies": {
     "connect": "^3.7.0",
     "cors": "^2.8.5",
-    "discord.js": "vaporox/discord.js#feat-interactions",  
+    "discord.js": "vaporox/discord.js#feat-interactions",
     "ejs": "^3.1.6",
     "emoji": "npm:emoji.json@^13.1.0",
     "emoji.json": "^13.1.0",
@@ -33,6 +33,7 @@
     "express-basic-auth": "^1.2.0",
     "firebase-admin": "^9.5.0",
     "json2csv": "^5.0.6",
+    "moment": "^2.29.1",
     "serve-static": "^1.14.1"
   }
 }
