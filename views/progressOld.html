@@ -1,0 +1,37 @@
+<%- include('header.html') %>
+<%- include('pagination.html') %>
+
+<h2>Tutorial Progress</h2>
+
+<nav>
+  <a href="csv/">Download CSV</a>
+  <% if (locals.query.filter) {
+    %><a href="?">Remove Filter</a><%
+  } %>
+</nav>
+<br />
+
+<%- pageLinks(locals.data) %>
+
+<table border="1" cellpadding="8">
+  <tr>
+    <th>ID</th>
+    <th>Username</th>
+    <th>Tutorial</th>
+    <th>Page</th>
+    <th>Timestamp</th>
+  </tr>
+  <% locals.pagedData.forEach(function(row){ 
+    %>
+    <tr>
+        <%- cell(row, "studentID") %>
+        <%- cell(row, "username") %>
+        <%- cell(row, "tutorial") %>
+        <%- cell(row, "page") %>
+        <td><%= row.timestamp %></td>
+
+    </tr>
+  <% }) %>
+</table>
+
+<%- include('footer.html') %>

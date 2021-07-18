@@ -1,6 +1,7 @@
 import { downloadResource, removeQuestionMark } from "./utils.js";
 
 import * as guild from "../guild/guild.js";
+import { loadClassList } from "../core/classList.js";
 
 import * as guild_routes from '../guild/routes.js';
 import * as award_routes from '../awards/routes.js';
@@ -9,6 +10,7 @@ import * as lecture_text_routes from '../lecture_text/routes.js';
 import * as poll_routes from '../polls/routes.js';
 import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 
+//TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
 {
     //home page (select guild)
@@ -26,9 +28,13 @@ export default function(app)
     app.get("/guild/:guildID/attendance/", guild.load(), attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
     app.get("/guild/:guildID/attendance/csv", guild.load(), attendance_routes.getAttendanceData, downloadResource("attendance.csv")); 
 
-    app.get("/guild/:guildID/progress/", guild.load(), attendance_routes.getProgressData, attendance_routes.displayProgress); 
-    app.get("/guild/:guildID/progress/csv", guild.load(), attendance_routes.getProgressData, downloadResource("progress.csv"));
+    app.get("/guild/:guildID/progress/", guild.load(), loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress); 
+    app.get("/guild/:guildID/progress/csv", guild.load(), loadClassList, attendance_routes.getProgressData, downloadResource("progress.csv"));
+    app.get("/guild/:guildID/progressOld/", guild.load(), attendance_routes.getProgressDataOld, attendance_routes.displayProgressOld); 
+    app.get("/guild/:guildID/progressOld/csv", guild.load(), attendance_routes.getProgressDataOld, downloadResource("progress.csv"));
     app.get("/guild/:guildID/recordProgress/", guild.load(), attendance_routes.recordProgress); 
+    app.post("/guild/:guildID/recordSectionProgress/", guild.load(), attendance_routes.recordSectionProgress); 
+    app.get("/guild/:guildID/recordSectionProgress/", guild.load(), attendance_routes.getSectionProgress); 
 
     //lecture text
     app.get("/guild/:guildID/text/", guild.load(), lecture_text_routes.obs); //this is the obs page

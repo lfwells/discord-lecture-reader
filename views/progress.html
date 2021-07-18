@@ -1,25 +1,70 @@
 <%- include('header.html') %>
+<%- include('pagination.html') %>
+
+<style>
+.pageResult {
+  width:2px;
+  min-width: 4px;
+  border: 0.5px solid #ffffff42;
+}
+.complete { background-color: green; }
+.not_complete { background-color: black; }
+
+.sectionName {
+  writing-mode: vertical-rl;
+  text-align: left;
+  min-width: 25px; /* for firefox */
+  transform: rotate(180deg);
+}
+.studentName {
+  width:fit-content;
+  text-align: left;
+}
+.studentRow {
+  height:25px;
+}
+td, th { white-space: nowrap; }
+table th {
+    position: -webkit-sticky; 
+    position: sticky;
+    top: 0;
+    left:0;
+    z-index: 10;
+    background-color: #2c2f33; 
+}
+
+</style>
 
 <h2>Tutorial Progress</h2>
 
-<nav><a href="csv/">Download CSV</a></nav>
-
-<table border="1" cellpadding="8">
+<table border="1" cellpadding="0" cellspacing="0">
   <tr>
-    <th>ID</th>
-    <th>Username</th>
-    <th>Tutorial</th>
-    <th>Page</th>
-    <th>Timestamp</th>
+    <th rowspan="2">Student</th>
+    <% locals.tutorials.forEach(function(tutorial)
+    { 
+      %><th colspan="<%= tutorial.colspan %>"><%= tutorial.name %></th><% 
+    }) %>
   </tr>
-  <% data.forEach(function(row){ 
+  <tr>
+    <% locals.tutorials.forEach(function(tutorial)
+    { 
+      tutorial.sections.forEach(function(section)
+      {
+        %><th colspan="<%= section.colspan %>" class="sectionName"><%= section.shortName +" - "+section.name.substring(0, 20) %></th><%
+      })
+    }) %>
+  </tr>
+  <% locals.classList.forEach(function(student){ 
     %>
-    <tr>
-        <td><%= row.studentID %></td>
-        <td><%= row.username %></td>
-        <td><%= row.tutorial %></td>
-        <td><%= row.page %></td>
-        <td><%= row.timestamp %></td>
+    <tr class="studentRow">
+      %><th class="studentName"><%= student.discordName %></th>  
+      <% locals.tutorials.forEach(function(tutorial)
+      { 
+        tutorial.sections.forEach(function(section)
+        {
+          %><%- locals.checkAttendance(student, section) %><%
+        })
+      }) %>
     </tr>
   <% }) %>
 </table>

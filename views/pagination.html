@@ -1,0 +1,22 @@
+<%
+cell = function(data, column) 
+{
+    return '<td><a href="?filter='+column+'&filterValue='+data[column]+'">'+data[column]+'</a></td>';
+}
+pageLinks = function(data, perPage)
+{
+    return "";
+    /*
+    if (!perPage) perPage = 10;
+    var pages = data.length / perPage;
+    var result = '<nav><ul>';
+        for (var i = 0; i < pages; i++)
+        {
+            result = result + '<li><a href="?page='+i+'">'+(i+1)+'</a></li>';
+            if (i < pages-1)
+                result  result + " | ";
+        }
+    result  result +  '</ul></nav>;
+    return result;*/
+}
+%>

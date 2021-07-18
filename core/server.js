@@ -18,6 +18,7 @@ app.use(function(req, res, next) {
     req.path.endsWith("/text/latest/") || 
     req.path.indexOf("/poll/") > 0 || 
     req.path.indexOf("/recordProgress/") > 0 || 
+    req.path.indexOf("/recordSectionProgress/") > 0 || 
     req.path.endsWith(".js") || 
     req.path.endsWith(".css") || 
     req.path.endsWith(".ico")|| 
