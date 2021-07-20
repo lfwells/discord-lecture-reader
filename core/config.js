@@ -4,6 +4,7 @@ export const enableSendMessagesAndReplies = true; //mute robo lindsay here
 
 export const LINDSAY_ID = "318204205435322368";
 export const IAN_ID = "368235194714554369";
+export const ROBO_LINDSAY_ID = "811958340967071745";
 export const SIMPLE_POLL_BOT_ID = "324631108731928587";
 
 export const TEST_SERVER_ID = "813152605810458645"; //giant lindsays server

@@ -262,7 +262,7 @@ export async function displayProgress(req, res, next)
 
 
 //fancy session-based view
-var earlyTime = 5;//minutes
+var earlyTime = 15;//minutes
 export async function getAttendanceData(req,res,next)
 {
     var data = await req.guildDocument.collection("attendance").get();
@@ -348,6 +348,16 @@ export async function getAttendanceData(req,res,next)
                 sessions: [] 
             };
 
+            var sessionTime = moment(weekStart);
+            sessionTime.day(2); //Tuesday
+            sessionTime.hour(13);
+            week.sessions.push({
+                name:"Lecture",
+                time:sessionTime,
+                duration:2,
+                room:"Lecture Room"
+            });
+
             if (w > 1) //no pracs in week 1
             {
                 var sessionTime = moment(weekStart);
@@ -360,16 +370,6 @@ export async function getAttendanceData(req,res,next)
                     room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
                 });
             }
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(2); //Tuesday
-            sessionTime.hour(13);
-            week.sessions.push({
-                name:"Lecture",
-                time:sessionTime,
-                duration:2,
-                room:"Lecture Room"
-            });
 
 
             week.colspan = week.sessions.length;
@@ -425,17 +425,20 @@ export async function getAttendanceData(req,res,next)
                 duration:2,
                 room:"Lecture Room"
             });
-             
-            var sessionTime = moment(weekStart);
-            sessionTime.day(3); //Wednesday
-            sessionTime.hour(15);
-            week.sessions.push({
-                name:"Lecture",
-                time:sessionTime,
-                duration:2,
-                room:"Lecture Room"
-            });
-
+        
+            if (w == 1) //only week 1... grr lol
+            {
+            
+                var sessionTime = moment(weekStart);
+                sessionTime.day(3); //Wednesday
+                sessionTime.hour(15);
+                week.sessions.push({
+                    name:"Lecture",
+                    time:sessionTime,
+                    duration:2,
+                    room:"Lecture Room"
+                });
+            }
 
             week.colspan = week.sessions.length;
             res.locals.weeks.push(week);
@@ -458,6 +461,8 @@ export async function getAttendanceData(req,res,next)
             session.startTimestamp = start.subtract(earlyTime, "minutes");
             session.endTimestamp = end.add(session.duration, "hours");
         });
+
+        week.sessions.sort((a,b) => a.time - b.time);
     });
 
     res.locals.checkAttendance = function(student, session)
