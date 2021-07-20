@@ -51,7 +51,7 @@ export async function init_client(client)
 	await init_guild_events(client);
 	await init_award_events(client);
 	init_responder_events(client);
-	init_attendance_events(client);
+	await init_attendance_events(client);
 	init_invite_events(client);
 	init_analytics_events(client); 
 }

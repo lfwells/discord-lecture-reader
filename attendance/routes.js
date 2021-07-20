@@ -1,10 +1,6 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
-
-
-
-import { guildsCollection } from "../core/database.js";
 import { filter, paginate } from "../core/pagination.js"; 
-import * as config from "../core/config.js";
+import { getSessions } from "./sessions.js";
 import moment from "moment";
 
 export async function displayAttendanceOld(req, res, next) 
@@ -262,7 +258,6 @@ export async function displayProgress(req, res, next)
 
 
 //fancy session-based view
-var earlyTime = 15;//minutes
 export async function getAttendanceData(req,res,next)
 {
     var data = await req.guildDocument.collection("attendance").get();
@@ -279,191 +274,7 @@ export async function getAttendanceData(req,res,next)
     });
     //console.log(req.attendanceData);
 
-    res.locals.weeks = [];
-
-    //TODO: an interface for defining sessions and names? for now just auto-gen
-    var semesterStart = moment("2021-07-11"); //start of the week of SUNDAY 11 July 2021
-    var weekStart = semesterStart;
-    if (req.guild.id == config.KIT109_S2_2021_SERVER)
-    {
-        for (var w = 1; w <= 13; w++)
-        {
-            var week = {
-                name: "Week "+w,
-                weekStart: weekStart,
-                sessions: [] 
-            };
-
-            if (w > 1) //no pracs in week 1
-            {
-                var sessionTime = moment(weekStart);
-                sessionTime.day(2); //Tuesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Practical",
-                    time:sessionTime,
-                    duration:2,
-                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
-                });
-            }
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(3); //Wednesday
-            sessionTime.hour(12);
-            week.sessions.push({
-                name:"Lecture",
-                time:sessionTime,
-                duration:2,
-                room:"Lecture Room"
-            });
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(4); //Thursday
-            sessionTime.hour(9);
-            week.sessions.push({
-                name:"Tutorial",
-                time:sessionTime,
-                duration:4,
-                room:"Tutorial Main Room"
-            });
-
-            week.colspan = week.sessions.length;
-            res.locals.weeks.push(week);
-
-            //add on one week
-            weekStart = moment(weekStart);
-            weekStart.add(7, 'days');
-            //semester break, add on another
-            if (w == 7)
-                weekStart.add(7, 'days');
-        }
-    }
-    else if (req.guild.id == config.KIT207_S2_2021_SERVER)
-    {
-        for (var w = 1; w <= 13; w++)
-        {
-            var week = {
-                name: "Week "+w,
-                weekStart: weekStart,
-                sessions: [] 
-            };
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(2); //Tuesday
-            sessionTime.hour(13);
-            week.sessions.push({
-                name:"Lecture",
-                time:sessionTime,
-                duration:2,
-                room:"Lecture Room"
-            });
-
-            if (w > 1) //no pracs in week 1
-            {
-                var sessionTime = moment(weekStart);
-                sessionTime.day(2); //Tuesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Practical",
-                    time:sessionTime,
-                    duration:2,
-                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
-                });
-            }
-
-
-            week.colspan = week.sessions.length;
-            res.locals.weeks.push(week);
-
-            //add on one week
-            weekStart = moment(weekStart);
-            weekStart.add(7, 'days');
-            //semester break, add on another
-            if (w == 7)
-                weekStart.add(7, 'days');
-        }
-    }
-    else if (req.guild.id == config.KIT308_S2_2021_SERVER)
-    {
-        for (var w = 1; w <= 13; w++)
-        {
-            var week = {
-                name: "Week "+w,
-                weekStart: weekStart,
-                sessions: [] 
-            };
-
-            if (w > 1) //no pracs in week 1
-            {
-                var sessionTime = moment(weekStart);
-                sessionTime.day(3); //Wednesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Tutorial",
-                    time:sessionTime,
-                    duration:2,
-                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
-                });
-
-                var sessionTime = moment(weekStart);
-                sessionTime.day(4); //Thursday
-                sessionTime.hour(14);
-                week.sessions.push({
-                    name:"Workshop",
-                    time:sessionTime,
-                    duration:2,
-                    room:"Tutorial Main Room" //should be discord channel id etc whatvs next semester
-                });
-            }
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(1); //Monday
-            sessionTime.hour(13);
-            week.sessions.push({
-                name:"Lecture",
-                time:sessionTime,
-                duration:2,
-                room:"Lecture Room"
-            });
-        
-            if (w == 1) //only week 1... grr lol
-            {
-            
-                var sessionTime = moment(weekStart);
-                sessionTime.day(3); //Wednesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Lecture",
-                    time:sessionTime,
-                    duration:2,
-                    room:"Lecture Room"
-                });
-            }
-
-            week.colspan = week.sessions.length;
-            res.locals.weeks.push(week);
-
-            //add on one week
-            weekStart = moment(weekStart);
-            weekStart.add(7, 'days');
-            //semester break, add on another
-            if (w == 7)
-                weekStart.add(7, 'days');
-        }
-    }
-
-    //cache some maths (TODO: Sort too?)
-    res.locals.weeks.forEach(week => {
-        week.sessions.forEach(session => {
-            var time = moment(session.time);
-            var start = moment(time);
-            var end = moment(time);
-            session.startTimestamp = start.subtract(earlyTime, "minutes");
-            session.endTimestamp = end.add(session.duration, "hours");
-        });
-
-        week.sessions.sort((a,b) => a.time - b.time);
-    });
+    res.locals.weeks = await getSessions(req.guild);
 
     res.locals.checkAttendance = function(student, session)
     {
@@ -478,9 +289,9 @@ export async function getAttendanceData(req,res,next)
                 var leftTime = moment(row.leftTimestamp);
                 /*if (student.username == "lfwells" && session == res.locals.weeks[0].sessions[0])
                 {
-                    console.log(row.timestamp, time, session.startTimestamp, session.endTimestamp, time.isBetween(session.startTimestamp, session.endTimestamp));
+                    console.log(row.timestamp, time, session.earlyStartTimestamp, session.endTimestamp, time.isBetween(session.earlyStartTimestamp, session.endTimestamp));
                 }*/
-                if (time.isBetween(session.startTimestamp, session.endTimestamp) || leftTime.isBetween(session.startTimestamp, session.endTimestamp)) 
+                if (time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp)) 
                 {
                     complete = true;
                     data = row;

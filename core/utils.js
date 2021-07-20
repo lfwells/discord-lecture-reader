@@ -72,3 +72,10 @@ export function redirectToMainPage(req,res, message){
 export function redirectToWhereWeCameFrom(req,res,message) {
   res.redirect(req.headers.referer+"?message="+message);
 }
+
+//https://stackoverflow.com/questions/14249506/how-can-i-wait-in-node-js-javascript-l-need-to-pause-for-a-period-of-time
+export function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}  
