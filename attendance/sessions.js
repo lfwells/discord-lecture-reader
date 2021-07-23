@@ -3,6 +3,8 @@ import moment from "moment";
 import { sleep } from "../core/utils.js";
 import { send } from "../core/client.js";
 
+import { MessageEmbed } from 'discord.js';
+
 var earlyTime = 15;//minutes
 var remindBefore = 15;//minutes //todo: override per-session?
 
@@ -197,9 +199,9 @@ export async function getSessions(guild)
             };
 
             var sessionTime = moment(weekStart);
-            sessionTime.day(3); //Wednesday
-            sessionTime.hour(4);
-            sessionTime.minute(35+15);
+            sessionTime.day(6); //Wednesday
+            sessionTime.hour(8);
+            sessionTime.minute(28+15);
             week.sessions.push({
                 name:"Lecture",
                 time:sessionTime,
@@ -273,7 +275,10 @@ export async function getNextSessionCountdown(guild, linkChannelName)
     var nextSession = await getNextSession(guild);
     if (nextSession == null)
     {
-        return "There is no next session. Sad Panda :(";
+        return { 
+            title:"There is no next session. Sad Panda :(",
+            description:""
+        };
     }
 
     console.log(nextSession);
@@ -281,18 +286,23 @@ export async function getNextSessionCountdown(guild, linkChannelName)
     var text = "The next **";
     text += nextSession.name;
     text += "** will be ";
+    text += nextSession.startTimestamp.fromNow();
+    //text += " (that's "+nextSession.startTimestamp.calendar()+").";
+    
+    var desc = "That's "+nextSession.startTimestamp.calendar();
     if (linkChannelName)
     {
-        text += "in <#"+nextSession.channelID+"> ";
+        desc += " in <#"+nextSession.channelID+">.";
     }
     else
     {
-        text += "in @here "
+        desc += " in @here.";
     }
-    text += nextSession.startTimestamp.fromNow();
-    text += " (that's "+nextSession.startTimestamp.calendar()+").";
-    
-    return text;
+
+    return { 
+        title:text,
+        description:desc
+    };
 }
 
 export async function scheduleNextSessionPost(guild)
@@ -313,8 +323,10 @@ export async function scheduleNextSessionPost(guild)
             console.log("waiting", diffInMilliseconds, "ms before next session countdown --", await getNextSessionCountdown(guild, false));
             await sleep(diffInMilliseconds); 
 
+            var countdown = await getNextSessionCountdown(guild, false);
             var channel = await guild.client.channels.cache.get(nextSession.channelID);
-            await send(channel, await getNextSessionCountdown(guild, false));
+            await send(channel, {embed: countdown});
+            //await send(channel, await getNextSessionCountdown(guild, false));
         }
 
         //sleep a little, just so the next session isn't the same as this one

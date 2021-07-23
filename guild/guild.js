@@ -36,7 +36,7 @@ export function load() {
       var guildID = req.params.guildID;
       var client = getClient();
       req.guild = await client.guilds.fetch(guildID);
-      req.guildDocument = await guildsCollection.doc(guildID);
+      req.guildDocument = getGuildDocument(guildID);
   
       if (req.guild == undefined)
       {
@@ -54,6 +54,11 @@ export function load() {
         next();
       }
     }
+  }
+
+  export function getGuildDocument(guildID)
+  {
+    return guildsCollection.doc(guildID);
   }
 
   export function loadLectureChannel(required)  

@@ -207,7 +207,7 @@ export default async function (client)
         if (interaction.commandName === "nextsession") 
         {
             var msg = await sessions.getNextSessionCountdown(interaction.guild, true);//show channel name
-            await interaction.reply(msg);
+            await interaction.reply({embed: msg});
         }
     });
 

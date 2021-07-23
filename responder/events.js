@@ -2,11 +2,11 @@ import * as config from '../core/config.js';
 import { reply } from '../core/client.js';
 import { isOutsideTestServer, getStatus } from '../core/utils.js';
 import replies from './replies.js';
-import { guildsCollection } from "../core/database.js";
+import { getGuildDocument } from '../guild/guild.js';
 
 //lindsay in the chat (KIT305 only)
 //TODO: make this configurable etc
-export default function(client)
+export default async function(client) 
 {
     client.on('message', async (msg) =>  
     {
@@ -30,7 +30,7 @@ export default function(client)
                 {
                     var status = await getStatus(config.LINDSAY_ID, msg.guild);
                     
-                    var guildDocument = guildsCollection.doc(msg.guild.id);
+                    var guildDocument = getGuildDocument(msg.guild.id);
                     var guildDocumentSnapshot = await guildDocument.get();
                     var lastAutoReply = await guildDocumentSnapshot.get("lastAutoReply");
                     if (!lastAutoReply)

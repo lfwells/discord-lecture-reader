@@ -79,3 +79,19 @@ export function sleep(ms) {
     setTimeout(resolve, ms);
   });
 }  
+
+export function pluralize(number, textNotPlural, textPlural)
+{
+  if (number == 1)
+  {
+    return number +" "+textNotPlural;
+  }
+  else 
+  {
+    if (textPlural == undefined)
+    {
+      textPlural = textNotPlural+"s";
+    }
+    return number + " " + textPlural;
+  }
+}

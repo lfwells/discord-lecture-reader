@@ -50,8 +50,8 @@ export async function init_client(client)
 	//register the appropriate discord event listeners
 	await init_guild_events(client);
 	await init_award_events(client);
-	init_responder_events(client);
+	await init_responder_events(client);
 	await init_attendance_events(client);
-	init_invite_events(client);
-	init_analytics_events(client); 
+	await init_invite_events(client);
+	await init_analytics_events(client);  
 }

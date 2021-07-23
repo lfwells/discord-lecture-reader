@@ -1,21 +1,21 @@
-import { db, guildsCollection } from "../core/database.js";
 import { init_client } from '../core/client.js';
+import { getGuildDocument } from "./guild.js";
 
 export default async function(client)
 {
-    client.on('guildCreate', guild => 
+    client.on('guildCreate', async (guild) => 
     {
         console.log("guildCreate", guild); 
-        var guildDocument = guildsCollection.doc(guild.id);
+        var guildDocument = getGuildDocument(guild.id);
         guildDocument.set({
             name:guild.name
         });
         init_client(client);
     });
 
-    client.on("guildUpdate", (oldGuild, newGuild) => {
+    client.on("guildUpdate", async (oldGuild, newGuild) => {
         console.log("guildUpdate", newGuild); 
-        var guildDocument = guildsCollection.doc(newGuild.id);
+        var guildDocument = getGuildDocument(newGuild.id);
         guildDocument.set({
             name:newGuild.name
         });
