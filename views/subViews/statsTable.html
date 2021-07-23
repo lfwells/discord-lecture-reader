@@ -1,0 +1,28 @@
+<%
+if (Object.keys(data).length == 0)
+{
+    %>No data<%
+}
+else
+{
+    %>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Post Count</th>
+        </tr>
+        <%
+        for (var i in data)
+        {
+            var row = data[i];
+            %><tr>
+                <th><%=row.name%></th>
+                <td><%=row.posts.length.toLocaleString() %></td>
+            </tr><%
+        }
+        %>
+    </table>
+
+    <%
+}
+%>

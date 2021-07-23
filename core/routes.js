@@ -5,6 +5,7 @@ import { loadClassList } from "../core/classList.js";
 
 import * as guild_routes from '../guild/routes.js';
 import * as award_routes from '../awards/routes.js';
+import * as analytics_routes from '../analytics/routes.js';
 import * as attendance_routes from '../attendance/routes.js';
 import * as lecture_text_routes from '../lecture_text/routes.js';
 import * as poll_routes from '../polls/routes.js';
@@ -28,6 +29,9 @@ export default function(app)
     app.get("/guild/:guildID/attendance/", guild.load(), loadClassList, attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
     app.get("/guild/:guildID/attendanceOld/", guild.load(), attendance_routes.getAttendanceDataOld, attendance_routes.displayAttendanceOld); 
     app.get("/guild/:guildID/attendanceOld/csv", guild.load(), attendance_routes.getAttendanceDataOld, downloadResource("attendance.csv")); 
+
+    //analytics
+    app.get("/guild/:guildID/analytics/", guild.load(), analytics_routes.getStatsData, analytics_routes.displayStats); 
 
     //progress
     app.get("/guild/:guildID/progress/", guild.load(), loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress);

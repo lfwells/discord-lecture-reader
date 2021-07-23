@@ -11,6 +11,7 @@ export default function(client)
         var record = {};
         record.dump = JSON.stringify(msg);
         record.author = msg.author.id;
+        record.member = msg.member.id;
         record.channel = msg.channel.id;
         record.content = msg.content;
         //console.log(record);

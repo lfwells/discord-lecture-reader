@@ -1,0 +1,29 @@
+<%- include('header.html') %>
+<style>
+th {
+    text-transform: capitalize;
+    text-align: left;
+    border-bottom: 1px solid white;
+}
+th, td {
+    padding:0.5em;
+}
+.col {
+    vertical-align: top;
+}
+</style>
+<h2>Stats</h2>
+
+<table>
+    <tr>
+        <td class="col">
+            <h3>Channel Post Counts</h3>
+            <%- include("subViews/statsTable.html", {data:locals.statsData["channels"]}) %>
+        </td>
+        <td class="col">
+            <h3>Member Post Counts</h3>
+            <%- include("subViews/statsTable.html", {data:locals.statsData.members}) %>
+        </td>
+    </tr>
+
+<%- include('footer.html') %>

@@ -1,0 +1,36 @@
+<% if (data.length == 0)
+{
+    %>No data<%
+}
+else
+{
+    %>
+    <table>
+        <tr>
+            <% 
+            var keys = Object.keys(data[0]);
+            for (var i in keys)
+            {
+                var key = keys[i];
+                %><th><%=key%></th><%
+            }
+            %>
+        </tr>
+        <%
+        for (var i in data)
+        {
+            %><tr><%
+            var row = data[i];
+            for (var c in row)
+            {
+                var value = row[c];
+                %><td><%=value%></td><%
+            }
+            %></tr><%
+        }
+        %>
+    </table>
+
+    <%
+}
+%>
