@@ -1,5 +1,5 @@
 import * as config from '../core/config.js';
-import { getGuildDocument } from '../guild/guild.js';
+import { getGuildDocument, getOffTopicChannel } from '../guild/guild.js';
 import { getStats } from './analytics.js';
 import { pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
@@ -67,6 +67,13 @@ export default async function(client)
         // Check if it is the correct command
         if (interaction.commandName === "stats") 
         {
+            //only allow in off topic
+            var offTopicChannel = await getOffTopicChannel(interaction.guild);
+            if (offTopicChannel && interaction.channel != offTopicChannel)
+            {
+                interaction.reply("You can only `/stats` in <#"+offTopicChannel.id+">", { ephemeral:true });
+                return;
+            }
 
             //this can take too long to reply, so we immediately reply
             var msg = await interaction.reply("Fetching stats...", {ephemeral:true});
@@ -74,7 +81,13 @@ export default async function(client)
             var statsEmbed = {
                 title: "Top 5 Posters",
                 fields: [],
-                description:"As requested by <@"+interaction.user.id+">"
+                author: {
+                    name:"As requested by "+(interaction.member.displayName),
+                    icon_url:interaction.user.displayAvatarURL()
+                },
+                thumbnail: { 
+                    url:interaction.guild.iconURL() //this is null and at this point I don't care lol
+                }
             };
 
             var stats = await getStats(interaction.guild);
@@ -95,24 +108,34 @@ export default async function(client)
         // Check if it is the correct command
         else if (interaction.commandName === "statsme") 
         {
-            var user = interaction.member; 
+            //only allow in off topic
+            var offTopicChannel = await getOffTopicChannel(interaction.guild);
+            if (offTopicChannel && interaction.channel != offTopicChannel)
+            {
+                interaction.reply("You can only `/statsme` in <#"+offTopicChannel.id+">", { ephemeral:true });
+                return;
+            }
+
+            var member = interaction.member; 
             if (interaction.options.length >= 1)
             {
-                user = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
+                member = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
             }
 
             //this can take too long to reply, so we immediately reply
             var msg = await interaction.reply("Fetching stats...", {ephemeral:true});
 
             var statsEmbed = {
-                title: "Stats for "+(user.nickname ?? user.username),
+                title: "Stats for "+(member.nickname ?? member.username),
                 fields: [],
-                description:interaction.member.id != user.id ? "As requested by <@"+interaction.user.id+">" : null
+                thumbnail: { 
+                    url:member.user.displayAvatarURL()
+                }
             };
 
             var stats = await getStats(interaction.guild);
             var posts = [];
-            var memberStats = stats.members.find(m => m.memberID == user.id);
+            var memberStats = stats.members.find(m => m.memberID == member.id);
             if (memberStats)
             {
                 posts = memberStats.posts;
@@ -121,12 +144,17 @@ export default async function(client)
                 name:pluralize(posts.length, "Post"),
                 value:posts.length > 100 ? "'Thats'a lotta posts!'" : "Them's rookie numbers!"
             });
-
-            /*const user = await client.users.cache.get(interaction.member.user.id);
-            user.send(exampleEmbed);*/
             
-            //await interaction.reply({embed: statsEmbed});
+            if (interaction.member.id != member.id)
+            {
+                statsEmbed.author = {
+                    name:"As requested by "+(interaction.member.displayName),
+                    icon_url:interaction.user.displayAvatarURL()
+                }
+            }
+
             await send(interaction.channel, {embed: statsEmbed});
+            
         }
     });
 
