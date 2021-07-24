@@ -4,6 +4,7 @@ import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward } from "./awards.js";
 import { pluralize } from '../core/utils.js';
+import { getOffTopicChannel } from '../guild/guild.js';
 
 export default async function(client)
 {
@@ -123,6 +124,14 @@ export default async function(client)
         // Check if it is the correct command
         if (interaction.commandName === "flex") 
         {
+            //only allow in off topic
+            var offTopicChannel = await getOffTopicChannel(interaction.guild);
+            if (offTopicChannel && interaction.channel != offTopicChannel)
+            {
+                interaction.reply("You can only `/flex` in <#"+offTopicChannel.id+">", { ephemeral:true });
+                return;
+            }
+
             var member;
             if (interaction.options.length > 0) 
             {
@@ -140,19 +149,34 @@ export default async function(client)
                 awards.push(emoji+" "+awardsObj[emoji]); 
             }
 
-            var desc = awards.length == 0 ? ":(" : awards.join("\n");
-
-            //oh, don't need this, can still see who used
-            /*
-            if (interaction.member.id != member.id)
-            {
-                desc = "As requested by <@"+interaction.member.id+">.\n"+desc;
-            }*/
-
             var flexEmbed = {
                 title: (member.nickname ?? member.username)+" has "+pluralize(awards.length, "award"),
-                description: desc
+                thumbnail: { 
+                    url:member.user.displayAvatarURL()
+                },
+                fields:[]
             };
+            if (interaction.member.id != member.id)
+            {
+                flexEmbed.author = {
+                    name:"As requested by "+(interaction.member.displayName),
+                    icon_url:interaction.user.displayAvatarURL()
+                }
+            }
+            if (awards.length == 0)
+            {
+                flexEmbed.description = ":(";
+            }
+            var i = 0;
+            for(var emoji in awardsObj)
+            {
+                if (i == 25) break;//discord max
+                flexEmbed.fields.push({
+                    name:emoji,
+                    value:awardsObj[emoji]
+                });
+                i++;
+            }
             await interaction.reply({ embed: flexEmbed });
             //await interaction.reply(flex);
         }

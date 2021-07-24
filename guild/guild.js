@@ -163,11 +163,30 @@ export function loadOffTopicChannel(required)
       //no lecture channel defined
       if (required)
       {
-        res.end("No off-topic channel set. Please set one on dashboard page.");
-        return;
+        res.error = "No off-topic channel set. Please set one on dashboard page.";
+        res.end(res.error);
+        return res;
       }
     }
     next(); 
+    return res; //TODO: do this for other channels? or just wait until this is generic
   }
 }
-  
+
+//non-route version (but still spoofing route version)
+//todo: generic for all
+export async function getOffTopicChannel(guild, required)
+{
+  var client = getClient();
+  var req = {
+    guild: guild,
+    guildDocument: getGuildDocument(guild.id),
+  }
+  var res = await loadOffTopicChannel(required)(req, {locals:{}}, () => {});
+  if (required && res.error)
+  {
+    console.log(res.error);
+    //anything else?
+  }
+  return res.locals.offTopicChannel;
+}
