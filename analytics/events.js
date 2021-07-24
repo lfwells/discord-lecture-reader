@@ -35,15 +35,26 @@ export default async function(client)
             required: false,
         }*/],
     };
+    const statsMeCommand = {
+        name: 'statsme',
+        description: 'Replies with the YOUR server stats',
+        options: [{
+            name: 'user',
+            type: 'USER',
+            description: 'The user to see the stats for (leave blank for YOU)',
+            required: false,
+        }],
+    };
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         var commands = await guild.commands.fetch(); 
-            for (const command in commands)
-            {
-                console.log(guild.name+"delete "+await command.delete());
-            }
+        for (const command in commands)
+        {
+            console.log(guild.name+"delete "+await command.delete());
+        }
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(statsMeCommand);//); 
     });
 
     client.on('interaction', async function(interaction) 
@@ -74,6 +85,42 @@ export default async function(client)
                     value:pluralize(stats.members[i].posts.length, "Post")
                 });
             }
+
+            /*const user = await client.users.cache.get(interaction.member.user.id);
+            user.send(exampleEmbed);*/
+            
+            //await interaction.reply({embed: statsEmbed});
+            await send(interaction.channel, {embed: statsEmbed});
+        }
+        // Check if it is the correct command
+        else if (interaction.commandName === "statsme") 
+        {
+            var user = interaction.member; 
+            if (interaction.options.length >= 1)
+            {
+                user = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
+            }
+
+            //this can take too long to reply, so we immediately reply
+            var msg = await interaction.reply("Fetching stats...", {ephemeral:true});
+
+            var statsEmbed = {
+                title: "Stats for "+(user.nickname ?? user.username),
+                fields: [],
+                description:interaction.member.id != user.id ? "As requested by <@"+interaction.user.id+">" : null
+            };
+
+            var stats = await getStats(interaction.guild);
+            var posts = [];
+            var memberStats = stats.members.find(m => m.memberID == user.id);
+            if (memberStats)
+            {
+                posts = memberStats.posts;
+            }
+            statsEmbed.fields.push({
+                name:pluralize(posts.length, "Post"),
+                value:posts.length > 100 ? "'Thats'a lotta posts!'" : "Them's rookie numbers!"
+            });
 
             /*const user = await client.users.cache.get(interaction.member.user.id);
             user.send(exampleEmbed);*/
