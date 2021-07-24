@@ -140,12 +140,21 @@ export default async function(client)
                 awards.push(emoji+" "+awardsObj[emoji]); 
             }
 
-            var flex = "<@"+member.id+"> has "+awards.length+" award" + (awards.length == 1 ? "" : "s") +"\n"+awards.join("\n");
-            if (awards.length == 0) 
+            var desc = awards.length == 0 ? ":(" : awards.join("\n");
+
+            //oh, don't need this, can still see who used
+            /*
+            if (interaction.member.id != member.id)
             {
-                flex += ":(";
-            }
-            await interaction.reply(flex);
+                desc = "As requested by <@"+interaction.member.id+">.\n"+desc;
+            }*/
+
+            var flexEmbed = {
+                title: (member.nickname ?? member.username)+" has "+pluralize(awards.length, "award"),
+                description: desc
+            };
+            await interaction.reply({ embed: flexEmbed });
+            //await interaction.reply(flex);
         }
         else if (interaction.commandName == "award" || interaction.commandName == "awardnew")
         {
