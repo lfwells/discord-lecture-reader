@@ -18,6 +18,7 @@ export function guildList(req, res)
 
 export async function guildHome(req, res) 
 {  
+  //todo: these three need to be generic
   var setLectureChannelID = req.query.setLectureChannelID;
   if (setLectureChannelID)
   {
@@ -32,6 +33,8 @@ export async function guildHome(req, res)
 
     req.query.message = "set the lecture channel to #"+req.lectureChannel.name;
   }
+  
+  //todo: these three need to be generic
   var setAwardChannelID = req.query.setAwardChannelID;
   if (setAwardChannelID)
   {
@@ -45,6 +48,22 @@ export async function guildHome(req, res)
     res.locals.awardChannel = req.awardChannel;
 
     req.query.message = "set the award channel to #"+req.awardChannel.name;
+  }
+
+  //todo: these three need to be generic
+  var setOffTopicChannelID = req.query.setOffTopicChannelID;
+  if (setOffTopicChannelID)
+  {
+    await req.guildDocument.update({
+      offTopicChannelID: setOffTopicChannelID
+    });
+    req.offTopicChannelID = setOffTopicChannelID;
+    GUILD_CACHE[req.guild.id].offTopicChannelID = setOffTopicChannelID;
+
+    req.offTopicChannel = await client.channels.fetch(req.offTopicChannelID);//.cache.filter(c => c.id == offTopicChannelID);
+    res.locals.offTopicChannel = req.offTopicChannel;
+
+    req.query.message = "set the off topic channel to #"+req.offTopicChannel.name;
   }
 
   res.render("guild");

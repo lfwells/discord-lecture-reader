@@ -8,6 +8,7 @@ export async function loadClassList(req,res,next)
     var members = await req.guild.members.cache;//fetch();
     var classList = members.map(m => (
     { 
+        member: m,
         discordID: m.id, 
         discordName: m.displayName,
         username: 

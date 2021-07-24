@@ -2,7 +2,7 @@ import e from 'express';
 import * as config from '../core/config.js';
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward } from "./awards.js";
 import { pluralize } from '../core/utils.js';
 
 export default async function(client)
@@ -171,30 +171,7 @@ export default async function(client)
                     console.log("award", member.id, award);
                     if (award)
                     {
-                        var content = award.content+"\n<@"+member.id+">";
-                        //found the award, just append the name
-                        console.log(award.author);
-                        if (award.author != client.user)
-                        {
-                            await award.delete();
-                            await send(awardChannel, content);
-                        }
-                        else
-                        {
-                            await award.edit(content);
-                        }
-                        var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
-                        var awardNameForShow = getAwardName(award);
-                        if (awardNameForShow.lastIndexOf("*") > 0)
-                            awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
-                        if (awardNameForShow.length > 32)
-                            awardNameForShow = awardNameForShow.substring(0, 32)+"...";
-                        showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+getAwardEmoji(award)+" "+awardNameForShow+"!", style:"yikes" });
-
-                        var achievementEmbed = {
-                            title: (member.nickname ?? member.username) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
-                            description: "They have now have "+pluralize(awardCount, "achievement")+"."
-                        };
+                        await giveAward(interaction.guild, award, member); 
                         await interaction.reply({ embed: achievementEmbed });
                         //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                     }
@@ -216,7 +193,7 @@ export default async function(client)
                             
                             var achievementEmbed = {
                                 title: (member.nickname ?? member.username) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
-                                description: "(Brand new award 🤩!)\nThey have now have "+pluralize(awardCount, "achievement")+"."
+                                description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
                             };
                             await interaction.reply({ embed: achievementEmbed });
                             //await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");

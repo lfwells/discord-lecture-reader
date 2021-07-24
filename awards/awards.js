@@ -1,5 +1,9 @@
+import { getClient } from '../core/client.js';
 import * as config from '../core/config.js';
 import { guildsCollection } from "../core/database.js";
+import { showText } from "../lecture_text/routes.js";
+import { pluralize } from '../core/utils.js';
+import { send } from '../core/client.js';
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
@@ -129,6 +133,35 @@ export async function getAwardList(guild, member) //optionally get award list fo
   });
   return awards;
 }
+export async function getAwardListFullData(guild, classList) //optionally get award list for member
+{
+  var awards = [];
+  var awardChannel = await getAwardChannel(guild);
+  if (awardChannel == undefined) return [];
+
+  var messages = await awardChannel.messages.fetch();
+  messages.forEach(award => 
+  {
+    var emoji = getAwardEmoji(award);
+    var name = getAwardName(award);
+    var awardData = {
+      emoji:emoji,
+      name:name,
+      students:[]
+    };
+    for (var i in classList)
+    {
+      var student = classList[i];
+      var member = student.member;
+      if (award.mentions.users.has(member.user.id))
+      {
+        awardData.students.push(student);
+      }
+    }
+    awards.push(awardData);
+  });
+  return awards;
+}
 export async function getAwardByEmoji(guild, emoji)
 {
   var result;
@@ -166,4 +199,40 @@ export function getAwardName(award)
   if (newLinePos > 0)
       content = content.substr(0, newLinePos);
   return content.replace(getAwardEmoji(award), "").trim();
+}
+
+export async function giveAward(guild, award, member)
+{
+  var client = getClient();
+  var content = award.content+"\n<@"+member.id+">";
+  //found the award, just append the name 
+  if (award.author != client.user)
+  {
+      await award.delete();
+      var awardChannel = await getAwardChannel(guild);
+      await send(awardChannel, content);
+  }
+  else
+  {
+      await award.edit(content);
+  }
+  var awardCount = Object.keys(await getAwardList(guild, member)).length;
+  var awardNameForShow = getAwardName(award);
+  if (awardNameForShow.lastIndexOf("*") > 0)
+      awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
+  if (awardNameForShow.length > 32)
+      awardNameForShow = awardNameForShow.substring(0, 32)+"...";
+  showText({ guild: guild }, { text: baseName(member.displayName)+" earned\n"+getAwardEmoji(award)+" "+awardNameForShow+"!", style:"yikes" });
+
+  var achievementEmbed = {
+      title: baseName(member.displayName) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
+      description: "<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+".",
+      thumbnail: { 
+        url:member.user.displayAvatarURL()
+      }
+  };
+  console.log(achievementEmbed);
+
+  return achievementEmbed;
+
 }

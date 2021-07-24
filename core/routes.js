@@ -18,12 +18,31 @@ export default function(app)
     app.get("/", guild_routes.guildList);
 
     //guild home page (dashboard)
-    app.get("/guild/:guildID/", guild.load(), guild.loadLectureChannel(false), guild.loadAwardChannel(false), guild_routes.guildHome);
+    app.get("/guild/:guildID/", 
+                    guild.load(), 
+                    guild.loadLectureChannel(false), 
+                    guild.loadAwardChannel(false), 
+                    guild.loadOffTopicChannel(false), 
+                    guild_routes.guildHome);
 
     //awards
     app.get("/guild/:guildID/namesTest/", guild.load(), guild.loadAwardChannel(true), award_routes.namesTest); 
     app.get("/guild/:guildID/namesBackup/", guild.load(), guild.loadAwardChannel(true),award_routes.namesBackup); 
     app.get("/guild/:guildID/awardsList/", guild.load(), guild.loadAwardChannel(true),award_routes.getAwardsList); 
+    app.get("/guild/:guildID/awards/", 
+                    guild.load(), 
+                    loadClassList, 
+                    guild.loadLectureChannel(true), 
+                    guild.loadAwardChannel(true), 
+                    guild.loadOffTopicChannel(true), 
+                    award_routes.getAwardsData, 
+                    award_routes.displayAwards); 
+    app.get("/guild/:guildID/awards/giveAward", 
+                    guild.load(), 
+                    guild.loadLectureChannel(true), 
+                    guild.loadAwardChannel(true), 
+                    guild.loadOffTopicChannel(true), 
+                    award_routes.getGiveAward); 
 
     //attendance
     app.get("/guild/:guildID/attendance/", guild.load(), loadClassList, attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 

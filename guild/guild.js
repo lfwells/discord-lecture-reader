@@ -31,105 +31,143 @@ export async function init(client)
 
 //TODO: these two need to return error if not authed or wrong id
 export function load() {
-    return async function(req, res, next)
+  return async function(req, res, next)
+  {
+    var guildID = req.params.guildID;
+    var client = getClient();
+    req.guild = await client.guilds.fetch(guildID);
+    req.guildDocument = getGuildDocument(guildID);
+
+    if (req.guild == undefined)
     {
-      var guildID = req.params.guildID;
-      var client = getClient();
-      req.guild = await client.guilds.fetch(guildID);
-      req.guildDocument = getGuildDocument(guildID);
-  
-      if (req.guild == undefined)
-      {
-        res.end("Guild not found");
-        return;
-      }
-  
-      if (isOutsideTestServer(req.guild))
-      {
-        res.end("Tried to use non-test server in test mode. Disable test mode.");
-      }
-      else
-      {
-        res.locals.guild = req.guild;
-        next();
-      }
+      res.end("Guild not found");
+      return;
+    }
+
+    if (isOutsideTestServer(req.guild))
+    {
+      res.end("Tried to use non-test server in test mode. Disable test mode.");
+    }
+    else
+    {
+      res.locals.guild = req.guild;
+      next();
     }
   }
+}
 
-  export function getGuildDocument(guildID)
-  {
-    return guildsCollection.doc(guildID);
-  }
+export function getGuildDocument(guildID)
+{
+  return guildsCollection.doc(guildID);
+}
 
-  export function loadLectureChannel(required)  
-  {
-      return async function(req,res,next)  
-      {
-        var client = getClient();
-        if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].lectureChannelID)
-        {
-          req.lectureChannelID = GUILD_CACHE[req.guild.id].lectureChannelID;
-        }
-    
-        if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].lectureChannelID))
-        {
-          req.guildDocumentSnapshot = await req.guildDocument.get();
-          req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
-          if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-          GUILD_CACHE[req.guild.id].lectureChannelID = req.lectureChannelID;
-        } 
-        if (req.lectureChannelID)
-        {
-          //console.log("req.lectureChannelID", req.lectureChannelID);
-          req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
-          res.locals.lectureChannel = req.lectureChannel;
-        }
-        else
-        {
-          //no lecture channel defined
-          if (required)
-          {
-            res.end("No lecture channel set. Please set one on dashboard page.");
-            return;
-          }
-        }
-        next(); 
-      }
-  }
-  
-export function loadAwardChannel(required)  
+//TODO: these three funcs need to be generic, so we can tag many channel types
+export function loadLectureChannel(required)  
 {
     return async function(req,res,next)  
     {
       var client = getClient();
-      if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].awardChannelID)
+      if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].lectureChannelID)
       {
-        req.awardChannelID = GUILD_CACHE[req.guild.id].awardChannelID;
+        req.lectureChannelID = GUILD_CACHE[req.guild.id].lectureChannelID;
       }
   
-      if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].awardChannelID))
+      if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].lectureChannelID))
       {
         req.guildDocumentSnapshot = await req.guildDocument.get();
-        req.awardChannelID = await req.guildDocumentSnapshot.get("awardChannelID");
+        req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
         if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-        GUILD_CACHE[req.guild.id].awardChannelID = req.awardChannelID;
+        GUILD_CACHE[req.guild.id].lectureChannelID = req.lectureChannelID;
       } 
-      if (req.awardChannelID)
+      if (req.lectureChannelID)
       {
-        //console.log("req.awardChannelID", req.awardChannelID);
-        req.awardChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
-        res.locals.awardChannel = req.awardChannel;
+        //console.log("req.lectureChannelID", req.lectureChannelID);
+        req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
+        res.locals.lectureChannel = req.lectureChannel;
       }
       else
       {
         //no lecture channel defined
         if (required)
         {
-          res.end("No award channel set. Please set one on dashboard page.");
+          res.end("No lecture channel set. Please set one on dashboard page.");
           return;
         }
       }
       next(); 
     }
 }
-    
+
+//TODO: these three funcs need to be generic, so we can tag many channel types
+export function loadAwardChannel(required)  
+{
+  return async function(req,res,next)  
+  {
+    var client = getClient();
+    if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].awardChannelID)
+    {
+      req.awardChannelID = GUILD_CACHE[req.guild.id].awardChannelID;
+    }
+
+    if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].awardChannelID))
+    {
+      req.guildDocumentSnapshot = await req.guildDocument.get();
+      req.awardChannelID = await req.guildDocumentSnapshot.get("awardChannelID");
+      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+      GUILD_CACHE[req.guild.id].awardChannelID = req.awardChannelID;
+    } 
+    if (req.awardChannelID)
+    {
+      //console.log("req.awardChannelID", req.awardChannelID);
+      req.awardChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
+      res.locals.awardChannel = req.awardChannel;
+    }
+    else
+    {
+      //no lecture channel defined
+      if (required)
+      {
+        res.end("No award channel set. Please set one on dashboard page.");
+        return;
+      }
+    }
+    next(); 
+  }
+}
+  
+export function loadOffTopicChannel(required)  
+{
+  return async function(req,res,next)  
+  {
+    var client = getClient();
+    if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].offTopicChannelID)
+    {
+      req.offTopicChannelID = GUILD_CACHE[req.guild.id].offTopicChannelID;
+    }
+
+    if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].offTopicChannelID))
+    {
+      req.guildDocumentSnapshot = await req.guildDocument.get();
+      req.offTopicChannelID = await req.guildDocumentSnapshot.get("offTopicChannelID");
+      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+      GUILD_CACHE[req.guild.id].offTopicChannelID = req.offTopicChannelID;
+    } 
+    if (req.offTopicChannelID)
+    {
+      //console.log("req.offTopicChannelID", req.offTopicChannelID);
+      req.offTopicChannel = await client.channels.fetch(req.offTopicChannelID);//.cache.filter(c => c.id == offTopicChannel);
+      res.locals.offTopicChannel = req.offTopicChannel;
+    }
+    else
+    {
+      //no lecture channel defined
+      if (required)
+      {
+        res.end("No off-topic channel set. Please set one on dashboard page.");
+        return;
+      }
+    }
+    next(); 
+  }
+}
+  

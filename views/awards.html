@@ -1,0 +1,105 @@
+<%- include('header.html') %>
+<style>
+.pageResult {
+  width:2px;
+  min-width: 4px;
+  border: 0.5px solid #ffffff42;
+}
+.complete { background-color: green; }
+.not_complete { background-color: black; }
+
+.awardName {
+  writing-mode: vertical-rl;
+  text-align: left;
+  min-width: 25px; /* for firefox */
+  transform: rotate(180deg);
+}
+.studentName {
+  width:fit-content;
+  text-align: left;
+}
+.studentRow {
+  height:25px;
+}
+td, th { white-space: nowrap; }
+table th,table tr.header {
+    position: -webkit-sticky; 
+    position: sticky;
+    top: 0;
+    left:0;
+    z-index: 10;
+    background-color: #2c2f33; 
+}
+
+tr:hover, tr:hover button, tr:hover th {
+    background-color: indianred !important;
+}
+</style>
+<script>
+function award(studentDiscordID, emoji, button)
+{
+    $.ajax({
+        url:"giveAward",
+        data:{
+            studentDiscordID:studentDiscordID,
+            emoji:emoji,
+            popupChannelID:$('input[name="popupChannelID"]:checked').val(),
+        },
+        dataType: "json",
+        success:(json) =>
+        {
+            if (json.error)
+            {
+                alert(json.error);
+            }
+            else
+            {
+                var $button = $(button);
+                $button.parent("td").addClass("complete").removeClass("not_complete");
+                $button.remove();
+            }
+        }
+    })
+    
+}
+</script>
+
+<h2>Awards</h2>
+
+<div>
+    <label><input name="popupChannelID" value="<%=locals.offTopicChannel.id%>" type="radio" checked /> Show achievement popup in <%=locals.offTopicChannel.name%></label><br/>
+    <label><input name="popupChannelID" value="<%=locals.lectureChannel.id%>" type="radio" /> Show achievement popup in <%=locals.lectureChannel.name%></label><br/>
+    <label><input name="popupChannelID" value="" type="radio" /> No popup (silent by deadly)</label>
+</div>
+<br/>
+<table border="1" cellpadding="0" cellspacing="0">
+    <tr class="header">
+      <th rowspan="2">Student</th>
+      <% locals.awards.forEach(function(award)
+      { 
+        %><th class="awardName">
+            <%= award.name.substring(0, 30) %>
+        </th><% 
+      }) %>
+    </tr>
+    <tr class="header">
+        <% locals.awards.forEach(function(award)
+        { 
+          %><th>
+              <%= award.emoji %>
+          </th><% 
+        }) %>
+      </tr>
+    <% locals.classList.forEach(function(student){ 
+      %>
+      <tr class="studentRow">
+        %><th class="studentName"><%= student.discordName %></th>  
+        <% locals.awards.forEach(function(award)
+        { 
+            %><%- locals.checkAward(student, award) %><%
+        }) %>
+      </tr>
+    <% }) %>
+  </table>
+
+<%- include('footer.html') %>

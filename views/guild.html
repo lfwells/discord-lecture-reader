@@ -11,6 +11,7 @@
         <li><a href="text/input/">Lecture Full-Screen Texts</a></li>
         <li><a href="attendance/">Attendance</a></li>
         <li><a href="analytics/">Analytics</a></li>
+        <li><a href="awards/">Awards</a></li>
     </ul>
 </nav>
 
@@ -62,6 +63,31 @@
     $("#setAwardChannel").on("change", (e) =>
     {
         document.location.href = "?setAwardChannelID="+$("#setAwardChannel").val();
+    });
+</script>
+
+<p>Off-topic Channel:  
+    <select id="setOffTopicChannel">
+        <option>Please Select Channel</option>
+        <%
+        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
+        categoryChannels.forEach(cat => { %>
+            <optgroup label="<%= cat.name %>">
+                <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
+                sortedChannels.forEach(function(channel)
+                { 
+                    %><option value="<%= channel.id %>"
+                        <% if (locals.offTopicChannel && channel.id == locals.offTopicChannel.id) { %>selected<% } %>>
+                        <%= channel.name %>
+                    </option><%
+                }) %>
+            </optgroup>
+        <% }); %>
+    </select></p>
+<script>
+    $("#setOffTopicChannel").on("change", (e) =>
+    {
+        document.location.href = "?setOffTopicChannelID="+$("#setOffTopicChannel").val();
     });
 </script>
 
