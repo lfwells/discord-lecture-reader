@@ -3,6 +3,7 @@ import * as config from '../core/config.js';
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList } from "./awards.js";
+import { pluralize } from '../core/utils.js';
 
 export default async function(client)
 {
@@ -180,7 +181,13 @@ export default async function(client)
                         if (awardNameForShow.length > 32)
                             awardNameForShow = awardNameForShow.substring(0, 32)+"...";
                         showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+getAwardEmoji(award)+" "+awardNameForShow+"!", style:"yikes" });
-                        await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
+
+                        var achievementEmbed = {
+                            title: (member.nickname ?? member.username) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
+                            description: "They have now have "+pluralize(awardCount, "achievement")+"."
+                        };
+                        await interaction.reply({ embed: achievementEmbed });
+                        //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                     }
                     else
                     {
@@ -197,11 +204,17 @@ export default async function(client)
                             if (awardNameForShow.length > 32)
                                 awardNameForShow = awardNameForShow.substring(0, 32)+"...";
                             showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
-                            await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
+                            
+                            var achievementEmbed = {
+                                title: (member.nickname ?? member.username) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
+                                description: "(Brand new award 🤩!)\nThey have now have "+pluralize(awardCount, "achievement")+"."
+                            };
+                            await interaction.reply({ embed: achievementEmbed });
+                            //await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                         }
                         else
                         {
-                            await interaction.reply("No award found for "+emoji+" -- use /awardnew");
+                            await interaction.reply("No award found for "+emoji+" -- use /awardnew", { ephemeral: true });
                         }
                     }
                 }
