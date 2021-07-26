@@ -184,6 +184,9 @@ export default async function(client)
         {
             if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
             {
+                //print back to user first, then post
+                interaction.reply("Loading...", {ephemeral:true});
+
                 if (interaction.options.length >= 1)
                 {
                     var awardChannel = await getAwardChannel(interaction.guild);
@@ -195,8 +198,9 @@ export default async function(client)
                     console.log("award", member.id, award);
                     if (award)
                     {
-                        await giveAward(interaction.guild, award, member); 
-                        await interaction.reply({ embed: achievementEmbed });
+                        var achievementEmbed = await giveAward(interaction.guild, award, member); 
+                        //await interaction.reply({ embed: achievementEmbed });
+                        await send(interaction.channel, { embed: achievementEmbed });
                         //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                     }
                     else
@@ -219,7 +223,8 @@ export default async function(client)
                                 title: (member.nickname ?? member.username) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
                                 description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
                             };
-                            await interaction.reply({ embed: achievementEmbed });
+                            //await interaction.reply({ embed: achievementEmbed });
+                        await send(interaction.channel, { embed: achievementEmbed });
                             //await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                         }
                         else
@@ -231,9 +236,7 @@ export default async function(client)
             }
             else
             {
-                interaction.reply("You don't have permission to /award achievements.\nSuggesting award details to <@"+config.LINDSAY_ID+">:"+interaction.options.map(o => {
-                    return isNumeric(o.value) ? "<@"+o.value+">" : o.value
-                }).join("\n")); 
+                interaction.reply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
             }
         }
 
