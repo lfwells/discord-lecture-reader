@@ -2,9 +2,9 @@ import e from 'express';
 import * as config from '../core/config.js';
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward } from "./awards.js";
-import { pluralize } from '../core/utils.js';
-import { getOffTopicChannel } from '../guild/guild.js';
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward, getAwardListFullData, getLeaderboard } from "./awards.js";
+import { pluralize, offTopicOnly } from '../core/utils.js';
+import { getClassList } from '../core/classList.js';
 
 export default async function(client)
 {
@@ -45,7 +45,7 @@ export default async function(client)
         options: [{
             name: 'user',
             type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+            description: 'The user to see the awards for (leave blank for YOU). Only allowed in off topic channel.',
             required: false,
         }],
     };
@@ -100,6 +100,16 @@ export default async function(client)
             required: true,
         }],
     };
+    const leaderboardCommand = {
+        name: 'leaderboard',
+        description: 'Replies with the top 10 award earners (only allowed in off topic channel).',
+        /*options: [{
+            name: 'user',
+            type: 'USER',
+            description: 'The user to see the awards for (leave blank for YOU)',
+            required: false,
+        }],*/
+    };
   
     var guilds = client.guilds.cache;
 
@@ -112,6 +122,7 @@ export default async function(client)
         /*console.log(guild.name+"add "+*/await guild.commands.create(flexCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(awardCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(awardNewCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(leaderboardCommand);//); 
     });
 
     client.on('interaction', async function(interaction) 
@@ -124,81 +135,27 @@ export default async function(client)
         // Check if it is the correct command
         if (interaction.commandName === "flex") 
         {
-            doFlexCommand(client, interaction);
+            doFlexCommand(interaction);
         }
         else if (interaction.commandName == "award" || interaction.commandName == "awardnew")
         {
-            if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
-            {
-                //print back to user first, then post
-                interaction.reply("Loading...", {ephemeral:true});
-
-                if (interaction.options.length >= 1)
-                {
-                    var awardChannel = await getAwardChannel(interaction.guild);
-
-                    var member = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
-
-                    var emoji = interaction.options[1].value;
-                    var award = await getAwardByEmoji(interaction.guild, emoji);
-                    console.log("award", member.id, award);
-                    if (award)
-                    {
-                        var achievementEmbed = await giveAward(interaction.guild, award, member); 
-                        //await interaction.reply({ embed: achievementEmbed });
-                        await send(interaction.channel, { embed: achievementEmbed });
-                        //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
-                    }
-                    else
-                    {
-                        //new award
-                        if (interaction.commandName == "awardnew" && (interaction.options.length >= 2) )
-                        {
-                            var award_text = interaction.options[2].value;
-                            await send(awardChannel, emoji+" ***"+award_text+"***\n<@"+member.id+">");
-
-                            var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
-                            var awardNameForShow = award_text;
-                            if (awardNameForShow.lastIndexOf("*") > 0)
-                                awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
-                            if (awardNameForShow.length > 32)
-                                awardNameForShow = awardNameForShow.substring(0, 32)+"...";
-                            showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
-                            
-                            var achievementEmbed = {
-                                title:  baseName(member.displayName) + " just earned "+emoji+" "+awardNameForShow+"!",
-                                description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
-                            };
-                            //await interaction.reply({ embed: achievementEmbed });
-                            await send(interaction.channel, { embed: achievementEmbed });
-                            //await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
-                        }
-                        else
-                        {
-                            interaction.user.send("No award found for "+emoji+" -- use /awardnew");
-                            //await interaction.reply("No award found for "+emoji+" -- use /awardnew", { ephemeral: true });
-                        }
-                    }
-                }
-            }
-            else
-            {
-                interaction.reply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
-            }
+            doAwardCommand(interaction);
         }
+        else if (interaction.commandName === "leaderboard") 
+        {
+            doLeaderboardCommand(interaction);
+        }
+
+        //TODO a command for who has an achievmeent (even tho u can see this in the #acheivmenets channel)
+        //TODO a compare command
 
     });
 }
 
-async function doFlexCommand(client, interaction)
+async function doFlexCommand(interaction)
 {
     //only allow in off topic
-    var offTopicChannel = await getOffTopicChannel(interaction.guild);
-    if (offTopicChannel && interaction.channel != offTopicChannel)
-    {
-        interaction.reply("You can only `/flex` in <#"+offTopicChannel.id+">", { ephemeral:true });
-        return;
-    }
+    if (await offTopicOnly(interaction)) return;
 
     var member;
     if (interaction.options.length > 0) 
@@ -248,9 +205,94 @@ async function doFlexCommand(client, interaction)
     await interaction.reply({ embed: flexEmbed });
     //await interaction.reply(flex);
 }
+async function doAwardCommand(interaction)
+{
+    if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
+    {
+        //print back to user first, then post
+        interaction.reply("Loading...", {ephemeral:true});
 
-function isNumeric(str) {
-    if (typeof str != "string") return false // we only process strings!  
-    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-  }
+        if (interaction.options.length >= 1)
+        {
+            var awardChannel = await getAwardChannel(interaction.guild);
+
+            var member = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
+
+            var emoji = interaction.options[1].value;
+            var award = await getAwardByEmoji(interaction.guild, emoji);
+            console.log("award", member.id, award);
+            if (award)
+            {
+                var achievementEmbed = await giveAward(interaction.guild, award, member); 
+                //await interaction.reply({ embed: achievementEmbed });
+                await send(interaction.channel, { embed: achievementEmbed });
+                //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
+            }
+            else
+            {
+                //new award
+                if (interaction.commandName == "awardnew" && (interaction.options.length >= 2) )
+                {
+                    var award_text = interaction.options[2].value;
+                    await send(awardChannel, emoji+" ***"+award_text+"***\n<@"+member.id+">");
+
+                    var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
+                    var awardNameForShow = award_text;
+                    if (awardNameForShow.lastIndexOf("*") > 0)
+                        awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
+                    if (awardNameForShow.length > 32)
+                        awardNameForShow = awardNameForShow.substring(0, 32)+"...";
+                    showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
+                    
+                    var achievementEmbed = {
+                        title:  baseName(member.displayName) + " just earned "+emoji+" "+awardNameForShow+"!",
+                        description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
+                    };
+                    //await interaction.reply({ embed: achievementEmbed });
+                    await send(interaction.channel, { embed: achievementEmbed });
+                    //await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
+                }
+                else
+                {
+                    interaction.user.send("No award found for "+emoji+" -- use /awardnew");
+                    //await interaction.reply("No award found for "+emoji+" -- use /awardnew", { ephemeral: true });
+                }
+            }
+        }
+    }
+    else
+    {
+        interaction.reply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
+    }
+}
+
+async function doLeaderboardCommand(interaction)
+{
+    //only allow in off topic
+    if (await offTopicOnly(interaction)) return;
+
+    var awardsData = await getLeaderboard(interaction.guild, await getClassList(interaction.guild));
+    
+    var msg = await interaction.reply("Fetching leaderboard...", {ephemeral:true});
+
+    var statsEmbed = {
+        title: "Achievement Leaderboard",
+        fields: [],
+        author: {
+            name:"As requested by "+(interaction.member.displayName),
+            icon_url:interaction.user.displayAvatarURL()
+        },
+        thumbnail: { 
+            url:interaction.guild.iconURL() //this is null and at this point I don't care lol
+        }
+    };
+    for (var i = 0; i < Math.min(awardsData.length, 10); i++)
+    {
+        statsEmbed.fields.push({
+            name:awardsData[i].discordName,
+            value:pluralize(awardsData[i].awards.length, "Achievement")
+        });
+    }
+
+    await send(interaction.channel, {embed: statsEmbed});
+}

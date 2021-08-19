@@ -1,4 +1,4 @@
-import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji } from "./awards.js";
+import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard } from "./awards.js";
 import { getClient, send } from "../core/client.js";
 import e from "express";
 var client = getClient();
@@ -29,15 +29,13 @@ export async function getAwardsList(req,res,next)
 }
 export async function leaderboard(req,res,next)
 {
-  await getAwardListFullData(req.guild, req.classList);
-  req.classList = req.classList.sort((a,b) =>  b.awards.length - a.awards.length);
+  req.classList = await getLeaderboard(req.guild, req.classList); 
   await res.render("leaderboard");
   next();
 }
 export async function leaderboardOBS(req,res,next)
 {
-  await getAwardListFullData(req.guild, req.classList);
-  req.classList = req.classList.sort((a,b) =>  b.awards.length - a.awards.length);
+  req.classList = await getLeaderboard(req.guild, req.classList);
   await res.render("leaderboard_obs");
   next();
 }

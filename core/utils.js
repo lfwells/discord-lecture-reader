@@ -1,4 +1,5 @@
 import * as config from '../core/config.js';
+import { getOffTopicChannel } from '../guild/guild.js';
 
 export function isOutsideTestServer(guild)
 {
@@ -50,6 +51,17 @@ export function downloadResource(filename) {
     res.attachment(filename);
     return res.send(csv);
   }
+}
+
+export async function offTopicOnly(interaction)
+{
+    var offTopicChannel = await getOffTopicChannel(interaction.guild);
+    if (offTopicChannel && interaction.channel != offTopicChannel)
+    {
+        interaction.reply("You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", { ephemeral:true });
+        return true;
+    }
+    return false;
 }
 
 //middleware helpers

@@ -133,6 +133,7 @@ export async function getAwardList(guild, member) //optionally get award list fo
   });
   return awards;
 }
+//this function will populate the class list with a leaderboard
 export async function getAwardListFullData(guild, classList) //optionally get award list for member
 {
   var awards = [];
@@ -167,6 +168,12 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
     awards.push(awardData);
   });
   return awards;
+}
+export async function getLeaderboard(guild, classList)
+{
+  await getAwardListFullData(guild, classList);
+  classList = classList.sort((a,b) =>  b.awards.length - a.awards.length);
+  return classList;
 }
 export async function getAwardByEmoji(guild, emoji)
 {

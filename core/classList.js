@@ -32,3 +32,13 @@ export async function loadClassList(req,res,next)
     next(); 
 
 }
+
+//non express version
+export async function getClassList(guild)
+{
+    var req = { guild:guild };
+    var res = { locals: { } };
+    var next = ()=> {};
+    await loadClassList(req, res, next);
+    return res.locals.classList;
+}
