@@ -124,61 +124,7 @@ export default async function(client)
         // Check if it is the correct command
         if (interaction.commandName === "flex") 
         {
-            //only allow in off topic
-            var offTopicChannel = await getOffTopicChannel(interaction.guild);
-            if (offTopicChannel && interaction.channel != offTopicChannel)
-            {
-                interaction.reply("You can only `/flex` in <#"+offTopicChannel.id+">", { ephemeral:true });
-                return;
-            }
-
-            var member;
-            if (interaction.options.length > 0) 
-            {
-                member = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
-            }
-            else
-            {
-                member = interaction.member;
-            }
-
-            var awardsObj = await getAwardList(interaction.guild, member);
-            var awards = [];
-            for(var emoji in awardsObj)
-            {
-                awards.push(emoji+" "+awardsObj[emoji]); 
-            }
-
-            var flexEmbed = {
-                title: (member.nickname ?? member.username)+" has "+pluralize(awards.length, "award"),
-                thumbnail: { 
-                    url:member.user.displayAvatarURL()
-                },
-                fields:[]
-            };
-            if (interaction.member.id != member.id)
-            {
-                flexEmbed.author = {
-                    name:"As requested by "+(interaction.member.displayName),
-                    icon_url:interaction.user.displayAvatarURL()
-                }
-            }
-            if (awards.length == 0)
-            {
-                flexEmbed.description = ":(";
-            }
-            var i = 0;
-            for(var emoji in awardsObj)
-            {
-                if (i == 25) break;//discord max
-                flexEmbed.fields.push({
-                    name:emoji,
-                    value:awardsObj[emoji]
-                });
-                i++;
-            }
-            await interaction.reply({ embed: flexEmbed });
-            //await interaction.reply(flex);
+            doFlexCommand(client, interaction);
         }
         else if (interaction.commandName == "award" || interaction.commandName == "awardnew")
         {
@@ -220,16 +166,16 @@ export default async function(client)
                             showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
                             
                             var achievementEmbed = {
-                                title: (member.nickname ?? member.username) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
+                                title:  baseName(member.displayName) + " just earned "+emoji+" "+awardNameForShow+"!",
                                 description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
                             };
                             //await interaction.reply({ embed: achievementEmbed });
-                        await send(interaction.channel, { embed: achievementEmbed });
+                            await send(interaction.channel, { embed: achievementEmbed });
                             //await interaction.reply("<@"+member.id+"> just earned "+emoji+" ***"+award_text+"***! (Brand new award 🤩!)\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
                         }
                         else
                         {
-                            member.send("No award found for "+emoji+" -- use /awardnew");
+                            interaction.user.send("No award found for "+emoji+" -- use /awardnew");
                             //await interaction.reply("No award found for "+emoji+" -- use /awardnew", { ephemeral: true });
                         }
                     }
@@ -242,6 +188,65 @@ export default async function(client)
         }
 
     });
+}
+
+async function doFlexCommand(client, interaction)
+{
+    //only allow in off topic
+    var offTopicChannel = await getOffTopicChannel(interaction.guild);
+    if (offTopicChannel && interaction.channel != offTopicChannel)
+    {
+        interaction.reply("You can only `/flex` in <#"+offTopicChannel.id+">", { ephemeral:true });
+        return;
+    }
+
+    var member;
+    if (interaction.options.length > 0) 
+    {
+        member = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
+    }
+    else
+    {
+        member = interaction.member;
+    }
+
+    var awardsObj = await getAwardList(interaction.guild, member);
+    var awards = [];
+    for(var emoji in awardsObj)
+    {
+        awards.push(emoji+" "+awardsObj[emoji]); 
+    }
+
+    var flexEmbed = {
+        title: (member.nickname ?? member.username)+" has "+pluralize(awards.length, "award"),
+        thumbnail: { 
+            url:member.user.displayAvatarURL()
+        },
+        fields:[]
+    };
+    if (interaction.member.id != member.id)
+    {
+        flexEmbed.author = {
+            name:"As requested by "+(interaction.member.displayName),
+            icon_url:interaction.user.displayAvatarURL()
+        }
+    }
+    if (awards.length == 0)
+    {
+        flexEmbed.description = ":(";
+    }
+    var i = 0;
+    for(var emoji in awardsObj)
+    {
+        if (i == 25) break;//discord max
+        flexEmbed.fields.push({
+            name:emoji,
+            value:awardsObj[emoji]
+        });
+        i++;
+    }
+    await interaction.reply({ embed: flexEmbed });
+    //await interaction.reply(flex);
 }
 
 function isNumeric(str) {
