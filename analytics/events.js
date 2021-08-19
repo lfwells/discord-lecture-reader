@@ -1,6 +1,6 @@
 import * as config from '../core/config.js';
 import { getGuildDocument, getOffTopicChannel } from '../guild/guild.js';
-import { getStats } from './analytics.js';
+import { getStats, getStatsWeek } from './analytics.js';
 import { pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 
@@ -35,6 +35,16 @@ export default async function(client)
             required: false,
         }*/],
     };
+    const statsWeekCommand = {
+        name: 'statsweek',
+        description: 'Replies with the server stats for just this week',
+        options: [/*{
+            name: 'user',
+            type: 'USER',
+            description: 'The user to see the awards for (leave blank for YOU)',
+            required: false,
+        }*/],
+    };
     const statsMeCommand = {
         name: 'statsme',
         description: 'Replies with the YOUR server stats',
@@ -54,6 +64,7 @@ export default async function(client)
             console.log(guild.name+"delete "+await command.delete());
         }
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(statsWeekCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsMeCommand);//); 
     });
 
@@ -65,8 +76,10 @@ export default async function(client)
         console.log("got interaction", interaction.commandName, interaction.options.length);
     
         // Check if it is the correct command
-        if (interaction.commandName === "stats") 
+        if (interaction.commandName === "stats" || interaction.commandName === "statsweek") 
         {
+            var thisWeek = interaction.commandName === "statsweek";
+
             //only allow in off topic
             var offTopicChannel = await getOffTopicChannel(interaction.guild);
             if (offTopicChannel && interaction.channel != offTopicChannel)
@@ -79,7 +92,7 @@ export default async function(client)
             var msg = await interaction.reply("Fetching stats...", {ephemeral:true});
 
             var statsEmbed = {
-                title: "Top 5 Posters",
+                title: "Top 10 Posters " +(thisWeek ? "This Week" : ""),
                 fields: [],
                 author: {
                     name:"As requested by "+(interaction.member.displayName),
@@ -90,8 +103,8 @@ export default async function(client)
                 }
             };
 
-            var stats = await getStats(interaction.guild);
-            for (var i = 0; i < Math.min(stats.members.length, 5); i++)
+            var stats = await (thisWeek ? getStatsWeek(interaction.guild) : getStats(interaction.guild));
+            for (var i = 0; i < Math.min(stats.members.length, 10); i++)
             {
                 statsEmbed.fields.push({
                     name:stats.members[i].name,

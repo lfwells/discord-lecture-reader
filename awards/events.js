@@ -229,7 +229,8 @@ export default async function(client)
                         }
                         else
                         {
-                            await interaction.reply("No award found for "+emoji+" -- use /awardnew", { ephemeral: true });
+                            member.send("No award found for "+emoji+" -- use /awardnew");
+                            //await interaction.reply("No award found for "+emoji+" -- use /awardnew", { ephemeral: true });
                         }
                     }
                 }

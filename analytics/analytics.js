@@ -1,7 +1,12 @@
 import moment from "moment";
 import { getGuildDocument } from "../guild/guild.js";
+import * as Config from "../core/config.js";
 
-export async function getStats(guild)
+export async function getStatsWeek(guild, predicate)
+{
+    return getStats(guild, d => d.timestamp.isSame(new Date(), 'week') && (predicate == null || predicate(d)));
+}
+export async function getStats(guild, predicate)
 {
     var guildDocument = getGuildDocument(guild.id);
     var data = await guildDocument.collection("analytics").get();
@@ -10,9 +15,13 @@ export async function getStats(guild)
     {
         var d = doc.data();
         d.id = doc.id;
-        d.timestamp = moment(d.timestamp);
         d.postData = JSON.parse(d.dump);
-        rawStatsData.push(d);
+        d.timestamp = moment(d.postData.createdTimestamp);
+
+        if (predicate == undefined || predicate(d))
+        {
+            rawStatsData.push(d);
+        }
     });
 
     var stats = {
@@ -83,4 +92,15 @@ export async function getStats(guild)
     statsData.rawStatsData = rawStatsData;
 
     return statsData;
+}
+
+export function predicateExcludeAdmin(user)
+{
+    return [
+        Config.IAN_ID,
+        Config.LINDSAY_ID,
+        Config.SIMPLE_POLL_BOT_ID,
+        Config.ROBO_LINDSAY_ID,
+        //TODO: this could use roles but w/e
+    ].indexOf(user.author) == -1;
 }

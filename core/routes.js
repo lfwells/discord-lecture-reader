@@ -51,6 +51,11 @@ export default function(app)
 
     //analytics
     app.get("/guild/:guildID/analytics/", guild.load(), analytics_routes.getStatsData, analytics_routes.displayStats); 
+    app.get("/guild/:guildID/analytics/week", guild.load(), analytics_routes.getStatsDataWeek, analytics_routes.displayStats); 
+    
+    app.get("/guild/:guildID/analytics/obs", guild.load(), analytics_routes.obs); 
+    app.get("/guild/:guildID/analytics/obs/allTime", guild.load(), analytics_routes.getStatsDataOBS, analytics_routes.obsAllTime); 
+    app.get("/guild/:guildID/analytics/obs/week", guild.load(), analytics_routes.getStatsDataWeekOBS, analytics_routes.obsStatsWeek); 
 
     //progress
     app.get("/guild/:guildID/progress/", guild.load(), loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress);
