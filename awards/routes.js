@@ -27,6 +27,20 @@ export async function getAwardsList(req,res,next)
   var awards = await getAwardList(req.guild);
   res.json(awards);
 }
+export async function leaderboard(req,res,next)
+{
+  await getAwardListFullData(req.guild, req.classList);
+  req.classList = req.classList.sort((a,b) =>  b.awards.length - a.awards.length);
+  await res.render("leaderboard");
+  next();
+}
+export async function leaderboardOBS(req,res,next)
+{
+  await getAwardListFullData(req.guild, req.classList);
+  req.classList = req.classList.sort((a,b) =>  b.awards.length - a.awards.length);
+  await res.render("leaderboard_obs");
+  next();
+}
 
 export async function getAwardsData(req,res,next)
 {

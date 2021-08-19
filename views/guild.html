@@ -3,18 +3,29 @@
 <nav>
     <ul>
         <% if (locals.lectureChannel) { %>
-            <li><a href="poll/">Show Current Poll</a> (use this url for OBS)</li>
             <li><a href="clearpoll/">Clear Current Poll</a></li>
             <li><a href="pollSchedule/">Scheduled Polls</a></li>
         <% } %>
-        <li><a href="text/">Show Lecture Full-Screen Text</a> (use this url for OBS)</li>
         <li><a href="text/input/">Lecture Full-Screen Texts</a></li>
         <li><a href="attendance/">Attendance</a></li>
         <li><a href="analytics/">Analytics</a></li>
         <li><a href="awards/">Awards</a></li>
+        <li><a href="leaderboard/">Awards Leaderboard</a></li>
     </ul>
 </nav>
 
+<h3>OBS Pages</h3>
+<nav>
+    <ul>
+        <% if (locals.lectureChannel) { %>
+            <li><a href="poll/">Poll Widget</a></li>
+        <% } %>
+        <li><a href="text/">Lecture Full-Screen Text Widget</a></li>
+        <li><a href="analytics/obs">Top Posters and Award Leaderboard Widget</a></li>
+    </ul>
+</nav>
+
+<h3>Channel Set Up</h3>
 <p>Lecture Channel:  
     <select id="setLectureChannel">
         <option>Please Select Channel</option>

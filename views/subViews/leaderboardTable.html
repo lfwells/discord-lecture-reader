@@ -10,7 +10,7 @@ else
         <% if (typeof showHeaders == 'undefined'  || showHeaders) { %>
         <tr>
             <th>Name</th>
-            <th>Post Count</th>
+            <th>Awards</th>
         </tr>
         <%
         }
@@ -20,8 +20,8 @@ else
             if (locals.limit && i >= limit) break;
 
             %><tr>
-                <th><%=row.name%></th>
-                <td><%=row.posts.length.toLocaleString() %></td>
+                <th><%=row.discordName%></th>
+                <td><%=row.awards.length.toLocaleString() %></td>
             </tr><%
         }
         %>

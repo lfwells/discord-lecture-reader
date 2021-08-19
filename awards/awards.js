@@ -139,6 +139,11 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
   var awardChannel = await getAwardChannel(guild);
   if (awardChannel == undefined) return [];
 
+  for (var i in classList)
+  {
+    classList[i].awards = [];
+  }
+
   var messages = await awardChannel.messages.fetch();
   messages.forEach(award => 
   {
@@ -156,6 +161,7 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
       if (award.mentions.users.has(member.user.id))
       {
         awardData.students.push(student);
+        student.awards.push(awardData);
       }
     }
     awards.push(awardData);

@@ -1,0 +1,14 @@
+<%- include('header.html') %>
+
+<style>
+    h1 { display:none; }
+    .question { font-size:16pt; }
+    th { text-align: left; padding-right: 1ex; }
+</style>
+
+
+<h3>Award Leaderboard</h3>
+<%- include("subViews/leaderboardTable.html", { data:locals.classList, limit:5, showHeaders: false }) %>
+
+
+<%- include('footer.html') %>

@@ -43,6 +43,8 @@ export default function(app)
                     guild.loadAwardChannel(true), 
                     guild.loadOffTopicChannel(true), 
                     award_routes.getGiveAward); 
+    app.get("/guild/:guildID/leaderboard/", guild.load(), loadClassList, guild.loadAwardChannel(true),award_routes.leaderboard); 
+    app.get("/guild/:guildID/leaderboard/obs", guild.load(), loadClassList, guild.loadAwardChannel(true),award_routes.leaderboardOBS); 
 
     //attendance
     app.get("/guild/:guildID/attendance/", guild.load(), loadClassList, attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
