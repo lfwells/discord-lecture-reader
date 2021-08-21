@@ -1,6 +1,7 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
 import { getSessions } from "./sessions.js";
+import { invlerp } from "../core/utils.js";
 import moment from "moment";
 
 export async function displayAttendanceOld(req, res, next) 
@@ -86,7 +87,7 @@ export async function getSectionProgress(req,res,next)
 {
     if (req.query.studentID)
     {
-        console.log("stud id", req.query.studentID);
+        //console.log("stud id", req.query.studentID);
         var data = await req.guildDocument.collection("section_progress").where("studentID", "==", req.query.studentID).get();
         
         req.data = [];
@@ -105,12 +106,49 @@ export async function getSectionProgress(req,res,next)
     res.json({"success": false});
 }
 
+export async function getSectionProgressAll(req, res, next)
+{
+    var data = await req.guildDocument.collection("section_progress").get();
+    
+    //do a days cache
+    res.locals.sectionProgress = [];
+    res.locals.sectionProgressDayCache = {};
+    data.forEach(doc =>
+    {
+        var d = doc.data();
+        if (res.locals.sectionProgress.indexOf(d) == -1)
+            res.locals.sectionProgress.push(d);
+
+        var timestamp = moment(d.timestamp);
+        d.timestamp = moment(timestamp);
+        var day = timestamp.startOf('day');
+        if (res.locals.sectionProgressDayCache[day] == undefined)
+        {
+            res.locals.sectionProgressDayCache[day] = [];
+        }
+        res.locals.sectionProgressDayCache[day].push(d);
+    });
+    //var a = true;
+    for (var x of Object.keys(res.locals.sectionProgressDayCache))
+    {
+        res.locals.sectionProgressDayCache[x].sort((a,b) => b.timestamp - a.timestamp); //descending order for the cache to work nicely
+        /*if (a)
+        {
+            console.log(res.locals.sectionProgressDayCache[x]);
+            a =false;
+        }*/
+    }
+    next();
+}
+
 //new fancy version
 export async function getProgressData(req,res,next)
 {
     var data = await req.guildDocument.collection("progress").get();
     req.data = [];
     res.locals.tutorials = [];
+
+    var dayCache = {};
 
     function addTutorial(name) //TODO: logic in here may be a bit too KIT109 specifc, rely on tutorial naming scheme
     {
@@ -248,6 +286,7 @@ export async function getProgressData(req,res,next)
         }
         return text;
     };
+
     next();
 }
 export async function displayProgress(req, res, next) 
@@ -308,5 +347,118 @@ export async function getAttendanceData(req,res,next)
 export async function displayAttendance(req, res, next) 
 {
     res.render("attendance");
+    next()
+}
+
+
+export async function getProgressTimelineData(req, res, next)
+{
+    var days = [];
+    var semesterStart = moment("2021-07-11"); //start of the week of SUNDAY 11 July 2021
+    var semesterEnd = moment("2021-10-17"); //end of the week of SUNDAY 17 October 2021
+    var day = moment(semesterStart);
+    while (day.isSameOrBefore(semesterEnd))
+    {
+        var dayInfo = { 
+            day: day,
+            name: day.format("dddd MMMM Do"),
+            splits: [],
+        };
+        var split = moment(day);
+        var endOfDay = moment(day);
+        endOfDay.add(1, 'day');
+
+        while (split.isSameOrBefore(endOfDay))
+        {
+            dayInfo.splits.push({
+                split:moment(split),
+                name: split.format("h:mm"),
+            });
+            split.add(1, 'hour');
+        }
+        dayInfo.colspan = dayInfo.splits.length;
+
+        days.push(dayInfo);
+        day.add(1, 'day');
+    }
+    res.locals.days = days;
+
+    //var colors = ["#048318", "#01ff29", "#03f7d0", "#0b1d2f", "#04959f", "#000da7", "#0f02d8", "#099f8c", "#00566b", "#0c1c83", "#0d19cf", "#076c68", "#0d91e3", "#0e83fd", "#03efed"];
+    var colors = [
+        "#AA0000",
+        "#FF0000",
+        "#00AA00",
+        "#00FF00",
+        "#0000AA",
+        "#0000FF",
+        "#AAAA00",
+        "#FFFF00",
+        "#00AAAA",
+        "#00FFFF",
+        "#AF0000",
+        "#00AF00",
+        "#0000AF",
+        "#000000",
+        "#FFFFFF",
+    ]
+    res.locals.checkProgress = function(student, split)
+    {
+        var complete = false;
+        var color = "#000000";
+        var a = 0;
+        var tutorial = "";
+        var session = "";
+
+        var day = moment(split);
+        var nextSplit = moment(split);
+        nextSplit.add(1, "hour");
+        day = day.startOf('day');
+        var cache = res.locals.sectionProgressDayCache[day];
+        if (cache)
+        {
+            /*
+            if  (day.isSame(moment().subtract(3, 'day').startOf('day'))) //test
+                {
+                    console.log(split, nextSplit);
+                    //console.log(row.timestamp, split, nextSplit, row.timestamp.isBetween(nextSplit, split));
+                }
+                */
+            for (var row of cache)
+            {
+                if (row.username == student.username)
+                {
+                    /*if  (day.isSame(moment().subtract(3, 'day').startOf('day'))) //test
+                    {
+                        //console.log(split, nextSplit);
+                        console.log(row.timestamp.format("HH:mm"), split.format("HH:mm"), nextSplit.format("HH:mm"), row.timestamp.isBetween(split, nextSplit));
+                    }*/
+                    if (row.timestamp.isBetween(split, nextSplit))
+                    {
+                        var tutorial =  parseInt(row.tutorial / 100);
+                        var section = row.tutorial % 100;
+                        complete = true;
+
+                        color = colors[(tutorial-1) % colors.length];
+                        a = parseInt((invlerp(0, 10, section-1) * 255)).toString(16); //TODO: know section length of each
+                        break;
+                    }
+                }
+            }
+        }
+        if (tutorial)
+            return '<td title="Tutorial '+tutorial+'-'+section+'" style="background-color:'+color+a+';">&nbsp;</td>';
+        else
+            return '<td></td>';
+    };
+
+    
+    //only show last student, for testing
+    //res.locals.classList = res.locals.classList.slice(-1); 
+
+    next();
+}
+export async function displayProgressTimeline(req, res, next) 
+{
+    res.render("progress_timeline"); //TODO use middleware properly here instead zz
     next()
 }

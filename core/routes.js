@@ -66,6 +66,7 @@ export default function(app)
     app.get("/guild/:guildID/recordProgress/", guild.load(), attendance_routes.recordProgress); 
     app.post("/guild/:guildID/recordSectionProgress/", guild.load(), attendance_routes.recordSectionProgress); 
     app.get("/guild/:guildID/recordSectionProgress/", guild.load(), attendance_routes.getSectionProgress); 
+    app.get("/guild/:guildID/timeline/", guild.load(), loadClassList, attendance_routes.getSectionProgressAll, attendance_routes.getProgressTimelineData, attendance_routes.displayProgressTimeline);
 
     //lecture text
     app.get("/guild/:guildID/text/", guild.load(), lecture_text_routes.obs); //this is the obs page

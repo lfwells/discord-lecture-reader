@@ -19,7 +19,7 @@ export async function getSessions(guild)
         return weeks;
     }
 
-    var semesterStart = moment("2021-07-11"); //start of the week of SUNDAY 11 July 2021
+    var semesterStart = moment("2021-07-11"); //start of the week of SUNDAY 11 July 2021 //TODO: configured
     var weekStart = semesterStart;
     if (guild.id == config.KIT109_S2_2021_SERVER)
     {
