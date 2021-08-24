@@ -12,13 +12,13 @@
 <script type="text/javascript">
     $(async function()
     {
-        var pages = ["obs/allTime", "obs/week", "../awards/obs"];
+        var pages = ["obs/allTime", "obs/week", "../leaderboard/obs"];
         var i = 0;
         while (true)
         {
             var data = await $.ajax(pages[i % pages.length]);
             $("#results").html(data);
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 5000));
             i++;
         }
     });
