@@ -1,0 +1,16 @@
+<%- include('header.html') %>
+
+<h2>Invites</h2>
+<p>Associate a role with an invite. Users who use that invite will automatically be assigned that role.</p>
+<table id="guilds">
+  <% invites.forEach(function(invite){ %>
+    <tr>
+        <td><a href="https://discord.gg/<%= invite.code %>">https://discord.gg/<%= invite.code %></a></td>
+        <td>
+
+        </td>
+    </tr>
+  <% }) %>
+</table>
+
+<%- include('footer.html') %>

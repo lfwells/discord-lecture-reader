@@ -10,6 +10,7 @@ import * as attendance_routes from '../attendance/routes.js';
 import * as lecture_text_routes from '../lecture_text/routes.js';
 import * as poll_routes from '../polls/routes.js';
 import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
+import * as invite_routes from "../invite/routes.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
@@ -84,5 +85,8 @@ export default function(app)
     //scheduled polls
     app.get("/guild/:guildID/pollSchedule", guild.load(), scheduled_poll_routes.load, scheduled_poll_routes.getPollSchedule);
     app.post("/guild/:guildID/pollSchedule", guild.load(), scheduled_poll_routes.load, scheduled_poll_routes.postPollSchedule);
+
+    //invites
+    app.get("/guild/:guildID/invites", guild.load(), invite_routes.inviteList);
         
 }
