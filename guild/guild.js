@@ -2,6 +2,7 @@ import * as config from '../core/config.js';
 import { db, guildsCollection } from "../core/database.js";
 import { getStatus, isOutsideTestServer } from "../core/utils.js";
 import { init_invites } from "../invite/invite.js";
+import { init_roles } from '../invite/roles.js';
 
 import { getClient } from "../core/client.js";
 
@@ -26,7 +27,8 @@ export async function init(client)
     console.log("initialised Guild",guild.name, guild.id);
   });
 
-  init_invites(client);
+  await init_invites(client);
+  await init_roles(client);
 }
 
 //TODO: these two need to return error if not authed or wrong id

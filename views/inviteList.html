@@ -7,10 +7,32 @@
     <tr>
         <td><a href="https://discord.gg/<%= invite.code %>">https://discord.gg/<%= invite.code %></a></td>
         <td>
-
+            <%- include("subViews/select.html", { 
+                id:invite.code, 
+                data:rolesList, 
+                defaultText: "--- Assign Role ---",
+                selected: appliedRolesList[invite.code],
+                onChange:"applyRole(value, id);" }) %>
         </td>
     </tr>
   <% }) %>
+  <tr>
+      <td>TODO: Generate invite button here</td>
+  </tr>
 </table>
+<script>
+    function applyRole(role, id)
+    {
+        $.ajax({
+            url:"",
+            method:"post",
+            data:{
+                role:role,
+                id:id,
+            },
+            complete:(XPathResult) => document.location.reload()
+        })
+    }
+</script>
 
 <%- include('footer.html') %>

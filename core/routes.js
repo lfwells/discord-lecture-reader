@@ -88,5 +88,6 @@ export default function(app)
 
     //invites
     app.get("/guild/:guildID/invites", guild.load(), invite_routes.inviteList);
+    app.post("/guild/:guildID/invites", guild.load(), invite_routes.assignRole, invite_routes.inviteList);
         
 }
