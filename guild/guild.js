@@ -71,14 +71,14 @@ export async function getAdminGuilds(client, req)
       if (g2.id == g.id)
       {
         //if owner then yess
-        if (g2.owner) { console.log("is owner of "+g2.name); return true; }
+        if (g2.owner) { /*console.log("is owner of "+g2.name); */return true; }
 
         //check admin permissions, but this is not enough
-        if ((g2.permissions & 0x0000000008) == 0x0000000008) { console.log("is admin of "+g2.name); return true; }
+        if ((g2.permissions & 0x0000000008) == 0x0000000008) { /*console.log("is admin of "+g2.name); */return true; }
 
         //check if theyre in the admins list
         if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
-          console.log("is in staff role of "+g2.name); return true;
+          /*console.log("is in staff role of "+g2.name); */return true;
         }
       }
       return false;
@@ -102,7 +102,6 @@ export async function checkGuildAdmin(req, res, next)
   {
     var client = getClient();
     var adminGuilds = (await getAdminGuilds(client, req)).map(g => g.id);
-    console.log(adminGuilds);
     if (adminGuilds.indexOf(req.guild.id) >= 0)
     {
       next();
