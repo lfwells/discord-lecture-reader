@@ -5,15 +5,15 @@ import { init_invites } from "../invite/invite.js";
 import { init_roles } from '../invite/roles.js';
 
 import { getClient } from "../core/client.js";
+import { loginPage, oauth } from '../core/login.js';
 
-var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
-export function getGuildCache() { return GUILD_CACHE; }
+export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
 export async function init(client)
 {
   var guilds = client.guilds.cache;
   //store them in the db
-  guilds.each( async (guild) => { 
+  await Promise.all(guilds.map( async (guild) => { 
     await db.collection("guilds").doc(guild.id).set({    
       name:guild.name
     }, {merge:true}); 
@@ -25,8 +25,11 @@ export async function init(client)
       console.log(await getStatus(config.LINDSAY_ID, guild));
     }
     console.log("initialised Guild",guild.name, guild.id);
-  });
+  })
+  );;
+  console.log("done awaiting all guilds"); 
 
+  await init_admin_users(client);
   await init_invites(client);
   await init_roles(client);
 }
@@ -37,7 +40,7 @@ export function load() {
   {
     var guildID = req.params.guildID;
     var client = getClient();
-    req.guild = await client.guilds.fetch(guildID);
+    req.guild = await client.guilds.fetch(guildID); 
     req.guildDocument = getGuildDocument(guildID);
 
     if (req.guild == undefined)
@@ -54,6 +57,59 @@ export function load() {
     {
       res.locals.guild = req.guild;
       next();
+    }
+  }
+}
+
+export async function getAdminGuilds(client, req)
+{
+  if (req.session && req.session.auth)
+  {
+    var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+    //console.log("user guilds", guilds);
+    var result = client.guilds.cache.filter(g => guilds.findIndex(g2 => {
+      if (g2.id == g.id)
+      {
+        //if owner then yess
+        if (g2.owner) { console.log("is owner of "+g2.name); return true; }
+
+        //check admin permissions, but this is not enough
+        if ((g2.permissions & 0x0000000008) == 0x0000000008) { console.log("is admin of "+g2.name); return true; }
+
+        //check if theyre in the admins list
+        if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
+          console.log("is in staff role of "+g2.name); return true;
+        }
+      }
+      return false;
+    }) >= 0);
+
+    return result;
+  }
+  return [];
+}
+
+export async function checkGuildAdmin(req, res, next)
+{
+  if (req.path.indexOf("obs") >= 0 || 
+  req.path.indexOf("/text/") > 0 || 
+  req.path.endsWith("/text/latest/") || 
+  req.path.indexOf("/poll") >= 0 || 
+  req.path.indexOf("/recordProgress/") >= 0 || 
+  req.path.indexOf("/recordSectionProgress/") >= 0)  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
+    next() 
+  else
+  {
+    var client = getClient();
+    var adminGuilds = (await getAdminGuilds(client, req)).map(g => g.id);
+    console.log(adminGuilds);
+    if (adminGuilds.indexOf(req.guild.id) >= 0)
+    {
+      next();
+    }
+    else
+    {
+      res.render("accessDenied");
     }
   }
 }
@@ -175,20 +231,84 @@ export function loadOffTopicChannel(required)
   }
 }
 
+
+  
+export async function loadAdminRoleID(req,res,next)   
+{
+  if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].adminRoleID)
+  {
+    req.adminRoleID = GUILD_CACHE[req.guild.id].adminRoleID;
+  }
+
+  if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].adminRoleID))
+  {
+    req.guildDocumentSnapshot = await req.guildDocument.get();
+    req.adminRoleID = await req.guildDocumentSnapshot.get("adminRoleID");
+    if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+    GUILD_CACHE[req.guild.id].adminRoleID = req.adminRoleID;
+  }
+    
+  if (req.adminRoleID)
+  {
+    req.adminRole = await req.guild.roles.fetch(req.adminRoleID);
+    res.locals.adminRole = req.adminRole;
+  }
+
+  next(); 
+  return res; 
+}
+
 //non-route version (but still spoofing route version)
 //todo: generic for all
 export async function getOffTopicChannel(guild, required)
 {
   var client = getClient();
-  var req = {
-    guild: guild,
-    guildDocument: getGuildDocument(guild.id),
-  }
-  var res = await loadOffTopicChannel(required)(req, {locals:{}}, () => {});
+  var res = await loadOffTopicChannel(required)(getFakeReq(guild), {locals:{}}, () => {});
   if (required && res.error)
   {
     console.log(res.error);
     //anything else?
   }
   return res.locals.offTopicChannel;
+}
+//non-route version (but still spoofing route version)
+//todo: generic for all
+export async function getAdminRole(guild)
+{
+  var client = getClient();
+  var res = await loadAdminRoleID(getFakeReq(guild), {locals:{}}, () => {});
+  if (res.error)
+  {
+    console.log(res.error);
+    //anything else?
+  }
+  return res.locals.adminRole;
+}
+
+//TODO: this will need a refresh button or a detect that a member role has changed
+export async function init_admin_users(client)
+{
+  console.log("init_admin_users");
+
+  var guilds = client.guilds.cache;
+  //store them in the db
+  guilds.each( async (guild) => 
+  { 
+    var adminRole = await getAdminRole(guild);
+    if (adminRole)
+    {
+      console.log(guild.name);
+      GUILD_CACHE[guild.id].admins = adminRole.members.map(m=>m.user.id);
+      console.log(GUILD_CACHE[guild.id].admins);
+    }
+  });
+}
+
+function getFakeReq(guild)
+{
+  var req = {
+    guild: guild,
+    guildDocument: getGuildDocument(guild.id),
+  }
+  return req;
 }

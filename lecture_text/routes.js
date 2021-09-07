@@ -1,7 +1,6 @@
 import { send } from "../core/client.js";
 
-import { getGuildCache } from "../guild/guild.js";
-var GUILD_CACHE = getGuildCache();
+import { GUILD_CACHE } from "../guild/guild.js";
 
 import fs from "fs";
 var f = fs.readFileSync("./lecture_text/emoji.json");

@@ -2,8 +2,7 @@ import { send } from "../core/client.js";
 import * as config from "../core/config.js";
 import { redirectToWhereWeCameFrom } from "../core/utils.js";
 
-import { getGuildCache } from "../guild/guild.js";
-var GUILD_CACHE = getGuildCache();
+import { GUILD_CACHE } from "../guild/guild.js";
 var previousRequest;
 
 //poll display details

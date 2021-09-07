@@ -1,13 +1,13 @@
 import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard } from "./awards.js";
-import { getClient, send } from "../core/client.js";
-import e from "express";
-var client = getClient();
+import { send } from "../core/client.js";
 
 //todo: summary (public?) pages that list achievements?
 export async function namesTest(req,res,next) 
 {
   console.log(req.awardChannelID);
   console.log(req.awardChannel);
+  
+  var client = getClient();
   var awardedMembers = await handleAwardNicknames(client, req.awardChannel);
   
   console.log(awardedMembers);

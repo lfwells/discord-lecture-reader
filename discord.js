@@ -1,13 +1,6 @@
 //discord
 import { getClient, init_client } from './core/client.js'; 
 
-//web server
-import { app } from "./core/server.js";
-
-//web server routes
-import init_routes from './core/routes.js';
-init_routes(app);
-
 //import things need to initialize discord
 import * as guild from "./guild/guild.js";
 
@@ -30,3 +23,8 @@ client.login(token);
 //register for errors to be posted to test server
 import { initErrorHandler } from './core/errors.js';
 initErrorHandler(client);
+
+
+//web server
+import { init_server } from "./core/server.js";
+init_server();

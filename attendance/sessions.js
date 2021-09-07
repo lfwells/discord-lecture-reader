@@ -281,7 +281,7 @@ export async function getNextSessionCountdown(guild, linkChannelName)
         };
     }
 
-    console.log(nextSession);
+    //console.log(nextSession);
 
     var text = "The next **";
     text += nextSession.name;
@@ -320,7 +320,7 @@ export async function scheduleNextSessionPost(guild)
         }
         else
         {
-            console.log("waiting", diffInMilliseconds, "ms before next session countdown --", await getNextSessionCountdown(guild, false));
+            //console.log("waiting", diffInMilliseconds, "ms before next session countdown --", await getNextSessionCountdown(guild, false));
             await sleep(diffInMilliseconds); 
 
             var countdown = await getNextSessionCountdown(guild, false);

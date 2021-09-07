@@ -133,3 +133,9 @@
     #exportTutorial footer {
         text-align: center;
     }
+
+    .discordUser {
+        position: fixed;
+        right:1em;
+        top:1em;
+    }

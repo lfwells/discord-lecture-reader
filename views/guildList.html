@@ -1,11 +1,14 @@
 <%- include('header.html') %>
 
 <h1>Servers</h1>
+<!--
 <p><% if (testMode) { %>
     Test Mode ON. <a href="/testMode/false">Turn OFF</a>
 <% } else { %>
     Test Mode OFF. <a href="/testMode/true">Turn ON</a>
 <% } %> (Test mode limits the bot to only respond and post on the test server)</p>
+-->
+
 <ul id="guilds">
   <% guilds.forEach(function(guild){ %>
     <li><a href="/guild/<%= guild.id %>/"><%= guild.name %> &lt;<%= guild.id %>&gt;</a></li>

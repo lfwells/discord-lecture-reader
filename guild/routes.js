@@ -1,23 +1,22 @@
+import { getClient } from "../core/client.js";
 import * as config from "../core/config.js";
 import { isOutsideTestServer } from "../core/utils.js";
 
-import { getClient } from "../core/client.js";
-var client = getClient();
+import { getAdminGuilds, GUILD_CACHE } from "./guild.js";
 
-import { getGuildCache } from "./guild.js";
-var GUILD_CACHE = getGuildCache();
-
-export function guildList(req, res) 
-{
-    
+export async function guildList(req, res) 
+{  
+  var client = getClient();
   res.render('guildList', {
-    guilds: client.guilds.cache.filter(g => !isOutsideTestServer(g)),
+    guilds: (await getAdminGuilds(client, req)).filter(g => !isOutsideTestServer(g)).sort((a, b) => a.name.localeCompare(b.name)),
     testMode: config.getTestMode(),
   });
 }
 
 export async function guildHome(req, res) 
 {  
+  var client = getClient();
+
   //todo: these three need to be generic
   var setLectureChannelID = req.query.setLectureChannelID;
   if (setLectureChannelID)
@@ -47,7 +46,7 @@ export async function guildHome(req, res)
     req.awardChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
     res.locals.awardChannel = req.awardChannel;
 
-    req.query.message = "set the award channel to #"+req.awardChannel.name;
+    req.query.message = "set the award channel to @"+req.awardChannel.name;
   }
 
   //todo: these three need to be generic
@@ -65,6 +64,22 @@ export async function guildHome(req, res)
 
     req.query.message = "set the off topic channel to #"+req.offTopicChannel.name;
   }
+
+  var setAdminRoleID = req.query.setAdminRoleID;
+  if (setAdminRoleID)
+  {
+    await req.guildDocument.update({
+      adminRoleID: setAdminRoleID
+    });
+    req.adminRoleID = setAdminRoleID;
+    GUILD_CACHE[req.guild.id].adminRoleID = setAdminRoleID;
+
+    req.adminRole = await req.guild.roles.fetch(req.adminRoleID);//.cache.filter(c => c.id == offTopicChannelID);
+    res.locals.adminRole = req.adminRole;
+
+    req.query.message = "set the admin role to #"+req.adminRole.name;
+  }
+
 
   res.render("guild");
 }

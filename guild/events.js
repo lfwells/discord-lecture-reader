@@ -1,5 +1,5 @@
 import { init_client } from '../core/client.js';
-import { getGuildDocument } from "./guild.js";
+import { getGuildDocument, init_admin_users } from "./guild.js";
 
 export default async function(client)
 {
@@ -20,5 +20,10 @@ export default async function(client)
             name:newGuild.name
         });
         init_client(client);
+    });
+
+    client.on("guildMemberUpdate", function(oldMember, newMember){
+        console.error(`a guild member changes - i.e. new role, removed role, nickname.`);
+        init_admin_users(oldMember.client);
     });
 }

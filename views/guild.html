@@ -26,6 +26,28 @@
     </ul>
 </nav>
 
+<h3>Role Set Up</h3>
+<p>Admin/Staff Role:
+    <select id="setAdminRoleID">
+        <option>Please Select Role</option>
+        <% 
+        var roles = guild.roles.cache.sort((a,b) => a.position - b.position);
+        roles.forEach(function(role)
+        { 
+            console.log(role);
+            %><option value="<%= role.id %>"
+                <% if (locals.adminRole && role.id == locals.adminRole.id) { %>selected<% } %>>
+                <%= role.name %>
+            </option><%
+        }) %>
+    </select></p>
+<script>
+    $("#setAdminRoleID").on("change", (e) =>
+    {
+        document.location.href = "?setAdminRoleID="+$("#setAdminRoleID").val();
+    });
+</script>
+
 <h3>Channel Set Up</h3>
 <p>Lecture Channel:  
     <select id="setLectureChannel">
