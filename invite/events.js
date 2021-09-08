@@ -10,7 +10,9 @@ export default async function(client)
     //if (member.guild.id == config.KIT109_S2_2021_SERVER || member.guild.id == config.TEST_SERVER_ID)
     //{
         // To compare, we need to load the current invite list.
-        member.guild.fetchInvites().then(async (guildInvites) => {
+        //member.guild.fetchInvites().then(async (guildInvites) => {
+            var guildInvites = await member.guild.invites.fetch();
+
             // This is the *existing* invites for the guild.
             const ei = invites[member.guild.id];
             // Update the cached invites for the guild.
@@ -52,7 +54,7 @@ export default async function(client)
 
             init_invites(member.client);
         
-        });
+        //});
     //}
     });
 

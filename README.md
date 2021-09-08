@@ -62,12 +62,14 @@ Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
 You can clear the poll on this page by clicking the button or navigating to `http://131.217.172.176/guild/<guild_id>/clearpoll`.
 
 ## TODO
-For fun: "latest vote: XX for YY" (actually is hard)
+For fun: "latest vote: XX for YY" (actually is hard -- unless we do a robo lindsay version)
 
-but im thinking about a longer term solution where we effectively have a "dashboard" that can do heaps of stuff, like:
 - a button for enabling/disabling breakout rooms
 - a button for clearing a channel, or posting an announcement or all sorts of cool shit
 
 
 TODO:
 - lecturechannel can be set with extra query string junk on end
+- fix header to look nicer
+- add invites link
+- detect when new roles are made / refresh cache on load page

@@ -92,7 +92,7 @@ export async function getAdminGuilds(client, req)
 export async function checkGuildAdmin(req, res, next)
 {
   if (req.path.indexOf("obs") >= 0 || 
-  req.path.indexOf("/text/") > 0 || 
+  req.path.indexOf("/text") >= 0 || 
   req.path.endsWith("/text/latest/") || 
   req.path.indexOf("/poll") >= 0 || 
   req.path.indexOf("/recordProgress/") >= 0 || 

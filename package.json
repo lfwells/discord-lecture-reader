@@ -27,7 +27,7 @@
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "discord-oauth2": "^2.7.1",
-    "discord.js": "vaporox/discord.js#feat-interactions",
+    "discord.js": "^13.1.0",
     "ejs": "^3.1.6",
     "emoji": "npm:emoji.json@^13.1.0",
     "emoji.json": "^13.1.0",

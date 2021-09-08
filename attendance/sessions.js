@@ -325,7 +325,7 @@ export async function scheduleNextSessionPost(guild)
 
             var countdown = await getNextSessionCountdown(guild, false);
             var channel = await guild.client.channels.cache.get(nextSession.channelID);
-            await send(channel, {embed: countdown});
+            await send(channel, {embeds: [ countdown ]});
             //await send(channel, await getNextSessionCountdown(guild, false));
         }
 

@@ -8,9 +8,10 @@ export async function init_invites(client)
     //store them in the db
     guilds.each( async (guild) => 
     { 
-        guild.fetchInvites().then(guildInvites => 
-        {
+        var guildInvites = await guild.invites.fetch();
+        //guild.fetchInvites().then(guildInvites => 
+        //{
             invites[guild.id] = guildInvites;
-        });
+        //});
     });
 }

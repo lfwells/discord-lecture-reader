@@ -1,7 +1,7 @@
 import * as config from '../core/config.js';
 import { getGuildDocument, getOffTopicChannel } from '../guild/guild.js';
 import { getStats, getStatsWeek } from './analytics.js';
-import { offTopicOnly, pluralize } from '../core/utils.js';
+import { offTopicOnly, pluralize, sleep } from '../core/utils.js';
 import { send } from '../core/client.js';
 
 export default async function(client)
@@ -68,12 +68,10 @@ export default async function(client)
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsMeCommand);//); 
     });
 
-    client.on('interaction', async function(interaction) 
+    client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand()) return;
-        
-        console.log("got interaction", interaction.commandName, interaction.options.length);
     
         // Check if it is the correct command
         if (interaction.commandName === "stats" || interaction.commandName === "statsweek") 
@@ -97,15 +95,11 @@ async function doStatsCommand(interaction)
     if (await offTopicOnly(interaction)) return;
 
     //this can take too long to reply, so we immediately reply
-    var msg = await interaction.reply("Fetching stats...", {ephemeral:true});
+    await interaction.deferReply();
 
     var statsEmbed = {
         title: "Top 10 Posters " +(thisWeek ? "This Week" : ""),
         fields: [],
-        author: {
-            name:"As requested by "+(interaction.member.displayName),
-            icon_url:interaction.user.displayAvatarURL()
-        },
         thumbnail: { 
             url:interaction.guild.iconURL() //this is null and at this point I don't care lol
         }
@@ -119,12 +113,8 @@ async function doStatsCommand(interaction)
             value:pluralize(stats.members[i].posts.length, "Post")
         });
     }
-
-    /*const user = await client.users.cache.get(interaction.member.user.id);
-    user.send(exampleEmbed);*/
     
-    //await interaction.reply({embed: statsEmbed});
-    await send(interaction.channel, {embed: statsEmbed});
+    await interaction.editReply({embeds: [ statsEmbed ]});
 }
 
 async function doStatsMeCommand(interaction)
@@ -132,14 +122,10 @@ async function doStatsMeCommand(interaction)
     //only allow in off topic
     if (await offTopicOnly(interaction)) return;
 
-    var member = interaction.member; 
-    if (interaction.options.length >= 1)
-    {
-        member = await interaction.guild.members.fetch(interaction.options[0].value.replace("<@", "").replace(">", "").replace("!", ""));
-    }
+    var member = interaction.options.getMember("user") ?? interaction.member; 
 
     //this can take too long to reply, so we immediately reply
-    var msg = await interaction.reply("Fetching stats...", {ephemeral:true});
+    await interaction.deferReply();
 
     var statsEmbed = {
         title: "Stats for "+(member.nickname ?? member.username),
@@ -160,14 +146,6 @@ async function doStatsMeCommand(interaction)
         name:pluralize(posts.length, "Post"),
         value:posts.length > 100 ? "'Thats'a lotta posts!'" : "Them's rookie numbers!"
     });
-    
-    if (interaction.member.id != member.id)
-    {
-        statsEmbed.author = {
-            name:"As requested by "+(interaction.member.displayName),
-            icon_url:interaction.user.displayAvatarURL()
-        }
-    }
 
-    await send(interaction.channel, {embed: statsEmbed});
+    await interaction.editReply({embeds: [ statsEmbed ]});
 }

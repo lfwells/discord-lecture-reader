@@ -1,6 +1,12 @@
-import Discord from 'discord.js';
-const client = new Discord.Client({ 
-    intents: Discord.Intents.ALL,
+import { Client, Intents } from 'discord.js';
+const client = new Client({ 
+    intents: [ 
+        Intents.FLAGS.GUILDS, 
+        Intents.FLAGS.GUILD_INVITES, 
+        Intents.FLAGS.GUILD_MEMBERS, 
+        Intents.FLAGS.GUILD_MESSAGE_REACTIONS, 
+        Intents.FLAGS.GUILD_PRESENCES
+    ],
     fetchAllMembers: true
 });
 export function getClient() { return client };

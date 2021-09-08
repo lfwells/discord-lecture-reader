@@ -196,18 +196,18 @@ export default async function (client)
         /*console.log(guild.name+"add "+*/await guild.commands.create(nextSessionCommand);//); 
     });
 
-    client.on('interaction', async function(interaction) 
+    client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand()) return;
-        
-        console.log("got interaction", interaction.commandName, interaction.options.length);
     
         // Check if it is the correct command
         if (interaction.commandName === "nextsession") 
         {
+            await interaction.deferReply();
+
             var msg = await sessions.getNextSessionCountdown(interaction.guild, true);//show channel name
-            await interaction.reply({embed: msg});
+            await interaction.editReply({embeds: [ msg ]});
         }
     });
 

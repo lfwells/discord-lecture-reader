@@ -62,7 +62,7 @@ export async function offTopicOnly(interaction)
     var offTopicChannel = await getOffTopicChannel(interaction.guild);
     if (offTopicChannel && interaction.channel != offTopicChannel)
     {
-        interaction.reply("You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", { ephemeral:true });
+        interaction.reply({ content: "You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", ephemeral:true });
         return true;
     }
     return false;

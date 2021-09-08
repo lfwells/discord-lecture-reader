@@ -98,7 +98,7 @@ export async function getGiveAward(req, res, next)
         if (req.query.popupChannelID)
         {
           var channel = await req.guild.channels.cache.get(req.query.popupChannelID);
-          await send(channel, {embed:achievementEmbed});
+          await send(channel, {embeds: [ achievementEmbed ]});
         }
         res.json({success:true});
       }
