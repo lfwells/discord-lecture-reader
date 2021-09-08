@@ -6,10 +6,10 @@ import { send } from '../core/client.js';
 
 export default async function(client)
 {
-    client.on('message', async (msg) =>  
+    client.on('messageCreate', async (msg) =>  
     {
         if (msg.channel.id == config.ERROR_LOG_CHANNEL_ID) return; //dont get stuck in a loop recording error logs lol
-        //console.log(msg);
+
         var guildDocument = getGuildDocument(msg.guild.id);
         var record = {};
         record.dump = JSON.stringify(msg);

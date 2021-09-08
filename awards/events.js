@@ -5,11 +5,14 @@ import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward, getAwardListFullData, getLeaderboard } from "./awards.js";
 import { pluralize, offTopicOnly } from '../core/utils.js';
 import { getClassList } from '../core/classList.js';
+import { getAdminRole } from '../guild/guild.js';
 
 export default async function(client)
 {
-    client.on('message', async (msg) => 
+    client.on('interactionCreate', async (msg) => 
     {
+        if (msg.isCommand()) return;
+
         if (await isAwardChannelID(msg.channel))
         {
             //detect update to awards (add)
@@ -52,10 +55,10 @@ export default async function(client)
     const awardCommand = {
         name: 'award', 
         description: 'Gives an award to a user',
-        /*defaultPermission:false,
-        permissions: [
+        defaultPermission: false,
+        /*permissions: [
             {
-                id: "801718054487719936",
+                id: ,
                 type: 1,
                 permission: true
             }
@@ -82,27 +85,12 @@ export default async function(client)
             required: false,
         }],
     }; 
-    /*
+    
     const awardNewCommand = {
         name: 'awardnew', 
-        description: 'Gives an award to a user',
-        options: [{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to give the award to',
-            required: true,
-        },{
-            name: 'award',
-            type: 'STRING',
-            description: 'The emoji to represent the award',
-            required: true,
-        },{
-            name: 'text',
-            type: 'STRING', 
-            description: 'The text to use for the title of the award (use only if creating a new award)',
-            required: true,
-        }],
-    };*/
+        description: 'old, and I don\'t know how to delete this lol',
+        defaultPermission: false,
+    };
     const leaderboardCommand = {
         name: 'leaderboard',
         description: 'Replies with the top 10 award earners (only allowed in off topic channel).',
@@ -118,13 +106,29 @@ export default async function(client)
 
     await guilds.each( async (guild) => { 
         var commands = await guild.commands.fetch(); 
-            for (const command in commands)
-            {
-                console.log(guild.name+"delete "+await command.delete());
-            }
+        //TODO: this doesnt work!
+        for (const command in commands)
+        {
+            console.log(guild.name+"delete "+await command.delete());
+        }
+
+        var awardCommand2 = JSON.parse(JSON.stringify(awardCommand));
+        /* TODO: this still doesnt work!
+        var admin = (await getAdminRole(guild));
+        if (admin)
+        {
+            awardCommand2.permissions = [
+                {
+                    id: admin.id,
+                    type: "ROLE",
+                    permission: true
+                }
+            ];
+        }*/
+
         /*console.log(guild.name+"add "+*/await guild.commands.create(flexCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(awardCommand);//); 
-        ///*console.log(guild.name+"add "+*/await guild.commands.create(awardNewCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(awardCommand2);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(awardNewCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(leaderboardCommand);//); 
     });
 
@@ -138,7 +142,7 @@ export default async function(client)
         {
             doFlexCommand(interaction);
         }
-        else if (interaction.commandName == "award" || interaction.commandName == "awardnew")
+        else if (interaction.commandName == "award"/* || interaction.commandName == "awardnew"*/)
         {
             doAwardCommand(interaction);
         }

@@ -8,7 +8,7 @@ import { getGuildDocument } from '../guild/guild.js';
 //TODO: make this configurable etc
 export default async function(client) 
 {
-    client.on('message', async (msg) =>  
+    client.on('messageCreate', async (msg) =>  
     {
         if (isOutsideTestServer(msg.channel.guild)) return;
         
