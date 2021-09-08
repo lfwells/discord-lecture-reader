@@ -3,6 +3,7 @@ import { getGuildDocument, getOffTopicChannel } from '../guild/guild.js';
 import { getStats, getStatsWeek } from './analytics.js';
 import { offTopicOnly, pluralize, sleep } from '../core/utils.js';
 import { send } from '../core/client.js';
+import { MessageActionRow, MessageButton } from 'discord.js';
 
 export default async function(client)
 {
@@ -55,6 +56,10 @@ export default async function(client)
             required: false,
         }],
     };
+    const buttonCommand = {
+        name: 'button',
+        description: 'this is dumb',
+    }; 
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
@@ -66,6 +71,7 @@ export default async function(client)
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsWeekCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsMeCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(buttonCommand);//); 
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -82,6 +88,11 @@ export default async function(client)
         else if (interaction.commandName === "statsme") 
         {
            doStatsMeCommand(interaction);            
+        }
+        // Check if it is the correct command
+        else if (interaction.commandName === "button") 
+        {
+           doButtonCommand(interaction);            
         }
     });
 
@@ -147,5 +158,40 @@ async function doStatsMeCommand(interaction)
         value:posts.length > 100 ? "'Thats'a lotta posts!'" : "Them's rookie numbers!"
     });
 
-    await interaction.editReply({embeds: [ statsEmbed ]});
+
+    await interaction.editReply({embeds: [ statsEmbed ] });
+}
+
+var clicks = 0;
+async function doButtonCommand(interaction)
+{
+    //only allow in off topic
+    if (await offTopicOnly(interaction)) return;
+
+
+    const row = new MessageActionRow()
+    .addComponents(
+        new MessageButton()
+            .setCustomId('primary')
+            .setLabel('Click me for nothing interesting to happen')
+            .setStyle('PRIMARY')
+            .setEmoji('😄')
+    );
+
+    const rows = [ row ]
+
+    
+    const collector = interaction.channel.createMessageComponentCollector({ time: 150000000 });
+    collector.on('collect', async i => {
+        if (i.customId === 'primary') {
+            //await i.deferUpdate();
+            //await wait(4000);
+            clicks++;
+            await i.update({ content: pluralize(clicks, "click"), components: rows });
+        }
+    });
+    
+    collector.on('end', collected => console.log(`Collected ${collected.size} items`));
+
+    await interaction.reply({content: pluralize(clicks, "click"), components: rows});
 }
