@@ -34,7 +34,7 @@
         var roles = guild.roles.cache.sort((a,b) => a.position - b.position);
         roles.forEach(function(role)
         { 
-            console.log(role);
+            //console.log(role);
             %><option value="<%= role.id %>"
                 <% if (locals.adminRole && role.id == locals.adminRole.id) { %>selected<% } %>>
                 <%= role.name %>
@@ -53,7 +53,7 @@
     <select id="setLectureChannel">
         <option>Please Select Channel</option>
         <%
-        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
+        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
         categoryChannels.forEach(cat => { %>
             <optgroup label="<%= cat.name %>">
                 <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
@@ -79,7 +79,7 @@
     <select id="setAwardChannel">
         <option>Please Select Channel</option>
         <%
-        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
+        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
         categoryChannels.forEach(cat => { %>
             <optgroup label="<%= cat.name %>">
                 <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
@@ -104,7 +104,7 @@
     <select id="setOffTopicChannel">
         <option>Please Select Channel</option>
         <%
-        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "category").sort((a,b) => a.position - b.position);
+        var categoryChannels = guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
         categoryChannels.forEach(cat => { %>
             <optgroup label="<%= cat.name %>">
                 <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);

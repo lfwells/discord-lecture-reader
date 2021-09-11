@@ -6,8 +6,8 @@ import express  from 'express';
 
 export const app = express();
 
-import basicAuth from 'express-basic-auth';
-import users from "../users.js";
+//import basicAuth from 'express-basic-auth';
+//import users from "../users.js";
 import { loginPage, oauth } from './login.js';
 
 import cors from "cors"; 
@@ -17,7 +17,8 @@ import sessions from "express-session";
 
 import ejs from 'ejs';
 import path from 'path';
-import { init } from '../guild/guild.js';
+
+import FileStore from 'session-file-store';
 
 export function init_server()
 {
@@ -25,10 +26,13 @@ export function init_server()
 
   app.use(cookieParser())
   
+  var fs = FileStore(sessions);
+  const fileStoreOptions = {};
   const oneDay = 1000 * 60 * 60 * 24;
   app.use(sessions({
       secret: "thisismysecrctekeyfhrgfgrfrty84fwir767",
       saveUninitialized:true,
+      store: new fs(fileStoreOptions),
       cookie: { maxAge: oneDay * 90 },
       resave: false 
   }));
@@ -89,7 +93,7 @@ export async function authHandler (req, res, next)  {
     next();
   } else {
     //console.log("challenge:", req.path);
-    console.log(("auth check"), req.session);
+    //console.log(("auth check"), req.session);
     if (req.session == undefined || req.session.auth == undefined)
     {
       loginPage(req,res);

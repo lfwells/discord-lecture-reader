@@ -61,6 +61,8 @@ Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
 
 You can clear the poll on this page by clicking the button or navigating to `http://131.217.172.176/guild/<guild_id>/clearpoll`.
 
+Note: for sessions to work, you will need a `sessions` subdirectory with write permissions.
+
 ## TODO
 For fun: "latest vote: XX for YY" (actually is hard -- unless we do a robo lindsay version)
 

@@ -69,7 +69,7 @@ export async function recordSectionProgress(req, res, next)
 {
     if (req.query.studentID)
     {
-        console.log("stud id", req.query.studentID);
+        //console.log("stud id", req.query.studentID);
         var d = new Date();
         req.query.timestamp = d.getTime();
 
@@ -78,7 +78,7 @@ export async function recordSectionProgress(req, res, next)
         next()
         return;
     }
-    console.log((req.query));
+    //console.log((req.query));
     res.statusCode = 403;
     res.json({"success": false});
 }
@@ -101,7 +101,7 @@ export async function getSectionProgress(req,res,next)
         res.json(req.data);
         return;
     }
-    console.log((req.query));
+    //console.log((req.query));
     res.statusCode = 403;
     res.json({"success": false});
 }

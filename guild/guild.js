@@ -261,7 +261,6 @@ export async function loadAdminRoleID(req,res,next)
 //todo: generic for all
 export async function getOffTopicChannel(guild, required)
 {
-  var client = getClient();
   var res = await loadOffTopicChannel(required)(getFakeReq(guild), {locals:{}}, () => {});
   if (required && res.error)
   {
@@ -296,9 +295,9 @@ export async function init_admin_users(client)
     var adminRole = await getAdminRole(guild);
     if (adminRole)
     {
-      console.log(guild.name);
+      //console.log(guild.name);
       GUILD_CACHE[guild.id].admins = adminRole.members.map(m=>m.user.id);
-      console.log(GUILD_CACHE[guild.id].admins);
+      //console.log(GUILD_CACHE[guild.id].admins);
     }
   });
 }

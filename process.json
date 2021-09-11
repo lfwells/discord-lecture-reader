@@ -1,0 +1,8 @@
+{
+  "script": "discord.js",
+  "watch": true,
+  "ignore_watch" : ["node_modules", "sessions"],
+  "watch_options": {
+    "followSymlinks": false
+  }
+}

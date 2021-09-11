@@ -1,4 +1,5 @@
-import { invites } from "./invite.js";
+import { getClient } from "../core/client.js";
+import { init_invites, invites } from "./invite.js";
 import { roles } from "./roles.js";
 
 
@@ -7,6 +8,8 @@ import { roles } from "./roles.js";
 
 export async function inviteList(req, res) 
 {
+    init_invites(getClient());
+    
     var appliedRolesList = [];
     var query = await req.guildDocument.collection("invites").get();
     query.forEach(function(doc) {

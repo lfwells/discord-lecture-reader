@@ -5,7 +5,7 @@ export default async function(client)
 {
     client.on('guildCreate', async (guild) => 
     {
-        console.log("guildCreate", guild); 
+        //console.log("guildCreate", guild); 
         var guildDocument = getGuildDocument(guild.id);
         guildDocument.set({
             name:guild.name
@@ -14,7 +14,7 @@ export default async function(client)
     });
 
     client.on("guildUpdate", async (oldGuild, newGuild) => {
-        console.log("guildUpdate", newGuild); 
+        //console.log("guildUpdate", newGuild); 
         var guildDocument = getGuildDocument(newGuild.id);
         guildDocument.set({
             name:newGuild.name
