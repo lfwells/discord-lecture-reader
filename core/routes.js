@@ -104,6 +104,7 @@ function guildRouter()
     router.get("/poll/", guild.loadLectureChannel(true), poll_routes.load, poll_routes.obs); //obs page
     router.get("/poll/data/", guild.loadLectureChannel(true), poll_routes.load, poll_routes.pollData); //json data for obs page
     router.get("/poll/:pollText/", removeQuestionMark, guild.loadLectureChannel(true), poll_routes.postPoll);  //send poll (uses get, so that we can do the cool powerpoint links)
+    router.get("/pollRoboLinds/:pollText/", removeQuestionMark, guild.loadLectureChannel(true), poll_routes.postPollRoboLinds);  //send poll (uses get, so that we can do the cool powerpoint links)
     router.get("/clearpoll/", guild.loadLectureChannel(false), poll_routes.clearPoll);
 
     //scheduled polls

@@ -49,6 +49,7 @@ import init_attendance_events from '../attendance/events.js';
 import init_invite_events from '../invite/events.js';
 import init_analytics_events from '../analytics/events.js';
 import init_guild_events from '../guild/events.js';
+import init_poll_events from '../polls/events.js';
 
 export async function init_client(client)
 {
@@ -61,4 +62,5 @@ export async function init_client(client)
 	await init_attendance_events(client);
 	await init_invite_events(client);
 	await init_analytics_events(client);  
+	await init_poll_events(client);  
 }

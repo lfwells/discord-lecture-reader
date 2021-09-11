@@ -10,6 +10,7 @@
             <ul>
                 <li><%= poll.poll %></li>
                 <li><a class="post" href="javascript:poll('../poll/<%= encodeURIComponent(poll.poll.replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23")) %>')">POST</a></li>
+                <li><a class="post" href="javascript:poll('../pollRoboLinds/<%= encodeURIComponent(poll.poll.replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23")) %>')">POST ROBO LINDS POLL</a></li>
             </ul>
         </li>
     <% }) %>
@@ -29,10 +30,10 @@
 </form>
 
 <script type="text/javascript">
-function poll(poll)
-{
-    $.ajax(poll);
-}
+    function poll(poll)
+    {
+        $.ajax(poll);
+    }
 $(function()
 {
     $(".post").on("click", function() {

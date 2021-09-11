@@ -1,8 +1,10 @@
-import { send } from "../core/client.js";
+import { MessageActionRow, MessageButton } from "discord.js";
+import { getClient, send } from "../core/client.js";
 import * as config from "../core/config.js";
 import { redirectToWhereWeCameFrom } from "../core/utils.js";
 
 import { GUILD_CACHE } from "../guild/guild.js";
+import { doPollCommand } from "./events.js";
 var previousRequest;
 
 //poll display details
@@ -15,26 +17,42 @@ export async function load(req,res,next)
   var latestClearMessage = messages.filter(m => m.content.startsWith("/clearpoll")).first(); 
   //var latestClearPoll = parseInt(await req.guildDocumentSnapshot.get("latestClearPoll"));
   var latestClearPoll = GUILD_CACHE[req.guild.id].latestClearPoll;
-  var pollMessages = messages.filter(m => m.author.id == config.SIMPLE_POLL_BOT_ID);
+  var simplePollMessages = messages.filter(m => m.author.id == config.SIMPLE_POLL_BOT_ID);
   //console.log(pollMessages);
   //console.log(`${pollMessages.size} poll messages`);
-  var latestPoll = pollMessages.first();
-  if (latestPoll)
+  var latestSimplePoll = simplePollMessages.first();
+  var latestSimplePollTimestamp = latestSimplePoll.createdTimestamp
+
+  var latestRoboLindsPoll = GUILD_CACHE[req.guild.id].latestRoboLindsPoll;
+  var latestRoboLindsPollTimestamp = GUILD_CACHE[req.guild.id].latestRoboLindsPollTimestamp;
+  if (latestRoboLindsPoll && latestSimplePoll)
+  {
+    if (latestRoboLindsPollTimestamp > latestSimplePollTimestamp)
+    {
+      latestSimplePoll = null;
+    }
+    else if (latestRoboLindsPollTimestamp <= latestSimplePollTimestamp)
+    {
+      latestRoboLindsPoll = null;
+    }
+  }
+
+  if (latestSimplePoll)
   { 
-    if (latestClearPoll && latestPoll.createdTimestamp < latestClearPoll) 
+    if (latestClearPoll && latestSimplePoll.createdTimestamp < latestClearPoll) 
     {
       //console.log("latest pool was before most recent clearpoll");
       res.end("");
       return;
     }
-    if (latestClearMessage && latestPoll.createdTimestamp < latestClearMessage.createdTimestamp) 
+    if (latestClearMessage && latestSimplePoll.createdTimestamp < latestClearMessage.createdTimestamp) 
     {
       //console.log("latest pool was before most recent clearpoll message");
       res.end("");
       return;
     }
 
-    var question = latestPoll.content;
+    var question = latestSimplePoll.content;
     question = question.replace("**", "");
     question = question.replace(":bar_chart: ", "");
     question = question.replace("**", "");
@@ -44,14 +62,14 @@ export async function load(req,res,next)
 
     //display graph (TODO: right align?)
     var results = [];
-    if (latestPoll.embeds.length == 0) //yes/no poll
+    if (latestSimplePoll.embeds.length == 0) //yes/no poll
     {
       results.push({ answer:"Yes" });
       results.push({ answer:"No" });
     }
     else
     {
-      var embeds = latestPoll.embeds[0];
+      var embeds = latestSimplePoll.embeds[0];
       if (!embeds) {
         res.end("");
         return;
@@ -68,7 +86,7 @@ export async function load(req,res,next)
       }
     }
 
-    var reactions = latestPoll.reactions.cache;
+    var reactions = latestSimplePoll.reactions.cache;
     var i = 0;
     var mostVotes = 0;
     reactions.each((data,key) => {
@@ -83,6 +101,39 @@ export async function load(req,res,next)
     req.results = results;
     req.mostVotes = mostVotes;
     //console.log(results);
+  }
+  else if (latestRoboLindsPoll)
+  {
+    //console.log(latestRoboLindsPoll.fields[0].value.replace("votes", "").replace("vote", "").trim());
+    if (latestClearPoll && latestRoboLindsPollTimestamp < latestClearPoll) 
+    {
+      //console.log("latest pool was before most recent clearpoll");
+      res.end("");
+      return;
+    }
+    if (latestClearMessage && latestRoboLindsPollTimestamp < latestClearMessage.createdTimestamp) 
+    {
+      //console.log("latest pool was before most recent clearpoll message");
+      res.end("");
+      return;
+    }
+
+    var question = latestRoboLindsPoll.title;
+    //display question
+    req.question = "Poll: "+question+"\n";
+
+    var numberPattern = /\d+/g;
+    req.results = latestRoboLindsPoll.fields.map(f => ( {
+      answer: f.name,
+      votes: parseInt(f.value.match( numberPattern ))
+    }));
+    
+    var i = 0;
+    var mostVotes = 0;
+    for (let i = 0; i < req.results.length; i++) {
+      mostVotes = Math.max(mostVotes, req.results[i].votes);
+    }
+    req.mostVotes = mostVotes;
   }
   next();
 } 
@@ -144,6 +195,53 @@ export async function postPoll(req, res)
   var message = await send(req.lectureChannel, pollText);
   message.delete();
 
+  //show web page
+  res.end(`Poll ${pollText} sent to ${req.lectureChannel.name}`);
+}
+export async function postPollRoboLinds(req, res) 
+{
+  var pollText = req.params.pollText;
+
+  pollText = pollText.replace("/poll ", "");
+  
+  //turn it into a simple poll command
+  console.log("post poll",pollText);
+
+  //ward off evil powerpoint duplicate requests
+  if (pollText == previousRequest) 
+  {  
+    res.end();
+    return; 
+  }
+  previousRequest = pollText;
+
+  var myRegexp = /[^\s"]+|"([^"]*)"/gi;
+  var myString = pollText;
+  var myArray = [];
+
+  do {
+      //Each call to exec returns the next regex match as an array
+      var match = myRegexp.exec(myString);
+      if (match != null)
+      {
+          //Index 1 in the array is the captured group if it exists
+          //Index 0 is the matched text, which we use if no captured group exists
+          myArray.push(match[1] ? match[1] : match[0]);
+      }
+  } while (match != null);
+  console.log(myArray);
+
+  //send the message on discord
+  
+  var post = await send(req.lectureChannel, "poll");
+  await doPollCommand(post, {
+    question: myArray[0],
+    options: myArray.slice(1),
+    multi_vote: true,
+    allow_undo: true,
+    poll_emoji: "█"
+  });
+  
   //show web page
   res.end(`Poll ${pollText} sent to ${req.lectureChannel.name}`);
 }
