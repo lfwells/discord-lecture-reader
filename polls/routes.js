@@ -17,11 +17,11 @@ export async function load(req,res,next)
   var latestClearMessage = messages.filter(m => m.content.startsWith("/clearpoll")).first(); 
   //var latestClearPoll = parseInt(await req.guildDocumentSnapshot.get("latestClearPoll"));
   var latestClearPoll = GUILD_CACHE[req.guild.id].latestClearPoll;
-  var simplePollMessages = messages.filter(m => m.author.id == config.SIMPLE_POLL_BOT_ID);
+  var simplePollMessages = messages.filter(m => m.author.id == config.SIMPLE_POLL_BOT_ID); 
   //console.log(pollMessages);
   //console.log(`${pollMessages.size} poll messages`);
   var latestSimplePoll = simplePollMessages.first();
-  var latestSimplePollTimestamp = latestSimplePoll.createdTimestamp
+  var latestSimplePollTimestamp = latestSimplePoll ? latestSimplePoll.createdTimestamp : 0;
 
   var latestRoboLindsPoll = GUILD_CACHE[req.guild.id].latestRoboLindsPoll;
   var latestRoboLindsPollTimestamp = GUILD_CACHE[req.guild.id].latestRoboLindsPollTimestamp;
