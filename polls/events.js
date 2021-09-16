@@ -115,6 +115,7 @@ export async function doPollCommand(interaction, scheduledOptions)
         var rows = [];
         for (let i = 0; i < options.length; i++) {
             const row = new MessageActionRow();
+            var addedAComponent = false;
             for (let j = 0; j < options[i].length; j++) {
                 const option = options[i][j];
                 row.addComponents(
@@ -124,8 +125,10 @@ export async function doPollCommand(interaction, scheduledOptions)
                         .setStyle('PRIMARY')
                         //.setEmoji('😄') ///TODO: emoji like ABC?
                 );
+                addedAComponent = true;
             }
-            rows.push(row);
+            if (addedAComponent)
+                rows.push(row);
         }
 
         //admin only rows
