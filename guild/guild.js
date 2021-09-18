@@ -63,7 +63,7 @@ export function load() {
 
 export async function getAdminGuilds(client, req)
 {
-  if (req.session && req.session.auth)
+  if (req.session && req.session.auth && req.discordUser)
   {
     var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
     //console.log("user guilds", guilds);
@@ -77,7 +77,7 @@ export async function getAdminGuilds(client, req)
         if ((g2.permissions & 0x0000000008) == 0x0000000008) { /*console.log("is admin of "+g2.name); */return true; }
 
         //check if theyre in the admins list
-        if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
+        if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id] && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
           /*console.log("is in staff role of "+g2.name); */return true;
         }
       }
@@ -97,20 +97,21 @@ export async function checkGuildAdmin(req, res, next)
   req.path.indexOf("/poll") >= 0 || 
   req.path.indexOf("/recordProgress/") >= 0 || 
   req.path.indexOf("/recordSectionProgress/") >= 0)  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
-    next() 
-  else
+  {
+    next();
+    return;
+  }
+  else if (req.discordUser)
   {
     var client = getClient();
     var adminGuilds = (await getAdminGuilds(client, req)).map(g => g.id);
     if (adminGuilds.indexOf(req.guild.id) >= 0)
     {
       next();
-    }
-    else
-    {
-      res.render("accessDenied");
+      return;
     }
   }
+  res.render("accessDenied");
 }
 
 export function getGuildDocument(guildID)

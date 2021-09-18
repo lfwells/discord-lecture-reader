@@ -85,11 +85,13 @@
     select, option, optgroup { color:#2C2F33;}
     
 
-    tr .bar {
+    .bar {
         background-color: white;
     }
-    tr .bar.leading {
+    .bar.leading,
+    .barplot .bar {
         background-color: #7289DA;
+        fill: #7289DA;
     }
 
     #exportTutorial > div {
@@ -138,4 +140,28 @@
         position: fixed;
         right:1em;
         top:1em;
+    }
+
+
+    .barplot text {
+        fill: white !important;
+    }
+
+    .barplot .axis path,
+    .barplot .axis line {
+        stroke: gray !important;
+    }
+
+        
+    div.tooltip {	
+        position: absolute;			
+        text-align: center;			
+        /*width: 60px;					
+        height: 28px;	
+        font: 12px sans-serif;		*/				
+        padding: 8px;				
+        background: lightsteelblue;	
+        border: 0px;		
+        border-radius: 8px;			
+        pointer-events: none;			
     }

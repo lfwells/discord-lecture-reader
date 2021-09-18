@@ -101,8 +101,14 @@ export async function authHandler (req, res, next)  {
     else
     {
       //store some basic discord info
-      req.discordUser = await oauth.getUser(req.session.auth.access_token);
-      res.locals.discordUser = req.discordUser;
+      try
+      {
+        req.discordUser = await oauth.getUser(req.session.auth.access_token);
+        res.locals.discordUser = req.discordUser;
+      }
+      catch (DiscordHTTPError) {
+        return loginPage(req,res);
+      }
       //console.log(req.discordUser);
 
       //basicAuth(users)(req, res, next);

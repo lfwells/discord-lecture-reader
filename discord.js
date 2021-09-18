@@ -17,8 +17,14 @@ client.on('ready', async () =>
 });
 
 //login with discord auth token
-import token from './core/token.js';
-client.login(token);
+import token from './core/token.js';  
+console.log("Logging in to Discord...");  
+client.login(token).catch(reason => {
+
+    console.log("Login failed: " + reason);
+    console.log("Token used: " + token);
+
+}); 
 
 //register for errors to be posted to test server
 import { initErrorHandler } from './core/errors.js';
