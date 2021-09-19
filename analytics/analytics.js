@@ -2,12 +2,13 @@ import moment from "moment";
 import { getGuildDocument } from "../guild/guild.js";
 import * as Config from "../core/config.js";
 import { getClient } from "../core/client.js";
+import { getSessions } from "../attendance/sessions.js";
 
 export async function getStatsWeek(guild, predicate)
 {
     return getStats(guild, d => d.timestamp.isSame(new Date(), 'week') && (predicate == null || predicate(d)));
 }
-export async function getStats(guild, predicate)
+export async function getPostsData(guild, predicate)
 {
     var guildDocument = getGuildDocument(guild.id);
     var data = await guildDocument.collection("analytics").get();
@@ -24,6 +25,11 @@ export async function getStats(guild, predicate)
             rawStatsData.push(d);
         }
     });
+    return rawStatsData;
+}
+export async function getStats(guild, predicate)
+{
+    var rawStatsData = await getPostsData(guild, predicate);
 
     var stats = {
         channels: [],
@@ -155,11 +161,8 @@ async function lots_of_messages_getter(channel, limit = 500) {
     return sum_messages;
 }
 
-export async function loadTimeSeries(guild)
+export async function loadTimeSeries(rawStatsData)
 {
-    console.log("loading posts for time graph...");
-    var rawStatsData = (await getStats(guild, predicateExcludeAdmin)).rawStatsData;
-    console.log("operating on", rawStatsData.length, "posts");
     var days = [];
     for (var r in rawStatsData)
     {
@@ -175,4 +178,111 @@ export async function loadTimeSeries(guild)
     days = days.sort((a,b) => a.date - b.date);
 
     return days;
+}
+export async function loadPostsPerDay(rawStatsData)
+{
+    var days = [];
+    for (var r in rawStatsData)
+    {
+        var row = rawStatsData[r];
+        var dayOfWeek = moment(row.timestamp).day();
+        var idx = days.findIndex(d => dayOfWeek == d.x);
+        if (idx == -1)
+        {
+            idx = days.push({ x: dayOfWeek, value: 0 }) - 1;
+        }
+        days[idx].value++;
+
+        days = days.sort((a,b) => a.x - b.x);
+    }
+    var daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday"];
+    var daysNamed = [];
+    for (var d = 0; d < daysOfWeek.length; d++)
+    {
+        var n = { "x": daysOfWeek[d], value: days[d].value };
+        daysNamed[d] = n;
+    }
+
+    return daysNamed;
+}
+export async function loadPostsPerHour(rawStatsData)
+{
+    var hours = [];
+    for (var r in rawStatsData)
+    {
+        var row = rawStatsData[r];
+        var hour = moment(row.timestamp).hour();
+        var idx = hours.findIndex(d => hour == d.x);
+        if (idx == -1)
+        {
+            idx = hours.push({ x: hour, value: 0 }) - 1;
+        }
+        hours[idx].value++;
+
+        hours = hours.sort((a,b) => a.x - b.x);
+    }
+
+    return hours;
+}
+export async function loadPostsPerSession(rawStatsData, guild, includeNoSession)
+{
+    var sessions = (await getSessions(guild)).flatMap(s => {
+        s.sessions.forEach(s2 => {
+            s2.x = s.name+" "+s2.name
+            s2.messages = [];
+            s2.value = 0;
+            if (typeof(s2.channelID) !== "object")
+            {
+                s2.channelID = [s2.channelID]; //convert to array here, to allow multi-channel detection for stats
+            }
+        });
+        return s.sessions;
+    });
+    var outOfSessionPosts = [];
+
+    for (var r in rawStatsData)
+    {
+        var row = rawStatsData[r];
+        var channelID = row.channel;
+        if (channelID)
+        {
+            var channel = await guild.channels.fetch(channelID);
+            if (channel.isThread())
+            {
+                //console.log("post was thread "+channel.name, "a child of", channel.parent.name);
+                channelID = channel.parent.id;
+            }
+            var timestamp = moment(row.timestamp);
+            
+            var postWasForSession = false;
+            for (var session of sessions)
+            {
+                if (session.channelID.indexOf(channelID) >= 0 && timestamp.isBetween(session.startTimestamp, session.endTimestamp))
+                {
+                    session.messages.push(row);
+                }
+            }
+            if (postWasForSession == false)
+            {
+                outOfSessionPosts.push(row);
+            }
+        }
+    }
+
+    if (includeNoSession)
+    {
+        sessions.push({
+            name: "No Session",
+            x: "No Session",
+            messages: outOfSessionPosts
+        });
+    }
+    sessions.forEach(
+        s => { 
+            s.value = s.messages.length;
+            console.log(s.x+" - "+s.value);
+        }
+    );
+
+    return sessions;
 }
