@@ -290,11 +290,22 @@ export async function pollHistory(req,res,next)
 {
   var messagesManager = req.lectureChannel.messages;
   var messages = await messagesManager.fetch();//TODO need more than just the 100 most recent messages, is possible poll could be lost, so we need to search more, also uncertain if this uses cache or not
-  var simplePollMessages = messages.filter(m => m.author.id == config.SIMPLE_POLL_BOT_ID); 
+  
   var polls = [];
+
+  var roboLindsayMessages = messages.filter(m => m.author.id == config.ROBO_LINDSAY_ID); 
+  await Promise.all(roboLindsayMessages.map( async (post) => 
+  {
+    if (post.interaction && post.interaction.commandName == config.POLL_COMMAND)
+    {
+      polls.push(await readRoboLindsayPoll(post.embeds[0]));
+    }
+  }));
+
+  var simplePollMessages = messages.filter(m => m.author.id == config.SIMPLE_POLL_BOT_ID); 
+  
   await Promise.all(simplePollMessages.map( async (post) => 
   {
-    console.log(post);
     polls.push(await readSimplePoll(post));
   }));
   res.render("poll_history", {

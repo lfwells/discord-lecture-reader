@@ -20,7 +20,7 @@
 <% for (var graph in graphs)
 {
     %>
-    <h2><%=graph%> - <%- include("subViews/download_csv.html", { data:graphs[graph], filename:graph+".csv" }) %></h2>
+    <h2><%=graph%> - <%- include("subViews/download_csv.html", { data:graphs[graph], filename:graph }) %></h2>
     <%- include("subViews/barplot.html", {data:graphs[graph]}) %>
     <%
 }

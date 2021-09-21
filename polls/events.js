@@ -3,6 +3,7 @@ import { send } from '../core/client.js';
 import { pluralize } from '../core/utils.js';
 
 import { GUILD_CACHE } from "../guild/guild.js";
+import * as config from "../core/config.js";
 
 export default async function(client)
 {
@@ -11,7 +12,7 @@ export default async function(client)
     //commands (/stats)
     // The data for our command
     const pollCommand = {
-        name: 'poll_test',
+        name: config.POLL_COMMAND,
         description: 'Testing out an in-house version of polls',
         options: [
             { name: 'question', type: 'STRING', description: 'The poll question', required: true, },
@@ -56,7 +57,7 @@ export default async function(client)
         if (!interaction.isCommand()) return;
     
         // Check if it is the correct command
-        if (interaction.commandName === "poll_test") 
+        if (interaction.commandName === config.POLL_COMMAND) 
         {
             doPollCommand(interaction);
         }

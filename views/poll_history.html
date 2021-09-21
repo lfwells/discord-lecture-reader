@@ -16,7 +16,7 @@
     locals.polls.forEach(poll =>
     {
         %><%- include("pollTable.html", poll);%>
-        <%- include("subViews/download_csv.html", { data:poll }) ; %><%
+        <%- include("subViews/download_csv.html", { data:poll.results, filename:poll.question }) ; %><%
     });
 %>
 <%- include('footer.html') %>
