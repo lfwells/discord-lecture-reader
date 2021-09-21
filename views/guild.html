@@ -1,31 +1,6 @@
 <%- include('header.html') %>
 
-<nav>
-    <ul>
-        <% if (locals.lectureChannel) { %>
-            <li><a href="clearpoll/">Clear Current Poll</a></li>
-            <li><a href="pollSchedule/">Scheduled Polls</a></li>
-        <% } %>
-        <li><a href="text/input/">Lecture Full-Screen Texts</a></li>
-        <li><a href="attendance/">Attendance</a></li>
-        <li><a href="analytics/">Analytics</a></li>
-        <li><a href="analytics/timeGraph">Analytics - Graphs</a></li>
-        <li><a href="awards/">Awards</a></li>
-        <li><a href="leaderboard/">Awards Leaderboard</a></li>
-        <li><a href="invites/">Configure Invites</a></li>
-    </ul>
-</nav>
-
-<h3>OBS Pages</h3>
-<nav>
-    <ul>
-        <% if (locals.lectureChannel) { %>
-            <li><a href="poll/">Poll Widget</a></li>
-        <% } %>
-        <li><a href="text/">Lecture Full-Screen Text Widget</a></li>
-        <li><a href="analytics/obs">Top Posters and Award Leaderboard Widget</a></li>
-    </ul>
-</nav>
+<h2>Configure Server</h2>
 
 <h3>Role Set Up</h3>
 <p>Admin/Staff Role:

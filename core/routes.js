@@ -31,6 +31,9 @@ function defaultRouter()
     //login
     router.get("/login", login_routes.loginPage);
     router.get("/loginComplete", login_routes.loginComplete); 
+
+    router.get("/logout", login_routes.logout);
+
     return router;
 }
 
@@ -43,14 +46,33 @@ function guildRouter()
     //middleware check that this is one of "our" servers 
     router.use(guild.checkGuildAdmin);
 
+    router.use(guild.loadAdminRoleID);
+    router.use( guild.loadStudentRoleID);
+    router.use(guild.loadLectureChannel(false));
+    router.use(guild.loadAwardChannel(false));
+    router.use(guild.loadOffTopicChannel(false));
+
     //guild home page (dashboard)
     router.get("/", 
+
+
+
+    //TODO: not sure if these should only be on this page?
+    /*
                     guild.loadAdminRoleID, 
                     guild.loadStudentRoleID,
                     guild.loadLectureChannel(false), 
                     guild.loadAwardChannel(false), 
                     guild.loadOffTopicChannel(false), 
+*/
+
+
+
+
                     guild_routes.guildHome);
+
+                    
+    router.get("/obs/", guild.load(), guild.loadAwardChannel(true), basic_render("obs")); 
 
     //awards
     router.get("/namesTest/", guild.load(), guild.loadAwardChannel(true), award_routes.namesTest); 
@@ -124,4 +146,13 @@ function guildRouter()
     router.post("/invites", invite_routes.assignRole, invite_routes.inviteList);
         
     return router;
+}
+
+//this will just render out a page for us
+function basic_render(page, data)
+{
+    return (req,res,next) =>
+    {
+        res.render(page, data);
+    };
 }

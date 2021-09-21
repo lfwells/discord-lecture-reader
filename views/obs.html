@@ -1,0 +1,17 @@
+<%- include('header.html') %>
+
+<h2>OBS Pages</h2>
+<p>Use these links as URLs for Browser Sources in OBS.</p>
+<p>Right click a link here and choose "Copy Link Address".</p>
+<p class="TODO">Show URLs, have a auto-copy button</p>
+<nav>
+    <ul>
+        <% if (locals.lectureChannel) { %>
+            <li><a href="poll/">Poll Widget</a></li>
+        <% } %>
+        <li><a href="text/">Lecture Popup Text Widget</a></li>
+        <li><a href="analytics/obs">Top Posters and Award Leaderboard Widget</a></li>
+    </ul>
+</nav>
+
+<%- include('footer.html') %>

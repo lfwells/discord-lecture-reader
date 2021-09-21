@@ -11,11 +11,18 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     </head>
     <body>
+        <header>
         <% 
         if (locals.discordUser)
         {
             %>
-            <p class="discordUser"><img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" /><%=locals.discordUser.username%></p>
+            <div class="discordUser">
+                <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                <div>
+                    <%=locals.discordUser.username%><br />
+                    <a href="/logout" class="logout">Logout</a>
+                </div>
+            </div>
             <%
         }
         
@@ -24,13 +31,42 @@
             %>
             <h1><a href="/guild/<%= guild.id %>/"><%= guild.name %></a> <a href="/" style="font-size:small">Change Server</a></h1>
             <% 
-        } 
-        
-        if (locals.query && locals.query.message) 
-        { 
+            
+            if (locals.query && locals.query.message) 
+            { 
+                %>
+                <p><strong><%= locals.query.message %></strong></p>
+                <% 
+            } 
+            
             %>
-            <p><strong><%= locals.query.message %></strong></p>
-            <% 
+            
+            <nav>
+                <ul>
+                    <li><a href="/guild/<%= guild.id %>/">Configure Server</a></li>
+                    <% if (locals.lectureChannel) { %>
+                        <!--<li><a href="/guild/<%= guild.id %>/clearpoll/">Clear Current Poll</a></li>-->
+                        <li><a href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
+                    <% } %>
+                    <li><a href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
+                    <li><a href="/guild/<%= guild.id %>/analytics/">Analytics</a></li>
+                    <li><a href="/guild/<%= guild.id %>/analytics/timeGraph">Graphs</a></li>
+                    <li><a href="/guild/<%= guild.id %>/awards/">Achievements</a></li>
+                    <li><a href="/guild/<%= guild.id %>/leaderboard/">Achievements Leaderboard</a></li>
+                    <li><a href="/guild/<%= guild.id %>/invites/">Configure Invites</a></li>
+                    <li><a href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
+                    <li><a href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
+                </ul>
+            </nav>
+            <%
         } 
-        
+        else
+        {
+            %><h1>UTAS Lecture Bot</h1>
+            <p>&nbsp;</p><%
+        }
         %>
+
+        </header>
+
+        <main>

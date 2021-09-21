@@ -83,6 +83,16 @@
         font-family: 'Courier New', Courier, monospace;
     }
     select, option, optgroup { color:#2C2F33;}
+
+    a { text-decoration: none; }
+    a:hover {text-decoration: underline;}
+
+    h1 { margin-bottom: 0em;}
+
+    .TODO {
+        background-color: rgba(255, 255, 0, 0.541);
+        color:red;
+    }
     
 
     .bar {
@@ -150,6 +160,21 @@
         vertical-align: middle;
     }
 
+    .logout { font-size: smaller; }
+    .discordUser div {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .login
+    {
+        background-color: #7289DA;
+        padding:1em;
+        font-size:large;
+        margin:1em;
+        margin-top:2em;
+        border-radius: 8px;
+    }
 
     .barplot text {
         fill: white !important;
@@ -180,21 +205,55 @@
             font-size: small;
         }
 
-        #guilds
+        #guilds,
+        nav ul
         {
             margin-left:-4ex;
         }
-        #guilds li
+        #guilds li,
+        nav ul li
         {
             list-style: none;
             padding:0.5em;
         }
-        #guilds li:hover
+        #guilds li:hover,
+        nav ul li:hover
         {
             cursor:pointer;
-            background-color: lightsteelblue;
+            background-color: rgba(176, 196, 222, 0.582);/*lightstellblue with alpha*/
         }
-        #guilds li span
+        #guilds li span,
+        nav ul li span
         {
             font-size: smaller;
+        }
+
+        header 
+        {
+            background-color: #1c1e20;
+            margin:-1em;
+            margin-bottom: 1em;
+            padding:2em;
+            padding-bottom:0.5em;
+        }
+        header nav ul
+        {
+            margin-left:-6ex;
+        }
+        header nav ul li
+        {
+            display:inline-block;
+        }
+
+        main 
+        { 
+            padding: 2em;
+            padding-top:0.5em;
+        }
+
+        footer {
+            position: absolute;
+            bottom:8px;
+            right:8px;
+            font-size: small;
         }

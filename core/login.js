@@ -19,7 +19,7 @@ export async function loginPage(req,res)
     });
 
     //console.log(url);  
-    res.render('login', { url: url });
+    res.render('login', { url: url });//TODO: redirect url within the site??
 }
 export async function loginComplete(req,res)
 {
@@ -38,4 +38,11 @@ export async function loginComplete(req,res)
 //    guildList(req,res);
     res.redirect("/");
 
+}
+
+
+export async function logout(req,res)
+{
+    req.session.auth = null;
+    res.redirect("/");
 }

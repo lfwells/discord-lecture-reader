@@ -90,6 +90,15 @@ export async function authHandler (req, res, next)  {
     req.path.endsWith(".ico")|| 
     req.path.indexOf("/static/") === 0)) {
     //console.log("skipping auth to allow polls to work", req.path);
+
+    //store some basic discord info (but in this case, don't error)
+    try
+    {
+      req.discordUser = await oauth.getUser(req.session.auth.access_token);
+      res.locals.discordUser = req.discordUser;
+    }
+    catch (DiscordHTTPError) { }
+
     next();
   } else {
     //console.log("challenge:", req.path);
