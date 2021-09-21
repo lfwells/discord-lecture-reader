@@ -99,43 +99,45 @@ var id = uuidv4();
 
     // Bars
     var bandwidth = isTimeSeries ? width/data.length :  x.bandwidth();
-    svg.selectAll("mybar")
-        .data(data)
-        .enter()
-        .append("rect")
-            .attr("class", "bar")
-            .attr("x", function(d) 
-            { 
-                if (isTimeSeries)
-                    return x(d.date) - bandwidth/2; 
-                else
-                    return x(d.x);// - bandwidth/2; 
-            })
-            .attr("y", function(d) { return y(d.value); })
-            .attr("width", bandwidth) //x.bandwidth())
-            .attr("height", function(d) { return height - y(d.value); })
-            .on("mouseover", function(d) {		
-                div.transition()		
-                    .duration(200)		
-                    .style("opacity", .9);		
-                if (isTimeSeries)
-                {
-                    div	.html(d3.timeFormat('%b %d')(d.date) + "<br/>"  + d.value)	
-                        .style("left", (d3.event.pageX) + "px")		
-                        .style("top", (d3.event.pageY - 28) + "px");	
-                }
-                else
-                {
-                    div	.html(d.x + "<br/>"  + d.value)	 
-                        .style("left", (d3.event.pageX) + "px")		
-                        .style("top", (d3.event.pageY - 28) + "px");					
-                }
-            })
-            .on("mouseout", function(d) {		
-                div.transition()		
-                    .duration(500)		
-                    .style("opacity", 0);	
-            });
-    
+    (function(isTimeSeriesClosure) {
+        svg.selectAll("mybar")
+            .data(data)
+            .enter()
+            .append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d) 
+                { 
+                    if (isTimeSeriesClosure)
+                        return x(d.date) - bandwidth/2; 
+                    else
+                        return x(d.x);// - bandwidth/2; 
+                })
+                .attr("y", function(d) { return y(d.value); })
+                .attr("width", bandwidth) //x.bandwidth())
+                .attr("height", function(d) { return height - y(d.value); })
+                .on("mouseover", function(d) {		
+                    div.transition()		
+                        .duration(200)		
+                        .style("opacity", .9);		
+                    if (isTimeSeriesClosure)
+                    {
+                        console.log("d.date", d.date, d3.timeFormat('%b %d')(d.date));
+                        div	.html(d3.timeFormat('%b %d')(d.date) + "<br/>"  + d.value)	
+                            .style("left", (d3.event.pageX) + "px")		
+                            .style("top", (d3.event.pageY - 28) + "px");	
+                    }
+                    else
+                    {
+                        div	.html(d.x + "<br/>"  + d.value)	 
+                            .style("left", (d3.event.pageX) + "px")		
+                            .style("top", (d3.event.pageY - 28) + "px");					
+                    }
+                })
+                .on("mouseout", function(d) {		
+                    div.transition()		
+                        .duration(500)		
+                        .style("opacity", 0);	
+                });
+        })(isTimeSeries);
     
     </script>

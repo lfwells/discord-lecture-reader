@@ -3,6 +3,22 @@ import { getGuildDocument } from "../guild/guild.js";
 import * as Config from "../core/config.js";
 import { getClient } from "../core/client.js";
 import { didAttendSession, getSessions } from "../attendance/sessions.js";
+import { db, guildsCollection } from "../core/database.js";
+
+export function createFirebaseRecordFrom(msg)
+{
+    var record = {};
+    record.dump = JSON.stringify(msg);
+    record.author = msg.author.id;
+    if (msg.member)
+    {
+        record.member = msg.member.id;
+    }
+    record.channel = msg.channel.id;
+    record.content = msg.content;
+    //console.log(record);
+    return record;
+}
 
 export async function getStatsWeek(guild, predicate)
 {
@@ -10,8 +26,19 @@ export async function getStatsWeek(guild, predicate)
 }
 export async function getPostsData(guild, predicate)
 {
+    var collection = "analytics";
+    if (
+        guild.id == "801006169496748063" || //kit305 2021
+        guild.id == "801757073083203634" //kit109 2021 sem 1
+    )
+    {
+        collection = "analytics_history";
+    }
+
+
     var guildDocument = getGuildDocument(guild.id);
-    var data = await guildDocument.collection("analytics").get();
+    var data = await guildDocument.collection(collection).get();
+
     var rawStatsData = [];
     data.forEach(doc =>
     {
@@ -112,13 +139,17 @@ export function predicateExcludeAdmin(user)
     ].indexOf(user.author) == -1;
 }
 
+
+//TODO: this doesn't seem to save all of them or something?
+//e.g. kit109 sem 1 2021, says it read through 17828 posts, but only operated on 9953 posts -- did it have to skip some or something?
 export async function loadHistoricalData(res, guild)
 {
-    var data = [];
+    var analyticsCollection = guildsCollection.doc(guild.id).collection("analytics_history");
 
+    var data = [];
     await Promise.all(
         guild.channels.cache.map(async (c) =>  {
-            data.push(...(await lots_of_messages_getter(res, c)));
+            data.push(...(await lots_of_messages_getter(res, c, analyticsCollection)));
         })
     );
     return data;
@@ -129,9 +160,16 @@ export async function loadAllMessagesForChannel(channel)
 }
 
 //https://stackoverflow.com/questions/55153125/fetch-more-than-100-messages
-async function lots_of_messages_getter(res, channel, limit) {
+async function lots_of_messages_getter(res, channel, writeToDBCollection, limit) {
     const sum_messages = [];
     let last_id;
+
+    var batch;
+    if (writeToDBCollection)
+    {
+        // Get a new write batch
+        batch = db.batch();
+    }
 
     while (true) {
         const options = { limit: 100 };
@@ -145,6 +183,16 @@ async function lots_of_messages_getter(res, channel, limit) {
             if (messages && messages.size > 0)
             {
                 sum_messages.push(...messages);
+                if (writeToDBCollection)
+                {
+                    for (var message of messages)
+                    {
+                        var msg = message[1];
+                        batch.set(writeToDBCollection.doc(), createFirebaseRecordFrom(msg));
+                    }
+                    await batch.commit();
+                    batch = db.batch();
+                }
                 console.log(channel.name, "sum_messages", sum_messages.length);
                 if (res) res.write([channel.name, "sum_messages", sum_messages.length].join(", "));
                 last_id = messages.last().id; 
@@ -203,7 +251,7 @@ export async function loadPostsPerDay(rawStatsData)
     }
     var daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday"];
     var daysNamed = [];
-    for (var d = 0; d < daysOfWeek.length; d++)
+    for (var d = 0; d < days.length; d++)
     {
         var n = { "x": daysOfWeek[d], value: days[d].value };
         daysNamed[d] = n;

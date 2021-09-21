@@ -1,6 +1,6 @@
 import * as config from '../core/config.js';
 import { getGuildDocument, getOffTopicChannel } from '../guild/guild.js';
-import { getStats, getStatsWeek } from './analytics.js';
+import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js';
 import { offTopicOnly, pluralize, sleep } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
@@ -12,15 +12,7 @@ export default async function(client)
         if (msg.channel.id == config.ERROR_LOG_CHANNEL_ID) return; //dont get stuck in a loop recording error logs lol
 
         var guildDocument = getGuildDocument(msg.guild.id);
-        var record = {};
-        record.dump = JSON.stringify(msg);
-        record.author = msg.author.id;
-        record.member = msg.member.id;
-        record.channel = msg.channel.id;
-        record.content = msg.content;
-        //console.log(record);
-
-        await guildDocument.collection("analytics").add(record);
+        await guildDocument.collection("analytics").add(createFirebaseRecordFrom(msg));
     });
 
     
