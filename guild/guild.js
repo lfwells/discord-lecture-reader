@@ -13,7 +13,9 @@ export async function init(client)
 {
   var guilds = client.guilds.cache;
   //store them in the db
-  await Promise.all(guilds.map( async (guild) => { 
+  await Promise.all(guilds.map( async (guild) => 
+  { 
+    await guild.fetch();
     await db.collection("guilds").doc(guild.id).set({    
       name:guild.name
     }, {merge:true}); 

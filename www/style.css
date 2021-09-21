@@ -141,6 +141,14 @@
         right:1em;
         top:1em;
     }
+    .discordUser img
+    {
+        border-radius: 50%;
+        width:64px;
+        height:64px;
+        margin:8px;
+        vertical-align: middle;
+    }
 
 
     .barplot text {
@@ -170,4 +178,23 @@
         button {
             color:black;
             font-size: small;
+        }
+
+        #guilds
+        {
+            margin-left:-4ex;
+        }
+        #guilds li
+        {
+            list-style: none;
+            padding:0.5em;
+        }
+        #guilds li:hover
+        {
+            cursor:pointer;
+            background-color: lightsteelblue;
+        }
+        #guilds li span
+        {
+            font-size: smaller;
         }

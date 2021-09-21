@@ -1,6 +1,7 @@
 <%- include('header.html') %>
 
-<h1>Servers</h1>
+<h1>UTAS Lecture Bot</h1>
+<h2>Server List</h2>
 <!--
 <p><% if (testMode) { %>
     Test Mode ON. <a href="/testMode/false">Turn OFF</a>
@@ -11,9 +12,23 @@
 
 <ul id="guilds">
   <% guilds.forEach(function(guild){ %>
-    <li><a href="/guild/<%= guild.id %>/"><%= guild.name %> &lt;<%= guild.id %>&gt;</a></li>
+    <li>
+      <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>"><%= guild.name %></a><br />
+      <span>
+        <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
+        <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%></span>
+    </li>
   <% }) %>
   <li><a href="https://discord.com/api/oauth2/authorize?client_id=811958340967071745&permissions=8&redirect_uri=http%3A%2F%2F131.217.172.176%2F&response_type=code&scope=messages.read%20bot%20applications.commands%20guilds%20guilds.join%20connections">Add Your Server</a></li>
 </ul>
+
+<script>
+  $("li a").each((i,e) => {
+    var $a = $(e);
+    $a.parent().on("click", () => {
+      document.location.href = $a.attr("href");
+    });
+  });
+</script>
 
 <%- include('footer.html') %>
