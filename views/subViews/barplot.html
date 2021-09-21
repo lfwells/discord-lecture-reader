@@ -121,7 +121,7 @@ var id = uuidv4();
                         .style("opacity", .9);		
                     if (isTimeSeriesClosure)
                     {
-                        console.log("d.date", d.date, d3.timeFormat('%b %d')(d.date));
+                        //console.log("d.date", d.date, d3.timeFormat('%b %d')(d.date));
                         div	.html(d3.timeFormat('%b %d')(d.date) + "<br/>"  + d.value)	
                             .style("left", (d3.event.pageX) + "px")		
                             .style("top", (d3.event.pageY - 28) + "px");	
