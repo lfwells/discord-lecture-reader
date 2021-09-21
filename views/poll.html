@@ -1,7 +1,8 @@
-<%- include('header.html') %>
+<%- include('header.html', { showTitle: false }) %>
 
 <style>
     h1 { display:none; }
+    main { padding:initial; }
     .question { font-size:16pt; }
     th { text-align: left; padding-right: 1ex; }
     .votes { padding-left: 1ex; text-align: center; }
@@ -32,5 +33,3 @@
         }
     });
 </script>
-
-<%- include('footer.html') %>
