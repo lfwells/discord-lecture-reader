@@ -55,7 +55,7 @@ export default async function(client)
     const awardCommand = {
         name: 'award', 
         description: 'Gives an award to a user',
-        defaultPermission: false,
+        defaultPermission: true,
         /*permissions: [
             {
                 id: ,
