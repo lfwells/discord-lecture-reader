@@ -50,8 +50,13 @@ export async function obsStatsWeek(req, res, next)
 
 export async function getHistoricalData(req, res, next)
 {
-    var historicalData = await loadHistoricalData();
-    await res.json(historicalData);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Transfer-Encoding', 'chunked');
+    var historicalData = await loadHistoricalData(res, req.guild);
+    //await res.json(historicalData.length);
+    console.log("historicalData.length", historicalData.length);
+    res.write("historicalData.length = "+historicalData.length);
+    res.end();
 }
 
 export async function timeGraph(req, res, next)

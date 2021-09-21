@@ -1,4 +1,5 @@
 import { MessageActionRow, MessageButton } from "discord.js";
+import { loadAllMessagesForChannel } from "../analytics/analytics.js";
 import { getClient, send } from "../core/client.js";
 import * as config from "../core/config.js";
 import { redirectToWhereWeCameFrom } from "../core/utils.js";
@@ -288,8 +289,10 @@ export async function clearPoll(req, res)
 
 export async function pollHistory(req,res,next)
 {
-  var messagesManager = req.lectureChannel.messages;
-  var messages = await messagesManager.fetch();//TODO need more than just the 100 most recent messages, is possible poll could be lost, so we need to search more, also uncertain if this uses cache or not
+  //var messagesManager = req.lectureChannel.messages;
+  //var messages = await messagesManager.fetch();//TODO need more than just the 100 most recent messages, is possible poll could be lost, so we need to search more, also uncertain if this uses cache or not
+  var messages = await loadAllMessagesForChannel(req.lectureChannel);
+  console.log(messages[0]);
   
   var polls = [];
 

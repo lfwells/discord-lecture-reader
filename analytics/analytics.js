@@ -112,20 +112,24 @@ export function predicateExcludeAdmin(user)
     ].indexOf(user.author) == -1;
 }
 
-export async function loadHistoricalData()
+export async function loadHistoricalData(res, guild)
 {
     var data = [];
 
-    var client = getClient();
-    client.channels.cache.forEach(async (c) =>  {
-        data.push(...(await lots_of_messages_getter(c)));
-    });
-
+    await Promise.all(
+        guild.channels.cache.map(async (c) =>  {
+            data.push(...(await lots_of_messages_getter(res, c)));
+        })
+    );
     return data;
+}
+export async function loadAllMessagesForChannel(channel)
+{
+    return await lots_of_messages_getter(null, channel);
 }
 
 //https://stackoverflow.com/questions/55153125/fetch-more-than-100-messages
-async function lots_of_messages_getter(channel, limit = 500) {
+async function lots_of_messages_getter(res, channel, limit) {
     const sum_messages = [];
     let last_id;
 
@@ -141,9 +145,11 @@ async function lots_of_messages_getter(channel, limit = 500) {
             if (messages && messages.size > 0)
             {
                 sum_messages.push(...messages);
+                console.log(channel.name, "sum_messages", sum_messages.length);
+                if (res) res.write([channel.name, "sum_messages", sum_messages.length].join(", "));
                 last_id = messages.last().id; 
 
-                if (sum_messages.length >= limit) { 
+                if (limit && sum_messages.length >= limit) { 
                     break;
                 }
             }
@@ -158,7 +164,7 @@ async function lots_of_messages_getter(channel, limit = 500) {
         }
     }
 
-    return sum_messages;
+    return sum_messages.map(m => m[1]); //not sure 100% why we need to do this but whatevs
 }
 
 export async function loadTimeSeries(rawStatsData)
