@@ -1,0 +1,22 @@
+<%- include('header.html') %>
+
+<style>
+    .question { font-size:16pt; }
+    th { text-align: left; padding-right: 1ex; }
+    .votes { padding-left: 1ex; text-align: center; }
+    * {
+        text-shadow: 0px 0px 4px #2C2F33;
+    }
+    .bar {
+        box-shadow: 0px 0px 4px #2C2F33;
+    }
+</style>
+
+<%
+    locals.polls.forEach(poll =>
+    {
+        %><%- include("pollTable.html", poll);%>
+        <%- include("subViews/download_csv.html", { data:poll }) ; %><%
+    });
+%>
+<%- include('footer.html') %>
