@@ -218,9 +218,20 @@ export async function doPollCommand(interaction, scheduledOptions)
         else
         {
             if (interaction.followUp)
-                latestFollowUp = await interaction.followUp(postContent);
+            {
+                try
+                {
+                    latestFollowUp = await interaction.followUp(postContent);
+                }
+                catch (DiscordAPIError) //invalid webook error, more than 15 mins have passed
+                {
+                    latestFollowUp = await send(interaction.channel, postContent);
+                }
+            }
             else
+            {
                 latestFollowUp = await send(interaction.channel, postContent);
+            }
         }
     }
 
