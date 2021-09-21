@@ -9,6 +9,7 @@
         <li><a href="text/input/">Lecture Full-Screen Texts</a></li>
         <li><a href="attendance/">Attendance</a></li>
         <li><a href="analytics/">Analytics</a></li>
+        <li><a href="analytics/timeGraph">Analytics - Graphs</a></li>
         <li><a href="awards/">Awards</a></li>
         <li><a href="leaderboard/">Awards Leaderboard</a></li>
         <li><a href="invites/">Configure Invites</a></li>
@@ -45,6 +46,26 @@
     $("#setAdminRoleID").on("change", (e) =>
     {
         document.location.href = "?setAdminRoleID="+$("#setAdminRoleID").val();
+    });
+</script>
+<p>Current Students Role:
+    <select id="setStudentRoleID">
+        <option>Please Select Role</option>
+        <% 
+        var roles = guild.roles.cache.sort((a,b) => a.position - b.position);
+        roles.forEach(function(role)
+        { 
+            //console.log(role);
+            %><option value="<%= role.id %>"
+                <% if (locals.studentRole && role.id == locals.studentRole.id) { %>selected<% } %>>
+                <%= role.name %>
+            </option><%
+        }) %>
+    </select></p>
+<script>
+    $("#setStudentRoleID").on("change", (e) =>
+    {
+        document.location.href = "?setStudentRoleID="+$("#setStudentRoleID").val();
     });
 </script>
 

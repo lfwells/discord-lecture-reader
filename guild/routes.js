@@ -80,6 +80,21 @@ export async function guildHome(req, res)
     req.query.message = "set the admin role to #"+req.adminRole.name;
   }
 
+  var setStudentRoleID = req.query.setStudentRoleID;
+  if (setStudentRoleID)
+  {
+    await req.guildDocument.update({
+      studentRoleID: setStudentRoleID
+    });
+    req.studentRoleID = setStudentRoleID;
+    GUILD_CACHE[req.guild.id].studentRoleID = setStudentRoleID;
+
+    req.studentRole = await req.guild.roles.fetch(req.studentRoleID);//.cache.filter(c => c.id == offTopicChannelID);
+    res.locals.studentRole = req.studentRole;
+
+    req.query.message = "set the student role to #"+req.studentRole.name;
+  }
+
 
   res.render("guild");
 }

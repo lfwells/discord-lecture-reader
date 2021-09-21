@@ -1,0 +1,38 @@
+<%
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}  
+
+if (data && data.length > 0)
+{
+    var id = uuidv4();
+    var csvdata = "data:text/csv;charset=utf-8," 
+        + Object.keys(data[0]).filter(k => typeof(data[0][k]) !== "object").join(",")+"\n"
+        + data.map(e => Object.values(e).filter(e => typeof(e) !== "object").join(",")).join("\n");
+    %>
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <!-- Create a div where the graph will take place -->
+    <button id="button<%=id%>" class="barplot">Download CSV</button>
+
+    <script>
+    $("#button<%=id%>").on("click", function()
+    {
+        var data = `<%= csvdata %>`;
+        var encodedUri = encodeURI(data);
+        //window.open(encodedUri);
+        var link = document.createElement("a");
+        link.download = "<%=filename%>";
+        link.href = encodedUri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        delete link;
+    });
+    </script>
+    <%
+}
+%>

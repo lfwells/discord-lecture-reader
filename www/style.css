@@ -165,3 +165,9 @@
         border-radius: 8px;			
         pointer-events: none;			
     }
+
+
+        button {
+            color:black;
+            font-size: small;
+        }

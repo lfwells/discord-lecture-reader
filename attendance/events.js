@@ -10,9 +10,9 @@ export default async function (client)
 {
     client.on('voiceStateUpdate', async (oldMember, newMember) => 
     {
+        const newUserChannel = newMember.channel;
+        const oldUserChannel = oldMember.channel;
 
-        const newUserChannel = newMember.channelID;
-        const oldUserChannel = oldMember.channelID;
         var guild;
 
         var d = new Date();
@@ -20,7 +20,7 @@ export default async function (client)
         if (newUserChannel == undefined)
         {
             var member = oldMember.guild.members.cache.get(oldMember.id);
-            var channel = await client.channels.cache.get(oldUserChannel);
+            var channel = oldUserChannel;//await client.channels.cache.get(oldUserChannel);
             guild = channel.guild;
             if(isOutsideTestServer(guild)) return;
 
@@ -31,31 +31,31 @@ export default async function (client)
             
             if (attendanceQuery.docs.length > 0)
             {
-            var attendanceRow = attendanceQuery.docs.slice(-1)[0];//last item in array (should be latests)
-            var attendanceRowReference = attendanceCollection.doc(attendanceRow.id);
-            await attendanceRowReference.update("left", d.getTime());
+                var attendanceRow = attendanceQuery.docs.slice(-1)[0];//last item in array (should be latests)
+                var attendanceRowReference = attendanceCollection.doc(attendanceRow.id);
+                await attendanceRowReference.update("left", d.getTime());
 
-            console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`);
+                console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`);
             }
             else
             {
-            console.error("strang state to be in, no previous row with left = false")
+                console.error("strang state to be in, no previous row with left = false")
             }    
         }
         else //its possible they are unmuting, or sharing video
         {
             var member = newMember.guild.members.cache.get(newMember.id);
-            var channel = await client.channels.cache.get(newUserChannel);
+            var channel = newUserChannel;//await client.channels.cache.get(newUserChannel);
             guild = channel.guild;
             if(isOutsideTestServer(guild)) return;
 
             //detect channel switch
-            if (oldMember.channelID && oldMember.channelID != newMember.channelID)
+            if (oldMember.channel && oldMember.channel != newMember.channel)
             {
                 console.log("detect channel change!");
                 var attendanceCollection = guild ? guildsCollection.doc(guild.id).collection("attendance") : null;
                 var attendanceQuery = await attendanceCollection
-                    .where("memberIDchannelID", "==", member.id+""+oldMember.channelID)
+                    .where("memberIDchannelID", "==", member.id+""+oldMember.channel.id)
                     .get();
                 
                 if (attendanceQuery.docs.length > 0)
@@ -76,8 +76,8 @@ export default async function (client)
             //log new data
             var attendanceCollection = guild ? guildsCollection.doc(guild.id).collection("attendance") : null;
             var attendanceQuery = await attendanceCollection
-            .where("memberIDchannelID", "==", member.id+""+channel.id)
-            .get();
+                .where("memberIDchannelID", "==", member.id+""+channel.id)
+                .get();
             
             var mostRecentRowWasPreviousSession = true;
             if (attendanceQuery.docs.length > 0)

@@ -2,7 +2,7 @@ import moment from "moment";
 import { getGuildDocument } from "../guild/guild.js";
 import * as Config from "../core/config.js";
 import { getClient } from "../core/client.js";
-import { getSessions } from "../attendance/sessions.js";
+import { didAttendSession, getSessions } from "../attendance/sessions.js";
 
 export async function getStatsWeek(guild, predicate)
 {
@@ -224,20 +224,31 @@ export async function loadPostsPerHour(rawStatsData)
 
     return hours;
 }
-export async function loadPostsPerSession(rawStatsData, guild, includeNoSession)
+
+async function getSessionsFlatArray(guild)
 {
     var sessions = (await getSessions(guild)).flatMap(s => {
         s.sessions.forEach(s2 => {
             s2.x = s.name+" "+s2.name
             s2.messages = [];
+            s2.attendance = [];
             s2.value = 0;
             if (typeof(s2.channelID) !== "object")
             {
                 s2.channelID = [s2.channelID]; //convert to array here, to allow multi-channel detection for stats
             }
+            if (typeof(s2.voiceChannelID) !== "object")
+            {
+                s2.voiceChannelID = [s2.voiceChannelID]; //convert to array here, to allow multi-channel detection for stats
+            }
         });
         return s.sessions;
     });
+    return sessions;
+}
+export async function loadPostsPerSession(rawStatsData, guild, includeNoSession)
+{
+    var sessions = await getSessionsFlatArray(guild);
     var outOfSessionPosts = [];
 
     for (var r in rawStatsData)
@@ -246,26 +257,31 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession)
         var channelID = row.channel;
         if (channelID)
         {
-            var channel = await guild.channels.fetch(channelID);
-            if (channel.isThread())
+            try
             {
-                //console.log("post was thread "+channel.name, "a child of", channel.parent.name);
-                channelID = channel.parent.id;
-            }
-            var timestamp = moment(row.timestamp);
-            
-            var postWasForSession = false;
-            for (var session of sessions)
-            {
-                if (session.channelID.indexOf(channelID) >= 0 && timestamp.isBetween(session.startTimestamp, session.endTimestamp))
+                var channel = await guild.channels.fetch(channelID);
+                if (channel.isThread())
                 {
-                    session.messages.push(row);
+                    //console.log("post was thread "+channel.name, "a child of", channel.parent.name);
+                    channelID = channel.parent.id;
+                }
+                var timestamp = moment(row.timestamp);
+                
+                var postWasForSession = false;
+                for (var session of sessions)
+                {
+                    if (session.channelID.indexOf(channelID) >= 0 && timestamp.isBetween(session.startTimestamp, session.endTimestamp))
+                    {
+                        session.messages.push(row);
+                        postWasForSession = true;  
+                    }
+                }
+                if (postWasForSession == false)
+                {
+                    outOfSessionPosts.push(row);
                 }
             }
-            if (postWasForSession == false)
-            {
-                outOfSessionPosts.push(row);
-            }
+            catch (DiscordAPIError) {}
         }
     }
 
@@ -280,9 +296,60 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession)
     sessions.forEach(
         s => { 
             s.value = s.messages.length;
-            console.log(s.x+" - "+s.value);
         }
     );
 
     return sessions;
 }
+
+export async function loadAttendanceSession(attendanceData, guild, includeNoSession)
+{
+    var sessions = await getSessionsFlatArray(guild);
+    var outOfSessionAttendance = [];
+    for (var r in attendanceData)
+    {
+        var row = attendanceData[r];
+        var channelID = row.channelID;
+        //filter by only current students role
+        
+        var attendanceWasForSession = false;
+        for (var session of sessions)
+        {
+            if (session.voiceChannelID.indexOf(channelID) >= 0 && didAttendSession(row, session))
+            {
+                    
+                //unique attendance only! ignore duplicate joins from same member id
+                if (session.attendance.findIndex(a => a.memberID == row.memberID) == -1)
+                {
+                    session.attendance.push(row);
+                    attendanceWasForSession = true;
+                }
+            }
+        }
+        if (attendanceWasForSession == false)
+        {
+            outOfSessionAttendance.push(row);
+        }
+    
+    }
+    
+    sessions.forEach(
+        s => { 
+            s.value = s.attendance.length;
+        }
+    );
+
+    if (includeNoSession)
+    {
+        sessions.push({
+            name: "No Session",
+            x: "No Session",
+            attendance: outOfSessionAttendance,
+            value: outOfSessionAttendance.length
+        });
+    }
+
+    return sessions;
+}
+
+//TODO: consultation attendance counts?

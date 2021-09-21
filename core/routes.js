@@ -46,6 +46,7 @@ function guildRouter()
     //guild home page (dashboard)
     router.get("/", 
                     guild.loadAdminRoleID, 
+                    guild.loadStudentRoleID,
                     guild.loadLectureChannel(false), 
                     guild.loadAwardChannel(false), 
                     guild.loadOffTopicChannel(false), 
@@ -85,7 +86,10 @@ function guildRouter()
     router.get("/analytics/obs/week", analytics_routes.getStatsDataWeekOBS, analytics_routes.obsStatsWeek); 
 
     router.get("/analytics/history", analytics_routes.getHistoricalData); 
-    router.get("/analytics/timeGraph", analytics_routes.timeGraph); 
+    router.get("/analytics/timeGraph", 
+        guild.loadAdminRoleID, 
+        guild.loadStudentRoleID,
+        analytics_routes.timeGraph); 
 
     //progress
     router.get("/progress/", loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress);

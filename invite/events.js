@@ -20,7 +20,7 @@ export default async function(client)
             // Look through the invites, find the one for which the uses went up.
             const invite = guildInvites.find(i => ei.get(i.code).uses < i.uses);
             // This is just to simplify the message being sent below (inviter doesn't have a tag property)
-            const inviter = client.users.cache.get(invite.inviter.id);
+            const inviter = client.users.cache.get(invite.inviter.id); //TODO: this line doesnt work!
             // Get the log channel (change to your liking)
             console.log(`${member.user.tag} joined using invite code ${invite.code} from ${inviter.tag}. Invite was used ${invite.uses} times since its creation.`);
             

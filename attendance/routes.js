@@ -1,6 +1,6 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { getSessions } from "./sessions.js";
+import { didAttendSession, getSessions } from "./sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 
@@ -324,13 +324,14 @@ export async function getAttendanceData(req,res,next)
             var row = req.attendanceData[i];
             if (row.memberID == student.discordID) //AND check room? shouldn't matter
             {
-                var time = moment(row.timestamp);
-                var leftTime = moment(row.leftTimestamp);
+                //var time = moment(row.timestamp);
+                //var leftTime = moment(row.leftTimestamp);
                 /*if (student.username == "lfwells" && session == res.locals.weeks[0].sessions[0])
                 {
                     console.log(row.timestamp, time, session.earlyStartTimestamp, session.endTimestamp, time.isBetween(session.earlyStartTimestamp, session.endTimestamp));
                 }*/
-                if (time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp)) 
+                //if (time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp)) 
+                if (didAttendSession(row, session))
                 {
                     complete = true;
                     data = row;

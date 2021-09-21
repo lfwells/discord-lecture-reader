@@ -257,6 +257,30 @@ export async function loadAdminRoleID(req,res,next)
   next(); 
   return res; 
 }
+export async function loadStudentRoleID(req,res,next)   
+{
+  if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].studentRoleID)
+  {
+    req.studentRoleID = GUILD_CACHE[req.guild.id].studentRoleID;
+  }
+
+  if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].studentRoleID))
+  {
+    req.guildDocumentSnapshot = await req.guildDocument.get();
+    req.studentRoleID = await req.guildDocumentSnapshot.get("studentRoleID");
+    if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+    GUILD_CACHE[req.guild.id].studentRoleID = req.studentRoleID;
+  }
+    
+  if (req.studentRoleID)
+  {
+    req.studentRole = await req.guild.roles.fetch(req.admstudentRoleIDinRoleID);
+    res.locals.studentRole = req.studentRole;
+  }
+
+  next(); 
+  return res; 
+}
 
 //non-route version (but still spoofing route version)
 //todo: generic for all

@@ -40,7 +40,18 @@ export async function getSessions(guild)
                     name:"Practical",
                     time:sessionTime,
                     duration:2,
-                    channelID:"851553123746578481" //should be discord channel id etc whatvs next semester
+                    channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
+                        "866939311597027358", "851553123340255253", //queue and game-feedback
+                        "851553124073209876", "851553124073209877", "851553124073209878", "879599703656890408", "879599731108610108", "879599755783729193"],  //breakouts
+                    voiceChannelID:[
+                        "851553124073209879",
+                        "851553124073209880",
+                        "851553124073209881",
+                        "851553124073209882",
+                        "879599578184290324",
+                        "879599619959578635",
+                        "879599657611837490"
+                    ]
                 });
             }
 
@@ -51,7 +62,8 @@ export async function getSessions(guild)
                 name:"Lecture",
                 time:sessionTime,
                 duration:2,
-                channelID:"851553123746578474"
+                channelID: "851553123746578474",
+                voiceChannelID: "851553123746578475"
             });
 
             var sessionTime = moment(weekStart);
@@ -61,7 +73,18 @@ export async function getSessions(guild)
                 name:"Tutorial",
                 time:sessionTime,
                 duration:4,
-                channelID:"851553123746578481"
+                channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
+                        "866939311597027358", "851553123340255253", //queue and game-feedback
+                        "851553124073209876", "851553124073209877", "851553124073209878", "879599703656890408", "879599731108610108", "879599755783729193"],  //breakouts
+                voiceChannelID:[
+                    "851553124073209879",
+                    "851553124073209880",
+                    "851553124073209881",
+                    "851553124073209882",
+                    "879599578184290324",
+                    "879599619959578635",
+                    "879599657611837490"
+                ]
             });
 
             week.colspan = week.sessions.length;
@@ -92,7 +115,8 @@ export async function getSessions(guild)
                 name:"Lecture",
                 time:sessionTime,
                 duration:2,
-                channelID:"861231510005743656"
+                channelID:"861231510005743656",
+                voiceChannelID: ["860360631450075139", "869445948399562792"]
             });
 
             if (w > 1) //no pracs in week 1
@@ -104,7 +128,8 @@ export async function getSessions(guild)
                     name:"Practical",
                     time:sessionTime,
                     duration:2,
-                    channelID:"861231530751164426" //should be discord channel id etc whatvs next semester
+                    channelID:"861231530751164426",
+                    voiceChannelID: ["860360631450075139", "869445948399562792"]
                 });
             }
 
@@ -139,7 +164,8 @@ export async function getSessions(guild)
                     name:"Tutorial",
                     time:sessionTime,
                     duration:2,
-                    channelID:"861228239229157426" //should be discord channel id etc whatvs next semester
+                    channelID:"861228239229157426" ,
+                    voiceChannelID: "860323794060312600"
                 });
 
                 var sessionTime = moment(weekStart);
@@ -149,7 +175,8 @@ export async function getSessions(guild)
                     name:"Workshop",
                     time:sessionTime,
                     duration:2,
-                    channelID:"861228239229157426" //should be discord channel id etc whatvs next semester
+                    channelID:"861228239229157426" ,
+                    voiceChannelID: "860323794060312600"
                 });
             }
 
@@ -160,7 +187,8 @@ export async function getSessions(guild)
                 name:"Lecture",
                 time:sessionTime,
                 duration:2,
-                channelID:"861228214835347496"
+                channelID:"861228214835347496",
+                voiceChannelID: "860323794060312600"
             });
         
             if (w == 1) //only week 1... grr lol
@@ -173,7 +201,8 @@ export async function getSessions(guild)
                     name:"Lecture",
                     time:sessionTime,
                     duration:2,
-                    channelID:"861228214835347496"
+                    channelID:"861228214835347496",
+                    voiceChannelID: "860323794060312600"
                 });
             }
 
@@ -292,7 +321,7 @@ export async function getNextSessionCountdown(guild, linkChannelName)
     var desc = "That's "+nextSession.startTimestamp.calendar();
     if (linkChannelName)
     {
-        desc += " in <#"+nextSession.channelID+">.";
+        desc += " in <#"+channelIDArrayHandler(nextSession.channelID)+">.";
     }
     else
     {
@@ -324,7 +353,7 @@ export async function scheduleNextSessionPost(guild)
             await sleep(diffInMilliseconds); 
 
             var countdown = await getNextSessionCountdown(guild, false);
-            var channel = await guild.client.channels.cache.get(nextSession.channelID);
+            var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.channelID));
             await send(channel, {embeds: [ countdown ]});
             //await send(channel, await getNextSessionCountdown(guild, false));
         }
@@ -334,4 +363,23 @@ export async function scheduleNextSessionPost(guild)
 
         await scheduleNextSessionPost(guild);//rinse and repeat!
     }
+}
+
+function channelIDArrayHandler(channelID)
+{
+    if (typeof(channelID) === "object")
+    {
+        return channelID[0];
+    }
+    else
+    {
+        return channelID;
+    }
+}
+
+export function didAttendSession(instance, session)
+{
+    var time = moment(instance.joined);
+    var leftTime = moment(instance.left);
+    return time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp);
 }
