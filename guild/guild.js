@@ -168,9 +168,17 @@ export function loadGuildProperty(property, required)
 }
   
 //non-route version (but still spoofing route version)
-export async function getGuildProperty(property, guild, required)
+export async function getGuildProperty(property, guild, defaultValue, required)
 {
-  var res = await loadGuildProperty(property, required)(getFakeReq(guild), {locals:{}}, () => {});
+  var res = {locals:{}};
+  await loadGuildProperty(property, required)(getFakeReq(guild), res, () => {});
+
+  if (defaultValue && res.error)
+  {
+    res.error = false;
+    await saveGuildProperty(property, defaultValue, req, res);
+  }
+
   if (required && res.error)
   {
     console.log(res.error);
@@ -179,10 +187,17 @@ export async function getGuildProperty(property, guild, required)
   }
   return res.locals[property];
 }
-export async function getGuildPropertyConverted(property, guild, required) //this version will return the channel/role object itself
+export async function getGuildPropertyConverted(property, guild, defaultValue, required) //this version will return the channel/role object itself
 {
   var res = {locals:{}};
   await loadGuildProperty(property, required)(getFakeReq(guild), res, () => {});
+
+  if (defaultValue && res.error)
+  {
+    res.error = false;
+    await saveGuildProperty(property, defaultValue, req, res);
+  }
+
   if (required && res.error)
   {
     console.log(res.error);
@@ -199,6 +214,32 @@ export async function getGuildPropertyConverted(property, guild, required) //thi
   }
 
   return res.locals[property];
+}
+
+export async function saveGuildProperty(property, value, req, res)
+{
+  await req.guildDocument.update({
+    property: value
+  });
+  req[property] = value;
+  GUILD_CACHE[req.guild.id][property] = value;
+
+  await loadGuildProperty(property, false)(req, res, () => {});
+
+  if (property.endsWith("ChannelID"))
+  {
+    property = property.replace("ChannelID", "Channel");
+    req.query.message = "Set "+property+" to #"+ req[property].name+".";
+  }
+  else if (property.endsWith("RoleID"))
+  {
+    property = property.replace("RoleID", "Role");
+    req.query.message = "Set "+property+" to @"+ req[property].name+".";
+  }
+  else
+  {
+    req.query.message = "Set "+property+" to "+ req[property]+".";
+  }
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed
