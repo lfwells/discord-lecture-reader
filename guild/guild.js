@@ -121,73 +121,45 @@ export function getGuildDocument(guildID)
   return guildsCollection.doc(guildID);
 }
 
-//TODO: these three funcs need to be generic, so we can tag many channel types
-export function loadLectureChannel(required)  
-{
-    return async function(req,res,next)  
-    {
-      var client = getClient();
-      if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].lectureChannelID)
-      {
-        req.lectureChannelID = GUILD_CACHE[req.guild.id].lectureChannelID;
-      }
-  
-      if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].lectureChannelID))
-      {
-        req.guildDocumentSnapshot = await req.guildDocument.get();
-        req.lectureChannelID = await req.guildDocumentSnapshot.get("lectureChannelID");
-        if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-        GUILD_CACHE[req.guild.id].lectureChannelID = req.lectureChannelID;
-      } 
-      if (req.lectureChannelID)
-      {
-        //console.log("req.lectureChannelID", req.lectureChannelID);
-        req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
-        res.locals.lectureChannel = req.lectureChannel;
-      }
-      else
-      {
-        //no lecture channel defined
-        if (required)
-        {
-          res.end("No lecture channel set. Please set one on dashboard page.");
-          return;
-        }
-      }
-      next(); 
-    }
-}
-
-//TODO: these three funcs need to be generic, so we can tag many channel types
-export function loadAwardChannel(required)  
+export function loadGuildProperty(property, required)
 {
   return async function(req,res,next)  
   {
     var client = getClient();
-    if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].awardChannelID)
+    if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id][property])
     {
-      req.awardChannelID = GUILD_CACHE[req.guild.id].awardChannelID;
+      req[property] = GUILD_CACHE[req.guild.id][property];
     }
 
-    if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].awardChannelID))
+    if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id][property]))
     {
       req.guildDocumentSnapshot = await req.guildDocument.get();
-      req.awardChannelID = await req.guildDocumentSnapshot.get("awardChannelID");
+      req[property] = await req.guildDocumentSnapshot.get(property);
       if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-      GUILD_CACHE[req.guild.id].awardChannelID = req.awardChannelID;
+      GUILD_CACHE[req.guild.id][property] = req[property];
     } 
-    if (req.awardChannelID)
+
+    //auto detect an ChannelID or RoleID
+    if (req[property])
     {
-      //console.log("req.awardChannelID", req.awardChannelID);
-      req.awardChannel = await client.channels.fetch(req.awardChannelID);//.cache.filter(c => c.id == awardChannelID);
-      res.locals.awardChannel = req.awardChannel;
+      if (property.endsWith("ChannelID"))
+      {
+        var channelProperty = property.replace("ChannelID", "Channel");
+        req[channelProperty] = await client.channels.fetch(req[property]);
+        res.locals[channelProperty] = req[channelProperty];
+      }
+      if (property.endsWith("RoleID"))
+      {
+        var roleProperty = property.replace("RoleID", "Role");
+        req[roleProperty] = await req.guild.roles.fetch(req[property]);
+        res.locals[roleProperty] = req[roleProperty];
+      }
     }
     else
     {
-      //no lecture channel defined
       if (required)
       {
-        res.end("No award channel set. Please set one on dashboard page.");
+        res.end("No "+property+" set. Please set one.");
         return;
       }
     }
@@ -195,119 +167,38 @@ export function loadAwardChannel(required)
   }
 }
   
-export function loadOffTopicChannel(required)  
-{
-  return async function(req,res,next)  
-  {
-    var client = getClient();
-    if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].offTopicChannelID)
-    {
-      req.offTopicChannelID = GUILD_CACHE[req.guild.id].offTopicChannelID;
-    }
-
-    if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].offTopicChannelID))
-    {
-      req.guildDocumentSnapshot = await req.guildDocument.get();
-      req.offTopicChannelID = await req.guildDocumentSnapshot.get("offTopicChannelID");
-      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-      GUILD_CACHE[req.guild.id].offTopicChannelID = req.offTopicChannelID;
-    } 
-    if (req.offTopicChannelID)
-    {
-      //console.log("req.offTopicChannelID", req.offTopicChannelID);
-      req.offTopicChannel = await client.channels.fetch(req.offTopicChannelID);//.cache.filter(c => c.id == offTopicChannel);
-      res.locals.offTopicChannel = req.offTopicChannel;
-    }
-    else
-    {
-      //no lecture channel defined
-      if (required)
-      {
-        res.error = "No off-topic channel set. Please set one on dashboard page.";
-        res.end(res.error);
-        return res;
-      }
-    }
-    next(); 
-    return res; //TODO: do this for other channels? or just wait until this is generic
-  }
-}
-
-
-  
-export async function loadAdminRoleID(req,res,next)   
-{
-  if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].adminRoleID)
-  {
-    req.adminRoleID = GUILD_CACHE[req.guild.id].adminRoleID;
-  }
-
-  if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].adminRoleID))
-  {
-    req.guildDocumentSnapshot = await req.guildDocument.get();
-    req.adminRoleID = await req.guildDocumentSnapshot.get("adminRoleID");
-    if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-    GUILD_CACHE[req.guild.id].adminRoleID = req.adminRoleID;
-  }
-    
-  if (req.adminRoleID)
-  {
-    req.adminRole = await req.guild.roles.fetch(req.adminRoleID);
-    res.locals.adminRole = req.adminRole;
-  }
-
-  next(); 
-  return res; 
-}
-export async function loadStudentRoleID(req,res,next)   
-{
-  if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].studentRoleID)
-  {
-    req.studentRoleID = GUILD_CACHE[req.guild.id].studentRoleID;
-  }
-
-  if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id].studentRoleID))
-  {
-    req.guildDocumentSnapshot = await req.guildDocument.get();
-    req.studentRoleID = await req.guildDocumentSnapshot.get("studentRoleID");
-    if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-    GUILD_CACHE[req.guild.id].studentRoleID = req.studentRoleID;
-  }
-    
-  if (req.studentRoleID)
-  {
-    req.studentRole = await req.guild.roles.fetch(req.admstudentRoleIDinRoleID);
-    res.locals.studentRole = req.studentRole;
-  }
-
-  next(); 
-  return res; 
-}
-
 //non-route version (but still spoofing route version)
-//todo: generic for all
-export async function getOffTopicChannel(guild, required)
+export async function getGuildProperty(property, guild, required)
 {
-  var res = await loadOffTopicChannel(required)(getFakeReq(guild), {locals:{}}, () => {});
+  var res = await loadGuildProperty(property, required)(getFakeReq(guild), {locals:{}}, () => {});
   if (required && res.error)
   {
     console.log(res.error);
+    return null;
     //anything else?
   }
-  return res.locals.offTopicChannel;
+  return res.locals[property];
 }
-//non-route version (but still spoofing route version)
-//todo: generic for all
-export async function getAdminRole(guild)
+export async function getGuildPropertyConverted(property, guild, required) //this version will return the channel/role object itself
 {
-  var client = getClient();
-  var res = await loadAdminRoleID(getFakeReq(guild), {locals:{}}, () => {});
-  if (res.error)
+  var res = {locals:{}};
+  await loadGuildProperty(property, required)(getFakeReq(guild), res, () => {});
+  if (required && res.error)
   {
     console.log(res.error);
+    return null;
     //anything else?
   }
-  return res.locals.adminRole;
+  if (property.endsWith("ChannelID"))
+  {
+    property = property.replace("ChannelID", "Channel");
+  }
+  if (property.endsWith("RoleID"))
+  {
+    property = property.replace("RoleID", "Role");
+  }
+
+  return res.locals[property];
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed
@@ -319,7 +210,7 @@ export async function init_admin_users(client)
   //store them in the db
   guilds.each( async (guild) => 
   { 
-    var adminRole = await getAdminRole(guild);
+    var adminRole = await getGuildPropertyConverted("adminRoleID", guild);
     if (adminRole)
     {
       //console.log(guild.name);

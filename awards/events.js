@@ -5,7 +5,6 @@ import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward, getAwardListFullData, getLeaderboard } from "./awards.js";
 import { pluralize, offTopicOnly } from '../core/utils.js';
 import { getClassList } from '../core/classList.js';
-import { getAdminRole } from '../guild/guild.js';
 
 export default async function(client)
 {

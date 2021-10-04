@@ -46,53 +46,33 @@ function guildRouter()
     //middleware check that this is one of "our" servers 
     router.use(guild.checkGuildAdmin);
 
-    router.use(guild.loadAdminRoleID);
-    router.use( guild.loadStudentRoleID);
-    router.use(guild.loadLectureChannel(false));
-    router.use(guild.loadAwardChannel(false));
-    router.use(guild.loadOffTopicChannel(false));
+    router.use(guild.loadGuildProperty("adminRoleID"));
+    router.use(guild.loadGuildProperty("studentRoleID"));
+    router.use(guild.loadGuildProperty("lectureChannelID"));
+    router.use(guild.loadGuildProperty("awardChannelID"));
+    router.use(guild.loadGuildProperty("offTopicChannelID"));
 
     //guild home page (dashboard)
     router.get("/", 
 
-
-
-    //TODO: not sure if these should only be on this page?
-    /*
-                    guild.loadAdminRoleID, 
-                    guild.loadStudentRoleID,
-                    guild.loadLectureChannel(false), 
-                    guild.loadAwardChannel(false), 
-                    guild.loadOffTopicChannel(false), 
-*/
-
-
-
-
-                    guild_routes.guildHome);
+    guild_routes.guildHome);
 
                     
-    router.get("/obs/", guild.load(), guild.loadAwardChannel(true), basic_render("obs")); 
+    router.get("/obs/", basic_render("obs")); 
 
     //awards
-    router.get("/namesTest/", guild.load(), guild.loadAwardChannel(true), award_routes.namesTest); 
-    router.get("/namesBackup/", guild.load(), guild.loadAwardChannel(true),award_routes.namesBackup); 
-    router.get("/awardsList/", guild.load(), guild.loadAwardChannel(true),award_routes.getAwardsList); 
+    router.get("/namesTest/", award_routes.namesTest); 
+    router.get("/namesBackup/", award_routes.namesBackup); 
+    router.get("/awardsList/", award_routes.getAwardsList); 
     router.get("/awards/", 
                     loadClassList, 
-                    guild.loadLectureChannel(true), 
-                    guild.loadAwardChannel(true), 
-                    guild.loadOffTopicChannel(true), 
                     award_routes.getAwardsData, 
                     award_routes.displayAwards); 
     router.get("/awards/giveAward", 
-                    guild.loadLectureChannel(true), 
-                    guild.loadAwardChannel(true), 
-                    guild.loadOffTopicChannel(true), 
                     award_routes.getGiveAward); 
                     
-    router.get("/leaderboard/", loadClassList, guild.loadAwardChannel(true),award_routes.leaderboard); 
-    router.get("/leaderboard/obs", loadClassList, guild.loadAwardChannel(true),award_routes.leaderboardOBS); 
+    router.get("/leaderboard/", loadClassList, award_routes.leaderboard); 
+    router.get("/leaderboard/obs", loadClassList, award_routes.leaderboardOBS); 
 
     //attendance
     router.get("/attendance/", loadClassList, attendance_routes.getAttendanceData, attendance_routes.displayAttendance); 
@@ -109,8 +89,7 @@ function guildRouter()
 
     router.get("/analytics/history", analytics_routes.getHistoricalData); 
     router.get("/analytics/timeGraph", 
-        guild.loadAdminRoleID, 
-        guild.loadStudentRoleID,
+        guild.loadGuildProperty("adminRoleID"),
         analytics_routes.timeGraph); 
 
     //progress
@@ -124,18 +103,18 @@ function guildRouter()
 
     //lecture text
     router.get("/text/", lecture_text_routes.obs); //this is the obs page
-    router.get("/text/input", guild.loadLectureChannel(false), lecture_text_routes.load, lecture_text_routes.inputGet); //this is the page for triggering text 
-    router.post("/text/input",guild.loadLectureChannel(false), lecture_text_routes.load, lecture_text_routes.inputPost);
+    router.get("/text/input", lecture_text_routes.load, lecture_text_routes.inputGet); //this is the page for triggering text 
+    router.post("/text/input", lecture_text_routes.load, lecture_text_routes.inputPost);
     router.get("/text/latest", lecture_text_routes.getLatest); //the query to see the latest
     router.get("/text/:style/", lecture_text_routes.render); //grabbed with ajax on demand
 
     //polls    
-    router.get("/poll/", guild.loadLectureChannel(true), poll_routes.load, poll_routes.obs); //obs page
-    router.get("/poll/data/", guild.loadLectureChannel(true), poll_routes.load, poll_routes.pollData); //json data for obs page
-    router.get("/poll/history/", guild.loadLectureChannel(true), poll_routes.pollHistory);
-    router.get("/poll/:pollText/", removeQuestionMark, guild.loadLectureChannel(true), poll_routes.postPoll);  //send poll (uses get, so that we can do the cool powerpoint links)
-    router.get("/pollRoboLinds/:pollText/", removeQuestionMark, guild.loadLectureChannel(true), poll_routes.postPollRoboLinds);  //send poll (uses get, so that we can do the cool powerpoint links)
-    router.get("/clearpoll/", guild.loadLectureChannel(false), poll_routes.clearPoll);
+    router.get("/poll/", guild.loadGuildProperty("lectureChannelID", true), poll_routes.load, poll_routes.obs); //obs page
+    router.get("/poll/data/", guild.loadGuildProperty("lectureChannelID", true), poll_routes.load, poll_routes.pollData); //json data for obs page
+    router.get("/poll/history/", guild.loadGuildProperty("lectureChannelID", true), poll_routes.pollHistory);
+    router.get("/poll/:pollText/", removeQuestionMark, guild.loadGuildProperty("lectureChannelID", true), poll_routes.postPoll);  //send poll (uses get, so that we can do the cool powerpoint links)
+    router.get("/pollRoboLinds/:pollText/", removeQuestionMark, guild.loadGuildProperty("lectureChannelID", true), poll_routes.postPollRoboLinds);  //send poll (uses get, so that we can do the cool powerpoint links)
+    router.get("/clearpoll/", guild.loadGuildProperty("lectureChannelID", false), poll_routes.clearPoll);
 
     //scheduled polls
     router.get("/pollSchedule", scheduled_poll_routes.load, scheduled_poll_routes.getPollSchedule);

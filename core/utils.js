@@ -1,5 +1,5 @@
 import * as config from '../core/config.js';
-import { getOffTopicChannel } from '../guild/guild.js';
+import { getGuildPropertyConverted } from '../guild/guild.js';
 
 
 export const clamp = (a, min = 0, max = 1) => Math.min(max, Math.max(min, a));
@@ -59,7 +59,7 @@ export function downloadResource(filename) {
 
 export async function offTopicOnly(interaction)
 {
-    var offTopicChannel = await getOffTopicChannel(interaction.guild);
+    var offTopicChannel = await getGuildPropertyConverted("offTopicChannel", interaction.guild);
     if (offTopicChannel && interaction.channel != offTopicChannel)
     {
         interaction.reply({ content: "You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", ephemeral:true });

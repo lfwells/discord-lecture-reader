@@ -1,5 +1,5 @@
 import * as config from '../core/config.js';
-import { getGuildDocument, getOffTopicChannel } from '../guild/guild.js';
+import { getGuildDocument } from '../guild/guild.js';
 import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js';
 import { offTopicOnly, pluralize, sleep } from '../core/utils.js';
 import { send } from '../core/client.js';
