@@ -1,0 +1,35 @@
+<label><%=typeof label !== 'undefined' ? label : "" %>
+    <select id="<%= id %>" title="<%=typeof value !== 'undefined' ? value : "" %>">
+        <option><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
+        <% 
+        var roles = guild.roles.cache.sort((a,b) => a.position - b.position);
+        roles.forEach(function(role)
+        { 
+            %><option value="<%= role.id %>"
+                <% if (value && role.id == value) { %>selected<% } %>>
+                <%= role.name %>
+            </option><%
+        }) %>
+    </select>
+</label>
+<script>
+    $("#<%= id %>").on("change", (e) =>
+    {
+        document.location.href = "?<%= id %>="+$("#<%= id %>").val();
+    });
+</script>
+
+<% 
+/* 
+usage:
+
+<p>include("subViews/roleSelect.html", 
+    { 
+        label: "Admin/Staff Role:",
+        selectDefaultText:"-- Select Role--",
+        id: "setAdminRoleID",
+        value: locals.adminRole.id
+    })</p>
+
+*/ 
+%>
