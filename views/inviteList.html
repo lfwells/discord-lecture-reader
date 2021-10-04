@@ -3,21 +3,21 @@
 <h2>Invites</h2>
 <p>Associate a role with an invite. Users who use that invite will automatically be assigned that role.</p>
 <table id="guilds">
-  <% invites.forEach(function(invite){ %>
+  <% invites.forEach(function(uses, code){ %>
     <tr>
-        <td><a href="https://discord.gg/<%= invite.code %>">https://discord.gg/<%= invite.code %></a></td>
+        <td><a href="https://discord.gg/<%= code %>">https://discord.gg/<%= code %></a></td>
         <td>
             <%- include("subViews/select.html", { 
-                id:invite.code, 
+                id:code, 
                 data:rolesList, 
                 defaultText: "--- Assign Role ---",
-                selected: appliedRolesList[invite.code],
+                selected: appliedRolesList[code],
                 onChange:"applyRole(value, id);" }) %>
         </td>
     </tr>
   <% }) %>
   <tr>
-      <td>TODO: Generate invite button here</td>
+      <td><a href="generate">Generate New Invite</a></td>
   </tr>
 </table>
 <script>

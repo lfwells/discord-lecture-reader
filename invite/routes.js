@@ -18,7 +18,7 @@ export async function inviteList(req, res)
     });
 
     res.render('inviteList', {
-        invites: invites[req.guild.id],
+        invites: invites.get(req.guild.id),
         rolesList: roles[req.guild.id].map((role) => { return {
             value: role.id,
             text: role.name
@@ -45,4 +45,19 @@ export async function assignRole(req, res)
     res.json({
         success:true
     });
+}
+
+export async function generateInvite(req,res,next)
+{
+    var channel = req.guild.channels.cache.find(x => x.name === "rules"); //TODO select channel
+    console.log(channel.name);
+    var newInvite = await channel.createInvite({
+        unique:true,
+        maxAge: 0, //TODO option
+        maxUses: 0,
+    });
+    
+    invites.get(req.guild.id).set(newInvite.code, newInvite.uses);
+
+    next();
 }

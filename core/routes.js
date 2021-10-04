@@ -144,6 +144,7 @@ function guildRouter()
     //invites
     router.get("/invites", invite_routes.inviteList);
     router.post("/invites", invite_routes.assignRole, invite_routes.inviteList);
+    router.get("/invites/generate", invite_routes.generateInvite, invite_routes.inviteList);
         
     return router;
 }
