@@ -66,26 +66,53 @@ export async function getSessions(guild)
                 voiceChannelID: "851553123746578475"
             });
 
-            var sessionTime = moment(weekStart);
-            sessionTime.day(4); //Thursday
-            sessionTime.hour(9);
-            week.sessions.push({
-                name:"Tutorial",
-                time:sessionTime,
-                duration:4,
-                channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
-                        "866939311597027358", "851553123340255253", //queue and game-feedback
-                        "851553124073209876", "851553124073209877", "851553124073209878", "879599703656890408", "879599731108610108", "879599755783729193"],  //breakouts
-                voiceChannelID:[
-                    "851553124073209879",
-                    "851553124073209880",
-                    "851553124073209881",
-                    "851553124073209882",
-                    "879599578184290324",
-                    "879599619959578635",
-                    "879599657611837490"
-                ]
-            });
+            //week 12 friday = thurdsay
+            if (w == 11)
+            {
+                var sessionTime = moment(weekStart);
+                sessionTime.day(5); //Friday
+                sessionTime.hour(9);
+                week.sessions.push({
+                    name:"Tutorial",
+                    time:sessionTime,
+                    duration:4,
+                    channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
+                            "866939311597027358", "851553123340255253", //queue and game-feedback
+                            "851553124073209876", "851553124073209877", "851553124073209878", "879599703656890408", "879599731108610108", "879599755783729193"],  //breakouts
+                    voiceChannelID:[
+                        "851553124073209879",
+                        "851553124073209880",
+                        "851553124073209881",
+                        "851553124073209882",
+                        "879599578184290324",
+                        "879599619959578635",
+                        "879599657611837490"
+                    ]
+                });
+            }
+            else
+            {
+                var sessionTime = moment(weekStart);
+                sessionTime.day(4); //Thursday
+                sessionTime.hour(9);
+                week.sessions.push({
+                    name:"Tutorial",
+                    time:sessionTime,
+                    duration:4,
+                    channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
+                            "866939311597027358", "851553123340255253", //queue and game-feedback
+                            "851553124073209876", "851553124073209877", "851553124073209878", "879599703656890408", "879599731108610108", "879599755783729193"],  //breakouts
+                    voiceChannelID:[
+                        "851553124073209879",
+                        "851553124073209880",
+                        "851553124073209881",
+                        "851553124073209882",
+                        "879599578184290324",
+                        "879599619959578635",
+                        "879599657611837490"
+                    ]
+                });
+            }
 
             week.colspan = week.sessions.length;
             weeks.push(week);
