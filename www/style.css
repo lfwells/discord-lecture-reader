@@ -214,8 +214,8 @@
         nav ul li{
             list-style: none;
         }
-        #guilds li a,
-        nav ul li a
+        #guilds li > *,
+        nav ul li > *
         {
             display:block;
             padding:0.5em;
