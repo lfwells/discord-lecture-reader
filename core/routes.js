@@ -18,6 +18,11 @@ import { Router } from "express";
 export default function(app)
 {
     app.use(defaultRouter());
+    app.use(function(req, res, next){
+        res.path = req.path;
+        res.locals.path = req.path;
+        next();
+    });
     app.use("/guild/:guildID", guildRouter());
 }
 

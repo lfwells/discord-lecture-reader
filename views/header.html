@@ -44,23 +44,38 @@
                     <% 
                 } 
                 
+                function currentTab(checkFor)
+                {
+                    var path = locals.path.replace("/guild/"+guild.id+"/",  "");
+                    var isCurrent = false;
+                    if (path.length == 0 && checkFor == "")
+                    {
+                        isCurrent = true;
+                    } 
+                    else if (checkFor != "" && (path.endsWith(checkFor) || path.endsWith(checkFor+"/")))
+                    {
+                        isCurrent = true;
+                    }
+                    return isCurrent ? ' class=current ' : "";
+                }
+
                 %>
                 
                 <nav>
                     <ul>
-                        <li><a href="/guild/<%= guild.id %>/">Configure Server</a></li>
+                        <li><a <%=currentTab("")%> href="/guild/<%= guild.id %>/">Configure Server</a></li>
                         <% if (locals.lectureChannel) { %>
                             <!--<li><a href="/guild/<%= guild.id %>/clearpoll/">Clear Current Poll</a></li>-->
-                            <li><a href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
+                            <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
                         <% } %>
-                        <li><a href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
-                        <li><a href="/guild/<%= guild.id %>/analytics/">Analytics</a></li>
-                        <li><a href="/guild/<%= guild.id %>/analytics/timeGraph">Graphs</a></li>
-                        <li><a href="/guild/<%= guild.id %>/awards/">Achievements</a></li>
-                        <li><a href="/guild/<%= guild.id %>/leaderboard/">Achievements Leaderboard</a></li>
-                        <li><a href="/guild/<%= guild.id %>/invites/">Configure Invites</a></li>
-                        <li><a href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
-                        <li><a href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
+                        <li><a <%=currentTab("attendance")%> href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
+                        <li><a <%=currentTab("analytics")%> href="/guild/<%= guild.id %>/analytics/">Analytics</a></li>
+                        <li><a <%=currentTab("timeGraph")%> href="/guild/<%= guild.id %>/analytics/timeGraph">Graphs</a></li>
+                        <li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Achievements</a></li>
+                        <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Achievements Leaderboard</a></li>
+                        <li><a <%=currentTab("invites")%> href="/guild/<%= guild.id %>/invites/">Invites</a></li>
+                        <li><a <%=currentTab("text")%> href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
+                        <li><a <%=currentTab("obs")%> href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
                     </ul>
                 </nav>
                 <%

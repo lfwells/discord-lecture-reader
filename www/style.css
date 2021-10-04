@@ -249,6 +249,11 @@
             display:inline-block;
         }
 
+        header nav .current
+        {
+            background-color: #7289DA;
+        }
+
         main 
         { 
             padding: 2em;

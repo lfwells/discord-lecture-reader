@@ -8,6 +8,7 @@ import { roles } from "./roles.js";
 
 export async function inviteList(req, res) 
 {
+    console.log(req.path);
     init_invites(getClient());
     
     var appliedRolesList = [];
