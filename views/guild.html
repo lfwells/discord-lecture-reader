@@ -9,14 +9,14 @@
         label: "Admin/Staff Role:",
         selectDefaultText:"-- Select Role--",
         id: "setAdminRoleID",
-        value: locals.adminRole.id
+        value: locals.adminRole ? locals.adminRole.id : undefined
     }) %></p>
 <p><%- include("subViews/roleSelect.html", 
     { 
         label: "Current Students Role:",
         selectDefaultText:"-- Select Role--",
         id: "setStudentRoleID",
-        value: locals.studentRole.id
+        value: locals.studentRole ? locals.studentRole.id : undefined
     }) %></p>
 
 <h3>Channel Set Up</h3>
@@ -26,21 +26,21 @@
         label: "Lecture Channel:",
         selectDefaultText:"-- Select Channel--",
         id: "setLectureChannelID",
-        value: locals.lectureChannel.id
+        value: locals.lectureChannel ? locals.lectureChannel.id : undefined
     }) %></p>
 <p><%- include("subViews/channelSelect.html", 
     { 
         label: "Achievements Channel:",
         selectDefaultText:"-- Select Channel--",
         id: "setAwardChannelID",
-        value: locals.awardChannel.id
+        value: locals.awardChannel ? locals.awardChannel.id : undefined
     }) %></p>
 <p><%- include("subViews/channelSelect.html", 
     { 
         label: "Off Topic Channel:",
         selectDefaultText:"-- Select Channel--", 
         id: "setOffTopicChannelID",
-        value: locals.offTopicChannel.id
+        value: locals.offTopicChannel ? locals.offTopicChannel.id : undefined
     }) %></p>
 
 
