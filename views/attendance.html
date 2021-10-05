@@ -1,5 +1,7 @@
 <%- include('header.html') %>
 <style>
+body { width: max-content; }
+
 .pageResult {
   width:2px;
   min-width: 4px;
@@ -31,22 +33,35 @@ table th {
     background-color: #2c2f33; 
 }
 
+th { 
+  padding:4px;
+}
+
 </style>
 
 <h2>Attendance</h2>
 
-<div><a href="../attendanceOld/">View old interface for this (perfect for if you dont have sessions defined)</a></div>
+<form method="get">
+  <label><input type="checkbox" name="current" class="autosubmit" <%= locals.query.current ? "checked" : "" %>/> Filter By Current Students Only</label>
+</form>
 
+<!--<div><a href="../attendanceOld/">View old interface for this (perfect for if you dont have sessions defined)</a></div>-->
+<% 
+var students = locals.classList;
+var studentCount = students.length;
+var sessionsCount = 0;
+%>
 <table border="1" cellpadding="0" cellspacing="0">
     <tr>
       <th rowspan="2">Student</th>
       <% locals.weeks.forEach(function(week)
       { 
-        %><th colspan="<%= week.colspan %>">
+        %><th colspan="<%= week.colspan %>" class="week">
             <%= week.name %><br />
             <%= week.weekStart.format("DD MMMM YYYY") %>
         </th><% 
       }) %>
+      <th rowspan="2">% Attendance</th>
     </tr>
     <tr>
       <% locals.weeks.forEach(function(week)
@@ -54,22 +69,57 @@ table th {
         week.sessions.forEach(function(session)
         {
           %><th class="sectionName"><%= session.name %> - <%= session.time.format("ddd Do HH:mm") %></th><%
+          sessionsCount++;
         })
       }) %>
     </tr>
-    <% locals.classList.forEach(function(student){ 
+    <% 
+    var weekSummary = [];
+    locals.weeks.forEach(function(week, weekIndex)
+    { 
+      var sessionSummary = [];
+      week.sessions.forEach(function(session)
+      {
+        sessionSummary.push(0);
+      });
+      weekSummary.push(sessionSummary);
+    });
+
+    students.forEach(function(student){ 
       %>
       <tr class="studentRow">
         %><th class="studentName"><%= student.discordName %></th>  
-        <% locals.weeks.forEach(function(week)
+        <% 
+        var studentSessionCount = 0;
+        locals.weeks.forEach(function(week, weekIndex)
         { 
-          week.sessions.forEach(function(session)
+          week.sessions.forEach(function(session, sessionIndex)
           {
-            %><%- locals.checkAttendance(student, session) %><%
+            var sessionData = locals.checkAttendance(student, session);
+            if (sessionData.indexOf("not_complete") == -1)
+            {
+              weekSummary[weekIndex][sessionIndex]++;
+              studentSessionCount++; 
+            }
+            %><%- sessionData %><%
           })
         }) %>
+        <td><%=Math.round(((studentSessionCount / sessionsCount)*100)*10)/10 %>% (<%=studentSessionCount%>)</td>
       </tr>
     <% }) %>
+    <tr>
+      <th>Class %</th>
+      <% 
+      console.log(weekSummary);
+      weekSummary.forEach(function(sessionSummary)
+      { 
+        sessionSummary.forEach(function(sessionCount)
+        {
+          %><td class="center pad"><%= Math.round(((sessionCount / studentCount)*100)*10)/10 %>%<br />(<%=sessionCount %>)</td><%
+        });
+      }) %>
+      <td>&nbsp;</td>
+    </tr>
   </table>
 
 <%- include('footer.html') %>

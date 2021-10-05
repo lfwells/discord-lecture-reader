@@ -1,5 +1,16 @@
 </main>
 <footer>&copy; University of Tasmania - For Support Contact <a href="mailto:Lindsay.Wells@utas.edu.au">Lindsay.Wells@utas.edu.au</a></footer>
+
+<script>
+    $(document).ready(() => {
+        $(".autosubmit").on("change", function(e)
+        {
+            $(this).closest("form").submit();
+        })
+    });
+    
+</script>
+
 </body>
 
 

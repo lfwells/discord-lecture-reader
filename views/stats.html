@@ -1,6 +1,6 @@
 <%- include('header.html') %>
 <style>
-th {
+th, td {
     text-transform: capitalize;
     text-align: left;
     border-bottom: 1px solid white;
@@ -25,5 +25,6 @@ th, td {
             <%- include("subViews/statsTable.html", {data:locals.statsData.members}) %>
         </td>
     </tr>
+</table>
 
 <%- include('footer.html') %>

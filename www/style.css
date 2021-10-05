@@ -264,4 +264,8 @@
             padding:8px;
             text-align: right;
             font-size: small;
+            width:100%;
         }
+
+        .center {text-align: center;}
+        .pad { padding:4px;}

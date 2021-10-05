@@ -1,3 +1,4 @@
+import { getGuildProperty, getGuildPropertyConverted, GUILD_CACHE } from "../guild/guild.js";
 import { getClient } from "./client.js";
 import * as config from "./config.js";
 
@@ -27,6 +28,14 @@ export async function loadClassList(req,res,next)
         classList = classList.filter(m => m.discordID != config.LINDSAY_ID);
     }
 
+    if (req.query.current && req.query.current == "on")
+    {
+        var studentRoleID = await getGuildProperty("studentRoleID", req.guild, undefined, true);
+        if (studentRoleID)
+            classList = classList.filter(m => m.member.roles.cache.has(studentRoleID)); 
+        else
+            classList = [];
+    }
     req.classList = classList.sort((a,b) => a.discordName.localeCompare(b.discordName));
     res.locals.classList = req.classList;
     next(); 
@@ -40,5 +49,6 @@ export async function getClassList(guild)
     var res = { locals: { } };
     var next = ()=> {};
     await loadClassList(req, res, next);
+
     return res.locals.classList;
 }

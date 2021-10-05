@@ -138,6 +138,7 @@ export function loadGuildProperty(property, required)
       if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
       GUILD_CACHE[req.guild.id][property] = req[property];
     } 
+    res.locals[property] = req[property];
 
     //auto detect an ChannelID or RoleID
     if (req[property])
@@ -173,7 +174,7 @@ export async function getGuildProperty(property, guild, defaultValue, required)
   var res = {locals:{}};
   await loadGuildProperty(property, required)(getFakeReq(guild), res, () => {});
 
-  if (defaultValue && res.error)
+  if (defaultValue != undefined && res.error)
   {
     res.error = false;
     await saveGuildProperty(property, defaultValue, req, res);
