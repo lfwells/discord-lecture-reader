@@ -269,3 +269,11 @@
 
         .center {text-align: center;}
         .pad { padding:4px;}
+
+        .filter > span 
+        {
+            margin-right:2ex;
+        }
+        .filter {
+            padding:8px;
+        }

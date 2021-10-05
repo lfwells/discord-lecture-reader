@@ -42,7 +42,7 @@ th {
 <h2>Attendance</h2>
 
 <form method="get">
-  <label><input type="checkbox" name="current" class="autosubmit" <%= locals.query.current ? "checked" : "" %>/> Filter By Current Students Only</label>
+  <%- locals.classlistFilters() %>
 </form>
 
 <!--<div><a href="../attendanceOld/">View old interface for this (perfect for if you dont have sessions defined)</a></div>-->

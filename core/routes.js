@@ -1,7 +1,7 @@
 import { downloadResource, removeQuestionMark } from "./utils.js";
 
 import * as guild from "../guild/guild.js";
-import { loadClassList } from "../core/classList.js";
+import { filterButtons, loadClassList } from "../core/classList.js";
 
 import * as login_routes from '../core/login.js';
 import * as guild_routes from '../guild/routes.js';
@@ -56,6 +56,8 @@ function guildRouter()
     router.use(guild.loadGuildProperty("lectureChannelID"));
     router.use(guild.loadGuildProperty("awardChannelID"));
     router.use(guild.loadGuildProperty("offTopicChannelID"));
+
+    router.use(filterButtons);
 
     //guild home page (dashboard)
     router.get("/", 

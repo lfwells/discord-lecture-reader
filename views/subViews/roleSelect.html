@@ -1,5 +1,10 @@
 <label><%=typeof label !== 'undefined' ? label : "" %>
-    <select id="<%= id %>" title="<%=typeof value !== 'undefined' ? value : "" %>">
+    <select 
+        id="<%= id %>" 
+        title="<%=typeof value !== 'undefined' ? value : "" %>"
+        name="<%=typeof name !== 'undefined' ? name : "" %>"
+        class="<%=typeof className !== 'undefined' ? className : "" %>"
+        >
         <option><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
         <% 
         var roles = guild.roles.cache.sort((a,b) => a.position - b.position);
