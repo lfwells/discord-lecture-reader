@@ -37,6 +37,10 @@ export async function load(req,res,next)
   res.locals.animations = text_animations;
   res.locals.styles = text_styles;
 
+  //support text input
+  if (req.query.text)
+    await handleInput(req, req.query);
+
   next();
 }
 
@@ -70,10 +74,7 @@ export async function inputPost(req,res,next)
     req.body.text = newPhrase;
   }
 
-
-  //trigger the db to have information
-  await req.textCollection.set(req.body);
-  showText(req, req.body);
+  await handleInput(req, req.body);
 
   //back to the page
   req.query.message = "Posted '"+req.body.text+"'!"; 
@@ -81,6 +82,12 @@ export async function inputPost(req,res,next)
     phrases: req.phrases,
     emoji: emoji
   });
+}
+async function handleInput(req, body)
+{
+ //trigger the db to have information
+ await req.textCollection.set(body);
+ showText(req, body);
 }
 export async function showText(req, data) //expects { text: "text", style, animation, robolindsay }
 {
@@ -129,6 +136,11 @@ export async function render(req,res,next)
   if (!req.query.duration)
   {
     req.query.duration = 2;
+  }
+  if (req.params == undefined) { req.params = {}; }
+  if (req.params.style == undefined || req.params.style == "undefined")
+  {
+    req.params.style = "yikes";//"random";
   }
   if (req.params.style == "random")
   {
