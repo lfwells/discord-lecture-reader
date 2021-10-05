@@ -2,16 +2,65 @@
 
 <h2>OBS Pages</h2>
 <p>Use these links as URLs for Browser Sources in OBS.</p>
-<p>Right click a link here and choose "Copy Link Address".</p>
-<p class="TODO">Show URLs, have a auto-copy button</p>
 <nav>
     <ul>
         <% if (locals.lectureChannel) { %>
-            <li><a href="../poll/">Poll Widget</a></li>
+            <li>
+                <a href="../poll/">Poll Widget
+                    <br />
+                    <input class="autoLink copy" /> <button class="copy">Copy</button>
+                </a>
+            </li>
         <% } %>
-        <li><a href="../text/">Lecture Popup Text Widget</a></li>
-        <li><a href="../analytics/obs">Top Posters and Award Leaderboard Widget</a></li>
+
+        <li>
+            <a href="../text/">Lecture Popup Text Widget
+                <br />
+                <input class="autoLink copy" /> <button class="copy">Copy</button>
+            </a>
+        </li>
+        
+        <% if (locals.awardChannel) { %>
+            <li>
+                <a href="../analytics/obs">Top Posters and Award Leaderboard Widget
+                    <br />
+                    <input class="autoLink copy" /> <button class="copy">Copy</button>
+                </a>
+            
+            </li>
+        <% } %>
     </ul>
 </nav>
 
+<style>
+    .autoLink { width: 500px; }
+</style>
+<script>
+    $(document).ready(() =>
+    {
+        $(".autoLink").each((i,e) => {
+            var a = $(e).parents("a");
+            var link = a.attr("href");
+            $(e).val(new URL(link, document.baseURI).href);
+        });
+
+        $(".copy, .autoLink").on("click", (e) => {
+            var txt = $(e.target).parents("a").find("input")[0];
+            copyToClipboard(txt);
+            e.stopPropagation();
+            return false;
+        });
+    });
+
+    function copyToClipboard(txt) {
+        console.log($(txt));
+        //var $temp = $("<input>");
+        //$("body").append($temp);
+        //$temp.val(txt).select();
+        $(txt).select();
+        document.execCommand("copy");
+        //$temp.remove();
+    }
+
+</script>
 <%- include('footer.html') %>

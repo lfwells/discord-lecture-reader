@@ -364,7 +364,7 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
     return sessions;
 }
 
-export async function loadAttendanceSession(attendanceData, guild, includeNoSession)
+export async function loadAttendanceSession(attendanceData, guild, includeNoSession, predicate)
 {
     var sessions = await getSessionsFlatArray(guild);
     var outOfSessionAttendance = [];
@@ -373,7 +373,7 @@ export async function loadAttendanceSession(attendanceData, guild, includeNoSess
         var row = attendanceData[r];
         row.author = row.memberID;
         
-        if (predicate == undefined || await predicate(session))
+        if (predicate == undefined || await predicate(row))
         {
             var channelID = row.channelID;
             //filter by only current students role

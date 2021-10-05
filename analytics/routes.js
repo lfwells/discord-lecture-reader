@@ -78,8 +78,8 @@ export async function timeGraph(req, res, next)
     var postsPerSessionPlusOutOfSession = await loadPostsPerSession(rawStatsData, req.guild, true);
 
     await getAttendanceData(req,res, next);
-    var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild);
-    var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true);
+    var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild, false, await getFilterPredicate(req));
+    var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true, await getFilterPredicate(req));
 
     await res.render("timeGraph", {
         graphs: {
