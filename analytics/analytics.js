@@ -24,6 +24,8 @@ export async function getStatsWeek(guild, predicate)
 {
     return getStats(guild, d => d.timestamp.isSame(new Date(), 'week') && (predicate == null || predicate(d)));
 }
+
+//TODO: can we cache this?
 export async function getPostsData(guild, predicate)
 {
     var collection = "analytics";
@@ -38,20 +40,26 @@ export async function getPostsData(guild, predicate)
 
     var guildDocument = getGuildDocument(guild.id);
     var data = await guildDocument.collection(collection).get();
+    var tempCollection = [];
+    data.forEach(collection => {
+        tempCollection.push(collection);
+    });
 
     var rawStatsData = [];
-    data.forEach(doc =>
+    //data.forEach(doc =>
+    for (let doc of tempCollection)
     {
         var d = doc.data();
         d.id = doc.id;
         d.postData = JSON.parse(d.dump);
         d.timestamp = moment(d.postData.createdTimestamp);
 
-        if (predicate == undefined || predicate(d))
+        if (predicate == undefined || await predicate(d))
         {
             rawStatsData.push(d);
         }
-    });
+    }
+    //}));
     return rawStatsData;
 }
 export async function getStats(guild, predicate)
