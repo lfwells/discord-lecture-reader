@@ -1,5 +1,6 @@
 import moment from "moment";
 import { getAttendanceData } from "../attendance/routes.js";
+import { getFilterPredicate } from "../core/classList.js";
 import { KIT109_S2_2021_SERVER } from "../core/config.js";
 import { getStats, getStatsWeek, predicateExcludeAdmin, loadHistoricalData, getPostsData, loadTimeSeries, loadPostsPerDay, loadPostsPerHour, loadPostsPerSession, loadAttendanceSession } from "./analytics.js";
 import fakeData from "./fakeData.js";
@@ -7,12 +8,12 @@ import fakeData from "./fakeData.js";
 
 export async function getStatsData(req,res,next)
 {
-    res.locals.statsData = await getStats(req.guild);
+    res.locals.statsData = await getStats(req.guild, await getFilterPredicate(req));
     next();
 }
 export async function getStatsDataWeek(req,res,next)
 {
-    res.locals.statsData = await getStatsWeek(req.guild);
+    res.locals.statsData = await getStatsWeek(req.guild, await getFilterPredicate(req));
     next();
 }
 export async function getStatsDataOBS(req,res,next)

@@ -29,9 +29,16 @@ export async function loadClassList(req,res,next)
 
     if (req.query.filterByRole)
     {
-        classList = classList.filter(m => m.member.roles.cache.has(req.query.filterByRole)); 
-        delete req.query.current;
-        delete req.query.includeAdmin;
+        if (req.query.filterByRole.startsWith("-"))
+        {
+            delete req.query.filterByRole;
+        }
+        else
+        {
+            classList = classList.filter(m => m.member.roles.cache.has(req.query.filterByRole)); 
+            delete req.query.current;
+            delete req.query.includeAdmin;
+        }
     }
     if (req.query.includeAdmin == undefined)
     {
@@ -109,14 +116,36 @@ export async function filterButtons(req,res,next)
 
     res.locals.classlistFilters = function()
     {
-        var all = "<div class='filter'>";
+        var all = '<form method="get"><div class="filter">';
         //all += "<span>"+res.locals.classListFilterCurrentStudentCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterAdminCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterByRoleList()+"</span>";
-        all += "</div>";
+        all += "</div></form>";
 
         return all;
     }
 
     next();
+}
+
+export async function getFilterPredicate(req)
+{
+    var studentRoleID = await getGuildProperty("studentRoleID", req.guild);
+    var adminRoleID = await getGuildProperty("adminRoleID", req.guild);
+    return async function (user)
+    {
+        var member = await req.guild.members.cache.get(user.author);
+        if (member == undefined) return false;
+
+        if (req.query.current && req.query.current == "on")
+            if (member.roles == undefined || member.roles.cache.has(studentRoleID) == false) return false;
+        
+        if (req.query.includeAdmin == undefined)
+            if (member.roles == undefined || member.roles.cache.has(adminRoleID) == true) return false;
+
+        if (req.query.filterByRole)
+            if (member.roles == undefined || member.roles.cache.has(req.query.filterByRole) == false) return false;
+
+        return true;
+    };
 }
