@@ -65,9 +65,9 @@ export async function timeGraph(req, res, next)
     console.log("loading posts for time graph...");
     
     var rawStatsData = fakeData();
-    if (req.guild.id != KIT109_S2_2021_SERVER)
+    if (req.guild.id != KIT109_S2_2021_SERVER || req.query.current || req.query.includeAdmin || req.query.filterByRole)
     {
-        rawStatsData = await getPostsData(req.guild, predicateExcludeAdmin);
+        rawStatsData = await getPostsData(req.guild, await getFilterPredicate(req));
     }
     console.log("operating on", rawStatsData.length, "posts");
 

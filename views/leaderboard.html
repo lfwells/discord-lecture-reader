@@ -5,6 +5,9 @@
 </style>
 
 <h2>Award Leaderboard</h2>
+
+<%- locals.classlistFilters() %>
+
 <%- include("subViews/leaderboardTable.html", { data:locals.classList }) %>
 
 

@@ -308,7 +308,7 @@ async function getSessionsFlatArray(guild)
     });
     return sessions;
 }
-export async function loadPostsPerSession(rawStatsData, guild, includeNoSession)
+export async function loadPostsPerSession(rawStatsData, guild, includeNoSession, predicate)
 {
     var sessions = await getSessionsFlatArray(guild);
     var outOfSessionPosts = [];
@@ -371,28 +371,33 @@ export async function loadAttendanceSession(attendanceData, guild, includeNoSess
     for (var r in attendanceData)
     {
         var row = attendanceData[r];
-        var channelID = row.channelID;
-        //filter by only current students role
+        row.author = row.memberID;
         
-        var attendanceWasForSession = false;
-        for (var session of sessions)
+        if (predicate == undefined || await predicate(session))
         {
-            if (session.voiceChannelID.indexOf(channelID) >= 0 && didAttendSession(row, session))
+            var channelID = row.channelID;
+            //filter by only current students role
+            
+            var attendanceWasForSession = false;
+            for (var session of sessions)
             {
-                    
-                //unique attendance only! ignore duplicate joins from same member id
-                if (session.attendance.findIndex(a => a.memberID == row.memberID) == -1)
+                if (session.voiceChannelID.indexOf(channelID) >= 0 && didAttendSession(row, session))
                 {
-                    session.attendance.push(row);
-                    attendanceWasForSession = true;
+                        
+                    //unique attendance only! ignore duplicate joins from same member id
+                    if (session.attendance.findIndex(a => a.memberID == row.memberID) == -1)
+                    {
+                        session.attendance.push(row);
+                        attendanceWasForSession = true;
+                    }
                 }
             }
+            if (attendanceWasForSession == false)
+            {
+                outOfSessionAttendance.push(row);
+            }
         }
-        if (attendanceWasForSession == false)
-        {
-            outOfSessionAttendance.push(row);
-        }
-    
+        
     }
     
     sessions.forEach(

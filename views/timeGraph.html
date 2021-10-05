@@ -1,26 +1,11 @@
 <%- include('header.html') %>
 
-<form method="GET">
-<%if (locals.adminRole)
-{
-    %><p><label><input type="checkbox" id="filterOutAdmin" name="filterOutAdmin" />Exclude @<%=locals.adminRole.name%> ?</label></p><%
-}
-%>
-
-<%if (locals.studentRole)
-{
-    %><p><label><input type="checkbox" id="filterByStudent" name="filterByStudent" />Filter by @<%=locals.studentRole.name%> ?</label></p><%
-}
-%>
-<script>
-    $("filterOutAdmin, #filterByStudent").on("click",  (e) => { $("form").submit(); });
-</script>
-</form>
+<%- locals.classlistFilters() %>
 
 <% for (var graph in graphs)
 {
     %>
-    <h2><%=graph%> - <%- include("subViews/download_csv.html", { data:graphs[graph], filename:graph }) %></h2>
+    <h2><%=graph%> <%- include("subViews/download_csv.html", { data:graphs[graph], filename:graph }) %></h2>
     <%- include("subViews/barplot.html", {data:graphs[graph]}) %>
     <%
 }

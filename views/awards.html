@@ -66,6 +66,8 @@ function award(studentDiscordID, emoji, button)
 
 <h2>Awards</h2>
 
+<%- locals.classlistFilters() %>
+
 <div>
     <label><input name="popupChannelID" value="<%=locals.offTopicChannel.id%>" type="radio" checked /> Show achievement popup in <%=locals.offTopicChannel.name%></label><br/>
     <label><input name="popupChannelID" value="<%=locals.lectureChannel.id%>" type="radio" /> Show achievement popup in <%=locals.lectureChannel.name%></label><br/>
