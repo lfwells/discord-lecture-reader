@@ -261,8 +261,7 @@
         }
 
         footer {
-            position: absolute;
-            bottom:8px;
-            right:8px;
+            padding:8px;
+            text-align: right;
             font-size: small;
         }
