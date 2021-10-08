@@ -219,9 +219,9 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
 
 export async function saveGuildProperty(property, value, req, res)
 {
-  await req.guildDocument.update({
-    property: value
-  });
+  var toSave = {};
+  toSave[property] = value;
+  await req.guildDocument.update(toSave);
   req[property] = value;
   GUILD_CACHE[req.guild.id][property] = value;
 
