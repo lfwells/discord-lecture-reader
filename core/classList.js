@@ -27,7 +27,7 @@ export async function loadClassList(req,res,next)
         classList = classList.filter(m => m.discordID != config.LINDSAY_ID);
     }
 
-    if (req.query.filterByRole)
+    if (req.query && req.query.filterByRole)
     {
         if (req.query.filterByRole.startsWith("-"))
         {
@@ -40,18 +40,18 @@ export async function loadClassList(req,res,next)
             delete req.query.includeAdmin;
         }
     }
-    if (req.query.includeAdmin == undefined)
+    if (req.query && req.query.includeAdmin == undefined)
     {
         var adminRoleID = await getGuildProperty("adminRoleID", req.guild, undefined, true);
         if (adminRoleID)
             classList = classList.filter(m => m.member.roles.cache.has(adminRoleID) == false); 
     }
-    else
+    else if (req.query)
     {
         delete req.query.current;
     }
 
-    if (req.query.current && req.query.current == "on")
+    if (req.query && req.query.current && req.query.current == "on")
     {
         delete req.query.includeAdmin;
         delete req.query.filterByRole;
