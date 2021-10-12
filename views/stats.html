@@ -20,11 +20,11 @@ th, td {
     <tr>
         <td class="col">
             <h3>Channel Post Counts</h3>
-            <%- include("subViews/statsTable.html", {data:locals.statsData["channels"]}) %>
+            <%- include("subViews/statsTable.html", {data:locals.statsData["channels"], sum:true}) %>
         </td>
         <td class="col">
             <h3>Member Post Counts</h3>
-            <%- include("subViews/statsTable.html", {data:locals.statsData.members}) %>
+            <%- include("subViews/statsTable.html", {data:locals.statsData.members, sum:true}) %>
         </td>
     </tr>
 </table>

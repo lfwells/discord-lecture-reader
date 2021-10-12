@@ -61,6 +61,7 @@ export async function getAwardsData(req,res,next)
 
 export async function displayAwards(req, res, next) 
 {
+  console.log(res.locals.offTopicChannelID);
     res.render("awards");
     next()
 }

@@ -141,6 +141,10 @@ export function loadGuildProperty(property, required)
     res.locals[property] = req[property];
 
     //auto detect an ChannelID or RoleID
+    if (property == "offTopicChannelID")
+    {
+      console.log("off topic", req[property], property, GUILD_CACHE[req.guild.id]);
+    }
     if (req[property])
     {
       if (property.endsWith("ChannelID"))
@@ -148,6 +152,7 @@ export function loadGuildProperty(property, required)
         var channelProperty = property.replace("ChannelID", "Channel");
         req[channelProperty] = await client.channels.fetch(req[property]);
         res.locals[channelProperty] = req[channelProperty];
+        
       }
       if (property.endsWith("RoleID"))
       {

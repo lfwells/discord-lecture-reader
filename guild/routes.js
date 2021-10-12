@@ -32,7 +32,7 @@ export async function guildHome(req, res)
   var setOffTopicChannelID = req.query.setOffTopicChannelID;
   if (setOffTopicChannelID)
   {
-    await saveGuildProperty("offTopicID", setOffTopicChannelID, req, res);
+    await saveGuildProperty("offTopicChannelID", setOffTopicChannelID, req, res); 
   }
 
   var setAdminRoleID = req.query.setAdminRoleID;

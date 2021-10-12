@@ -17,6 +17,7 @@ else
             %>
         </tr>
         <%
+        var sum = 0;
         for (var i in data)
         {
             %><tr><%
@@ -25,9 +26,18 @@ else
             {
                 var value = row[c];
                 %><td><%=value%></td><%
+
+                sum += value;
             }
             %></tr><%
         }
+
+        <% if (typeof sum == 'undefined'  || sum) { %>
+            <tr>
+                <th>Total</th>
+                <th><%=sum%></th>
+            </tr>
+            <%
         %>
     </table>
 
