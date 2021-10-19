@@ -86,17 +86,38 @@ export async function getSessions(guild)
                     "879599657611837490"
                 ]
             });
+        
+
+            week.colspan = week.sessions.length;
+            weeks.push(week);
+
+            //add on one week
+            weekStart = moment(weekStart);
+            weekStart.add(7, 'days');
+            //semester break, add on another
+            if (w == 7)
+                weekStart.add(7, 'days');
         }
+
+        //week 14 garb
+        var week = {
+            name: "SWOTVAC",
+            weekStart: weekStart,
+            sessions: [] 
+        };
+        var sessionTime = moment(weekStart);
+        sessionTime.day(3); //Wednesday
+        sessionTime.hour(12);
+        week.sessions.push({
+            name:"Exam Game Demo",
+            time:sessionTime,
+            duration:2,
+            channelID: "851553123746578474",
+            voiceChannelID: "851553123746578475"
+        });
 
         week.colspan = week.sessions.length;
         weeks.push(week);
-
-        //add on one week
-        weekStart = moment(weekStart);
-        weekStart.add(7, 'days');
-        //semester break, add on another
-        if (w == 7)
-            weekStart.add(7, 'days');
     
     }
     else if (guild.id == config.KIT207_S2_2021_SERVER)
