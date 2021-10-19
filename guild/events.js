@@ -7,20 +7,24 @@ export default async function(client)
     {
         //console.log("guildCreate", guild); 
         var guildDocument = getGuildDocument(guild.id);
-        guildDocument.set({
-            name:guild.name,
-            options:{ merge: true }
-        });
+        guildDocument.set(
+            {
+                name:guild.name
+            },
+            { merge: true }
+        );
         init_client(client);
     });
 
     client.on("guildUpdate", async (oldGuild, newGuild) => {
         //console.log("guildUpdate", newGuild); 
         var guildDocument = getGuildDocument(newGuild.id);
-        guildDocument.set({
-            name:newGuild.name,
-            options:{ merge: true }
-        });
+        guildDocument.set(
+            {
+                name:newGuild.name
+            },
+            { merge: true }
+        );
         init_client(client);
     });
 
