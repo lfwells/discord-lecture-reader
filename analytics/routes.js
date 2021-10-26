@@ -65,32 +65,34 @@ export async function timeGraph(req, res, next)
     console.log("loading posts for time graph...");
     
     var rawStatsData = fakeData();
-    if (req.guild.id != KIT109_S2_2021_SERVER || req.query.current || req.query.includeAdmin || req.query.filterByRole)
+    //if (req.guild.id != KIT109_S2_2021_SERVER || req.query.current || req.query.includeAdmin || req.query.filterByRole)
     {
         rawStatsData = await getPostsData(req.guild, await getFilterPredicate(req));
     }
     console.log("operating on", rawStatsData.length, "posts");
 
     var postsOverTime = await loadTimeSeries(rawStatsData);
+    var postsOverTimeWeekly = await loadTimeSeries(rawStatsData, true);//weekly
     var postsPerDay = await loadPostsPerDay(rawStatsData);
     var postsPerHour = await loadPostsPerHour(rawStatsData);
     var postsPerSession = await loadPostsPerSession(rawStatsData, req.guild);
     var postsPerSessionPlusOutOfSession = await loadPostsPerSession(rawStatsData, req.guild, true);
 
-    await getAttendanceData(req,res, next);
+    await getAttendanceData(req,res);
     var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild, false, await getFilterPredicate(req));
     var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true, await getFilterPredicate(req));
 
     await res.render("timeGraph", {
         graphs: {
             "Posts Over Time": postsOverTime,
+            "Posts Over Time (Weekly)": postsOverTimeWeekly,
             "Posts Per Day": postsPerDay,
             "Posts Per Hour": postsPerHour,
             "Posts Per Session": postsPerSession,
-            "Posts Per Session (plus out of session count)": postsPerSessionPlusOutOfSession,
+            "Posts Per In/Out Session": postsPerSessionPlusOutOfSession,
 
             "Attendance Per Session": attendancePerSession,
-            "Attendance Per Session (plus out of session count)": attendancePerSessionPlusOutOfSession,
+            "Attendance In/Out Session": attendancePerSessionPlusOutOfSession,
         }
     });
 }

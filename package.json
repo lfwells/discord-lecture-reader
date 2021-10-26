@@ -35,6 +35,7 @@
     "express-basic-auth": "^1.2.0",
     "express-session": "^1.17.2",
     "firebase-admin": "^9.5.0",
+    "googleapis": "^39.2.0",
     "json2csv": "^5.0.6",
     "moment": "^2.29.1",
     "serve-static": "^1.14.1",

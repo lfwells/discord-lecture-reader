@@ -342,7 +342,7 @@ export async function getAttendanceData(req,res,next)
         //TODO: any info about the row?, maybe in title
         return '<td title="'+session.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'">&nbsp;</td>';
     };
-    next();
+    if (next) next();
 }
 
 export async function displayAttendance(req, res, next) 

@@ -223,13 +223,13 @@ async function lots_of_messages_getter(res, channel, writeToDBCollection, limit)
     return sum_messages.map(m => m[1]); //not sure 100% why we need to do this but whatevs
 }
 
-export async function loadTimeSeries(rawStatsData)
+export async function loadTimeSeries(rawStatsData, weekly)
 {
     var days = [];
     for (var r in rawStatsData)
     {
         var row = rawStatsData[r];
-        var timestamp = moment(row.timestamp).startOf('day'); 
+        var timestamp = moment(row.timestamp).startOf(weekly ? 'week' : 'day'); 
         var idx = days.findIndex(d => timestamp.isSame(d.date));
         if (idx == -1)
         {
@@ -312,6 +312,7 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
 {
     var sessions = await getSessionsFlatArray(guild);
     var outOfSessionPosts = [];
+    var inOfSessionPosts = [];
 
     for (var r in rawStatsData)
     {
@@ -338,9 +339,16 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
                         postWasForSession = true;  
                     }
                 }
-                if (postWasForSession == false)
+                if (includeNoSession)
                 {
-                    outOfSessionPosts.push(row);
+                    if (postWasForSession == false)
+                    {
+                        outOfSessionPosts.push(row);
+                    }
+                    else
+                    {
+                        inOfSessionPosts.push(row);
+                    }
                 }
             }
             catch (DiscordAPIError) {}
@@ -349,17 +357,26 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
 
     if (includeNoSession)
     {
+        sessions = [];
         sessions.push({
             name: "No Session",
             x: "No Session",
             messages: outOfSessionPosts
         });
+        sessions.push({
+            name: "In Session",
+            x: "In Session",
+            messages: inOfSessionPosts
+        });
     }
-    sessions.forEach(
-        s => { 
-            s.value = s.messages.length;
-        }
-    );
+    else
+    {
+        sessions.forEach(
+            s => { 
+                s.value = s.messages.length;
+            }
+        );
+    }
 
     return sessions;
 }
@@ -368,6 +385,7 @@ export async function loadAttendanceSession(attendanceData, guild, includeNoSess
 {
     var sessions = await getSessionsFlatArray(guild);
     var outOfSessionAttendance = [];
+    var inOfSessionAttendance = [];
     for (var r in attendanceData)
     {
         var row = attendanceData[r];
@@ -392,28 +410,47 @@ export async function loadAttendanceSession(attendanceData, guild, includeNoSess
                     }
                 }
             }
-            if (attendanceWasForSession == false)
+
+            if (includeNoSession)
             {
-                outOfSessionAttendance.push(row);
+                if (attendanceWasForSession == false)
+                {
+                    outOfSessionAttendance.push(row);
+                }
+                else
+                {
+                    inOfSessionAttendance.push(row);
+                }
             }
         }
         
     }
     
-    sessions.forEach(
-        s => { 
-            s.value = s.attendance.length;
-        }
-    );
 
     if (includeNoSession)
     {
+        sessions = [];
+        sessions.push({
+            name: "In Session",
+            x: "In Session",
+            attendance: inOfSessionAttendance,
+            value: inOfSessionAttendance.length
+        });
         sessions.push({
             name: "No Session",
             x: "No Session",
             attendance: outOfSessionAttendance,
             value: outOfSessionAttendance.length
         });
+    }
+    else
+    {
+        
+        sessions.forEach(
+            s => { 
+                s.value = s.attendance.length;
+            }
+        );
     }
 
     return sessions;
