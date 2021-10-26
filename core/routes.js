@@ -13,7 +13,7 @@ import * as poll_routes from '../polls/routes.js';
 import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 import * as invite_routes from "../invite/routes.js";
 import { Router } from "express";
-import { sheets_test } from "../sheets_test.js";
+import * as sheet_routes from "../sheets_test.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
@@ -64,9 +64,6 @@ function guildRouter()
     router.get("/", 
 
     guild_routes.guildHome);
-
-
-    router.get("/sheetstest", sheets_test); 
                     
     router.get("/obs/", basic_render("obs")); 
 
@@ -134,6 +131,10 @@ function guildRouter()
     router.get("/invites", invite_routes.inviteList);
     router.post("/invites", invite_routes.assignRole, invite_routes.inviteList);
     router.get("/invites/generate", invite_routes.generateInvite, invite_routes.inviteList);
+
+    //sheets
+    router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheets_test); 
+    router.get("/sheets/update", loadClassList, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
         
     return router;
 }

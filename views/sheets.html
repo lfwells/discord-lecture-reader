@@ -1,0 +1,53 @@
+<%- include('header.html') %>
+<style>
+th, td {
+    text-transform: capitalize;
+    text-align: left;
+    border-bottom: 1px solid white;
+}
+th, td {
+    padding:0.5em;
+}
+.col {
+    vertical-align: top;
+}
+</style>
+<h2>Google Sheet Export</h2>
+
+<p><a target="_blank" href="https://docs.google.com/spreadsheets/d/<%=locals.googleSheetID%>/edit#gid=0">Open Google Sheet</a> (currently only accessible to Ian and Lindsay)</p>
+<p><a href="#" id="updateSheetContents">Update Sheet Contents</a></p>
+<pre id="log">
+
+</pre>
+<script>
+    $("#updateSheetContents").on("click", function()
+    {
+        
+        var last_response_len = false;
+        $.ajax({
+            url:"update",
+            xhrFields: {
+                onprogress: function(e)
+                {
+                    var this_response, response = e.currentTarget.response;
+                    if(last_response_len === false)
+                    {
+                        this_response = response;
+                        last_response_len = response.length;
+                    }
+                    else
+                    {
+                        this_response = response.substring(last_response_len);
+                        last_response_len = response.length;
+                    }
+                    console.log(this_response);
+                    $("#log").html(response);
+                }
+            },
+            success: function(data){
+                $("#log").html(data);
+            }
+        })
+    });
+</script>
+<%- include('footer.html') %>

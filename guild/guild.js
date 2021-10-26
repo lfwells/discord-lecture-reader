@@ -6,6 +6,7 @@ import { init_roles } from '../invite/roles.js';
 
 import { getClient } from "../core/client.js";
 import { loginPage, oauth } from '../core/login.js';
+import { init_sheet_for_guild } from '../sheets_test.js';
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
@@ -20,7 +21,9 @@ export async function init(client)
       name:guild.name
     }, {merge:true}); 
 
-    GUILD_CACHE[guild.id] = {};
+    GUILD_CACHE[guild.id] = guild;//{};
+    
+    await init_sheet_for_guild(guild);
 
     if (guild.id == config.TEST_SERVER_ID)
     {
@@ -218,8 +221,18 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
   {
     property = property.replace("RoleID", "Role");
   }
+  if (property.endsWith("SheetID"))
+  {
+    property = property.replace("SheetID", "Sheet");
+    return GUILD_CACHE[property];
+  }
 
   return res.locals[property];
+}
+export async function setGuildProperty(guild, property, value)
+{
+  var res = {locals:{}};
+  await saveGuildProperty(property, value, getFakeReq(guild), res);
 }
 
 export async function saveGuildProperty(property, value, req, res)
@@ -272,6 +285,7 @@ function getFakeReq(guild)
   var req = {
     guild: guild,
     guildDocument: getGuildDocument(guild.id),
+    query:{}
   }
   return req;
 }

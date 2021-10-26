@@ -315,7 +315,7 @@ export async function getAttendanceData(req,res,next)
 
     res.locals.weeks = await getSessions(req.guild);
 
-    res.locals.checkAttendance = function(student, session)
+    res.locals.checkAttendance = function(student, session, plainText)
     {
         var complete = false;
         var data = null;
@@ -340,7 +340,14 @@ export async function getAttendanceData(req,res,next)
             }
         }
         //TODO: any info about the row?, maybe in title
-        return '<td title="'+session.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'">&nbsp;</td>';
+        if (plainText)
+        {
+            return (complete ? "x" : "");
+        }
+        else
+        {
+            return '<td title="'+session.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'">&nbsp;</td>';
+        }
     };
     if (next) next();
 }
