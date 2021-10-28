@@ -38,6 +38,7 @@ export async function getSessions(guild)
                 sessionTime.hour(15);
                 week.sessions.push({
                     name:"Practical",
+                    week: w,
                     time:sessionTime,
                     duration:2,
                     channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
@@ -60,6 +61,7 @@ export async function getSessions(guild)
             sessionTime.hour(12);
             week.sessions.push({
                 name:"Lecture",
+                week: w,
                 time:sessionTime,
                 duration:2,
                 channelID: "851553123746578474",
@@ -71,6 +73,7 @@ export async function getSessions(guild)
             sessionTime.hour(9);
             week.sessions.push({
                 name:"Tutorial",
+                week: w,
                 time:sessionTime,
                 duration:4,
                 channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
@@ -110,6 +113,7 @@ export async function getSessions(guild)
         sessionTime.hour(12);
         week.sessions.push({
             name:"Exam Game Demo",
+            week: w,
             time:sessionTime,
             duration:2,
             channelID: "851553123746578474",
@@ -135,6 +139,7 @@ export async function getSessions(guild)
             sessionTime.hour(13);
             week.sessions.push({
                 name:"Lecture",
+                week: w,
                 time:sessionTime,
                 duration:2,
                 channelID:"861231510005743656",
@@ -148,6 +153,7 @@ export async function getSessions(guild)
                 sessionTime.hour(15);
                 week.sessions.push({
                     name:"Practical",
+                    week: w,
                     time:sessionTime,
                     duration:2,
                     channelID:"861231530751164426",
@@ -184,6 +190,7 @@ export async function getSessions(guild)
                 sessionTime.hour(15);
                 week.sessions.push({
                     name:"Tutorial",
+                    week: w,
                     time:sessionTime,
                     duration:2,
                     channelID:"861228239229157426" ,
@@ -195,6 +202,7 @@ export async function getSessions(guild)
                 sessionTime.hour(14);
                 week.sessions.push({
                     name:"Workshop",
+                    week: w,
                     time:sessionTime,
                     duration:2,
                     channelID:"861228239229157426" ,
@@ -207,6 +215,7 @@ export async function getSessions(guild)
             sessionTime.hour(13);
             week.sessions.push({
                 name:"Lecture",
+                week: w,
                 time:sessionTime,
                 duration:2,
                 channelID:"861228214835347496",
@@ -221,6 +230,7 @@ export async function getSessions(guild)
                 sessionTime.hour(15);
                 week.sessions.push({
                     name:"Lecture",
+                    week: w,
                     time:sessionTime,
                     duration:2,
                     channelID:"861228214835347496",
@@ -255,6 +265,7 @@ export async function getSessions(guild)
             sessionTime.minute(28+15);
             week.sessions.push({
                 name:"Lecture",
+                week: w,
                 time:sessionTime,
                 duration:2,
                 channelID: "813152606359650322"
@@ -265,6 +276,7 @@ export async function getSessions(guild)
             sessionTime.hour(9);
             week.sessions.push({
                 name:"Tutorial",
+                week: w,
                 time:sessionTime,
                 duration:4,
                 channelID:"813152606544855088"
@@ -404,4 +416,9 @@ export function didAttendSession(instance, session)
     var time = moment(instance.joined);
     var leftTime = moment(instance.left);
     return time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp);
+}
+export function postWasForSession(instance, session)
+{
+    var time = moment(instance.timestamp);
+    return time.isBetween(session.earlyStartTimestamp, session.endTimestamp);
 }

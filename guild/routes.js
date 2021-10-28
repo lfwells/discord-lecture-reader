@@ -16,7 +16,14 @@ export async function guildList(req, res)
 export async function guildHome(req, res) 
 {  
   //todo: a generic settings list maybe?
-
+  var settingsQueryKeys = Object.keys(req.query).filter(k => k.startsWith("set"));
+  await Promise.all(settingsQueryKeys.map( async (setting) => 
+  { 
+    var property = setting.replace("set", "");
+    property = property.charAt(0).toLowerCase() + property.slice(1);
+    await saveGuildProperty(property, req.query[setting], req, res);
+  }));
+/*
   var setLectureChannelID = req.query.setLectureChannelID;
   if (setLectureChannelID)
   {
@@ -46,7 +53,7 @@ export async function guildHome(req, res)
   {
     await saveGuildProperty("studentRoleID", setStudentRoleID, req, res);
   }
-
+*/
 
   res.render("guild");
 }

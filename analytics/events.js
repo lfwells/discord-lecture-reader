@@ -53,6 +53,11 @@ export default async function(client)
         description: 'this is dumb',
     }; 
     
+    const contextCommand = {
+        name: 'context_test',
+        type: "MESSAGE"
+    }; 
+    
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         var commands = await guild.commands.fetch(); 
@@ -64,6 +69,7 @@ export default async function(client)
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsWeekCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(statsMeCommand);//); 
         /*console.log(guild.name+"add "+*/await guild.commands.create(buttonCommand);//); 
+        /*console.log(guild.name+"add "+*/await guild.commands.create(contextCommand);//); 
     });
 
     client.on('interactionCreate', async function(interaction) 

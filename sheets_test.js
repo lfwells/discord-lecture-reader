@@ -1,8 +1,9 @@
 import { google } from "googleapis";
 import { GoogleAuth } from "google-auth-library";
 import { getGuildProperty, GUILD_CACHE, loadGuildProperty, setGuildProperty } from "./guild/guild.js";
-import { sleep } from "./core/utils.js";
 import { getAttendanceData } from "./attendance/routes.js";
+import { getStats } from "./analytics/analytics.js";
+import { getAwardListFullData } from "./awards/awards.js";
 
 var sheets;
 var drive;
@@ -116,6 +117,26 @@ export async function update_sheet_contents(req,res,next)
         await sleep(1000);
     }*/
 
+    
+    res.write("Loading Attendance Data...");
+    await getAttendanceData(req,res);
+    res.write(" DONE\n");
+
+    res.write("Loading Post Data...");
+    var statsData = await getStats(req.guild);
+    res.write(" DONE\n");
+
+    res.write("Loading Award Data...");
+    await getAwardListFullData(req.guild, res.locals.classList);
+    res.write(" DONE\n");
+
+    res.write("\n");
+
+    //class list
+    res.write("Writing Class Summary Sheet...\n");
+    await write_sheet(spreadsheetId, "class_summary", await write_class_summary(req, res, statsData));
+    res.write("DONE Class Summary Sheet...\n\n");
+
     //attendance
     res.write("Writing Attendance Sheet...\n");
     await write_sheet(spreadsheetId, "attendance", await write_attendance(req, res));
@@ -154,13 +175,10 @@ async function write_sheet(spreadsheetId, sheet, values)
 }
 async function write_attendance(req, res)
 {
-    await getAttendanceData(req,res);
-
     var sheetData = [];
     var row = [];
 
     var students = res.locals.classList;
-    var studentCount = students.length;
     var sessionsCount = 0;
     /*
     res.locals.weeks.forEach(function(week)
@@ -192,9 +210,12 @@ async function write_attendance(req, res)
         weekSummary.push(sessionSummary);
     });
 
+    var i = 0;
+    res.write("\t");
     students.forEach(function(student)
     { 
-        res.write("\tStudent "+student.discordName+"\n");
+        res.write((i++)+",");
+        //res.write("\tStudent "+student.discordName+"\n");
         row.push(student.discordName);
         
         var studentSessionCount = 0;
@@ -216,6 +237,7 @@ async function write_attendance(req, res)
 
         sheetData.push(row); row = [];
     });
+    res.write("\n");
 
     row.push("TOTAL:");
     weekSummary.forEach(function(sessionSummary)
@@ -226,6 +248,65 @@ async function write_attendance(req, res)
         });
     });
     sheetData.push(row); row = [];
+
+    return sheetData;
+}
+async function write_class_summary(req, res, statsData)
+{
+    var sheetData = [];
+    var row = [];
+
+    var students = res.locals.classList;
+    
+    //headers
+    row.push("Student");
+    row.push("Post Count");
+    row.push("Replies");
+    row.push("Images");
+    row.push("Links");
+    row.push("ThreadStarts");
+    //row.push("Command Usages");
+    row.push("Off Topic %");
+    row.push("Achievements");
+    sheetData.push(row); row = [];
+
+    var i = 0;
+    res.write("\t");
+    students.forEach(function(student)
+    { 
+        //res.write("\tStudent "+student.discordName+"\n");
+        res.write((i++)+",");
+        row.push(student.discordName);
+        var studentData = statsData.membersByID[student.discordID];
+        //console.log(studentData);
+
+        //row.push("Post Count");
+        row.push(studentData == null ? 0 : studentData.posts.length);
+        
+        //row.push("Replies");
+        row.push(studentData == null ? 0 : studentData.posts.filter(p => p.isReply).length);
+
+        //row.push("Images");
+        row.push(studentData == null ? 0 : studentData.posts.filter(p => p.isImage).length);
+        
+        //row.push("Links");
+        row.push(studentData == null ? 0 : studentData.posts.filter(p => p.isLink).length);
+
+        //row.push("ThreadStarts");
+        row.push(studentData == null ? 0 : studentData.posts.filter(p => p.isThreadStart).length);
+
+        //row.push("Command Usages");
+        //row.push(studentData == null ? 0 : studentData.posts.filter(p => p.isCommand).length);
+
+        //row.push("Off Topic %");
+        row.push(studentData == null ? 0 : studentData.posts.filter(p => p.isOffTopic).length / studentData.posts.length);
+
+        //row.push("Achievements");
+        row.push((student.awards == null) ? 0 : student.awards.length);
+        
+        sheetData.push(row); row = [];
+    });
+    res.write("\n");
 
     return sheetData;
 }

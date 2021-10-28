@@ -146,7 +146,7 @@ export function loadGuildProperty(property, required)
     //auto detect an ChannelID or RoleID
     if (property == "offTopicChannelID")
     {
-      console.log("off topic", req[property], property, GUILD_CACHE[req.guild.id]);
+      //console.log("off topic", req[property], property, GUILD_CACHE[req.guild.id]);
     }
     if (req[property])
     {
@@ -162,6 +162,12 @@ export function loadGuildProperty(property, required)
         var roleProperty = property.replace("RoleID", "Role");
         req[roleProperty] = await req.guild.roles.fetch(req[property]);
         res.locals[roleProperty] = req[roleProperty];
+      }
+      if (property.endsWith("CategoryID"))
+      {
+        var categoryProperty = property.replace("CategoryID", "Category");
+        req[categoryProperty] = await req.guild.channels.fetch(req[property]);
+        res.locals[categoryProperty] = req[categoryProperty];
       }
     }
     else
@@ -221,6 +227,10 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
   {
     property = property.replace("RoleID", "Role");
   }
+  if (property.endsWith("CategoryID"))
+  {
+    property = property.replace("CategoryID", "Category");
+  }
   if (property.endsWith("SheetID"))
   {
     property = property.replace("SheetID", "Sheet");
@@ -253,6 +263,11 @@ export async function saveGuildProperty(property, value, req, res)
   else if (property.endsWith("RoleID"))
   {
     property = property.replace("RoleID", "Role");
+    req.query.message = "Set "+property+" to @"+ req[property].name+".";
+  }
+  else if (property.endsWith("CategoryID"))
+  {
+    property = property.replace("CategoryID", "Category");
     req.query.message = "Set "+property+" to @"+ req[property].name+".";
   }
   else

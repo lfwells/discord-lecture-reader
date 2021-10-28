@@ -57,6 +57,8 @@ function guildRouter()
     router.use(guild.loadGuildProperty("lectureChannelID"));
     router.use(guild.loadGuildProperty("awardChannelID"));
     router.use(guild.loadGuildProperty("offTopicChannelID"));
+    router.use(guild.loadGuildProperty("todoChannelID"));
+    router.use(guild.loadGuildProperty("offTopicCategoryID"));
 
     router.use(filterButtons);
 

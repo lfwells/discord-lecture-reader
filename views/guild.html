@@ -35,13 +35,27 @@
         id: "setAwardChannelID",
         value: locals.awardChannel ? locals.awardChannel.id : undefined
     }) %></p>
-<p><%- include("subViews/channelSelect.html", 
-    { 
-        label: "Off Topic Channel:",
-        selectDefaultText:"-- Select Channel--", 
-        id: "setOffTopicChannelID",
-        value: locals.offTopicChannel ? locals.offTopicChannel.id : undefined
-    }) %></p>
+    <p><%- include("subViews/channelSelect.html", 
+        { 
+            label: "Off Topic Channel:",
+            selectDefaultText:"-- Select Channel--", 
+            id: "setOffTopicChannelID",
+            value: locals.offTopicChannel ? locals.offTopicChannel.id : undefined
+        }) %></p>
+    <p><%- include("subViews/channelSelect.html", 
+        { 
+            label: "TODOs Channel:",
+            selectDefaultText:"-- Select Channel--", 
+            id: "setTodoChannelID",
+            value: locals.todoChannelID ? locals.todoChannelID.id : undefined
+        }) %></p>
+    <p><%- include("subViews/channelCategorySelect.html", 
+        { 
+            label: "Off Topic Category:",
+            selectDefaultText:"-- Select Category--", 
+            id: "setOffTopicCategoryID",
+            value: locals.offTopicCategory ? locals.offTopicCategory.id : undefined
+        }) %></p>
 
 
 <%- include('footer.html') %>

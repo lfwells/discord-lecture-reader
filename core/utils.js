@@ -21,7 +21,7 @@ export async function getStatus(memberID, guild)
 {
   
   var user = await guild.members.fetch(memberID);
-  var custom = user.presence.activities;
+  var custom = user != null && user.presence != null ? user.presence.activities : null;
   if (custom)
   {
     custom = custom[0];

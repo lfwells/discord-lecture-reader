@@ -1,8 +1,7 @@
 import moment from "moment";
-import { getGuildDocument } from "../guild/guild.js";
+import { getGuildDocument, getGuildProperty, getGuildPropertyConverted } from "../guild/guild.js";
 import * as Config from "../core/config.js";
-import { getClient } from "../core/client.js";
-import { didAttendSession, getSessions } from "../attendance/sessions.js";
+import { didAttendSession, getSessions, postWasForSession } from "../attendance/sessions.js";
 import { db, guildsCollection } from "../core/database.js";
 
 export function createFirebaseRecordFrom(msg)
@@ -45,6 +44,9 @@ export async function getPostsData(guild, predicate)
         tempCollection.push(collection);
     });
 
+    var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", guild);
+    var offTopicChannelID = await getGuildProperty("offTopicChannelID", guild);
+
     var rawStatsData = [];
     //data.forEach(doc =>
     for (let doc of tempCollection)
@@ -53,6 +55,25 @@ export async function getPostsData(guild, predicate)
         d.id = doc.id;
         d.postData = JSON.parse(d.dump);
         d.timestamp = moment(d.postData.createdTimestamp);
+
+        //pull out some meta
+        d.isReply = d.postData.type == "REPLY";
+        d.isCommand = false;//HARD, this doesnt' work coz robo lindz does the post: //d.postData.type == "APPLICATION_COMMAND" || d.postData.type == "CONTEXT_MENU_COMMAND";
+        d.isThreadStart = d.postData.type == "THREAD_STARTER_MESSAGE";
+        
+        d.isLink = d.postData.attachments.some(e => e.url != null) || (d.postData.cleanContent && d.postData.cleanContent.indexOf("http") >= 0);
+        d.isImage = d.postData.attachments != null && d.postData.attachments.length > 0;
+
+        d.isOffTopic = false;
+        if (offTopicCategory) 
+        {
+            d.isOffTopic = offTopicCategory.children.some(c => c.channelId == d.postData.channelId);
+        }
+        if (offTopicChannelID) 
+        {
+            d.isOffTopic |= offTopicChannelID == d.postData.channelId;
+        }
+        
 
         if (predicate == undefined || await predicate(d))
         {
@@ -132,6 +153,8 @@ export async function getStats(guild, predicate)
     statsData.members = statsData.members.sort((a,b) => b.posts.length - a.posts.length);
 
     statsData.rawStatsData = rawStatsData;
+
+    statsData.membersByID = stats.members;
 
     return statsData;
 }
@@ -333,7 +356,7 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
                 var postWasForSession = false;
                 for (var session of sessions)
                 {
-                    if (session.channelID.indexOf(channelID) >= 0 && timestamp.isBetween(session.startTimestamp, session.endTimestamp))
+                    if (session.channelID.indexOf(channelID) >= 0 && postWasForSession(row, session))//timestamp.isBetween(session.startTimestamp, session.endTimestamp))
                     {
                         session.messages.push(row);
                         postWasForSession = true;  
@@ -361,12 +384,14 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
         sessions.push({
             name: "No Session",
             x: "No Session",
-            messages: outOfSessionPosts
+            messages: outOfSessionPosts,
+            value: outOfSessionPosts.length
         });
         sessions.push({
             name: "In Session",
             x: "In Session",
-            messages: inOfSessionPosts
+            messages: inOfSessionPosts,
+            value: inOfSessionPosts.length
         });
     }
     else
