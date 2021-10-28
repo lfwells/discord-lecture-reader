@@ -268,6 +268,7 @@ async function write_class_summary(req, res, statsData)
     //row.push("Command Usages");
     row.push("Off Topic %");
     row.push("Achievements");
+    row.push("Active Days");
     sheetData.push(row); row = [];
 
     var i = 0;
@@ -303,6 +304,9 @@ async function write_class_summary(req, res, statsData)
 
         //row.push("Achievements");
         row.push((student.awards == null) ? 0 : student.awards.length);
+        
+        //row.push("Active Days");
+        row.push(studentData == null ? 0 : new Set(studentData.posts.map(p => p.timestamp.startOf('day').valueOf())).size);
         
         sheetData.push(row); row = [];
     });
