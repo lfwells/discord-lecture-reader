@@ -3,7 +3,7 @@
 import { isOutsideTestServer } from "../core/utils.js"
 import { guildsCollection } from "../core/database.js"
 import * as sessions from "./sessions.js";
-import * as config from "../core/config.js";
+import { ATTENDANCE_CACHE } from "./routes.js";
 
 //attendance (TODO: if you start the bot after people are already in there its not smort enough to track they are there (But could do), and I realise a better data structure would be <name,room,started,left>, but I don't have a database or anything like that)
 export default async function (client)
@@ -26,14 +26,22 @@ export default async function (client)
 
             var attendanceCollection = guild ? guildsCollection.doc(guild.id).collection("attendance") : null;
             var attendanceQuery = await attendanceCollection
-            .where("memberIDchannelID", "==", member.id+""+channel.id)
-            .get();
+                .where("memberIDchannelID", "==", member.id+""+channel.id)
+                .get();
             
             if (attendanceQuery.docs.length > 0)
             {
                 var attendanceRow = attendanceQuery.docs.slice(-1)[0];//last item in array (should be latests)
                 var attendanceRowReference = attendanceCollection.doc(attendanceRow.id);
                 await attendanceRowReference.update("left", d.getTime());
+                //also update the cache
+                if (ATTENDANCE_CACHE[guild.id])
+                {
+                    console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
+                    var cachedRow = ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id);
+                    cachedRow.left = d.getTime();
+                    console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
+                }
 
                 console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`);
             }

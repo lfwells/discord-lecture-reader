@@ -5,7 +5,9 @@ import { didAttendSession, getSessions, postWasForSession } from "../attendance/
 import { db, guildsCollection } from "../core/database.js";
 import { getClient } from "../core/client.js";
 
-export function createFirebaseRecordFrom(msg)
+export var ANALYTICS_CACHE = {}; //because querying the db for all messages on demand is bad (cannot cache on node js firebase it seems)s
+
+export async function createFirebaseRecordFrom(msg)
 {
     var record = {};
     record.dump = JSON.stringify(msg);
@@ -17,6 +19,14 @@ export function createFirebaseRecordFrom(msg)
     record.channel = msg.channel.id;
     record.content = msg.content;
     //console.log(record);
+
+    await analyticsParseMessage(record, msg.guild);
+
+    if (ANALYTICS_CACHE[msg.guild.id])
+    {
+        ANALYTICS_CACHE[msg.guild.id].push(record);
+    }
+
     return record;
 }
 
@@ -25,9 +35,13 @@ export async function getStatsWeek(guild, predicate)
     return getStats(guild, d => d.timestamp.isSame(new Date(), 'week') && (predicate == null || predicate(d)));
 }
 
-//TODO: can we cache this?
 export async function getPostsData(guild, predicate)
 {
+    if (ANALYTICS_CACHE[guild.id])
+    {
+        return ANALYTICS_CACHE[guild.id];
+    }
+
     var collection = "analytics";
     if (
         guild.id == "801006169496748063" || //kit305 2021
@@ -45,8 +59,6 @@ export async function getPostsData(guild, predicate)
         tempCollection.push(collection);
     });
 
-    var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", guild);
-    var offTopicChannelID = await getGuildProperty("offTopicChannelID", guild);
 
     var rawStatsData = [];
     //data.forEach(doc =>
@@ -54,35 +66,42 @@ export async function getPostsData(guild, predicate)
     {
         var d = doc.data();
         d.id = doc.id;
-        d.postData = JSON.parse(d.dump);
-        d.timestamp = moment(d.postData.createdTimestamp);
-
-        //pull out some meta
-        d.isReply = d.postData.type == "REPLY";
-        d.isCommand = false;//HARD, this doesnt' work coz robo lindz does the post: //d.postData.type == "APPLICATION_COMMAND" || d.postData.type == "CONTEXT_MENU_COMMAND";
-        d.isThreadStart = d.postData.type == "THREAD_STARTER_MESSAGE";
+        await analyticsParseMessage(d, guild);
         
-        d.isLink = d.postData.attachments.some(e => e.url != null) || (d.postData.cleanContent && d.postData.cleanContent.indexOf("http") >= 0);
-        d.isImage = d.postData.attachments != null && d.postData.attachments.length > 0;
-
-        d.isOffTopic = false;
-        if (offTopicCategory) 
-        {
-            d.isOffTopic = offTopicCategory.children.some(c => c.channelId == d.postData.channelId);
-        }
-        if (offTopicChannelID) 
-        {
-            d.isOffTopic |= offTopicChannelID == d.postData.channelId;
-        }
-        
-
         if (predicate == undefined || await predicate(d))
         {
             rawStatsData.push(d);
         }
     }
     //}));
+    ANALYTICS_CACHE[guild.id] = rawStatsData;
     return rawStatsData;
+}
+async function analyticsParseMessage(d, guild)
+{
+    var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", guild);
+    var offTopicChannelID = await getGuildProperty("offTopicChannelID", guild);
+
+    d.postData = JSON.parse(d.dump);
+    d.timestamp = moment(d.postData.createdTimestamp);
+
+    //pull out some meta
+    d.isReply = d.postData.type == "REPLY";
+    d.isCommand = false;//HARD, this doesnt' work coz robo lindz does the post: //d.postData.type == "APPLICATION_COMMAND" || d.postData.type == "CONTEXT_MENU_COMMAND";
+    d.isThreadStart = d.postData.type == "THREAD_STARTER_MESSAGE";
+    
+    d.isLink = d.postData.attachments.some(e => e.url != null) || (d.postData.cleanContent && d.postData.cleanContent.indexOf("http") >= 0);
+    d.isImage = d.postData.attachments != null && d.postData.attachments.length > 0;
+
+    d.isOffTopic = false;
+    if (offTopicCategory) 
+    {
+        d.isOffTopic = offTopicCategory.children.some(c => c.channelId == d.postData.channelId);
+    }
+    if (offTopicChannelID) 
+    {
+        d.isOffTopic |= offTopicChannelID == d.postData.channelId;
+    }
 }
 export async function getStats(guild, predicate)
 {
@@ -224,7 +243,7 @@ async function lots_of_messages_getter(res, channel, writeToDBCollection, limit)
                     for (var message of messages)
                     {
                         var msg = message[1];
-                        batch.set(writeToDBCollection.doc(), createFirebaseRecordFrom(msg));
+                        batch.set(writeToDBCollection.doc(), await createFirebaseRecordFrom(msg));
                     }
                     await batch.commit();
                     batch = db.batch();

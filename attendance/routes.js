@@ -4,6 +4,8 @@ import { didAttendSession, getSessions } from "./sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 
+export var ATTENDANCE_CACHE = {}; //because querying the db for all attendances on demand is bad (cannot cache on node js firebase it seems)s
+
 export async function displayAttendanceOld(req, res, next) 
 {
     res.render("attendanceOld", {
@@ -299,19 +301,28 @@ export async function displayProgress(req, res, next)
 //fancy session-based view
 export async function getAttendanceData(req,res,next)
 {
-    var data = await req.guildDocument.collection("attendance").get();
-    req.attendanceData = [];
-    data.forEach(doc =>
+    if (ATTENDANCE_CACHE[req.guild.id])
     {
-        var d = doc.data();
-        d.id = doc.id;
-        d.timestamp = d.joined;
-        d.leftTimestamp = d.left;
-        d.joined = new Date(d.joined).toUTCString();
-        d.left = d.left ? new Date(d.left).toUTCString() : "";
-        req.attendanceData.push(d);
-    });
-    //console.log(req.attendanceData);
+        req.attendanceData = ATTENDANCE_CACHE[req.guild.id];
+    }
+    else
+    {
+
+        var data = await req.guildDocument.collection("attendance").get();
+        req.attendanceData = [];
+        data.forEach(doc =>
+        {
+            var d = doc.data();
+            d.id = doc.id;
+            d.timestamp = d.joined;
+            d.leftTimestamp = d.left;
+            d.joined = new Date(d.joined).toUTCString();
+            d.left = d.left ? new Date(d.left).toUTCString() : "";
+            req.attendanceData.push(d);
+        });
+    
+        ATTENDANCE_CACHE[req.guild.id] = req.attendanceData;
+    }
 
     res.locals.weeks = await getSessions(req.guild);
 
