@@ -69,7 +69,7 @@ export async function getSessions(guild)
             });
 
             var sessionTime = moment(weekStart);
-            sessionTime.day(4); //Thursday
+            sessionTime.day(w == 12 ? 5 : 4); //Thursday (Friday in week 12)
             sessionTime.hour(9);
             week.sessions.push({
                 name:"Tutorial",

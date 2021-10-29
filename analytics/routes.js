@@ -83,53 +83,56 @@ export async function timeGraph(req, res, next)
     var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild, false, await getFilterPredicate(req));
     var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true, await getFilterPredicate(req));
 
-    //in 2021 sem 2 we lost the week 8 and 9 tutes and lecture, fake the data...
-    //technically should do this for attendancePerSessionPlusOutOfSession but meh
-    if (req.guild.id == KIT109_S2_2021_SERVER)
-    {
-        attendancePerSession.forEach((s, i) => {
-            if (
-                (s.name == "Tutorial" && s.week == 8) || 
-                (s.name == "Tutorial" && s.week == 9) || 
-                (s.name == "Practical" && s.week == 9) || 
-                (s.name == "Lecture" && s.week == 9) )
-            {
-                //get unique author count of posts that were posted during this session
-                attendancePerSession[i].value = new Set(rawStatsData.filter(p => postWasForSession(p, s)).map(p => p.author)).size;
-            }
-            
-        });
-    }
-    else if (req.guild.id == KIT207_S2_2021_SERVER)
-    {
-        attendancePerSession.forEach((s, i) => {
-            if (
-                (s.name == "Practical" && s.week == 9) || 
-                (s.name == "Lecture" && s.week == 9) )
-            {
-                //get unique author count of posts that were posted during this session
-                attendancePerSession[i].value = new Set(rawStatsData.filter(p => postWasForSession(p, s)).map(p => p.author)).size;
-            }
-            
-        });
-    }
-    else if (req.guild.id == KIT308_S2_2021_SERVER)
-    {
-        attendancePerSession.forEach((s, i) => {
-            if (
-                (s.name == "Workshop" && s.week == 8) || 
-                (s.name == "Tutorial" && s.week == 9) || 
-                (s.name == "Workshop" && s.week == 9) || 
-                (s.name == "Lecture" && s.week == 9) )
-            {
-                //get unique author count of posts that were posted during this session
-                attendancePerSession[i].value = new Set(rawStatsData.filter(p => postWasForSession(p, s)).map(p => p.author)).size;
-            }
-            
-        });
-    }
-
+/*
+        //in 2021 sem 2 we lost the week 8 and 9 tutes and lecture, fake the data...
+        //technically should do this for attendancePerSessionPlusOutOfSession but meh
+        if (req.guild.id == KIT109_S2_2021_SERVER)
+        {
+            attendancePerSession.forEach((s, i) => {
+                if (
+                    (s.name == "Tutorial" && s.week == 8) || 
+                    (s.name == "Tutorial" && s.week == 9) || 
+                    (s.name == "Practical" && s.week == 9) || 
+                    (s.name == "Lecture" && s.week == 9) )
+                {
+                    //get unique author count of posts that were posted during this session
+                    attendancePerSession[i].value = new Set(rawStatsData.filter(p => postWasForSession(p, s)).map(p => p.author)).size;
+                }
+                
+            });
+        }
+        else if (req.guild.id == KIT207_S2_2021_SERVER)
+        {
+            attendancePerSession.forEach((s, i) => {
+                if (
+                    (s.name == "Practical" && s.week == 9) || 
+                    (s.name == "Lecture" && s.week == 9) )
+                {
+                    //get unique author count of posts that were posted during this session
+                    attendancePerSession[i].value = new Set(rawStatsData.filter(p => postWasForSession(p, s)).map(p => p.author)).size;
+                }
+                
+            });
+        }
+        else if (req.guild.id == KIT308_S2_2021_SERVER)
+        {
+            attendancePerSession.forEach((s, i) => {
+                if (
+                    (s.name == "Workshop" && s.week == 8) || 
+                    (s.name == "Tutorial" && s.week == 9) || 
+                    (s.name == "Workshop" && s.week == 9) || 
+                    (s.name == "Lecture" && s.week == 9) )
+                {
+                    //get unique author count of posts that were posted during this session
+                    attendancePerSession[i].value = new Set(rawStatsData.filter(p => postWasForSession(p, s)).map(p => p.author)).size;
+                }
+                
+            });
+        }
+        */
+       
     await res.render("timeGraph", {
+        postData:rawStatsData,
         graphs: {
             "Posts Over Time": postsOverTime,
             "Posts Over Time (Weekly)": postsOverTimeWeekly,

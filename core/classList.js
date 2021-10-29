@@ -4,7 +4,16 @@ import { renderFile } from "ejs";
 import { getStats } from "../analytics/analytics.js";
 import { getClient } from "./client.js";
 
-export async function loadClassList(req,res,next, includeRemoved)  
+
+export function loadClassList(req,res,next)
+{
+    return _loadClassList(req,res,next, false);//includeRemoved = false;
+}
+export function loadClassListWithRemoved(req,res,next)
+{
+    return _loadClassList(req,res,next, true);//includeRemoved = true;
+}
+export async function _loadClassList(req,res,next, includeRemoved)  
 {
     //TODO: await ready?
 
@@ -90,10 +99,6 @@ export async function loadClassList(req,res,next, includeRemoved)
 
 }
 
-export function loadClassListWithRemoved(req,res,next)
-{
-    return loadClassList(req,res,next, true);//includeRemoved = true;
-}
 
 //non express version
 export async function getClassList(guild, includeRemoved)

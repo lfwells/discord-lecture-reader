@@ -1,8 +1,10 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { didAttendSession, getSessions } from "./sessions.js";
+import { didAttendSession, getSessions, postWasForSession } from "./sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
+import { getPostsData } from "../analytics/analytics.js";
+import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } from "../core/config.js";
 
 export var ATTENDANCE_CACHE = {}; //because querying the db for all attendances on demand is bad (cannot cache on node js firebase it seems)s
 
@@ -326,7 +328,9 @@ export async function getAttendanceData(req,res,next)
 
     res.locals.weeks = await getSessions(req.guild);
 
-    res.locals.checkAttendance = function(student, session, plainText)
+    var rawStatsData = await getPostsData(req.guild);
+
+    res.locals.checkAttendance = function(student, s, plainText)
     {
         var complete = false;
         var data = null;
@@ -335,14 +339,7 @@ export async function getAttendanceData(req,res,next)
             var row = req.attendanceData[i];
             if (row.memberID == student.discordID) //AND check room? shouldn't matter
             {
-                //var time = moment(row.timestamp);
-                //var leftTime = moment(row.leftTimestamp);
-                /*if (student.username == "lfwells" && session == res.locals.weeks[0].sessions[0])
-                {
-                    console.log(row.timestamp, time, session.earlyStartTimestamp, session.endTimestamp, time.isBetween(session.earlyStartTimestamp, session.endTimestamp));
-                }*/
-                //if (time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp)) 
-                if (didAttendSession(row, session))
+                if (didAttendSession(row, s))
                 {
                     complete = true;
                     data = row;
@@ -350,6 +347,46 @@ export async function getAttendanceData(req,res,next)
                 }
             }
         }
+
+        if (!complete)
+        {
+            //in 2021 sem 2 we lost the week 8 and 9 tutes and lecture, fake the data...
+            //technically should do this for attendancePerSessionPlusOutOfSession but meh
+            if (req.guild.id == KIT109_S2_2021_SERVER)
+            {
+                if (
+                    (s.name == "Tutorial" && s.week == 8) || 
+                    (s.name == "Tutorial" && s.week == 9) || 
+                    (s.name == "Practical" && s.week == 9) || 
+                    (s.name == "Lecture" && s.week == 9) )
+                {
+                    //console.log("doing a check for week 8/9", rawStatsData.filter(p => p.author == student.discordID).length);
+                    complete = rawStatsData.findIndex(p => p.author == student.discordID && postWasForSession(p, s)) >= 0;
+                }
+                    
+            }
+            else if (req.guild.id == KIT207_S2_2021_SERVER)
+            {
+                if (
+                    (s.name == "Practical" && s.week == 9) || 
+                    (s.name == "Lecture" && s.week == 9) )
+                {
+                    complete = rawStatsData.findIndex(p => p.author == student.discordID && postWasForSession(p, s)) >= 0;
+                }
+            }
+            else if (req.guild.id == KIT308_S2_2021_SERVER)
+            {
+                if (
+                    (s.name == "Workshop" && s.week == 8) || 
+                    (s.name == "Tutorial" && s.week == 9) || 
+                    (s.name == "Workshop" && s.week == 9) || 
+                    (s.name == "Lecture" && s.week == 9) )
+                {
+                    complete = rawStatsData.findIndex(p => p.author == student.discordID && postWasForSession(p, s)) >= 0;
+                }
+            }
+        }
+
         //TODO: any info about the row?, maybe in title
         if (plainText)
         {
@@ -357,7 +394,7 @@ export async function getAttendanceData(req,res,next)
         }
         else
         {
-            return '<td title="'+session.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'">&nbsp;</td>';
+            return '<td title="'+s.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'">&nbsp;</td>';
         }
     };
     if (next) next();
