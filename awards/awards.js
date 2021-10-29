@@ -159,7 +159,7 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
     {
       var student = classList[i];
       var member = student.member;
-      if (award.mentions.users.has(member.user.id))
+      if (member.user && award.mentions.users.has(member.user.id))
       {
         awardData.students.push(student);
         student.awards.push(awardData);

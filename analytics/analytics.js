@@ -3,6 +3,7 @@ import { getGuildDocument, getGuildProperty, getGuildPropertyConverted } from ".
 import * as Config from "../core/config.js";
 import { didAttendSession, getSessions, postWasForSession } from "../attendance/sessions.js";
 import { db, guildsCollection } from "../core/database.js";
+import { getClient } from "../core/client.js";
 
 export function createFirebaseRecordFrom(msg)
 {
@@ -123,10 +124,14 @@ export async function getStats(guild, predicate)
         if (Object.keys(stats.members).includes(memberID) == false)
         {
             var memberObj = await guild.members.cache.get(memberID);
-            if (memberObj == undefined) continue;
+            var userObj = null;
+            if (memberObj == undefined) {//continue;
+                //console.log(row);
+                userObj = await getClient().users.fetch(memberID);//getClient().users.cache.get(memberID);
+            }
 
             stats.members[memberID] = { 
-                name: memberObj.nickname ?? memberObj.user.username,
+                name: memberObj == undefined ? userObj.username : memberObj.nickname ?? memberObj.user.username,
                 posts:[]
             };
         }

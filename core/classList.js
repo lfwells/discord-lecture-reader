@@ -1,8 +1,10 @@
 import { getGuildProperty, getGuildPropertyConverted, GUILD_CACHE } from "../guild/guild.js";
 import * as config from "./config.js";
 import { renderFile } from "ejs";
+import { getStats } from "../analytics/analytics.js";
+import { getClient } from "./client.js";
 
-export async function loadClassList(req,res,next)  
+export async function loadClassList(req,res,next, includeRemoved)  
 {
     //TODO: await ready?
 
@@ -17,6 +19,25 @@ export async function loadClassList(req,res,next)
             m.displayName.startsWith("Ian Lewis") ? "ij_lewis" :
             (m.displayName.match(/\(([^)]+)\)/) ?? []).length > 0 ? m.displayName.match(/\(([^)]+)\)/)[1] : ""
     }));
+    
+    //add in those with temporary roles, or those who were removed, by checking all posts
+    //this takes time due to no cache (currently), so use wisely
+    if (includeRemoved)
+    {
+        var stats = await getStats(req.guild);
+        var a = new Set(classList.map(s => s.discordID));
+        var b = new Set(Object.keys(stats.membersByID));
+        var diff = Array.from(new Set([...b].filter(x=> !a.has(x))));
+        await Promise.all(diff.map( async (s) => 
+        { 
+            var user = await getClient().users.fetch(s);
+            classList.push({
+                member:user,
+                discordID: s,
+                discordName: user.username
+            });
+        }));
+    }
 
     //filter out admin
     classList = classList.filter(m => m.discordID != config.SIMPLE_POLL_BOT_ID /*&& m.discordID != config.IAN_ID && m.discordID != config.ROBO_LINDSAY_ID*/);
@@ -35,7 +56,7 @@ export async function loadClassList(req,res,next)
         }
         else
         {
-            classList = classList.filter(m => m.member.roles.cache.has(req.query.filterByRole)); 
+            classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(req.query.filterByRole)); 
             delete req.query.current;
             delete req.query.includeAdmin;
         }
@@ -44,7 +65,7 @@ export async function loadClassList(req,res,next)
     {
         var adminRoleID = await getGuildProperty("adminRoleID", req.guild, undefined, true);
         if (adminRoleID)
-            classList = classList.filter(m => m.member.roles.cache.has(adminRoleID) == false); 
+            classList = classList.filter(m => m.member.roles == null || m.member.roles.cache.has(adminRoleID) == false); 
     }
     else if (req.query)
     {
@@ -58,7 +79,7 @@ export async function loadClassList(req,res,next)
 
         var studentRoleID = await getGuildProperty("studentRoleID", req.guild, undefined, true);
         if (studentRoleID)
-            classList = classList.filter(m => m.member.roles.cache.has(studentRoleID)); 
+            classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(studentRoleID)); 
         else
             classList = [];
     }
@@ -69,13 +90,18 @@ export async function loadClassList(req,res,next)
 
 }
 
+export function loadClassListWithRemoved(req,res,next)
+{
+    return loadClassList(req,res,next, true);//includeRemoved = true;
+}
+
 //non express version
-export async function getClassList(guild)
+export async function getClassList(guild, includeRemoved)
 {
     var req = { guild:guild };
     var res = { locals: { } };
     var next = ()=> {};
-    await loadClassList(req, res, next);
+    await loadClassList(req, res, next, includeRemoved);
 
     return res.locals.classList;
 }

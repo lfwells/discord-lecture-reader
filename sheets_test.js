@@ -79,6 +79,7 @@ export async function init_sheet_for_guild(guild)
 
 export async function sheets_test(req,res,next)
 {
+    /*
     var spreadsheetId = res.locals.googleSheetID;
           //test out some writing
           let values = [
@@ -94,7 +95,7 @@ export async function sheets_test(req,res,next)
           var writeResult = await sheets.spreadsheets.values.update({
             spreadsheetId,
             range,
-            valueInputOption:'USER_ENTERED', resource:resource2});
+            valueInputOption:'USER_ENTERED', resource:resource2});*/
 
     res.render("sheets");
 }

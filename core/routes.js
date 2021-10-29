@@ -1,7 +1,7 @@
 import { downloadResource, removeQuestionMark } from "./utils.js";
 
 import * as guild from "../guild/guild.js";
-import { filterButtons, loadClassList } from "../core/classList.js";
+import { filterButtons, loadClassList, loadClassListWithRemoved } from "../core/classList.js";
 
 import * as login_routes from '../core/login.js';
 import * as guild_routes from '../guild/routes.js';
@@ -136,7 +136,7 @@ function guildRouter()
 
     //sheets
     router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheets_test); 
-    router.get("/sheets/update", loadClassList, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
+    router.get("/sheets/update", loadClassListWithRemoved, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
         
     return router;
 }
