@@ -1,5 +1,5 @@
 import moment from "moment";
-import { getGuildDocument, getGuildProperty, getGuildPropertyConverted } from "../guild/guild.js";
+import { getGuildDocument, getGuildProperty, getGuildPropertyConverted, GUILD_CACHE } from "../guild/guild.js";
 import * as Config from "../core/config.js";
 import { didAttendSession, getSessions, postWasForSession } from "../attendance/sessions.js";
 import { db, guildsCollection } from "../core/database.js";
@@ -20,6 +20,10 @@ export async function createFirebaseRecordFrom(msg)
     record.content = msg.content;
     //console.log(record);
 
+    //caching these here, rather than in each analyticsParseMessage()
+    GUILD_CACHE[guild.id]["offTopicCategory"] = await getGuildPropertyConverted("offTopicCategoryID", guild);
+    await getGuildProperty("offTopicChannelID", guild);
+    
     await analyticsParseMessage(record, msg.guild);
 
     if (ANALYTICS_CACHE[msg.guild.id])
@@ -53,6 +57,11 @@ export async function getPostsData(guild, predicate)
 
 
     var guildDocument = getGuildDocument(guild.id);
+
+    //caching these here, rather than in each analyticsParseMessage()
+    GUILD_CACHE[guild.id]["offTopicCategory"] = await getGuildPropertyConverted("offTopicCategoryID", guild);
+    await getGuildProperty("offTopicChannelID", guild);
+
     var data = await guildDocument.collection(collection).get();
     var tempCollection = [];
     data.forEach(collection => {
@@ -62,6 +71,7 @@ export async function getPostsData(guild, predicate)
 
     var rawStatsData = [];
     //data.forEach(doc =>
+    var i = 0;
     for (let doc of tempCollection)
     {
         var d = doc.data();
@@ -79,8 +89,8 @@ export async function getPostsData(guild, predicate)
 }
 async function analyticsParseMessage(d, guild)
 {
-    var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", guild);
-    var offTopicChannelID = await getGuildProperty("offTopicChannelID", guild);
+    var offTopicCategory = GUILD_CACHE[guild.id]["offTopicCategory"];
+    var offTopicChannelID = GUILD_CACHE[guild.id]["offTopicChannelID"];
 
     d.postData = JSON.parse(d.dump);
     d.timestamp = moment(d.postData.createdTimestamp);
