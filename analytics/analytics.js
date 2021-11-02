@@ -21,8 +21,8 @@ export async function createFirebaseRecordFrom(msg)
     //console.log(record);
 
     //caching these here, rather than in each analyticsParseMessage()
-    GUILD_CACHE[guild.id]["offTopicCategory"] = await getGuildPropertyConverted("offTopicCategoryID", guild);
-    await getGuildProperty("offTopicChannelID", guild);
+    GUILD_CACHE[msg.guild.id]["offTopicCategory"] = await getGuildPropertyConverted("offTopicCategoryID", msg.guild);
+    await getGuildProperty("offTopicChannelID", msg.guild);
     
     await analyticsParseMessage(record, msg.guild);
 
