@@ -151,6 +151,46 @@ export async function filterButtons(req,res,next)
         //all += "<span>"+res.locals.classListFilterCurrentStudentCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterAdminCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterByRoleList()+"</span>";
+        all += "<span>"+res.locals.classListFilterByUserList()+"</span>";
+        all += "</div></form>";
+
+        return all;
+    }
+
+    //TODO: multi select?
+    var userList = await renderFile("views/subViews/userSelect.html", {
+        name: "filterByUser",
+        id: "filterByUser",
+        guild: req.guild,
+        className: "autosubmit",
+        value: res.locals.query.filterByUser,
+        selectDefaultText: "- Select -"
+    });
+    res.locals.classListFilterByUserList = function()
+    {
+        return "Filter By User: "+userList;
+    }
+
+    var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", req.guild, null);
+    
+    res.locals.classListFilterByOffTopicCheckbox = function()
+    {
+        if (offTopicCategory)
+        {
+            return '<label><input type="checkbox" name="includeOffTopic" class="autosubmit" '+((res.locals.query.includeOffTopic) ? "checked" : "" )+'/> Include <b>'+offTopicCategory.name+'</b> Posts?</label>';
+        }
+    };
+    
+    
+
+    res.locals.classlistFilters = function()
+    {
+        var all = '<form method="get"><div class="filter">';
+        //all += "<span>"+res.locals.classListFilterCurrentStudentCheckbox()+"</span>";
+        all += "<span>"+res.locals.classListFilterAdminCheckbox()+"</span>";
+        all += "<span>"+res.locals.classListFilterByRoleList()+"</span>";
+        all += "<span>"+res.locals.classListFilterByUserList()+"</span>"; 
+        all += "<span>"+res.locals.classListFilterByOffTopicCheckbox()+"</span>"; 
         all += "</div></form>";
 
         return all;
@@ -159,7 +199,7 @@ export async function filterButtons(req,res,next)
     next();
 }
 
-export async function getFilterPredicate(req)
+export async function getUserFilterPredicate(req)
 {
     var studentRoleID = await getGuildProperty("studentRoleID", req.guild);
     var adminRoleID = await getGuildProperty("adminRoleID", req.guild);
@@ -168,16 +208,15 @@ export async function getFilterPredicate(req)
         return await filterUserPredicate(user, req, studentRoleID, adminRoleID);
     };
 }
-/*
+
 export async function getPostsFilterPredicate(req)
 {
-    var studentRoleID = await getGuildProperty("studentRoleID", req.guild);
-    var adminRoleID = await getGuildProperty("adminRoleID", req.guild);
+    var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", req.guild);
     return async function (post)
     {
-        return await filterUserPredicate(post.user, req, studentRoleID, adminRoleID);
+        return await filterPostPredicate(post, req, offTopicCategory);
     };
-}*/
+}
 
 async function filterUserPredicate(user, req, studentRoleID, adminRoleID)
 {
@@ -194,9 +233,24 @@ async function filterUserPredicate(user, req, studentRoleID, adminRoleID)
         if (member.roles == undefined || member.roles.cache.has(adminRoleID) == true) return false;
     }
 
-    if (req.query.filterByRole)
+    if (req.query.filterByRole && req.query.filterByRole != "")
     {
         if (member.roles == undefined || member.roles.cache.has(req.query.filterByRole) == false) return false;
+    }
+
+    if (req.query.filterByUser && req.query.filterByUser != "")
+    {
+        if (member.roles == undefined || member.id == (req.query.filterByUser) == false) return false;
+    }
+
+    return true;
+}
+
+async function filterPostPredicate(post, req, offTopicCategory)
+{
+    if (req.query.includeOffTopic == undefined && offTopicCategory)
+    {
+        if (offTopicCategory.children.some(c => c.id == post.channel)) return false;
     }
 
     return true;

@@ -19,7 +19,7 @@ var id = uuidv4();
 
     // set the dimensions and margins of the graph
     var margin = {top: 30, right: 30, bottom: 70, left: 60},
-        width = Math.max(1000, window.innerWidth) - margin.left - margin.right,
+        width = Math.max(1000, window.innerWidth-50) - margin.left - margin.right,
         height = 460 - margin.top - margin.bottom;
     
     // append the svg object to the body of the page
@@ -98,6 +98,7 @@ var id = uuidv4();
         .style("opacity", 0);
 
     // Bars
+    console.log(width, data.length, width/data.length); 
     var bandwidth = isTimeSeries ? width/data.length :  x.bandwidth();
     (function(isTimeSeriesClosure) {
         svg.selectAll("mybar")

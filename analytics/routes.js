@@ -1,7 +1,7 @@
 import moment from "moment";
 import { getAttendanceData } from "../attendance/routes.js";
 import { postWasForSession } from "../attendance/sessions.js";
-import { getFilterPredicate } from "../core/classList.js";
+import { getUserFilterPredicate, getPostsFilterPredicate } from "../core/classList.js";
 import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } from "../core/config.js";
 import { getStats, getStatsWeek, predicateExcludeAdmin, loadHistoricalData, getPostsData, loadTimeSeries, loadPostsPerDay, loadPostsPerHour, loadPostsPerSession, loadAttendanceSession } from "./analytics.js";
 import fakeData from "./fakeData.js";
@@ -9,12 +9,12 @@ import fakeData from "./fakeData.js";
 
 export async function getStatsData(req,res,next)
 {
-    res.locals.statsData = await getStats(req.guild, await getFilterPredicate(req));
+    res.locals.statsData = await getStats(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
     next();
 }
 export async function getStatsDataWeek(req,res,next)
 {
-    res.locals.statsData = await getStatsWeek(req.guild, await getFilterPredicate(req));
+    res.locals.statsData = await getStatsWeek(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
     next();
 }
 export async function getStatsDataOBS(req,res,next)
@@ -65,11 +65,8 @@ export async function timeGraph(req, res, next)
 {
     console.log("loading posts for time graph...");
  
-    //var rawStatsData = fakeData();
-    //if (req.guild.id != KIT109_S2_2021_SERVER || req.query.current || req.query.includeAdmin || req.query.filterByRole)
-    {
-      var  rawStatsData = await getPostsData(req.guild, await getFilterPredicate(req));
-    }
+    var  rawStatsData = await getPostsData(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
+    
     console.log("operating on", rawStatsData.length, "posts");
 
     var postsOverTime = await loadTimeSeries(rawStatsData);
@@ -82,8 +79,8 @@ export async function timeGraph(req, res, next)
     var postsPerSessionPlusOutOfSession = await loadPostsPerSession(rawStatsData, req.guild, true);
 
     await getAttendanceData(req,res);
-    var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild, false, await getFilterPredicate(req));
-    var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true, await getFilterPredicate(req));
+    var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild, false, await getUserFilterPredicate(req));
+    var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true, await getUserFilterPredicate(req));
 */
 
        

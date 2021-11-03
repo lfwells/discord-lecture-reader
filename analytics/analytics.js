@@ -36,30 +36,37 @@ export async function createFirebaseRecordFrom(msg)
     return record;
 }
 
-export async function getStatsWeek(guild, predicate)
+export async function getStatsWeek(guild, userPredicate, postPredicate)
 {
-    return getStats(guild, d => d.timestamp.isSame(new Date(), 'week') && (predicate == null || predicate(d)));
+    return getStats(guild, 
+        d => d.timestamp.isSame(new Date(), 'week') && (userPredicate == null || userPredicate(d)), 
+        d => d.timestamp.isSame(new Date(), 'week') && (postPredicate == null || postPredicate(d)));
 }
 
-export async function getPostsData(guild, predicate)
+export async function getPostsData(guild, userPredicate, postPredicate)
 {
-/*
-    if (guild.id == Config.KIT109_S2_2021_SERVER)
+
+    if (Config.USE_CACHED_FAKE_KIT109_DATA && guild.id == Config.KIT109_S2_2021_SERVER)
     {
         ANALYTICS_CACHE[guild.id] = fakeData();
     }
-*/
+
 
     if (ANALYTICS_CACHE[guild.id])
     {
-        if (predicate)
+        var filtered = ANALYTICS_CACHE[guild.id];
+        console.log(filtered.length);
+        if (userPredicate)
         {
-            var filtered = await asyncFilter(ANALYTICS_CACHE[guild.id], predicate);
-            console.log(filtered.length, ANALYTICS_CACHE[guild.id].length);
-            return filtered;
+            filtered = await asyncFilter(filtered, userPredicate);
+            console.log("userPredicate", filtered.length);
         }
-        else
-            return ANALYTICS_CACHE[guild.id];
+        if (postPredicate)
+        {
+            filtered = await asyncFilter(filtered, postPredicate);
+            console.log("postPredicate", filtered.length);
+        }
+        return filtered;
     }
 
     var collection = "analytics";
@@ -99,7 +106,7 @@ export async function getPostsData(guild, predicate)
     //}));
     ANALYTICS_CACHE[guild.id] = rawStatsData;
 
-    return getPostsData(guild, predicate); //this looks like infinite recursion, but isn't, this call will use the cache, and apply predicate
+    return getPostsData(guild, userPredicate, postPredicate); //this looks like infinite recursion, but isn't, this call will use the cache, and apply predicate
     //return rawStatsData;
 }
 async function analyticsParseMessage(d, guild)
@@ -128,9 +135,9 @@ async function analyticsParseMessage(d, guild)
         d.isOffTopic |= offTopicChannelID == d.postData.channelId;
     }
 }
-export async function getStats(guild, predicate)
+export async function getStats(guild, userPredicate, postPredicate)
 {
-    var rawStatsData = await getPostsData(guild, predicate);
+    var rawStatsData = await getPostsData(guild, userPredicate, postPredicate);
 
     var stats = {
         channels: [],
@@ -298,6 +305,8 @@ async function lots_of_messages_getter(res, channel, writeToDBCollection, limit)
 export async function loadTimeSeries(rawStatsData, weekly)
 {
     var days = [];
+    var startDomain = null;
+    var endDomain = null;
     for (var r in rawStatsData)
     {
         var row = rawStatsData[r];
@@ -308,8 +317,30 @@ export async function loadTimeSeries(rawStatsData, weekly)
             idx = days.push({ date: timestamp, value: 0 }) - 1;
         }
         days[idx].value++;
+
+        if (startDomain == null || timestamp.isBefore(startDomain))
+        {
+            startDomain = timestamp;
+        }
+        if (endDomain == null || timestamp.isAfter(endDomain))
+        {
+            endDomain = timestamp;
+        }
     }
+
+    //fill in holes in graph with zeros
+    for (var m = moment(startDomain); m.isBefore(endDomain); m.add(1, 'days')) {
+        var idx = days.findIndex(d => m.isSame(d.date));
+        if (idx == -1)
+        {
+            //console.log("added missing day "+m.format());
+            days.push({ date: moment(m), value: 0 }); 
+        }
+        idx = days.findIndex(d => m.isSame(d.date));
+    }
+
     days = days.sort((a,b) => a.date - b.date);
+
 
     return days;
 }

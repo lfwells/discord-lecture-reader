@@ -23,3 +23,6 @@ export const POLL_COMMAND = 'poll_test';
 var _TEST_MODE = false; //limit to test server only
 export function getTestMode() { return _TEST_MODE; }
 export function setTestMode(enabled) { _TEST_MODE = enabled; }
+
+//use this to speed up the analytics pages for dev testing
+export const USE_CACHED_FAKE_KIT109_DATA = false;

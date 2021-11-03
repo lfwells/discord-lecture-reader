@@ -7,14 +7,14 @@
         >
         <option value=""><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
         <% 
-        var roles = guild.roles.cache.sort((a,b) => a.position - b.position);
-        roles.forEach(function(role)
+        var members = guild.members.cache.sort((a,b) => (a.nickname ?? a.user.username).localeCompare(b.nickname ?? b.user.username));
+        members.forEach(function(member)
         { 
-            %><option value="<%= role.id %>"
-                <% if (value && role.id == value) { %>selected<% } %>>
-                <%= role.name %>
+            %><option value="<%= member.id %>"
+                <% if (value && member.id == value) { %>selected<% } %>>
+                <%= member.nickname ?? member.user.username %>
             </option><%
-        }) %>
+        }) %> 
     </select>
 </label>
 <script>
@@ -24,17 +24,4 @@
     });
 </script>
 
-<% 
-/* 
-usage:
-
-<p>include("subViews/roleSelect.html", 
-    { 
-        label: "Admin/Staff Role:",
-        selectDefaultText:"-- Select Role--",
-        id: "setAdminRoleID",
-        value: locals.adminRole.id
-    })</p>
-
-*/ 
 %>
