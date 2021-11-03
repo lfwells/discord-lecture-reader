@@ -4,6 +4,8 @@ import * as Config from "../core/config.js";
 import { didAttendSession, getSessions, postWasForSession } from "../attendance/sessions.js";
 import { db, guildsCollection } from "../core/database.js";
 import { getClient } from "../core/client.js";
+import fakeData from "./fakeData.js";
+import { asyncFilter } from "../core/utils.js";
 
 export var ANALYTICS_CACHE = {}; //because querying the db for all messages on demand is bad (cannot cache on node js firebase it seems)s
 
@@ -41,9 +43,23 @@ export async function getStatsWeek(guild, predicate)
 
 export async function getPostsData(guild, predicate)
 {
+/*
+    if (guild.id == Config.KIT109_S2_2021_SERVER)
+    {
+        ANALYTICS_CACHE[guild.id] = fakeData();
+    }
+*/
+
     if (ANALYTICS_CACHE[guild.id])
     {
-        return ANALYTICS_CACHE[guild.id];
+        if (predicate)
+        {
+            var filtered = await asyncFilter(ANALYTICS_CACHE[guild.id], predicate);
+            console.log(filtered.length, ANALYTICS_CACHE[guild.id].length);
+            return filtered;
+        }
+        else
+            return ANALYTICS_CACHE[guild.id];
     }
 
     var collection = "analytics";
@@ -77,15 +93,14 @@ export async function getPostsData(guild, predicate)
         var d = doc.data();
         d.id = doc.id;
         await analyticsParseMessage(d, guild);
-        
-        if (predicate == undefined || await predicate(d))
-        {
-            rawStatsData.push(d);
-        }
+
+        rawStatsData.push(d);
     }
     //}));
     ANALYTICS_CACHE[guild.id] = rawStatsData;
-    return rawStatsData;
+
+    return getPostsData(guild, predicate); //this looks like infinite recursion, but isn't, this call will use the cache, and apply predicate
+    //return rawStatsData;
 }
 async function analyticsParseMessage(d, guild)
 {

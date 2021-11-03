@@ -165,18 +165,39 @@ export async function getFilterPredicate(req)
     var adminRoleID = await getGuildProperty("adminRoleID", req.guild);
     return async function (user)
     {
-        var member = await req.guild.members.cache.get(user.author);
-        if (member == undefined) return false;
-
-        if (req.query.current && req.query.current == "on")
-            if (member.roles == undefined || member.roles.cache.has(studentRoleID) == false) return false;
-        
-        if (req.query.includeAdmin == undefined)
-            if (member.roles == undefined || member.roles.cache.has(adminRoleID) == true) return false;
-
-        if (req.query.filterByRole)
-            if (member.roles == undefined || member.roles.cache.has(req.query.filterByRole) == false) return false;
-
-        return true;
+        return await filterUserPredicate(user, req, studentRoleID, adminRoleID);
     };
+}
+/*
+export async function getPostsFilterPredicate(req)
+{
+    var studentRoleID = await getGuildProperty("studentRoleID", req.guild);
+    var adminRoleID = await getGuildProperty("adminRoleID", req.guild);
+    return async function (post)
+    {
+        return await filterUserPredicate(post.user, req, studentRoleID, adminRoleID);
+    };
+}*/
+
+async function filterUserPredicate(user, req, studentRoleID, adminRoleID)
+{
+    var member = await req.guild.members.cache.get(user.author);
+    if (member == undefined) return false;
+
+    if (req.query.current && req.query.current == "on")
+    {
+        if (member.roles == undefined || member.roles.cache.has(studentRoleID) == false) return false;
+    }
+    
+    if (req.query.includeAdmin == undefined)
+    {
+        if (member.roles == undefined || member.roles.cache.has(adminRoleID) == true) return false;
+    }
+
+    if (req.query.filterByRole)
+    {
+        if (member.roles == undefined || member.roles.cache.has(req.query.filterByRole) == false) return false;
+    }
+
+    return true;
 }
