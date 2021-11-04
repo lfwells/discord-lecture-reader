@@ -145,18 +145,6 @@ export async function filterButtons(req,res,next)
         return "Filter By Role: "+roleList;
     }
 
-    res.locals.classlistFilters = function()
-    {
-        var all = '<form method="get"><div class="filter">';
-        //all += "<span>"+res.locals.classListFilterCurrentStudentCheckbox()+"</span>";
-        all += "<span>"+res.locals.classListFilterAdminCheckbox()+"</span>";
-        all += "<span>"+res.locals.classListFilterByRoleList()+"</span>";
-        all += "<span>"+res.locals.classListFilterByUserList()+"</span>";
-        all += "</div></form>";
-
-        return all;
-    }
-
     //TODO: multi select?
     var userList = await renderFile("views/subViews/userSelect.html", {
         name: "filterByUser",
@@ -180,17 +168,36 @@ export async function filterButtons(req,res,next)
             return '<label><input type="checkbox" name="includeOffTopic" class="autosubmit" '+((res.locals.query.includeOffTopic) ? "checked" : "" )+'/> Include <b>'+offTopicCategory.name+'</b> Posts?</label>';
         }
     };
+
+    
+    //TODO: multi select?
+    var channelList = await renderFile("views/subViews/channelSelect.html", {
+        name: "filterByChannel",
+        id: "filterByChannel",
+        guild: req.guild,
+        className: "autosubmit",
+        value: res.locals.query.filterByChannel,
+        selectDefaultText: "- Select -"
+    });
+    res.locals.classListFilterByChannelList = function()
+    {
+        return "Filter By Channel: "+channelList;
+    }
     
     
 
-    res.locals.classlistFilters = function()
+    res.locals.classlistFilters = function(includePostFilters)
     {
         var all = '<form method="get"><div class="filter">';
         //all += "<span>"+res.locals.classListFilterCurrentStudentCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterAdminCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterByRoleList()+"</span>";
         all += "<span>"+res.locals.classListFilterByUserList()+"</span>"; 
-        all += "<span>"+res.locals.classListFilterByOffTopicCheckbox()+"</span>"; 
+        if (includePostFilters)
+        {
+            all += "<span>"+res.locals.classListFilterByChannelList()+"</span>"; 
+            all += "<span>"+res.locals.classListFilterByOffTopicCheckbox()+"</span>"; 
+        }
         all += "</div></form>";
 
         return all;
@@ -252,6 +259,13 @@ async function filterPostPredicate(post, req, offTopicCategory)
     {
         if (offTopicCategory.children.some(c => c.id == post.channel)) return false;
     }
+
+    
+    if (req.query.filterByChannel && req.query.filterByChannel != "")
+    {
+        if (post.channel != req.query.filterByChannel) return false;
+    }
+
 
     return true;
 }

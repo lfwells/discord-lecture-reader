@@ -17,11 +17,15 @@
         }) %> 
     </select>
 </label>
-<script>
-    $("#<%= id %>").on("change", (e) =>
-    {
-        document.location.href = "?<%= id %>="+$("#<%= id %>").val();
-    });
-</script>
-
+<% if (typeof onGuildPage !== 'undefined' ? onGuildPage : "")
+{
+    %>
+    <script>
+        $("#<%= id %>").on("change", (e) =>
+        {
+            document.location.href = "?<%= id %>="+$("#<%= id %>").val();
+        });
+    </script>
+    <%
+}
 %>

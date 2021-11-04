@@ -9,14 +9,16 @@
         label: "Admin/Staff Role:",
         selectDefaultText:"-- Select Role--",
         id: "setAdminRoleID",
-        value: locals.adminRole ? locals.adminRole.id : undefined
+        value: locals.adminRole ? locals.adminRole.id : undefined,
+        onGuildPage:true
     }) %></p>
 <p><%- include("subViews/roleSelect.html", 
     { 
         label: "Current Students Role:",
         selectDefaultText:"-- Select Role--",
         id: "setStudentRoleID",
-        value: locals.studentRole ? locals.studentRole.id : undefined
+        value: locals.studentRole ? locals.studentRole.id : undefined,
+        onGuildPage:true
     }) %></p>
 
 <h3>Channel Set Up</h3>
@@ -26,35 +28,40 @@
         label: "Lecture Channel:",
         selectDefaultText:"-- Select Channel--",
         id: "setLectureChannelID",
-        value: locals.lectureChannel ? locals.lectureChannel.id : undefined
+        value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
+        onGuildPage:true
     }) %></p>
 <p><%- include("subViews/channelSelect.html", 
     { 
         label: "Achievements Channel:",
         selectDefaultText:"-- Select Channel--",
         id: "setAwardChannelID",
-        value: locals.awardChannel ? locals.awardChannel.id : undefined
+        value: locals.awardChannel ? locals.awardChannel.id : undefined,
+        onGuildPage:true
     }) %></p>
     <p><%- include("subViews/channelSelect.html", 
         { 
             label: "Off Topic Channel:",
             selectDefaultText:"-- Select Channel--", 
             id: "setOffTopicChannelID",
-            value: locals.offTopicChannel ? locals.offTopicChannel.id : undefined
+            value: locals.offTopicChannel ? locals.offTopicChannel.id : undefined,
+            onGuildPage:true
         }) %></p>
     <p><%- include("subViews/channelSelect.html", 
         { 
             label: "TODOs Channel:",
             selectDefaultText:"-- Select Channel--", 
             id: "setTodoChannelID",
-            value: locals.todoChannelID ? locals.todoChannelID.id : undefined
+            value: locals.todoChannelID ? locals.todoChannelID.id : undefined,
+            onGuildPage:true
         }) %></p>
     <p><%- include("subViews/channelCategorySelect.html", 
         { 
             label: "Off Topic Category:",
             selectDefaultText:"-- Select Category--", 
             id: "setOffTopicCategoryID",
-            value: locals.offTopicCategory ? locals.offTopicCategory.id : undefined
+            value: locals.offTopicCategory ? locals.offTopicCategory.id : undefined,
+            onGuildPage:true
         }) %></p>
 
 

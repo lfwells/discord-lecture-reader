@@ -70,9 +70,9 @@ export async function timeGraph(req, res, next)
     console.log("operating on", rawStatsData.length, "posts");
 
     var postsOverTime = await loadTimeSeries(rawStatsData);
-/*
-
     var postsOverTimeWeekly = await loadTimeSeries(rawStatsData, true);//weekly
+    /*
+    
     var postsPerDay = await loadPostsPerDay(rawStatsData);
     var postsPerHour = await loadPostsPerHour(rawStatsData);
     var postsPerSession = await loadPostsPerSession(rawStatsData, req.guild);
@@ -88,9 +88,8 @@ export async function timeGraph(req, res, next)
         postData:rawStatsData,
         graphs: {
             "Posts Over Time": postsOverTime,
-            /*
             "Posts Over Time (Weekly)": postsOverTimeWeekly,
-            "Posts Per Day": postsPerDay,
+            /*"Posts Per Day": postsPerDay,
             "Posts Per Hour": postsPerHour,
             "Posts Per Session": postsPerSession,
             "Posts Per In/Out Session": postsPerSessionPlusOutOfSession,
