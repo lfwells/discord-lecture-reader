@@ -11,7 +11,7 @@ export default async function (client)
 {
     client.on('voiceStateUpdate', async (oldMember, newMember) => 
     {    
-        if (hasFeature(oldMember.guild, "attendance") == false)
+        if (await hasFeature(oldMember.guild, "attendance") == false)
         {
             return;
         }

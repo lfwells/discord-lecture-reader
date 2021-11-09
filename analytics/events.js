@@ -9,7 +9,7 @@ export default async function(client)
 {
     client.on('messageCreate', async (msg) =>  
     {
-        if (hasFeature(msg.guild, "analytics") == false) return;
+        if (await hasFeature(msg.guild, "analytics") == false) return;
         if (msg.channel.id == config.ERROR_LOG_CHANNEL_ID) return; //dont get stuck in a loop recording error logs lol
 
         var guildDocument = getGuildDocument(msg.guild.id);
@@ -78,7 +78,7 @@ export default async function(client)
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand()) return;
 
-        if (hasFeature(msg.guild, "analytics") == false)
+        if (await hasFeature(interaction.guild, "analytics") == false)
         {
             interaction.reply({
                 content: "Post stats not enabled on this server",

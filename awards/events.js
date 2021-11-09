@@ -5,6 +5,7 @@ import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward, getAwardListFullData, getLeaderboard } from "./awards.js";
 import { pluralize, offTopicOnly } from '../core/utils.js';
 import { getClassList } from '../core/classList.js';
+import { hasFeature } from '../guild/guild.js';
 
 export default async function(client)
 {
@@ -135,6 +136,16 @@ export default async function(client)
     {
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand()) return;
+
+        if (await hasFeature(interaction.guild, "achievements") == false)
+        {
+            interaction.reply({
+                content: "Achievement System not enabled on this server",
+                ephemeral: true
+            });
+            return;
+        }
+
             
         // Check if it is the correct command
         if (interaction.commandName === "flex") 
