@@ -1,16 +1,19 @@
 import { init_client } from '../core/client.js';
 import { getGuildDocument, init_admin_users } from "./guild.js";
+import * as config from "../core/config.js";
 
 export default async function(client)
 {
     client.on('guildCreate', async (guild) => 
     {
-        //console.log("guildCreate", guild); 
+        console.log("guildCreate", Object.assign({
+            name:guild.name,
+        }, config.DEFAULT_GUILD_PROPERTIES)); 
         var guildDocument = getGuildDocument(guild.id);
         guildDocument.set(
-            {
-                name:guild.name
-            },
+            Object.assign({
+                name:guild.name,
+            }, config.DEFAULT_GUILD_PROPERTIES),
             { merge: true }
         );
         init_client(client);

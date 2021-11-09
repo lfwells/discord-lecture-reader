@@ -20,6 +20,11 @@ export const ERROR_LOG_CHANNEL_ID = "819332984850874368"; //#error-log
 export const DEFAULT_VOTE_SIZE_OBS = 10;
 export const POLL_COMMAND = 'poll_test';
 
+export const DEFAULT_GUILD_PROPERTIES = {
+    feature_attendance: true,
+    feature_analytics: true
+}
+
 var _TEST_MODE = false; //limit to test server only
 export function getTestMode() { return _TEST_MODE; }
 export function setTestMode(enabled) { _TEST_MODE = enabled; }

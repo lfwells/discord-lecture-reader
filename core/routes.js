@@ -61,6 +61,10 @@ function guildRouter()
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
+    router.use(guild.loadGuildProperty("feature_attendance"));
+    router.use(guild.loadGuildProperty("feature_analytics"));
+    router.use(guild.loadGuildProperty("feature_invites"));
+    router.use(guild.loadGuildProperty("feature_obs"));
 
     router.use(filterButtons);
 

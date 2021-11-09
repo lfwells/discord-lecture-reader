@@ -306,3 +306,8 @@ function getFakeReq(guild)
   }
   return req;
 }
+
+export async function hasFeature(guild, feature, defaultValue)
+{
+  return await getGuildProperty("feature_"+feature, guild, defaultValue ?? false);
+}
