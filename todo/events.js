@@ -1,5 +1,5 @@
-import { Permissions } from "discord.js";
-import { getGuildPropertyConverted } from "../guild/guild.js";
+import { Permissions, ReactionManager } from "discord.js";
+import { getGuildProperty, getGuildPropertyConverted } from "../guild/guild.js";
 
 export default async function(client)
 {    
@@ -39,17 +39,38 @@ export default async function(client)
         }
     });
 
+    client.on('messageReactionAdd', async (reaction, user) => {
+        // When a reaction is received, check if the structure is partial
+        if (reaction.partial) {
+            // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+            try {
+                await reaction.fetch();
+            } catch (error) {
+                console.error('Something went wrong when fetching the message:', error);
+                // Return as `reaction.message.author` may be undefined/null
+                return;
+            }
+        }
+    
+        var todoEmoji = await getGuildProperty("todoEmoji", reaction.message.guild, "");
+        //console.log("reaction.emoji.name", reaction.emoji.name, todoEmoji, todoEmoji == reaction.emoji.name);
+        if (todoEmoji == reaction.emoji.name)
+        {
+            doTodoCommand(null, reaction.message);   
+        }
+    });
+
 }
 
-async function doTodoCommand(interaction)
+async function doTodoCommand(interaction, reactMessage)
 {
     console.log("Todo command");
     //this can take too long to reply, so we immediately reply
-    await interaction.deferReply({ ephemeral: true });
+    if (interaction) await interaction.deferReply({ ephemeral: true });
     //TODO: allow option to inform user that they have been marked as a todo?
 
-    var originalMessage = await interaction.channel.messages.fetch(interaction.targetId);
-    console.log(originalMessage);
+    var originalMessage = reactMessage ?? await interaction.channel.messages.fetch(interaction.targetId);
+    //console.log(originalMessage);
 
     var message = {
         //title:"TODO",
@@ -60,24 +81,26 @@ async function doTodoCommand(interaction)
     };
 
     //only allow if user is admin
-    if (interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) == false)
+    var member = reactMessage ? reactMessage.member : interaction.member;
+    var user = reactMessage ? reactMessage.member.user : interaction.user;
+    if (member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) == false)
     {
-        var post = await interaction.user.send({ embeds:[message], content:"New TODO: "+originalMessage.url });
-        interaction.editReply("TODO sent as a DM "+post.url);
+        var post = await user.send({ embeds:[message], content:"New TODO: "+originalMessage.url });
+        if (interaction) interaction.editReply("TODO sent as a DM "+post.url);
     }
     else
     {
 
-        var todoChannel = await getGuildPropertyConverted("todoChannelID", interaction.guild);
+        var todoChannel = await getGuildPropertyConverted("todoChannelID", interaction ? interaction.guild : reactMessage.guild);
         if (todoChannel)
         {
             var post = await todoChannel.send({ embeds:[message], content:"New TODO:"+originalMessage.url });   
-            interaction.editReply("TODO sent to <#"+todoChannel.id+"> "+post.url);
+            if (interaction) interaction.editReply("TODO sent to <#"+todoChannel.id+"> "+post.url);
         }
         else
         {
             var post = await interaction.user.send({ embeds:[message], content:"New TODO (note: you can get these messages in a todo channel if you configure it): "+originalMessage.url });
-            interaction.editReply("TODO send as a DM "+post.url);
+            if (interaction) interaction.editReply("TODO send as a DM "+post.url);
         }
     }
 }

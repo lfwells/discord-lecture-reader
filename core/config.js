@@ -22,7 +22,8 @@ export const POLL_COMMAND = 'poll_test';
 
 export const DEFAULT_GUILD_PROPERTIES = {
     feature_attendance: true,
-    feature_analytics: true
+    feature_analytics: true,
+    todoEmoji:"🙌"
 }
 
 var _TEST_MODE = false; //limit to test server only

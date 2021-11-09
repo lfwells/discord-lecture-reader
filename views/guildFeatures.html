@@ -54,4 +54,46 @@
     }) %></dt>
 </dl>
 
+
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "TODOs",
+        feature: "todos"
+    }) %>
+</dt>
+
+    <dd>
+    <% 
+
+    if (hasFeature("todos"))
+    {
+        %><%- include("subViews/channelSelect.html", 
+        { 
+            label: "TODOs Channel:",
+            selectDefaultText:"-- Select Channel--", 
+            id: "setTodoChannelID",
+            value: locals.todoChannelID ? locals.todoChannelID.id : undefined,
+            onGuildPage:true
+        }) %><%
+    }
+    %>
+    </dd>
+    <dd>
+        <% 
+    
+        if (hasFeature("todos"))
+        {
+            %><%- include("subViews/textFieldGuildProperty.html", 
+            { 
+                label: "TODOs Emoji (Mobile):",
+                id: "setTodoEmoji",
+                property: "todoEmoji",
+                value: locals.todoEmoji ?? "",
+                onGuildPage:true
+            }) %><%
+        }
+        %>
+        </dd>
+
+
 <%- include('footer.html') %>
