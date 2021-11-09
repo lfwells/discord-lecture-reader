@@ -281,3 +281,8 @@
         dt {
             padding:1em;
         }
+
+        label > span {
+            display:inline-block;
+            min-width:200px
+        }

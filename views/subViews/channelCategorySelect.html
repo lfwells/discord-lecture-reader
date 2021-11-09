@@ -1,4 +1,5 @@
-<label><%=typeof label !== 'undefined' ? label : "" %>
+<label>
+    <span><%=typeof label !== 'undefined' ? label : "" %></span>
     <select id="<%= id %>" title="<%=typeof value !== 'undefined' ? value : "" %>">
         <option><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
         <%
