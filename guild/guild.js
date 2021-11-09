@@ -247,6 +247,8 @@ export async function setGuildProperty(guild, property, value)
 
 export async function saveGuildProperty(property, value, req, res)
 {
+  if (value == "true") value = true;
+  if (value == "false") value = false;
   var toSave = {};
   toSave[property] = value;
   await req.guildDocument.update(toSave);

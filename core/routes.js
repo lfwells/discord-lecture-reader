@@ -59,6 +59,8 @@ function guildRouter()
     router.use(guild.loadGuildProperty("offTopicChannelID"));
     router.use(guild.loadGuildProperty("todoChannelID"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
+    
+    router.use(guild.loadGuildProperty("feature_achievements"));
 
     router.use(filterButtons);
 
@@ -68,6 +70,8 @@ function guildRouter()
     guild_routes.guildHome);
                     
     router.get("/obs/", basic_render("obs")); 
+
+    router.get("/features/", guild_routes.guildFeatures); 
 
     //awards
     router.get("/namesTest/", award_routes.namesTest); 

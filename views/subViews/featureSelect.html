@@ -1,0 +1,21 @@
+<label>
+    <input type="checkbox" 
+        id="setFeature_<%= feature %>" 
+        name="setFeature_<%= feature %>" 
+        class="<%=typeof className !== 'undefined' ? className : "" %>"
+        <% 
+        console.log("feature", locals["feature_"+feature]);
+        if (locals["feature_"+feature])
+        {
+            %>checked<%
+        }
+        %>
+        /> 
+        <%=typeof label !== 'undefined' ? label : "" %>
+</label>
+<script>
+    $("#setFeature_<%= feature %>").on("change", (e) =>
+    {
+        document.location.href = "?setFeature_<%= feature %>="+$("#setFeature_<%= feature %>").prop("checked");
+    });
+</script>

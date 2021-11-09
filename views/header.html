@@ -59,24 +59,68 @@
                     return isCurrent ? ' class=current ' : "";
                 }
 
+                function hasFeature(feature)
+                {
+                    return locals["feature_"+feature];
+                }
+
                 %>
                 
                 <nav>
                     <ul>
                         <li><a <%=currentTab("")%> href="/guild/<%= guild.id %>/">Configure Server</a></li>
-                        <li><a <%=currentTab("attendance")%> href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
-                        <li><a <%=currentTab("analytics")%> href="/guild/<%= guild.id %>/analytics/">Stats</a></li>
-                        <li><a <%=currentTab("timeGraph")%> href="/guild/<%= guild.id %>/analytics/timeGraph">Graphs</a></li>
-                        <li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Achievements</a></li>
-                        <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Achievements Leaderboard</a></li>
-                        <li><a <%=currentTab("invites")%> href="/guild/<%= guild.id %>/invites/">Invites</a></li>
-                        <% if (locals.lectureChannel) { %>
+                        <li><a <%=currentTab("features")%> href="/guild/<%= guild.id %>/features/">Features</a></li>
+
+                        <% if (hasFeature("attendance"))
+                        {
+                            %>
+                            <li><a <%=currentTab("attendance")%> href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
+                            <%
+                        }
+                        %>
+
+                        <% if (hasFeature("analytics"))
+                        {
+                            %>
+                            <li><a <%=currentTab("analytics")%> href="/guild/<%= guild.id %>/analytics/">Stats</a></li>
+                            <li><a <%=currentTab("timeGraph")%> href="/guild/<%= guild.id %>/analytics/timeGraph">Graphs</a></li>
+                            <%
+                        }
+                        %>
+                        
+                        <% if (hasFeature("achievements") && locals.awardChannelID)
+                        {
+                            %><li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Achievements</a></li>
+                            <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Achievements Leaderboard</a></li><%
+                        }
+                        %>
+                       
+                        
+                        <% if (hasFeature("invites"))
+                        {
+                            %>
+                            <li><a <%=currentTab("invites")%> href="/guild/<%= guild.id %>/invites/">Invites</a></li>
+                            <%
+                        }
+                        %>
+
+                        <% if (hasFeature("obs") && locals.lectureChannelID) { %>
                             <!--<li><a href="/guild/<%= guild.id %>/clearpoll/">Clear Current Poll</a></li>-->
                             <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
                             <li><a <%=currentTab("text")%> href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
                             <li><a <%=currentTab("obs")%> href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
                         <% } %>
-                        <li><a <%=currentTab("sheets")%> href="/guild/<%= guild.id %>/sheets/">Google Sheet Export</a></li>
+
+                        <% if (hasFeature("analytics") && (locals.discordUser.id == locals.config.LINDSAY_ID || locals.discordUser.id == locals.config.IAN_ID))
+                        {
+                            %>
+                            <li><a <%=currentTab("sheets")%> href="/guild/<%= guild.id %>/sheets/">Google Sheet Export</a></li>
+                            <%
+                        }
+                        %>
+
+                        <li><a <%=currentTab("help")%> href="/help">User Guide</a></li>
+
                     </ul>
                 </nav>
                 <%

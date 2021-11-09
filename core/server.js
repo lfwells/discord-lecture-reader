@@ -58,6 +58,10 @@ export function init_server()
     res.locals.body   = req.body;
     next();
   });
+  app.use(function(req, res, next) {
+    res.locals.config = config;
+    next();
+  });
   
   
   app.get("/testmode/:onoff", (req, res, next) =>

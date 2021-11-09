@@ -1,0 +1,57 @@
+<%- include('header.html') %>
+
+<h2>Enable/Disable Features</h2>
+
+<dl>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Achievements",
+        feature: "achievements"
+    }) %>
+</dt>
+
+    <dd>
+    <% 
+    function hasFeature(feature)
+    {
+        return locals["feature_"+feature];
+    }
+
+    if (hasFeature("achievements"))
+    {
+        %><%- include("subViews/channelSelect.html", 
+        { 
+            label: "Achievements Channel:",
+            selectDefaultText:"-- Select Channel--",
+            id: "setAwardChannelID",
+            value: locals.awardChannel ? locals.awardChannel.id : undefined,
+            onGuildPage:true
+        }) %><%
+    }
+    %>
+</dd>
+
+
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Attendance Tracking",
+        feature: "attendance"
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Post Tracking",
+        feature: "analytics"
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Open Broadcaster Studio Integration",
+        feature: "obs"
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Custom Invites",
+        feature: "invites"
+    }) %></dt>
+</dl>
+
+<%- include('footer.html') %>

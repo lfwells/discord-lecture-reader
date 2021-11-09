@@ -23,37 +23,20 @@ export async function guildHome(req, res)
     property = property.charAt(0).toLowerCase() + property.slice(1);
     await saveGuildProperty(property, req.query[setting], req, res);
   }));
-/*
-  var setLectureChannelID = req.query.setLectureChannelID;
-  if (setLectureChannelID)
-  {
-    await saveGuildProperty("lectureChannelID", setLectureChannelID, req, res);
-  }
-
-  var setAwardChannelID = req.query.setAwardChannelID;
-  if (setAwardChannelID)
-  {
-    await saveGuildProperty("awardChannelID", setAwardChannelID, req, res);
-  }
-
-  var setOffTopicChannelID = req.query.setOffTopicChannelID;
-  if (setOffTopicChannelID)
-  {
-    await saveGuildProperty("offTopicChannelID", setOffTopicChannelID, req, res); 
-  }
-
-  var setAdminRoleID = req.query.setAdminRoleID;
-  if (setAdminRoleID)
-  {
-    await saveGuildProperty("adminRoleID", setAdminRoleID, req, res);
-  }
-
-  var setStudentRoleID = req.query.setStudentRoleID;
-  if (setStudentRoleID)
-  {
-    await saveGuildProperty("studentRoleID", setStudentRoleID, req, res);
-  }
-*/
 
   res.render("guild");
+}
+
+export async function guildFeatures(req, res) 
+{  
+  //todo: a generic settings list maybe?
+  var settingsQueryKeys = Object.keys(req.query).filter(k => k.startsWith("set"));
+  await Promise.all(settingsQueryKeys.map( async (setting) => 
+  { 
+    var property = setting.replace("set", "");
+    property = property.charAt(0).toLowerCase() + property.slice(1);
+    await saveGuildProperty(property, req.query[setting], req, res);
+  }));
+
+  res.render("guildFeatures");
 }
