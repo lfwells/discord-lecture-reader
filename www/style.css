@@ -286,3 +286,7 @@
             display:inline-block;
             min-width:200px
         }
+        .filter label > span {
+            display:inline !important;
+            min-width:initial !important;
+        }

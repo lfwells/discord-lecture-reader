@@ -129,6 +129,7 @@ export async function filterButtons(req,res,next)
         {
             return '<label><input type="checkbox" name="includeAdmin" class="autosubmit" '+(res.locals.query.includeAdmin ? "checked" : "" )+'/> Include <b>@'+adminRole.name+'</b>?</label>'
         }
+        return "";
     };
 
     //TODO: multi select?
@@ -167,6 +168,7 @@ export async function filterButtons(req,res,next)
         {
             return '<label><input type="checkbox" name="includeOffTopic" class="autosubmit" '+((res.locals.query.includeOffTopic) ? "checked" : "" )+'/> Include <b>'+offTopicCategory.name+'</b> Posts?</label>';
         }
+        return "";
     };
 
     

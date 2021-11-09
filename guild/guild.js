@@ -185,7 +185,7 @@ export function loadGuildProperty(property, required)
 //non-route version (but still spoofing route version)
 export async function getGuildProperty(property, guild, defaultValue, required)
 {
-  var res = {locals:{}};
+  var res = {locals:{}, end:(a)=>{}};
   await loadGuildProperty(property, required)(getFakeReq(guild), res, () => {});
 
   if (defaultValue != undefined && res.error)

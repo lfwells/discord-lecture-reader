@@ -1,5 +1,5 @@
 import * as config from '../core/config.js';
-import { getGuildDocument } from '../guild/guild.js';
+import { getGuildDocument, hasFeature } from '../guild/guild.js';
 import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js';
 import { offTopicOnly, pluralize, sleep } from '../core/utils.js';
 import { send } from '../core/client.js';
@@ -9,6 +9,7 @@ export default async function(client)
 {
     client.on('messageCreate', async (msg) =>  
     {
+        if (hasFeature(msg.guild, "analytics") == false) return;
         if (msg.channel.id == config.ERROR_LOG_CHANNEL_ID) return; //dont get stuck in a loop recording error logs lol
 
         var guildDocument = getGuildDocument(msg.guild.id);
@@ -76,6 +77,15 @@ export default async function(client)
     {
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand()) return;
+
+        if (hasFeature(msg.guild, "analytics") == false)
+        {
+            interaction.reply({
+                content: "Post stats not enabled on this server",
+                ephemeral: true
+            });
+            return;
+        }
     
         // Check if it is the correct command
         if (interaction.commandName === "stats" || interaction.commandName === "statsweek") 
