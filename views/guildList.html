@@ -1,6 +1,7 @@
 <%- include('header.html') %>
 
-<h2>Server List</h2>
+<h2>Unit List</h2>
+<p>Discord Servers that you are an admin of will appear here.</p>
 <!--
 <p><% if (testMode) { %>
     Test Mode ON. <a href="/testMode/false">Turn OFF</a>
@@ -10,6 +11,9 @@
 -->
 
 <ul id="guilds">
+  <li>
+    <a href="https://discord.com/api/oauth2/authorize?client_id=811958340967071745&permissions=8&redirect_uri=http%3A%2F%2F131.217.172.176%2F&response_type=code&scope=messages.read%20bot%20applications.commands%20guilds%20guilds.join%20connections"><span style="font-size:48pt; display:inline-block; vertical-align: middle;">+</span> <span style="vertical-align: middle;">Add Your Server</span></a>
+  </li>
   <% guilds.forEach(function(guild){ %>
     <li>
       <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>"><%= guild.name %><br />
@@ -19,7 +23,7 @@
       </a>
     </li>
   <% }) %>
-  <li><a href="https://discord.com/api/oauth2/authorize?client_id=811958340967071745&permissions=8&redirect_uri=http%3A%2F%2F131.217.172.176%2F&response_type=code&scope=messages.read%20bot%20applications.commands%20guilds%20guilds.join%20connections">Add Your Server</a></li>
+  
 </ul>
 
 <%- include('footer.html') %>
