@@ -9,7 +9,7 @@ export default async function(client)
         console.log("guildCreate", Object.assign({
             name:guild.name,
         }, config.DEFAULT_GUILD_PROPERTIES)); 
-        var guildDocument = getGuildDocument(guild.id);
+        var guildDocument = await getGuildDocument(guild.id);
         guildDocument.set(
             Object.assign({
                 name:guild.name,
@@ -21,7 +21,7 @@ export default async function(client)
 
     client.on("guildUpdate", async (oldGuild, newGuild) => {
         //console.log("guildUpdate", newGuild); 
-        var guildDocument = getGuildDocument(newGuild.id);
+        var guildDocument = await getGuildDocument(newGuild.id);
         guildDocument.set(
             {
                 name:newGuild.name

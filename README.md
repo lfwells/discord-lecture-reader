@@ -27,7 +27,10 @@ In the root directory, you will need a `users.js` file with the users and passwo
 }`
 
 ## Usage
-`sudo forever start -o out.log -e err.log discord/discord.js`
+
+use pm2 start process.json
+
+`sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080`
 
 ```
 screen -S <process description>	start a session

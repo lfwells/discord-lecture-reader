@@ -1,5 +1,5 @@
 import * as config from '../core/config.js'; 
-import { db, guildsCollection } from "../core/database.js";
+import { guildsCollection, transfer } from "../core/database.js";
 import { getStatus, isOutsideTestServer } from "../core/utils.js";
 import { init_invites } from "../invite/invite.js";
 import { init_roles } from '../invite/roles.js';
@@ -17,11 +17,13 @@ export async function init(client)
   await Promise.all(guilds.map( async (guild) => 
   { 
     await guild.fetch();
-    await db.collection("guilds").doc(guild.id).set({    
+    (await guildsCollection.doc(guild.id)).set({    
       name:guild.name
     }, {merge:true}); 
 
-    GUILD_CACHE[guild.id] = guild;//{};
+    GUILD_CACHE[guild.id] = guild;//{}
+    
+    await transfer(guild.id);
     
     await init_sheet_for_guild(guild);
 
@@ -46,7 +48,7 @@ export function load() {
     var guildID = req.params.guildID;
     var client = getClient();
     req.guild = await client.guilds.fetch(guildID); 
-    req.guildDocument = getGuildDocument(guildID);
+    req.guildDocument = await getGuildDocument(guildID);
 
     if (req.guild == undefined)
     {
@@ -119,9 +121,9 @@ export async function checkGuildAdmin(req, res, next)
   res.render("accessDenied");
 }
 
-export function getGuildDocument(guildID)
+export async function getGuildDocument(guildID)
 {
-  return guildsCollection.doc(guildID);
+  return await guildsCollection.doc(guildID);
 }
 
 export function loadGuildProperty(property, required)
@@ -136,10 +138,11 @@ export function loadGuildProperty(property, required)
 
     if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id][property]))
     {
-      req.guildDocumentSnapshot = await req.guildDocument.get();
-      req[property] = await req.guildDocumentSnapshot.get(property);
-      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-      GUILD_CACHE[req.guild.id][property] = req[property];
+        req.guildDocumentSnapshot = await req.guildDocument.get();
+        req[property] = await req.guildDocumentSnapshot.get(property);
+        if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+        GUILD_CACHE[req.guild.id][property] = req[property];
+      
     } 
     res.locals[property] = req[property];
 
@@ -186,7 +189,7 @@ export function loadGuildProperty(property, required)
 export async function getGuildProperty(property, guild, defaultValue, required)
 {
   var res = {locals:{}, end:(a)=>{}};
-  await loadGuildProperty(property, required)(getFakeReq(guild), res, () => {});
+  await loadGuildProperty(property, required)(await getFakeReq(guild), res, () => {});
 
   if (defaultValue != undefined && res.error)
   {
@@ -205,7 +208,7 @@ export async function getGuildProperty(property, guild, defaultValue, required)
 export async function getGuildPropertyConverted(property, guild, defaultValue, required) //this version will return the channel/role object itself
 {
   var res = {locals:{}};
-  await loadGuildProperty(property, required)(getFakeReq(guild), res, () => {});
+  await loadGuildProperty(property, required)(await getFakeReq(guild), res, () => {});
 
   if (defaultValue && res.error)
   {
@@ -242,7 +245,7 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
 export async function setGuildProperty(guild, property, value)
 {
   var res = {locals:{}};
-  await saveGuildProperty(property, value, getFakeReq(guild), res);
+  await saveGuildProperty(property, value, await getFakeReq(guild), res);
 }
 
 export async function saveGuildProperty(property, value, req, res)
@@ -297,11 +300,11 @@ export async function init_admin_users(client)
   });
 }
 
-function getFakeReq(guild)
+async function getFakeReq(guild)
 {
   var req = {
     guild: guild,
-    guildDocument: getGuildDocument(guild.id),
+    guildDocument: await await getGuildDocument(guild.id),
     query:{}
   }
   return req;

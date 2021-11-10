@@ -79,7 +79,7 @@ export async function getPostsData(guild, userPredicate, postPredicate)
     }
 
 
-    var guildDocument = getGuildDocument(guild.id);
+    var guildDocument = await getGuildDocument(guild.id);
 
     //caching these here, rather than in each analyticsParseMessage()
     GUILD_CACHE[guild.id]["offTopicCategory"] = await getGuildPropertyConverted("offTopicCategoryID", guild);

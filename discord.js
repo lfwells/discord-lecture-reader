@@ -4,10 +4,17 @@ import { getClient, init_client } from './core/client.js';
 //import things need to initialize discord
 import * as guild from "./guild/guild.js";
 
+
+import { init_db } from './core/database.js';
+
 //listen for when discord is logged in
 const client = getClient();
 client.on('ready', async () => 
 {
+
+	await init_db(); 
+	
+
 	console.log(`Logged in as ${client.user.tag}!`);
 
 	//save all the guilds etc to db

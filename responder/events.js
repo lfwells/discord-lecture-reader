@@ -30,7 +30,7 @@ export default async function(client)
                 {
                     var status = await getStatus(config.LINDSAY_ID, msg.guild);
                     
-                    var guildDocument = getGuildDocument(msg.guild.id);
+                    var guildDocument = await getGuildDocument(msg.guild.id);
                     var guildDocumentSnapshot = await guildDocument.get();
                     var lastAutoReply = await guildDocumentSnapshot.get("lastAutoReply");
                     if (!lastAutoReply)
