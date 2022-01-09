@@ -4,6 +4,7 @@ import { getGuildProperty, GUILD_CACHE, loadGuildProperty, setGuildProperty } fr
 import { getAttendanceData } from "./attendance/routes.js";
 import { getStats } from "./analytics/analytics.js";
 import { getAwardListFullData } from "./awards/awards.js";
+import moment from "moment";
 
 var sheets;
 var drive;
@@ -270,6 +271,7 @@ async function write_class_summary(req, res, statsData)
     row.push("Off Topic %");
     row.push("Achievements");
     row.push("Active Days");
+    row.push("Best Active Days Streak");
     sheetData.push(row); row = [];
 
     var i = 0;
@@ -307,7 +309,28 @@ async function write_class_summary(req, res, statsData)
         row.push((student.awards == null) ? 0 : student.awards.length);
         
         //row.push("Active Days");
-        row.push(studentData == null ? 0 : new Set(studentData.posts.map(p => p.timestamp.startOf('day').valueOf())).size);
+        var activeDays = studentData == null ? new Set() : new Set(studentData.posts.map(p => moment(p.timestamp).startOf('day').valueOf()));
+        row.push(activeDays.size);
+        
+        //row.push("Best Active Day Streak");
+        var bestStreak = 0;
+        var currentStreak = 0;
+        var prevItem = -1;
+        var ordered = [...activeDays].sort();
+        for (let index = 0; index < ordered.length; index++) {
+            const element = ordered[index];
+            if (element - prevItem == 86400000) //milliseconds in one day
+            {
+                currentStreak++;
+                bestStreak = Math.max(bestStreak, currentStreak);
+            }
+            else
+            {
+                currentStreak = 0;
+            }
+            prevItem = element;
+        }
+        row.push(bestStreak);
         
         sheetData.push(row); row = [];
     });
