@@ -290,3 +290,7 @@
             display:inline !important;
             min-width:initial !important;
         }
+
+        .btnAdd {
+            font-size:48pt; display:inline-block; vertical-align: middle;
+        }

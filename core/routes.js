@@ -14,6 +14,7 @@ import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 import * as invite_routes from "../invite/routes.js";
 import { Router } from "express";
 import * as sheet_routes from "../sheets_test.js";
+import { schedule_test } from "../attendance/scheduled_events.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
@@ -146,6 +147,8 @@ function guildRouter()
     router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheets_test); 
     router.get("/sheets/update", loadClassListWithRemoved, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
         
+    //scheduled_events
+    router.get("/schedule_test", schedule_test);
     return router;
 }
 

@@ -8,6 +8,7 @@ const client = new Client({
         Intents.FLAGS.GUILD_PRESENCES,
         Intents.FLAGS.GUILD_MESSAGES, 
         Intents.FLAGS.GUILD_VOICE_STATES,
+        Intents.FLAGS.GUILD_SCHEDULED_EVENTS
     ],
     fetchAllMembers: true
 });
@@ -53,6 +54,7 @@ import init_guild_events from '../guild/events.js';
 import init_poll_events from '../polls/events.js';
 import init_audit_events from '../audit/events.js';
 import init_todo_events from '../todo/events.js';
+import { init_roles } from '../invite/roles.js';
 
 export async function init_client(client)
 {
@@ -64,6 +66,7 @@ export async function init_client(client)
 	await init_responder_events(client);
 	await init_attendance_events(client);
 	await init_invite_events(client);
+    await init_roles(client);
 	await init_analytics_events(client);  
 	await init_poll_events(client);  
 	await init_audit_events(client);   

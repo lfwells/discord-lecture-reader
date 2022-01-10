@@ -17,7 +17,6 @@ export async function inviteList(req, res)
         var d = doc.data();
         appliedRolesList[d.code] = d.role;
     });
-
     res.render('inviteList', {
         invites: invites.get(req.guild.id),
         rolesList: roles[req.guild.id].map((role) => { return {
@@ -38,10 +37,11 @@ export async function assignRole(req, res)
         doc.ref.delete();
     });
     
-    await req.guildDocument.collection("invites").doc().set({
+    var result = await req.guildDocument.collection("invites").doc().set({
         code:code,
         role:role,
     });
+    console.log(result);
     
     res.json({
         success:true
@@ -60,5 +60,5 @@ export async function generateInvite(req,res,next)
     
     invites.get(req.guild.id).set(newInvite.code, newInvite.uses);
 
-    next();
+    res.redirect("back");//back to referring page
 }
