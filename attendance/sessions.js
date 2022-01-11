@@ -3,8 +3,6 @@ import moment from "moment";
 import { sleep } from "../core/utils.js";
 import { send } from "../core/client.js";
 
-import { MessageEmbed } from 'discord.js';
-
 var earlyTime = 15;//minutes
 var remindBefore = 15;//minutes //todo: override per-session?
 
