@@ -8,10 +8,15 @@ admin.initializeApp({
   //databaseURL: "https://partygolflite.firebaseio.com"
   databaseURL: "https://carers-care.firebaseio.com"
 });
+
+export const db = admin.firestore(); 
+export const guildsCollection = db.collection("guilds");
+export async function init_db(){}
+export async function transfer(){}
 /*
 export const db2 = admin.firestore(); 
 export const guildsCollection2 = db2.collection("guilds");
-*/
+
 import { MongoClient, Collection } from "mongodb";
 import { getGuildDocument } from "../guild/guild.js";
 
@@ -120,3 +125,4 @@ async function transferSubCollection(subcollection, guildDoc, guildDoc2)
    d = await d.update(element.data()); 
   }));
 }
+*/

@@ -71,7 +71,6 @@ export async function timeGraph(req, res, next)
 
     var postsOverTime = await loadTimeSeries(rawStatsData);
     var postsOverTimeWeekly = await loadTimeSeries(rawStatsData, true);//weekly
-    /*
     
     var postsPerDay = await loadPostsPerDay(rawStatsData);
     var postsPerHour = await loadPostsPerHour(rawStatsData);
@@ -81,7 +80,7 @@ export async function timeGraph(req, res, next)
     await getAttendanceData(req,res);
     var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild, false, await getUserFilterPredicate(req));
     var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true, await getUserFilterPredicate(req));
-*/
+
 
        
     await res.render("timeGraph", {
@@ -89,13 +88,13 @@ export async function timeGraph(req, res, next)
         graphs: {
             "Posts Over Time": postsOverTime,
             "Posts Over Time (Weekly)": postsOverTimeWeekly,
-            /*"Posts Per Day": postsPerDay,
+            "Posts Per Day": postsPerDay,
             "Posts Per Hour": postsPerHour,
             "Posts Per Session": postsPerSession,
             "Posts Per In/Out Session": postsPerSessionPlusOutOfSession,
 
             "Attendance Per Session": attendancePerSession,
-            "Attendance In/Out Session": attendancePerSessionPlusOutOfSession,*/
+            "Attendance In/Out Session": attendancePerSessionPlusOutOfSession,
         }
     });
 }
