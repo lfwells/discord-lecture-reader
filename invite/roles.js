@@ -1,13 +1,8 @@
-export const roles = {};
+export const roles = new Map();
 
-export async function init_roles(client)
+export async function init_roles(guild)
 {
-    console.log("init_roles");
+    console.log(`init_roles ${guild.name}`);
 
-    var guilds = client.guilds.cache;
-    //store them in the db
-    guilds.each( async (guild) => 
-    { 
-        roles[guild.id] = await guild.roles.fetch();
-    });
+    roles[guild.id] = await guild.roles.fetch();
 }

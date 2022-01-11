@@ -6,6 +6,13 @@ import { send } from "../core/client.js";
 var earlyTime = 15;//minutes
 var remindBefore = 15;//minutes //todo: override per-session?
 
+var SESSIONS = new Map();
+
+export async function init_sessions(guild)
+{
+
+}
+
 //TODO: an interface for defining sessions and names? for now just auto-gen
 export async function getSessions(guild)
 {
