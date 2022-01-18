@@ -30,17 +30,17 @@ export async function reply(originalMessage, message)
     }
     return result;
 }
-export async function send(channel, message)
+export async function send(channel, message, dontLogIt)
 {
     var result = null;
     if (config.enableSendMessagesAndReplies)
     {
         result = await channel.send(message);
-        console.log("SENT: "+message);
+        if (!dontLogIt) console.log("SENT: "+message);
     } 
     else
     {
-        console.log("(would have) SENT: "+message);
+        if (!dontLogIt) console.log("(would have) SENT: "+message);
     }
     return result;
 }
