@@ -73,7 +73,7 @@ export default async function(client)
                     }
                 }*/
             }
-            init_invites(member.client);
+            init_invites(member.guild);
         
         });
     //}
@@ -81,10 +81,10 @@ export default async function(client)
 
     client.on('inviteCreate', invite => {
         console.log("inviteCreate");
-        init_invites(invite.client);
+        init_invites(invite.guild);
     });
     client.on('inviteDelete', invite => {
         console.log("inviteDelete");
-        init_invites(invite.client);
+        init_invites(invite.guild);
     });
 }

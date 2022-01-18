@@ -129,3 +129,18 @@ export async function authHandler (req, res, next)  {
     }
   }
 }
+
+export function beginStreamingRes(res)
+{
+   //stream the content thru
+  //should have used a websocket or something but meh
+  //just call res.write after this, and it will stream to browser
+  //after calling this, write messages with res.write(str);
+  //and finish it all up with res.end();
+
+  res.writeHead(200, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Transfer-Encoding': 'chunked',
+      'X-Content-Type-Options': 'nosniff'});
+  return res;
+}

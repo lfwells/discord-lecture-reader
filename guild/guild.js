@@ -5,9 +5,9 @@ import { init_invites } from "../invite/invite.js";
 import { init_roles } from '../invite/roles.js';
 
 import { getClient } from "../core/client.js";
-import { loginPage, oauth } from '../core/login.js';
+import {  oauth } from '../core/login.js';
 import { init_sheet_for_guild } from '../sheets_test.js';
-import { init_sessions } from '../attendance/sessions.js';
+import { init_sessions, SESSIONS } from '../attendance/sessions.js';
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
