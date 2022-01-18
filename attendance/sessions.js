@@ -98,9 +98,9 @@ async function scheduleAllSessionsOfType(res, guild, config, semester)
         {
             descriptionItems.push(config.description);
         }
-        if (config.customDescriptions && i < config.customDescriptions.length)
+        if (config.descriptions && i < config.descriptions.length)
         {
-            descriptionItems.push(config.customDescriptions[i]);
+            descriptionItems.push(config.descriptions[i]);
         }
         if (config.location)
         {

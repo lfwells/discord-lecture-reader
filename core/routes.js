@@ -149,6 +149,8 @@ function guildRouter()
         
     //scheduled_events
     router.get("/schedule_test", schedule_test);
+    router.get("/sessions", attendance_routes.sessionPage);
+    router.post("/sessions", attendance_routes.sessionPagePost);
     return router;
 }
 

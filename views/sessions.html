@@ -1,0 +1,124 @@
+<%- include('header.html') %>
+
+  <div style="position:fixed; top:200; right:64; z-index: 9001; background-color: #1c1e20; padding:1em">
+    <button id='submit' style="font-size:larger">Save</button>
+    <% if (locals.nextLocation != null) { %>
+        <button id='submitNext' class='tiny'>Save and Next</button>
+    <% } %>
+  </div>
+  <div id='editor_holder' class='medium-12 columns'></div>
+  
+  <script>
+    // This is the starting value for the editor
+    // We will use this to seed the initial editor 
+    // and to provide a "Restore to Default" button.
+    var starting_value = <%-JSON.stringify(locals.sessions)%>;
+    var channels = <%-JSON.stringify(locals.channels)%>;
+    
+    // Initialize the editor
+    var editor = new JSONEditor(document.getElementById('editor_holder'),{
+      // Enable fetching schemas via ajax
+      ajax: true,
+      
+      // The schema for the editor
+      schema: {
+        $ref: "/static/schema/sessions.json",
+        theme: "bootstrap4",
+        template: "default"
+      },
+      
+      // Seed the form with a starting value
+      startval: starting_value,
+
+      no_additional_properties: true,
+      disable_array_delete_all_rows: true,
+      //disable_array_delete_last_row: true,
+      disable_array_reorder: true,
+      disable_edit_json: true,
+      disable_properties : true,
+      disable_collapse: true,
+      array_controls_top: true,
+      object_layout:"grid"
+    });
+    
+    // Hook up the submit button to log to the console
+    document.getElementById('submit').addEventListener('click',function() 
+    {
+      // Get the value from the editor
+      var DATA = editor.getValue();
+
+      //parse the weeks field)
+      DATA.types.forEach(type => {
+        if (Array.isArray(type.weeks) == false)
+        {
+          type.weeks = type.weeks.replace("[", "");
+          type.weeks = type.weeks.replace("]", "");
+          type.weeks = type.weeks.split(",").map(e => parseInt(e.trim()));
+        }
+      });
+
+      console.log(DATA);
+
+      //make a popup to display the output
+      var resultWindow = window.open("", "Scheduling Events...", "width=650,height=600");
+      resultWindow.document.write("<html><head><title>Scheduling Events...</title></head><body><style>body { background-color: #2C2F33; color:white; }</style><pre>");
+
+      //TODO: turn this into a client-side util?
+      var last_response_len  = false;
+      $.ajax({
+          method:"post",
+          contentType: 'application/json',
+          data: JSON.stringify(DATA),
+          xhrFields: {
+              onprogress: function(e)
+              {
+                  var this_response, response = e.currentTarget.response;
+                  if(last_response_len === false)
+                  {
+                      this_response = response;
+                      last_response_len = response.length;
+                  }
+                  else
+                  {
+                      this_response = response.substring(last_response_len);
+                      last_response_len = response.length;
+                  }
+                  console.log(this_response);
+                  resultWindow.document.write(this_response);
+              },
+              success: function(data)
+              {
+                resultWindow.document.write("</pre>");
+              }
+          },
+      });
+    });
+    
+    // Hook up the Restore to Default button
+    document.getElementById('restore').addEventListener('click',function() {
+      editor.setValue(starting_value);
+    });
+    
+    // Hook up the validation indicator to update its 
+    // status whenever the editor changes
+    editor.on('change',function() {
+      // Get an array of errors from the validator
+      var errors = editor.validate();
+      
+      var indicator = document.getElementById('valid_indicator');
+      
+      // Not valid
+      if(errors.length) {
+        indicator.className = 'label alert';
+        indicator.textContent = 'not valid';
+      }
+      // Valid
+      else {
+        indicator.className = 'label success';
+        indicator.textContent = 'valid';
+      }
+    });
+  </script>
+
+
+<%- include('footer.html') %>

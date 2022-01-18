@@ -82,7 +82,7 @@
     textarea {
         font-family: 'Courier New', Courier, monospace;
     }
-    select, option, optgroup { color:#2C2F33;}
+    select, option, optgroup { background-color:#2C2F33 !important; color:white !important; font-style: normal !important;}
 
     a { text-decoration: none; }
     a:hover {text-decoration: underline;}
@@ -201,9 +201,10 @@
 
 
         button {
-            color:black;
+            color:black !important;
             font-size: small;
         }
+        .fa { color:black; }
 
         #guilds,
         nav ul
@@ -294,3 +295,12 @@
         .btnAdd {
             font-size:48pt; display:inline-block; vertical-align: middle;
         }
+
+        .panel { margin-left:4ex; }
+        .form-control input, .form-control select {
+            width:250px;
+        }
+        .form-control textarea + p, .form-control select + p { margin-top:0px !important; }
+
+        *[data-schemapath="root.types.0.descriptions"] label { display: none; }
+        *[data-schemapath="root.types.0.day"] select + .panel { font-size:0; height:16px; }
