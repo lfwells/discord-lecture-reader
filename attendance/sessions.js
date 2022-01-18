@@ -1,10 +1,220 @@
 import * as config from "../core/config.js";
 import moment from "moment";
-import { sleep } from "../core/utils.js";
+import { pluralize, sleep } from "../core/utils.js";
 import { send } from "../core/client.js";
+import { guildsCollection, momentToTimestamp } from "../core/database.js";
+import admin from "firebase-admin"; 
 
 var earlyTime = 15;//minutes
 var remindBefore = 15;//minutes //todo: override per-session?
+
+export const SESSIONS = new Map();
+const discordEvents = new Map();
+
+export const SEMESTERS = { //todo: code in breaks/weeks etc
+    sem1_2021:{ start: moment() },
+    sem2_2021:{ start: moment() },
+    sem1_2022:{ start: moment() },
+    sem2_2022:{ start: moment() },
+    asp1_2022:{ start: moment() },
+    asp2_2022:{ start: moment() },
+}
+async function deleteAllScheduledEvents(guild)
+{
+    var allEvents = await guild.scheduledEvents.fetch();
+    allEvents.each(async (v,k) => await guild.scheduledEvents.delete(v));
+}
+export async function init_sessions(guild)
+{
+    //for testing
+    //await deleteAllScheduledEvents(guild);
+
+    var collection = sessionsCollection(guild);
+    var querySnapshot = await collection.get(); 
+    var data = [];
+    querySnapshot.forEach(doc =>
+    {
+        var session = doc.data();
+        session.id = doc.id;
+        data.push(session); 
+        
+    });
+    SESSIONS[guild.id] = data;
+
+    discordEvents[guild.id] = await guild.scheduledEvents.fetch();
+}
+
+export async function scheduleAllSessions(res, guild, config)
+{
+    var expectedCount = 0;
+    for (var i = 0; i < config.types.length; i++)
+    {
+        expectedCount += config.types[i].weeks.length;
+    }
+    res.write(`Scheduling ${pluralize(expectedCount, "Event")}. This may take some time (Discord takes a break every 5 events)...\n`);
+
+    var createdSessions = []; //use this array to work out what rows were created (/updated), and delete the rest
+    for (var i = 0; i < config.types.length; i++)
+    {
+        var sessionsForThisType = await scheduleAllSessionsOfType(res, guild, config.types[i], SEMESTERS[config.semester]);
+        createdSessions.push(...sessionsForThisType);
+    }
+
+    //now delete any previously scheduled sessions now in this list
+    var createdIDs = createdSessions.map(e => e.id);
+    console.log("Created Sessions", createdIDs);
+    var allIDs = SESSIONS[guild.id].map(e => e.id);
+    console.log("All Sessions", allIDs.length);
+
+    var sessionIDsToDelete = allIDs.filter(v => createdIDs.indexOf(v) == -1);
+    console.log("Sessions to Delete", sessionIDsToDelete.length);
+
+
+    res.write(`\nDeleting ${pluralize(sessionIDsToDelete.length, "No Longer Used Event")}... \n`);
+
+    for (var i = 0; i < sessionIDsToDelete.length; i++)
+    {
+        var session = SESSIONS[guild.id].find(e => e.id == sessionIDsToDelete[i]);
+        console.log(session);
+        if (session) await deleteScheduledSession(guild, session);
+
+        res.write(`${i+1}...`);
+    }
+    
+}
+async function scheduleAllSessionsOfType(res, guild, config, semester)
+{
+    console.log("scheduleAllSessionsOfType", config.type);
+    var createdSessions = [];
+    for (var i = 0; i < config.weeks.length; i++)
+    {
+        var week = config.weeks[i];
+        var weekStart = getSemesterWeekStart(semester, week);
+        var startTime = weekStart.add(config.hour, "hour").add(config.minute, "minute");
+        var endTime = moment(startTime).add(config.duration ?? 60, "minute");
+
+        var descriptionItems = [];
+        if (config.description)
+        {
+            descriptionItems.push(config.description);
+        }
+        if (config.customDescriptions && i < config.customDescriptions.length)
+        {
+            descriptionItems.push(config.customDescriptions[i]);
+        }
+        if (config.location)
+        {
+            descriptionItems.push(config.location);
+        }
+        var description = descriptionItems.length > 0 ? descriptionItems.join("\n") :  undefined;
+
+        var createdSession = await scheduleSession(
+            guild, config.type, startTime, endTime, config.channelID, week, config.day, config.hour, config.minute, config.duration, description
+        );
+        createdSessions.push(createdSession);
+
+        res.write(`Scheduled ${config.type} (Week ${week})\n`);
+    }
+    return createdSessions;
+}
+//TODO: give this functionality of breaks etc
+function getSemesterWeekStart(semester, week)
+{
+    var start = moment(semester.startDate);
+    return start.add(week-1, "week");
+}
+
+//TODO: the below will break if you specify same types
+//this will return the database ID of the generated session row (for the purposes of deleting all the other ones upon a sync)
+async function scheduleSession(guild, type, startTime, endTime, channelID, week, day, hour, minute, durationMins, description)
+{
+    var collection = sessionsCollection(guild);
+
+    //todo: check existing session, edit that instead (including reschedule)
+    var existingSession = SESSIONS[guild.id].find(e => e.type == type && e.week == week);
+    if (existingSession) console.log("found existing session", existingSession.id);
+
+    var name = `${type} (Week ${week})`
+
+    var discordEvent;
+    var discordEventArgs = {
+        name:name,
+        scheduledStartTime:startTime.toISOString(),
+        scheduledEndTime:endTime != null ? endTime.toISOString() : null,
+        description: description,
+        reason: "reason",
+        privacyLevel: "GUILD_ONLY"
+    }
+    if (channelID)
+    {
+        discordEventArgs.entityType = "VOICE";
+        discordEventArgs.channel = channelID;
+    }
+    else
+    {
+        discordEventArgs.entityMetadata = { location: description ?? "TBA" };
+        discordEventArgs.entityType = "EXTERNAL";
+    }
+
+    if (existingSession && existingSession.discordEventID && existingSession.discordEventID.length > 5) //need to update the existing discord event, so we don't lose "interested" people
+    {
+        try
+        {
+            discordEvent = await guild.scheduledEvents.edit(existingSession.discordEventID, discordEventArgs);
+        } catch {
+            discordEvent = await guild.scheduledEvents.create(discordEventArgs);    
+        }
+    }
+    else //new, make it
+    {
+        discordEvent = await guild.scheduledEvents.create(discordEventArgs);
+    }
+    
+    var discordEventID = discordEvent.id;
+
+    var session = {
+        type, week, day, hour, minute, discordEventID, durationMins, 
+        startTime: momentToTimestamp(startTime),
+        endTime: momentToTimestamp(endTime)
+    };
+    if (channelID) session.channelID = channelID;
+    if (description) session.description = description;
+
+    var result;
+    if (existingSession) //update details of existing one
+    {
+        result = await collection.doc(existingSession.id).update(session);
+        result.id = existingSession.id;
+    }
+    else //its new, make it
+    {
+        result = await collection.add(session); 
+    }
+    return result;
+}
+async function deleteScheduledSession(guild, session)
+{
+    var collection = sessionsCollection(guild);
+    await collection.doc(session.id).delete();
+
+    //var event = guild.scheduledEvents.
+    var event = session.discordEventID;
+    if (event && discordEventExists(guild, event))
+    {
+        try
+        {
+            await guild.scheduledEvents.delete(event);
+        } catch (e) {}
+    }
+}
+function discordEventExists(guild, discordEventID)
+{
+    return discordEvents[guild.id].has(discordEventID);
+}
+function sessionsCollection(guild)
+{
+    return guildsCollection.doc(guild.id).collection("sessions");
+}
 
 //TODO: an interface for defining sessions and names? for now just auto-gen
 export async function getSessions(guild)

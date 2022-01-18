@@ -9,7 +9,7 @@ import { roles } from "./roles.js";
 export async function inviteList(req, res) 
 {
     console.log(req.path);
-    init_invites(getClient());
+    init_invites(req.guild);
     
     var appliedRolesList = [];
     var query = await req.guildDocument.collection("invites").get();

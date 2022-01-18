@@ -5,8 +5,9 @@ import { init_invites } from "../invite/invite.js";
 import { init_roles } from '../invite/roles.js';
 
 import { getClient } from "../core/client.js";
-import { loginPage, oauth } from '../core/login.js';
+import {  oauth } from '../core/login.js';
 import { init_sheet_for_guild } from '../sheets_test.js';
+import { init_sessions, SESSIONS } from '../attendance/sessions.js';
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
@@ -25,6 +26,10 @@ export async function init(client)
     
     await transfer(guild.id);
     
+    await init_admin_users(guild);
+    await init_invites(guild);
+    await init_roles(guild);
+    await init_sessions(guild);
     await init_sheet_for_guild(guild);
 
     if (guild.id == config.TEST_SERVER_ID)
@@ -34,11 +39,7 @@ export async function init(client)
     console.log("initialised Guild",guild.name, guild.id);
   })
   );;
-  console.log("done awaiting all guilds"); 
-
-  await init_admin_users(client);
-  await init_invites(client);
-  await init_roles(client);
+  console.log("---------\nDone awaiting all guilds\n---------"); 
 }
 
 //TODO: these two need to return error if not authed or wrong id
@@ -282,22 +283,16 @@ export async function saveGuildProperty(property, value, req, res)
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed
-export async function init_admin_users(client)
+export async function init_admin_users(guild)
 {
-  console.log("init_admin_users");
-
-  var guilds = client.guilds.cache;
-  //store them in the db
-  guilds.each( async (guild) => 
-  { 
-    var adminRole = await getGuildPropertyConverted("adminRoleID", guild);
-    if (adminRole)
-    {
-      //console.log(guild.name);
-      GUILD_CACHE[guild.id].admins = adminRole.members.map(m=>m.user.id);
-      //console.log(GUILD_CACHE[guild.id].admins);
-    }
-  });
+  console.log(`init_admin_users ${guild.name}`);
+  var adminRole = await getGuildPropertyConverted("adminRoleID", guild);
+  if (adminRole)
+  {
+    //console.log(guild.name);
+    GUILD_CACHE[guild.id].admins = adminRole.members.map(m=>m.user.id);
+    //console.log(GUILD_CACHE[guild.id].admins);
+  }
 }
 
 async function getFakeReq(guild)
