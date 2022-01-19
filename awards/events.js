@@ -120,10 +120,10 @@ export default async function(client)
             ];
         }*/
             
-        await guild.commands.create(flexCommand);
-        await guild.commands.create(awardCommand2);
-        //await guild.commands.create(awardNewCommand); 
-        await guild.commands.create(leaderboardCommand);
+        //await guild.commands.create(flexCommand);
+        //await guild.commands.create(awardCommand2);
+        ////await guild.commands.create(awardNewCommand); 
+        //await guild.commands.create(leaderboardCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

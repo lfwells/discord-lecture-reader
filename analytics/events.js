@@ -61,11 +61,11 @@ export default async function(client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        await guild.commands.create(statsCommand);
-        await guild.commands.create(statsWeekCommand); 
-        await guild.commands.create(statsMeCommand); 
-        await guild.commands.create(buttonCommand);
-        await guild.commands.create(contextCommand);
+        //await guild.commands.create(statsCommand);
+        //await guild.commands.create(statsWeekCommand); 
+        //await guild.commands.create(statsMeCommand); 
+        //await guild.commands.create(buttonCommand);
+        //await guild.commands.create(contextCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

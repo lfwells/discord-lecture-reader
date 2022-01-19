@@ -1,5 +1,5 @@
 import { init_invites, invites } from "./invite.js";
-import { roles } from "../roles/roles.js";
+import { ROLES } from "../roles/roles.js";
 
 
 //import { getClient } from "../core/client.js";
@@ -18,7 +18,7 @@ export async function inviteList(req, res)
     });
     res.render('inviteList', {
         invites: invites.get(req.guild.id),
-        rolesList: roles[req.guild.id].map((role) => { return {
+        rolesList: ROLES[req.guild.id].map((role) => { return {
             value: role.id,
             text: role.name
         }}),

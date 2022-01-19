@@ -4,6 +4,7 @@ import { guildsCollection } from "../core/database.js";
 import { showText } from "../lecture_text/routes.js";
 import { pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
+import { botRoleHigherThanMemberRole } from '../roles/roles.js';
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
@@ -77,11 +78,9 @@ async function setNickname(client, member, nickname)
 {
   //console.log(nickname.length); 
   console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
+
   //we can only set the nickname if the role is lower than us
-  var us = await member.guild.members.cache.get(client.user.id);
-  var ourHighestRole = us.roles.highest;
-  var theirHighestRole = member.roles.highest;
-  if (ourHighestRole.position >= theirHighestRole.position)
+  if (await botRoleHigherThanMemberRole(member))
   {
     if (!config.getTestMode())
     {

@@ -33,6 +33,6 @@ export default async function(client)
 
     client.on("guildMemberUpdate", function(oldMember, newMember){
         console.error(`a guild member changes - i.e. new role, removed role, nickname.`);
-        init_admin_users(oldMember.client);
+        init_admin_users(oldMember.guild);
     });
 }

@@ -43,7 +43,7 @@ export default async function(client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        await guild.commands.create(pollCommand);
+        //await guild.commands.create(pollCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
