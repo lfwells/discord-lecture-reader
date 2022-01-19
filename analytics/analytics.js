@@ -1,7 +1,8 @@
 import moment from "moment";
 import { getGuildDocument, getGuildProperty, getGuildPropertyConverted, GUILD_CACHE } from "../guild/guild.js";
 import * as Config from "../core/config.js";
-import { didAttendSession, getSessions, postWasForSession } from "../attendance/sessions.js";
+import { didAttendSession, postWasForSession } from "../attendance/sessions.js";
+import { getSessions } from "../attendance/old_sessions.js";
 import { db, guildsCollection } from "../core/database.js";
 import { getClient } from "../core/client.js";
 import fakeData from "./fakeData.js";

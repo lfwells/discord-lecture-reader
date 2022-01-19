@@ -192,12 +192,12 @@ export default async function (client)
     const nextSessionCommand = {
         name: 'nextsession',
         description: 'Replies with when the next session is!',
-        options: [/*{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+        options: [{
+            name: 'type',
+            type: 'STRING',
+            description: 'Find out the next lecture or tutorial session',
             required: false,
-        }*/],
+        }],
     };
     
     var guilds = client.guilds.cache;
@@ -220,7 +220,9 @@ export default async function (client)
         {
             await interaction.deferReply();
 
-            var msg = await sessions.getNextSessionCountdown(interaction.guild, true);//show channel name
+            var ofType = interaction.options.getString("type");
+
+            var msg = await sessions.getNextSessionCountdown(interaction.guild, true, ofType);//show channel name
             await interaction.editReply({embeds: [ msg ]});
         }
     });

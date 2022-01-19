@@ -1,6 +1,7 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { deleteAllScheduledEvents, didAttendSession, getSessions, postWasForSession, scheduleAllSessions, SESSIONS, sessionsCollection } from "./sessions.js";
+import { deleteAllScheduledEvents, didAttendSession, postWasForSession, scheduleAllSessions } from "./sessions.js";
+import { getSessions } from "../attendance/old_sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 import { getPostsData } from "../analytics/analytics.js";
@@ -19,7 +20,8 @@ export async function sessionPage(req, res)
 
 /*TODO 
 - delete generated events using "reason" field (if we can)
-- modify /nextsession command to have optional parameter of "type"
+- import using ical or somethign
+- bugfix and test the old analytics pages
 */
 
 
@@ -388,6 +390,7 @@ export async function getAttendanceData(req,res,next)
         ATTENDANCE_CACHE[req.guild.id] = req.attendanceData;
     }
 
+    //TODO: return of this function is not compatible with these now
     res.locals.weeks = await getSessions(req.guild);
 
     var rawStatsData = await getPostsData(req.guild);
