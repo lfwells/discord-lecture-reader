@@ -11,13 +11,13 @@ var remindBefore = 15;//minutes //todo: override per-session?
 export const SESSIONS = new Map();
 const discordEvents = new Map();
 
-export const SEMESTERS = { //todo: code in breaks/weeks etc
-    sem1_2021:{ start: moment() },
-    sem2_2021:{ start: moment() },
-    sem1_2022:{ start: moment() },
-    sem2_2022:{ start: moment() },
-    asp1_2022:{ start: moment() },
-    asp2_2022:{ start: moment() },
+export const SEMESTERS = {  //breaks are inclusive (so first day of break, and the last day of break -- NOT the first day back after break)
+    //sem1_2021:{ start: moment() },
+    //sem2_2021:{ start: moment() },
+    sem1_2022:{ start: moment("2021-02-21"), breakStart: moment("2022-04-14"), breakEnd: moment("2022-04-20") },
+    sem2_2022:{ start: moment("2022-07-11"), breakStart: moment("2022-08-29"), breakEnd: moment("2022-09-04") },
+    //asp1_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
+    //asp2_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
 }
 async function deleteAllScheduledEvents(guild)
 {
@@ -89,9 +89,9 @@ async function scheduleAllSessionsOfType(res, guild, config, semester)
     for (var i = 0; i < config.weeks.length; i++)
     {
         var week = config.weeks[i];
-        var weekStart = getSemesterWeekStart(semester, week);
+        var weekStart = getSemesterWeekStart(semester, week, config.day);
         var startTime = weekStart.add(config.hour, "hour").add(config.minute, "minute");
-        var endTime = moment(startTime).add(config.duration ?? 60, "minute");
+        var endTime = moment(startTime).add(config.duration == null || config.duration == 0 ? 60 : config.duration, "minute");
 
         var descriptionItems = [];
         if (config.description)
@@ -111,17 +111,29 @@ async function scheduleAllSessionsOfType(res, guild, config, semester)
         var createdSession = await scheduleSession(
             guild, config.type, startTime, endTime, config.channelID, week, config.day, config.hour, config.minute, config.duration, description
         );
-        createdSessions.push(createdSession);
+        if (createdSession != null)
+            createdSessions.push(createdSession);
 
-        res.write(`Scheduled ${config.type} (Week ${week})\n`);
+        res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.toISOString()}\n`);
     }
     return createdSessions;
 }
-//TODO: give this functionality of breaks etc
-function getSemesterWeekStart(semester, week)
+function getSemesterWeekStart(semester, week, day)
 {
-    var start = moment(semester.startDate);
-    return start.add(week-1, "week");
+    var start = moment(semester.start);
+    start = start.add(day-1, 'day');
+    for (var i = 0; i < week-1; i++)
+    {
+        start = start.add(1, "week");
+        
+        if (dayIsDuringSemesterBreak(semester, start))
+            start = start.add(1, "week");
+    }
+    return start;
+}
+function dayIsDuringSemesterBreak(semester, dayMoment)
+{
+    return dayMoment.isBetween(semester.breakStart, semester.breakEnd, 'day', '()');
 }
 
 //TODO: the below will break if you specify same types
@@ -130,9 +142,24 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, week,
 {
     var collection = sessionsCollection(guild);
 
-    //todo: check existing session, edit that instead (including reschedule)
+    //check existing session, edit that instead (including reschedule)
     var existingSession = SESSIONS[guild.id].find(e => e.type == type && e.week == week);
     if (existingSession) console.log("found existing session", existingSession.id);
+
+    //check if event is in the past
+    if (startTime.isBefore(moment()))
+    {
+        if (existingSession)
+        {
+            console.log("session in the past, deleting");
+            await deleteScheduledSession(guild, existingSession);
+        }
+        else
+        {
+            console.log("session in the past, skipping");
+        }
+        return null;
+    }
 
     var name = `${type} (Week ${week})`
 
@@ -175,7 +202,7 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, week,
     var session = {
         type, week, day, hour, minute, discordEventID, durationMins, 
         startTime: momentToTimestamp(startTime),
-        endTime: momentToTimestamp(endTime)
+        endTime: endTime ? momentToTimestamp(endTime) : null
     };
     if (channelID) session.channelID = channelID;
     if (description) session.description = description;
@@ -211,7 +238,7 @@ function discordEventExists(guild, discordEventID)
 {
     return discordEvents[guild.id].has(discordEventID);
 }
-function sessionsCollection(guild)
+export function sessionsCollection(guild)
 {
     return guildsCollection.doc(guild.id).collection("sessions");
 }

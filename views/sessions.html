@@ -38,6 +38,7 @@
       disable_properties : true,
       disable_collapse: true,
       array_controls_top: true,
+      enable_array_copy: true,
       object_layout:"grid"
     });
     
@@ -61,7 +62,11 @@
 
       //make a popup to display the output
       var resultWindow = window.open("", "Scheduling Events...", "width=650,height=600");
-      resultWindow.document.write("<html><head><title>Scheduling Events...</title></head><body><style>body { background-color: #2C2F33; color:white; }</style><pre>");
+      try
+      {
+        resultWindow.document.querySelector('pre').remove();
+      } catch (e) {}
+      resultWindow.document.write("<html><head><title>Scheduling Events...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
 
       //TODO: turn this into a client-side util?
       var last_response_len  = false;

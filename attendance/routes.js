@@ -1,6 +1,6 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { didAttendSession, getSessions, postWasForSession, scheduleAllSessions } from "./sessions.js";
+import { didAttendSession, getSessions, postWasForSession, scheduleAllSessions, SESSIONS, sessionsCollection } from "./sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 import { getPostsData } from "../analytics/analytics.js";
@@ -12,41 +12,23 @@ export var ATTENDANCE_CACHE = {}; //because querying the db for all attendances 
 //TODO: move this to sessions.js (and create that lol)
 export async function sessionPage(req, res) 
 {
-    var sessions = { //TODO: get from db later
-        semester: "sem1_2022",
-        types: [
-            {
-                type:"Lecture",
-                weeks:[1,2],//[1,2,3,4,5,6,7,8,9,10,11,12,13],
-                day:2, //tuesday
-                hour:13,
-                minute:0,
-                duration:120, //mins
-                channelID: "813152606359650320",
-                description: "http://google.com", //this one appears on all, above the sub-description (great for zoom links etc)
-                descriptions:
-                [
-                    "Intro",
-                    "Game Objects",
-                    "Disecting Frogs"
-                ]
-            },
-            {
-                type:"Tutorial",
-                weeks:[2,3],//[2,3,4,5,6,7,8,9,10,11,12,13],
-                day:3, //wednesday
-                hour:15,
-                minute:0,
-                duration:120, //mins
-                location: "Cent139", //can also be a zoom link etc
-                descriptions:
-                [
-                    "Intro",
-                    "Game Objects",
-                    "Disecting Frogs"
-                ]
-            },
-        ]
+
+
+
+
+/*TODO 
+- the new window clearing thing still cooked (on repeat save presses zz)
+- delete generated events using "reason" field (if we can)
+- moodify /nextsession command to have optional parameter of "type"
+- consider a data structure for "day, hour, minute", and making that an array, so that we can have multiple tutorials with same data for example
+*/
+
+
+
+    
+    var sessions = { 
+        semester: "sem1_2022", //TODO: get from db later
+        types: SESSIONS[req.guild.id]
     };
 
     var channels = [];
