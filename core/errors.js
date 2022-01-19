@@ -55,15 +55,19 @@ async function getEmbedFromError(error)
 
 async function getGuildNameFromError(error)
 {
-    var path = error.path;
-    if (path)
+    try
     {
-        if (path.indexOf("/guilds/") > 0)
+        var path = error.path;
+        if (path)
         {
-            path = path.replace("/guilds/", "");
-            path = path.substr(0, path.indexOf("/"));
-            return await getGuildProperty("name", path, null, false);
+            if (path.indexOf("/guilds/") > 0)
+            {
+                path = path.replace("/guilds/", "");
+                path = path.substr(0, path.indexOf("/"));
+                return await getGuildProperty("name", path, null, false);
+            }
         }
     }
+    catch (e) {}
     return null;
 }

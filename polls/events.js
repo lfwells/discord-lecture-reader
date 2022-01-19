@@ -43,12 +43,7 @@ export default async function(client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-        for (const command in commands)
-        {
-            console.log(guild.name+"delete "+await command.delete());
-        }
-        /*console.log(guild.name+"add "+*/await guild.commands.create(pollCommand);//); 
+        await guild.commands.create(pollCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

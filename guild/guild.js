@@ -1,45 +1,52 @@
-import * as config from '../core/config.js'; 
 import { guildsCollection, transfer } from "../core/database.js";
-import { getStatus, isOutsideTestServer } from "../core/utils.js";
 import { init_invites } from "../invite/invite.js";
-import { init_roles } from '../invite/roles.js';
+import { init_roles } from '../roles/roles.js';
 
 import { getClient } from "../core/client.js";
-import {  oauth } from '../core/login.js';
+import { oauth } from '../core/login.js';
 import { init_sheet_for_guild } from '../sheets_test.js';
-import { init_sessions, SESSIONS } from '../attendance/sessions.js';
+import { init_sessions } from '../attendance/sessions.js';
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
-export async function init(client)
+export default async function init(client)
 {
   var guilds = client.guilds.cache;
   //store them in the db
   await Promise.all(guilds.map( async (guild) => 
   { 
+    //load guild info
     await guild.fetch();
     (await guildsCollection.doc(guild.id)).set({    
       name:guild.name
     }, {merge:true}); 
 
+    //cache the info (reduce firebase reads)
     GUILD_CACHE[guild.id] = guild;//{}
     
+    //aspriational function to move away from firebase and store in mongo one day
     await transfer(guild.id);
+
+    //wipe all the commands (they get generated again by the init functions)
+    //this is actually quite time consuming, and only useful for clearing old commands? Commenting out for sanity...
+    /*
+    var commands = await guild.commands.fetch(); 
+    await Promise.all(commands.map( async (c) => 
+    { 
+        await guild.commands.delete(c);
+    }));*/
     
+    //run the init functions
     await init_admin_users(guild);
     await init_invites(guild);
     await init_roles(guild);
     await init_sessions(guild);
     await init_sheet_for_guild(guild);
 
-    if (guild.id == config.TEST_SERVER_ID)
-    {
-      console.log(await getStatus(config.LINDSAY_ID, guild));
-    }
-    console.log("initialised Guild",guild.name, guild.id);
+    console.log("Initialised Guild",guild.name, guild.id);
   })
   );;
-  console.log("---------\nDone awaiting all guilds\n---------"); 
+  console.log("Done awaiting all guilds"); 
 }
 
 //TODO: these two need to return error if not authed or wrong id

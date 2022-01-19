@@ -3,7 +3,7 @@ import * as config from '../core/config.js';
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward, getAwardListFullData, getLeaderboard } from "./awards.js";
-import { pluralize, offTopicOnly } from '../core/utils.js';
+import { pluralize, offTopicCommandOnly } from '../core/utils.js';
 import { getClassList } from '../core/classList.js';
 import { hasFeature } from '../guild/guild.js';
 
@@ -105,13 +105,7 @@ export default async function(client)
     var guilds = client.guilds.cache;
 
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-        //TODO: this doesnt work!
-        for (const command in commands)
-        {
-            console.log(guild.name+"delete "+await command.delete());
-        }
-
+        
         var awardCommand2 = JSON.parse(JSON.stringify(awardCommand));
         /* TODO: this still doesnt work!
         var admin = (await getAdminRole(guild));
@@ -125,11 +119,11 @@ export default async function(client)
                 }
             ];
         }*/
-
-        /*console.log(guild.name+"add "+*/await guild.commands.create(flexCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(awardCommand2);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(awardNewCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(leaderboardCommand);//); 
+            
+        await guild.commands.create(flexCommand);
+        await guild.commands.create(awardCommand2);
+        //await guild.commands.create(awardNewCommand); 
+        await guild.commands.create(leaderboardCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -137,13 +131,16 @@ export default async function(client)
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand()) return;
 
-        if (await hasFeature(interaction.guild, "achievements") == false)
+        if (["flex", "award", "leaderboard"].indexOf(interaction.commandName) >= 0)
         {
-            interaction.reply({
-                content: "Achievement System not enabled on this server",
-                ephemeral: true
-            });
-            return;
+            if (await hasFeature(interaction.guild, "achievements") == false)
+            {
+                interaction.reply({
+                    content: "Achievement System not enabled on this server",
+                    ephemeral: true
+                });
+                return;
+            }
         }
 
             
@@ -170,7 +167,7 @@ export default async function(client)
 async function doFlexCommand(interaction)
 {
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
 
     await interaction.deferReply();
 
@@ -273,7 +270,7 @@ async function doAwardCommand(interaction)
 async function doLeaderboardCommand(interaction)
 {
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
 
     await interaction.deferReply();
 

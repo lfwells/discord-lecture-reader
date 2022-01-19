@@ -1,7 +1,6 @@
 import { init_client } from '../core/client.js';
 import { getGuildDocument, init_admin_users } from "./guild.js";
 import * as config from "../core/config.js";
-import { init_roles } from '../invite/roles.js';
 
 export default async function(client)
 {

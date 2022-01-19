@@ -32,17 +32,20 @@ export async function reply(originalMessage, message)
 }
 export async function send(channel, message, dontLogIt)
 {
-    var result = null;
-    if (config.enableSendMessagesAndReplies)
+    if (channel && channel.send)
     {
-        result = await channel.send(message);
-        if (!dontLogIt) console.log("SENT: "+message);
-    } 
-    else
-    {
-        if (!dontLogIt) console.log("(would have) SENT: "+message);
+        var result = null;
+        if (config.enableSendMessagesAndReplies)
+        {
+            result = await channel.send(message);
+            if (!dontLogIt) console.log("SENT: "+message);
+        } 
+        else
+        {
+            if (!dontLogIt) console.log("(would have) SENT: "+message);
+        }
+        return result;
     }
-    return result;
 }
 
 import init_award_events from '../awards/events.js';
@@ -54,19 +57,24 @@ import init_guild_events from '../guild/events.js';
 import init_poll_events from '../polls/events.js';
 import init_audit_events from '../audit/events.js';
 import init_todo_events from '../todo/events.js';
+import init_role_events from '../roles/events.js';
 
 export async function init_client(client)
 {
+    console.log("Begin init_client...");
     client.removeAllListeners();
 
 	//register the appropriate discord event listeners
-	await init_guild_events(client);
-	await init_award_events(client);
-	await init_responder_events(client);
-	await init_attendance_events(client);
-	await init_invite_events(client);
-	await init_analytics_events(client);  
-	await init_poll_events(client);  
-	await init_audit_events(client);   
-    await init_todo_events(client);
+    console.log("Init Guild Events...");	    await init_guild_events(client);
+	console.log("Init Award Events...");	    await init_award_events(client);
+	console.log("Init Responder Events...");	await init_responder_events(client);
+	console.log("Init Attendance Events...");	await init_attendance_events(client);
+	console.log("Init Invite Events...");	    await init_invite_events(client);
+	console.log("Init Analytics Events...");	await init_analytics_events(client);  
+	console.log("Init Poll Events...");	        await init_poll_events(client);  
+	console.log("Init Audit Events...");	    await init_audit_events(client);   
+    console.log("Init TODO Events...");	        await init_todo_events(client);
+    console.log("Init Role Events...");	        await init_role_events(client);
+    
+    console.log("End init_client.");
 }

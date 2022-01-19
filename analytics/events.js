@@ -1,7 +1,7 @@
 import * as config from '../core/config.js';
 import { getGuildDocument, hasFeature } from '../guild/guild.js';
 import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js';
-import { offTopicOnly, pluralize, sleep } from '../core/utils.js';
+import { offTopicCommandOnly, pluralize, sleep } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 
@@ -61,16 +61,11 @@ export default async function(client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-        for (const command in commands)
-        {
-            console.log(guild.name+"delete "+await command.delete());
-        }
-        /*console.log(guild.name+"add "+*/await guild.commands.create(statsCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(statsWeekCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(statsMeCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(buttonCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(contextCommand);//); 
+        await guild.commands.create(statsCommand);
+        await guild.commands.create(statsWeekCommand); 
+        await guild.commands.create(statsMeCommand); 
+        await guild.commands.create(buttonCommand);
+        await guild.commands.create(contextCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -111,7 +106,7 @@ async function doStatsCommand(interaction)
     var thisWeek = interaction.commandName === "statsweek";
 
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
 
     //this can take too long to reply, so we immediately reply
     await interaction.deferReply();
@@ -139,7 +134,7 @@ async function doStatsCommand(interaction)
 async function doStatsMeCommand(interaction)
 {
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
 
     var member = interaction.options.getMember("user") ?? interaction.member; 
 
@@ -174,7 +169,7 @@ var clicks = 0;
 async function doButtonCommand(interaction)
 {
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
 
 
     const row = new MessageActionRow()

@@ -1,6 +1,5 @@
-import { getClient } from "../core/client.js";
 import { init_invites, invites } from "./invite.js";
-import { roles } from "./roles.js";
+import { roles } from "../roles/roles.js";
 
 
 //import { getClient } from "../core/client.js";

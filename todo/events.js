@@ -1,4 +1,4 @@
-import { Permissions, ReactionManager } from "discord.js";
+import { Permissions } from "discord.js";
 import { getGuildProperty, getGuildPropertyConverted } from "../guild/guild.js";
 
 export default async function(client)
@@ -14,13 +14,8 @@ export default async function(client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-        for (const command in commands)
-        {
-            console.log(guild.name+"delete "+await command.delete());
-        }
-        /*console.log(guild.name+"add "+*/await guild.commands.create(todoCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(todoSlashCommand);//); 
+        await guild.commands.create(todoCommand);
+        await guild.commands.create(todoSlashCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
