@@ -1,11 +1,10 @@
 <%- include('header.html') %>
 
   <div style="position:fixed; top:200; right:64; z-index: 9001; background-color: #1c1e20; padding:1em">
-    <button id='submit' style="font-size:larger">Save</button>
-    <% if (locals.nextLocation != null) { %>
-        <button id='submitNext' class='tiny'>Save and Next</button>
-    <% } %>
+    <button id='submit' style="font-size:larger">Save and Schedule</button>
   </div>
+  <p>Note, Discord has a limit of 100 events. If you schedule more than 100 events, you should return to this page after some events have passed, and press Save and Schedule again.</p>
+  <p>You may find it useful to clear the events in Discord: <a href="#" id="deleteAll">Delete all Discord Events</a>. This won't delete your data below, just remove the events from Discord.</p>
   <div id='editor_holder' class='medium-12 columns'></div>
   
   <script>
@@ -99,6 +98,51 @@
               }
           },
       });
+    });
+
+    document.getElementById('deleteAll').addEventListener('click',function() 
+    {
+      if (confirm("This will delete all events on Discord (including any made by yourself or users). It won't delete your data from this page, and should only be used if you run into errors scheduling new events.\n\nAre you sure you want to continue?"))
+      {
+        //make a popup to display the output
+        if (resultWindow) resultWindow.close();
+        resultWindow = window.open("", "Deleting Events...", "width=650,height=600");
+        try
+        {
+          resultWindow.document.querySelector('pre').remove();
+        } catch (e) {}
+        resultWindow.document.write("<html><head><title>Deleting Events...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
+
+        //TODO: turn this into a client-side util?
+        var last_response_len  = false;
+        $.ajax({
+            url:"sessions/deleteAll",
+            method:"get",
+            contentType: 'application/json',
+            xhrFields: {
+                onprogress: function(e)
+                {
+                    var this_response, response = e.currentTarget.response;
+                    if(last_response_len === false)
+                    {
+                        this_response = response;
+                        last_response_len = response.length;
+                    }
+                    else
+                    {
+                        this_response = response.substring(last_response_len);
+                        last_response_len = response.length;
+                    }
+                    console.log(this_response);
+                    resultWindow.document.write(this_response);
+                },
+                success: function(data)
+                {
+                  resultWindow.document.write("</pre>");
+                }
+            },
+        });
+      }
     });
     
     // Hook up the Restore to Default button

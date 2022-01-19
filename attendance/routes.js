@@ -1,6 +1,6 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { didAttendSession, getSessions, postWasForSession, scheduleAllSessions, SESSIONS, sessionsCollection } from "./sessions.js";
+import { deleteAllScheduledEvents, didAttendSession, getSessions, postWasForSession, scheduleAllSessions, SESSIONS, sessionsCollection } from "./sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 import { getPostsData } from "../analytics/analytics.js";
@@ -20,8 +20,6 @@ export async function sessionPage(req, res)
 /*TODO 
 - delete generated events using "reason" field (if we can)
 - modify /nextsession command to have optional parameter of "type"
-- save the session info properly
-- do kit305 example
 */
 
 
@@ -62,6 +60,14 @@ export async function sessionPagePost(req,res,next)
     res.write("\nDone!");
     res.end();
 
+}
+export async function deleteAllEvents(req,res,next)
+{
+    beginStreamingRes(res)
+    await deleteAllScheduledEvents(res, req.guild);
+    
+    res.write("\nDone!");
+    res.end();
 }
 
 export async function displayAttendanceOld(req, res, next) 

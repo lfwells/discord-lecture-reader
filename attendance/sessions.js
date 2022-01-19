@@ -19,10 +19,17 @@ export const SEMESTERS = {  //breaks are inclusive (so first day of break, and t
     //asp1_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
     //asp2_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
 }
-async function deleteAllScheduledEvents(guild)
+export async function deleteAllScheduledEvents(res, guild)
 {
     var allEvents = await guild.scheduledEvents.fetch();
-    allEvents.each(async (v,k) => await guild.scheduledEvents.delete(v));
+    res.write(`Deleting ${pluralize(allEvents.size, "Event")}...\n`);
+    await Promise.all(allEvents.map( async (v) => 
+    { 
+        //res.write(`Deleting event ${v.name}...\n`);
+        await guild.scheduledEvents.delete(v);
+        res.write(`Deleted event ${v.name}.\n`);
+    })
+    );;
 }
 export async function init_sessions(guild)
 {
@@ -52,6 +59,14 @@ export async function scheduleAllSessions(res, guild, config)
         expectedCount += config.types[i].weeks.length * config.types[i].sessionsPerWeek.length;
     }
     res.write(`Scheduling ${pluralize(expectedCount, "Event")}. This may take some time (Discord takes a break every 5 events)...\n`);
+
+    if (expectedCount > 100)
+    {
+        res.write("\nNOTICE: You have scheduled a large number of events.\n");
+        res.write("        The maximum number events you can schedule on Discord is 100.\n");
+        res.write("        You will need to return to this tool again after some events\n");
+        res.write("        have passed to schedule future events.\n\n");
+    }
 
     var createdSessions = []; //use this array to work out what rows were created (/updated), and delete the rest
     for (var i = 0; i < config.types.length; i++)
@@ -116,10 +131,10 @@ async function scheduleAllSessionsOfTypeWeeklyItem(res, guild, config, semester,
     {
         descriptionItems.push(config.descriptions[i]);
     }
-    if (scheduleInfo.location)
+    /*if (scheduleInfo.location)
     {
         descriptionItems.push(scheduleInfo.location);
-    }
+    }*/
     var description = descriptionItems.length > 0 ? descriptionItems.join("\n") :  undefined;
 
     var createdSession = await scheduleSession(
@@ -197,27 +212,31 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, week,
         discordEventArgs.entityType = "EXTERNAL";
     }
 
-    if (existingSession && existingSession.discordEventID && existingSession.discordEventID.length > 5) //need to update the existing discord event, so we don't lose "interested" people
+    try
     {
-        try
+        if (existingSession && existingSession.discordEventID && existingSession.discordEventID.length > 5) //need to update the existing discord event, so we don't lose "interested" people
         {
-            discordEvent = await guild.scheduledEvents.edit(existingSession.discordEventID, discordEventArgs);
-        } catch {
-            discordEvent = await guild.scheduledEvents.create(discordEventArgs);    
+            try
+            {
+                discordEvent = await guild.scheduledEvents.edit(existingSession.discordEventID, discordEventArgs);
+            } catch {
+                discordEvent = await guild.scheduledEvents.create(discordEventArgs);    
+            }
         }
-    }
-    else //new, make it
-    {
-        discordEvent = await guild.scheduledEvents.create(discordEventArgs);
-    }
+        else //new, make it
+        {
+            discordEvent = await guild.scheduledEvents.create(discordEventArgs);
+        }
+    } catch (e) { console.log(e); }
     
-    var discordEventID = discordEvent.id;
+    var discordEventID = discordEvent ? discordEvent.id : null;
 
     var session = {
-        type, week, day, hour, minute, discordEventID, durationMins, 
+        type, week, day, hour, minute, durationMins, 
         startTime: momentToTimestamp(startTime),
         endTime: endTime ? momentToTimestamp(endTime) : null
     };
+    if (discordEventID) session.discordEventID = discordEventID;
     if (channelID) session.channelID = channelID;
     if (description) session.description = description;
 

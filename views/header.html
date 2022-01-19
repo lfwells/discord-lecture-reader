@@ -93,6 +93,14 @@
                         }
                         %>
 
+                        <% if (hasFeature("sessions"))
+                        {
+                            %>
+                            <li><a <%=currentTab("sessions")%> href="/guild/<%= guild.id %>/sessions/">Sessions</a></li>
+                            <%
+                        }
+                        %>
+
                         <% if (hasFeature("analytics"))
                         {
                             %>
