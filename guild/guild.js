@@ -189,16 +189,17 @@ export function loadGuildProperty(property, required)
 //non-route version (but still spoofing route version)
 export async function getGuildProperty(property, guild, defaultValue, required)
 {
+  var req = await getFakeReq(guild);
   var res = {locals:{}, end:(a)=>{}};
-  await loadGuildProperty(property, required)(await getFakeReq(guild), res, () => {});
-
-  if (defaultValue != undefined && res.error)
+  await loadGuildProperty(property, required)(req, res, () => {});
+  if (defaultValue != undefined && (res.error || res.locals[property] == undefined))
   {
+    console.log(`getGuildProperty got error ${res.error}, now filling in default value ${defaultValue}`);
     res.error = false;
     await saveGuildProperty(property, defaultValue, req, res);
   }
 
-  if (required && res.error)
+  if (required && (res.error || res.locals[property] == undefined))
   {
     console.log(res.error);
     return null;
@@ -208,8 +209,9 @@ export async function getGuildProperty(property, guild, defaultValue, required)
 }
 export async function getGuildPropertyConverted(property, guild, defaultValue, required) //this version will return the channel/role object itself
 {
+  var req = await getFakeReq(guild);
   var res = {locals:{}};
-  await loadGuildProperty(property, required)(await getFakeReq(guild), res, () => {});
+  await loadGuildProperty(property, required)(req, res, () => {});
 
   if (defaultValue && res.error)
   {

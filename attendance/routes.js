@@ -6,6 +6,7 @@ import moment from "moment";
 import { getPostsData } from "../analytics/analytics.js";
 import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } from "../core/config.js";
 import { beginStreamingRes } from "../core/server.js";
+import { getGuildDocument, getGuildProperty, setGuildProperty } from "../guild/guild.js";
 
 export var ATTENDANCE_CACHE = {}; //because querying the db for all attendances on demand is bad (cannot cache on node js firebase it seems)s
 
@@ -17,19 +18,17 @@ export async function sessionPage(req, res)
 
 
 /*TODO 
-- the new window clearing thing still cooked (on repeat save presses zz)
 - delete generated events using "reason" field (if we can)
-- moodify /nextsession command to have optional parameter of "type"
-- consider a data structure for "day, hour, minute", and making that an array, so that we can have multiple tutorials with same data for example
+- modify /nextsession command to have optional parameter of "type"
+- save the session info properly
+- do kit305 example
 */
 
 
 
     
-    var sessions = { 
-        semester: "sem1_2022", //TODO: get from db later
-        types: SESSIONS[req.guild.id]
-    };
+    var sessions = await getGuildProperty("sessionsJSON", req.guild, {});
+    console.log(sessions);
 
     var channels = [];
     var categoryChannels = req.guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
@@ -42,6 +41,12 @@ export async function sessionPage(req, res)
         }));
     });
 
+    channels.unshift({
+        id: "",
+        name: "Select Channel -",
+        category: ""
+    });
+
     res.render("sessions", {
         sessions: sessions,
         channels: channels
@@ -51,6 +56,7 @@ export async function sessionPagePost(req,res,next)
 {
     beginStreamingRes(res);
 
+    await setGuildProperty(req.guild, "sessionsJSON", req.body);
     await scheduleAllSessions(res, req.guild, req.body);
 
     res.write("\nDone!");

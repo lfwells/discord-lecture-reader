@@ -6,6 +6,7 @@
       "semester": {
         "title": "Semester",
         "type": "string",
+        "default": "sem1_2022",
         "enum": [
           "sem1_2021",
           "sem2_2021",
@@ -33,7 +34,7 @@
           "type": "object",
           "title": "Session",
           
-          "required": ["type", "weeks", "day", "hour", "minute", "duration"],
+          "required": ["type", "weeks", "sessionsPerWeek"],
           "properties": {
             "type": {
               "title": "Session Type",
@@ -46,60 +47,77 @@
               "default": "1,2,3,4,5,6,7,8,9,10,11,12,13",
               "description": "Comma-separated list of weeks this event occurs in"
             },
-            "day": {
-              "title": "Day of Week",
-              "type": "enum",
-              "default": 1,
-              "enum": [0,1,2,3,4,5,6],
-              "options": { 
-                "enum_titles": [
-                  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-                ]
+            "sessionsPerWeek": {
+              "title": "Sessions Per Week",
+              "type": "array",
+              "format": "table",
+              "minItems": 1,
+              "items": {
+                "headerTemplate ": "{{self.day}} {{self.hour}}",
+                "type": "object",
+                "required": ["day", "hour", "minute"],
+                "properties": {
+                  "day": {
+                    "title": "Day of Week",
+                    "type": "enum",
+                    "default": 1,
+                    "enum": [0,1,2,3,4,5,6],
+                    "options": { 
+                      "enum_titles": [
+                        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+                      ],
+                      "inputAttributes": {"class": "myclass"}
+                    }
+                  },
+                  "hour": {
+                    "title": "Hour of Day",
+                    "description": "24hr time",
+                    "type": "integer",
+                    "minimum": 0, 
+                    "maximum": 23,
+                    "default": 13
+                  },
+                  "minute": {
+                    "title": "Minute",
+                    "type": "integer",
+                    "description": "0-59",
+                    "minimum": 0,
+                    "maximum": 59,
+                    "default": 0
+                  },
+                  "channelID": {
+                    "title": "Discord Channel",
+                    "description": "Leave blank if physical location",
+                    "type": "string",
+                    "enumSource": [
+                      {
+                        "value": "",
+                        "title": "-- Select Channel --"
+                      },
+                      {
+                        "source": "channels",
+                        "value": "{{item.id}}",
+                        "title": "{{item.category}} - {{item.name}}"
+                      }
+                    ]
+                  },
+                  "location": {
+                    "title": "Location",
+                    "description": "If applicable, shown in description",
+                    "type": "string"
+                  }
+                }
               }
             },
-            "hour": {
-              "title": "Hour of Day",
-              "description": "24hr time",
-              "type": "integer",
-              "minimum": 0, 
-              "maximum": 23,
-              "default": 13
-            },
-            "minute": {
-              "title": "Minute",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 59,
-              "default": 0
-            },
+            
             "duration": {
               "title": "Duration",
               "description": "in mins",
               "type": "integer",
               "minimum": 0,
-              "default": 0
+              "default": 120
             },
-            "channelID": {
-              "title": "Discord Channel",
-              "description": "Leave blank if physical location. Currently need to pick ID in discord with right-click, TODO: a dropdown",
-              "type": "string",
-              "enumSource": [
-                {
-                  "value": null,
-                  "title": "-- Select Channel --"
-                },
-                {
-                  "source": "channels",
-                  "value": "{{item.id}}",
-                  "title": "{{item.category}} - {{item.name}}"
-                }
-              ]
-            },
-            "location": {
-              "title": "Location",
-              "description": "If applicable, shown in description",
-              "type": "string"
-            },
+
             "description": {
               "title": "Session Description",
               "description": "Can include links and markdown",

@@ -14,7 +14,7 @@ const discordEvents = new Map();
 export const SEMESTERS = {  //breaks are inclusive (so first day of break, and the last day of break -- NOT the first day back after break)
     //sem1_2021:{ start: moment() },
     //sem2_2021:{ start: moment() },
-    sem1_2022:{ start: moment("2021-02-21"), breakStart: moment("2022-04-14"), breakEnd: moment("2022-04-20") },
+    sem1_2022:{ start: moment("2022-02-21"), breakStart: moment("2022-04-14"), breakEnd: moment("2022-04-20") },
     sem2_2022:{ start: moment("2022-07-11"), breakStart: moment("2022-08-29"), breakEnd: moment("2022-09-04") },
     //asp1_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
     //asp2_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
@@ -49,7 +49,7 @@ export async function scheduleAllSessions(res, guild, config)
     var expectedCount = 0;
     for (var i = 0; i < config.types.length; i++)
     {
-        expectedCount += config.types[i].weeks.length;
+        expectedCount += config.types[i].weeks.length * config.types[i].sessionsPerWeek.length;
     }
     res.write(`Scheduling ${pluralize(expectedCount, "Event")}. This may take some time (Discord takes a break every 5 events)...\n`);
 
@@ -89,36 +89,47 @@ async function scheduleAllSessionsOfType(res, guild, config, semester)
     for (var i = 0; i < config.weeks.length; i++)
     {
         var week = config.weeks[i];
-        var weekStart = getSemesterWeekStart(semester, week, config.day);
-        var startTime = weekStart.add(config.hour, "hour").add(config.minute, "minute");
-        var endTime = moment(startTime).add(config.duration == null || config.duration == 0 ? 60 : config.duration, "minute");
-
-        var descriptionItems = [];
-        if (config.description)
+        for (var j = 0; j < config.sessionsPerWeek.length; j++)
         {
-            descriptionItems.push(config.description);
+            var scheduleInfo = config.sessionsPerWeek[j];
+            var createdSession = await scheduleAllSessionsOfTypeWeeklyItem(
+                res, guild, config, semester, week, scheduleInfo, i
+            );
+            if (createdSession != null)
+                createdSessions.push(createdSession);
         }
-        if (config.descriptions && i < config.descriptions.length)
-        {
-            descriptionItems.push(config.descriptions[i]);
-        }
-        if (config.location)
-        {
-            descriptionItems.push(config.location);
-        }
-        var description = descriptionItems.length > 0 ? descriptionItems.join("\n") :  undefined;
-
-        var createdSession = await scheduleSession(
-            guild, config.type, startTime, endTime, config.channelID, week, config.day, config.hour, config.minute, config.duration, description
-        );
-        if (createdSession != null)
-            createdSessions.push(createdSession);
-
-        res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.toISOString()}\n`);
     }
     return createdSessions;
 }
-function getSemesterWeekStart(semester, week, day)
+async function scheduleAllSessionsOfTypeWeeklyItem(res, guild, config, semester, week, scheduleInfo, i)
+{
+    var weekStart = getSemesterWeekStart(res, semester, week, scheduleInfo.day);
+    var startTime = moment(weekStart).add(scheduleInfo.hour, "hour").add(scheduleInfo.minute, "minute");
+    var endTime = moment(startTime).add(config.duration == null || config.duration == 0 ? 60 : config.duration, "minute");
+
+    var descriptionItems = [];
+    if (config.description)
+    {
+        descriptionItems.push(config.description);
+    }
+    if (config.descriptions && i < config.descriptions.length)
+    {
+        descriptionItems.push(config.descriptions[i]);
+    }
+    if (scheduleInfo.location)
+    {
+        descriptionItems.push(scheduleInfo.location);
+    }
+    var description = descriptionItems.length > 0 ? descriptionItems.join("\n") :  undefined;
+
+    var createdSession = await scheduleSession(
+        guild, config.type, startTime, endTime, scheduleInfo.channelID, week, scheduleInfo.day, scheduleInfo.hour, scheduleInfo.minute, config.duration, description, scheduleInfo.location
+    );
+
+    res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.utcOffset(11).format("dddd, MMMM Do YYYY, h:mm:ss a")}\n`);
+    return createdSession;
+}
+function getSemesterWeekStart(res, semester, week, day)
 {
     var start = moment(semester.start);
     start = start.add(day-1, 'day');
@@ -126,19 +137,22 @@ function getSemesterWeekStart(semester, week, day)
     {
         start = start.add(1, "week");
         
-        if (dayIsDuringSemesterBreak(semester, start))
+        if (dayIsDuringSemesterBreak(res, semester, start))
             start = start.add(1, "week");
     }
     return start;
 }
-function dayIsDuringSemesterBreak(semester, dayMoment)
-{
-    return dayMoment.isBetween(semester.breakStart, semester.breakEnd, 'day', '()');
+function dayIsDuringSemesterBreak(res, semester, dayMoment)
+{   
+    //var log = `----\nChecking\n\t${dayMoment.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n\t${semester.breakStart.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n\t${semester.breakEnd.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n${dayMoment.isBetween(semester.breakStart, semester.breakEnd, 'day', '[]')}\n\n`;
+    //console.log(log);
+    //res.write(log);
+    return dayMoment.isBetween(semester.breakStart, semester.breakEnd, 'day', '[]');
 }
 
 //TODO: the below will break if you specify same types
 //this will return the database ID of the generated session row (for the purposes of deleting all the other ones upon a sync)
-async function scheduleSession(guild, type, startTime, endTime, channelID, week, day, hour, minute, durationMins, description)
+async function scheduleSession(guild, type, startTime, endTime, channelID, week, day, hour, minute, durationMins, description, location)
 {
     var collection = sessionsCollection(guild);
 
@@ -166,10 +180,10 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, week,
     var discordEvent;
     var discordEventArgs = {
         name:name,
-        scheduledStartTime:startTime.toISOString(),
-        scheduledEndTime:endTime != null ? endTime.toISOString() : null,
+        scheduledStartTime:startTime.utcOffset(0).toISOString(),
+        scheduledEndTime:endTime != null ? endTime.utcOffset(0).toISOString() : null,
         description: description,
-        reason: "reason",
+        reason: "GENERATED",
         privacyLevel: "GUILD_ONLY"
     }
     if (channelID)
@@ -179,7 +193,7 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, week,
     }
     else
     {
-        discordEventArgs.entityMetadata = { location: description ?? "TBA" };
+        discordEventArgs.entityMetadata = { location: location && location != "" ? location : "TBA" };
         discordEventArgs.entityType = "EXTERNAL";
     }
 

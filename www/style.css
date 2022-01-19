@@ -300,7 +300,13 @@
         .form-control input, .form-control select {
             width:250px;
         }
-        .form-control textarea + p, .form-control select + p { margin-top:0px !important; }
+        .form-control textarea + p, 
+        .form-control select + p,
+        td .form-control input + p 
+        { 
+            margin-top:0px !important; 
+        }
 
-        *[data-schemapath="root.types.0.descriptions"] label { display: none; }
-        *[data-schemapath="root.types.0.day"] select + .panel { font-size:0; height:16px; }
+        *[data-schemapath*=".descriptions"] label { display: none; }
+        *[data-schemapath*="day"] select + .panel { font-size:0; height:16px; }
+        *[data-schemapath*="day"] label { display:none !important; }

@@ -32,7 +32,7 @@
 
       no_additional_properties: true,
       disable_array_delete_all_rows: true,
-      //disable_array_delete_last_row: true,
+      disable_array_delete_last_row: true,
       disable_array_reorder: true,
       disable_edit_json: true,
       disable_properties : true,
@@ -43,6 +43,7 @@
     });
     
     // Hook up the submit button to log to the console
+    var resultWindow;
     document.getElementById('submit').addEventListener('click',function() 
     {
       // Get the value from the editor
@@ -61,7 +62,8 @@
       console.log(DATA);
 
       //make a popup to display the output
-      var resultWindow = window.open("", "Scheduling Events...", "width=650,height=600");
+      if (resultWindow) resultWindow.close();
+      resultWindow = window.open("", "Scheduling Events...", "width=650,height=600");
       try
       {
         resultWindow.document.querySelector('pre').remove();
