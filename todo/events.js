@@ -1,4 +1,5 @@
 import { Permissions } from "discord.js";
+import { registerCommand } from "../guild/commands.js";
 import { getGuildProperty, getGuildPropertyConverted } from "../guild/guild.js";
 
 export default async function(client)
@@ -14,8 +15,8 @@ export default async function(client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        //await guild.commands.create(todoCommand);
-        //await guild.commands.create(todoSlashCommand);
+        await registerCommand(guild, todoCommand);
+        await registerCommand(guild, todoSlashCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

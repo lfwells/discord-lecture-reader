@@ -6,6 +6,7 @@ import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getA
 import { pluralize, offTopicCommandOnly } from '../core/utils.js';
 import { getClassList } from '../core/classList.js';
 import { hasFeature } from '../guild/guild.js';
+import { registerCommand } from '../guild/commands.js';
 
 export default async function(client)
 {
@@ -120,10 +121,10 @@ export default async function(client)
             ];
         }*/
             
-        //await guild.commands.create(flexCommand);
-        //await guild.commands.create(awardCommand2);
-        ////await guild.commands.create(awardNewCommand); 
-        //await guild.commands.create(leaderboardCommand);
+        await registerCommand(guild, flexCommand);
+        await registerCommand(guild, awardCommand2);
+        await registerCommand(guild, awardNewCommand); 
+        await registerCommand(guild, leaderboardCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

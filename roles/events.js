@@ -1,6 +1,7 @@
 import { adminCommandOnly } from "../core/utils.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { assignRole, getRoleByName, getRoleByNameOrCreate, unAssignRole } from "./roles.js";
+import { registerCommand } from "../guild/commands.js";
 
 export default async function (client)
 {
@@ -70,7 +71,7 @@ export default async function (client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        //await guild.commands.create(roleSelectCommand);
+        await registerCommand(guild, roleSelectCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

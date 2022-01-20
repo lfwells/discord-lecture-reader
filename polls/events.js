@@ -4,6 +4,7 @@ import { pluralize } from '../core/utils.js';
 
 import { GUILD_CACHE } from "../guild/guild.js";
 import * as config from "../core/config.js";
+import { registerCommand } from '../guild/commands.js';
 
 export default async function(client)
 {
@@ -43,7 +44,7 @@ export default async function(client)
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        //await guild.commands.create(pollCommand);
+        await registerCommand(guild, pollCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

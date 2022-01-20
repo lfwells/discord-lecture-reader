@@ -4,6 +4,7 @@ import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js
 import { offTopicCommandOnly, pluralize, sleep } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
+import { registerCommand } from '../guild/commands.js';
 
 export default async function(client)
 {
@@ -50,22 +51,15 @@ export default async function(client)
         }],
     };
     const buttonCommand = {
-        name: 'button',
-        description: 'this is dumb',
+        name: 'useless_button',
+        description: 'Literally just a button everyone can press. Why? I DON\'T KNOW!',
     }; 
-    
-    const contextCommand = {
-        name: 'context_test',
-        type: "MESSAGE"
-    }; 
-    
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        //await guild.commands.create(statsCommand);
-        //await guild.commands.create(statsWeekCommand); 
-        //await guild.commands.create(statsMeCommand); 
-        //await guild.commands.create(buttonCommand);
-        //await guild.commands.create(contextCommand);
+        await registerCommand(guild, statsCommand);
+        await registerCommand(guild, statsWeekCommand); 
+        await registerCommand(guild, statsMeCommand); 
+        await registerCommand(guild, buttonCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

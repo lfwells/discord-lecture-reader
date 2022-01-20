@@ -6,6 +6,7 @@ import { getClient } from "../core/client.js";
 import { oauth } from '../core/login.js';
 import { init_sheet_for_guild } from '../sheets_test.js';
 import { init_sessions } from '../attendance/sessions.js';
+import { unregisterAllCommandsIfNecessary } from "./commands.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
@@ -28,13 +29,7 @@ export default async function init(client)
     await transfer(guild.id);
 
     //wipe all the commands (they get generated again by the init functions)
-    //this is actually quite time consuming, and only useful for clearing old commands? Commenting out for sanity...
-    /*
-    var commands = await guild.commands.fetch(); 
-    await Promise.all(commands.map( async (c) => 
-    { 
-        await guild.commands.delete(c);
-    }));*/
+    await unregisterAllCommandsIfNecessary(guild);
     
     //run the init functions
     await init_admin_users(guild);
