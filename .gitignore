@@ -6,3 +6,5 @@ awards/namesBackup kit109.json
 awards/namesBackup kit305.json
 .vscode/sftp.json
 .vscode/sftp.json
+~*.docx
+~*.tmp
