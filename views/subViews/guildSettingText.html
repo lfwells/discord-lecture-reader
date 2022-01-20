@@ -1,0 +1,25 @@
+<label>
+    <span><%=typeof label !== 'undefined' ? label : "" %></span>
+    <input 
+        id="<%= id %>" 
+        name="<%=typeof name !== 'undefined' ? name : id %>"
+        class="<%=typeof className !== 'undefined' ? className : "" %>"
+        value="<%=typeof value !== 'undefined' ? value : "" %>"
+        />
+        <% if (typeof help !== 'undefined') { %><br/><span class="help"><%=help%></span><% } %>
+</label>
+
+<% 
+/* 
+usage:
+
+<p>include("subViews/guildSettingText.html", 
+    { 
+        label: "Bot Name in Server:",
+        id: "botName",
+        value: locals.botName ? locals.botName : "UTAS Discord Bot",
+        help: "instructions"
+    })</p>
+
+*/ 
+%>

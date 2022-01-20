@@ -7,6 +7,7 @@ import { oauth } from '../core/login.js';
 import { init_sheet_for_guild } from '../sheets_test.js';
 import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
+import { isOutsideTestServer } from "../core/utils.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
@@ -141,10 +142,15 @@ export function loadGuildProperty(property, required)
 
     if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id][property]))
     {
-        req.guildDocumentSnapshot = await req.guildDocument.get();
-        req[property] = await req.guildDocumentSnapshot.get(property);
-        if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-        GUILD_CACHE[req.guild.id][property] = req[property];
+      //console.log("loadGuildProperty cache miss --", property, "- ", req.guild.name, GUILD_CACHE[req.guild.id][property]);
+      //console.log(Object.keys(GUILD_CACHE[req.guild.id]).indexOf(property));
+      req.guildDocumentSnapshot = await req.guildDocument.get();
+      req[property] = await req.guildDocumentSnapshot.get(property);
+      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+      
+      GUILD_CACHE[req.guild.id][property] = req[property];
+      //console.log("loadGuildProperty setting", property, GUILD_CACHE[req.guild.id][property]);
+      //console.log(Object.keys(GUILD_CACHE[req.guild.id]).indexOf(property)); 
       
     } 
     res.locals[property] = req[property];
@@ -159,21 +165,24 @@ export function loadGuildProperty(property, required)
       if (property.endsWith("ChannelID"))
       {
         var channelProperty = property.replace("ChannelID", "Channel");
-        req[channelProperty] = await client.channels.fetch(req[property]);
+        req[channelProperty] = GUILD_CACHE[req.guild.id][channelProperty] ?? await client.channels.fetch(req[property]);
         res.locals[channelProperty] = req[channelProperty];
+        GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
         
       }
       if (property.endsWith("RoleID"))
       {
         var roleProperty = property.replace("RoleID", "Role");
-        req[roleProperty] = await req.guild.roles.fetch(req[property]);
+        req[roleProperty] = GUILD_CACHE[req.guild.id][roleProperty] ?? await req.guild.roles.fetch(req[property]);
         res.locals[roleProperty] = req[roleProperty];
+        GUILD_CACHE[req.guild.id][roleProperty] = req[roleProperty];
       }
       if (property.endsWith("CategoryID"))
       {
         var categoryProperty = property.replace("CategoryID", "Category");
-        req[categoryProperty] = await req.guild.channels.fetch(req[property]);
+        req[categoryProperty] = GUILD_CACHE[req.guild.id][categoryProperty] ?? await req.guild.channels.fetch(req[property]);
         res.locals[categoryProperty] = req[categoryProperty];
+        GUILD_CACHE[req.guild.id][categoryProperty] = req[categoryProperty];
       }
     }
     else
@@ -264,7 +273,7 @@ export async function saveGuildProperty(property, value, req, res)
   GUILD_CACHE[req.guild.id][property] = value;
 
   await loadGuildProperty(property, false)(req, res, () => {});
-
+/*
   if (property.endsWith("ChannelID"))
   {
     property = property.replace("ChannelID", "Channel");
@@ -283,7 +292,7 @@ export async function saveGuildProperty(property, value, req, res)
   else
   {
     req.query.message = "Set "+property+" to "+ req[property]+".";
-  }
+  }*/
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed
@@ -312,4 +321,15 @@ async function getFakeReq(guild)
 export async function hasFeature(guild, feature, defaultValue)
 {
   return await getGuildProperty("feature_"+feature, guild, defaultValue ?? false);
+}
+
+export async function setBotNickname(guild, nickname)
+{
+  console.log("Setting Bot Nickname", nickname, "...");
+  return await (await getBotMemberForGuild(guild)).setNickname(nickname);
+}
+export async function getBotMemberForGuild(guild)
+{
+  var client = getClient();
+  return await guild.members.cache.get(client.user.id);
 }

@@ -1,4 +1,4 @@
-import { getClient } from "../core/client.js";
+import { getBotMemberForGuild } from "../guild/guild.js";
 
 export const ROLES = new Map();
 
@@ -52,8 +52,7 @@ export async function botRoleHigherThanMemberRole(member)
 {
     if (member.id == member.guild.ownerId) return false;
 
-    var client = getClient();
-    var us = await member.guild.members.cache.get(client.user.id);
+    var us = await getBotMemberForGuild(member.guild);
     var ourHighestRole = us.roles.highest;
     var theirHighestRole = member.roles.highest;
     return ourHighestRole.position >= theirHighestRole.position;

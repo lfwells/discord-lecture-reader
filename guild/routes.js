@@ -2,7 +2,7 @@ import { getClient } from "../core/client.js";
 import * as config from "../core/config.js";
 import { isOutsideTestServer } from "../core/utils.js";
 
-import { getAdminGuilds, GUILD_CACHE, saveGuildProperty } from "./guild.js";
+import { getAdminGuilds, GUILD_CACHE, saveGuildProperty, setBotNickname } from "./guild.js";
 
 export async function guildList(req, res) 
 {  
@@ -14,17 +14,27 @@ export async function guildList(req, res)
 }
 
 export async function guildHome(req, res) 
-{  
-  //todo: a generic settings list maybe?
-  var settingsQueryKeys = Object.keys(req.query).filter(k => k.startsWith("set"));
+{ 
+  res.render("guild");
+}
+
+export async function guildHomePost(req, res, next)
+{
+  if (req.body.setBotName && req.body.setBotName.trim() != "")
+    await setBotNickname(req.guild, req.body.setBotName);
+
+  var settingsQueryKeys = Object.keys(req.body).filter(k => k.startsWith("set"));
   await Promise.all(settingsQueryKeys.map( async (setting) => 
   { 
     var property = setting.replace("set", "");
     property = property.charAt(0).toLowerCase() + property.slice(1);
-    await saveGuildProperty(property, req.query[setting], req, res);
+    var value = req.body[setting];
+    if (value == "__DISCORD_BOT_NONE__") return;
+
+    await saveGuildProperty(property, value, req, res);
   }));
 
-  res.render("guild");
+  next();
 }
 
 export async function guildFeatures(req, res) 

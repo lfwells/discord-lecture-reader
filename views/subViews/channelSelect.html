@@ -1,9 +1,11 @@
 <label>
     <span><%=typeof label !== 'undefined' ? label : "" %></span>
-    <select id="<%= id %>" title="<%=typeof value !== 'undefined' ? value : "" %>"
-        name="<%=typeof name !== 'undefined' ? name : "" %>"
+    <select 
+        id="<%= id %>" 
+        name="<%=typeof name !== 'undefined' ? name : id %>"
+        title="<%=typeof value !== 'undefined' ? value : "" %>"
         class="<%=typeof className !== 'undefined' ? className : "" %>">
-        <option value=""><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
+        <option value="__DISCORD_BOT_NONE__"><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
         <%
         var categoryChannels = guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
         categoryChannels.forEach(cat => { %>
@@ -11,6 +13,8 @@
                 <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
                 sortedChannels.forEach(function(channel)
                 { 
+                    if (typeof type !== 'undefined' && channel.type != type) return;
+
                     %><option value="<%= channel.id %>"
                         <% if (value && channel.id == value) { %>selected<% } %>>
                         <%= channel.name %>
@@ -18,21 +22,10 @@
                 }) %>
             </optgroup>
         <% }); %>
-    </select>
+    </select>    
+    <% if (typeof help !== 'undefined') { %><br/><span class="help"><%=help%></span><% } %>
 </label>
 
-<% if (typeof onGuildPage !== 'undefined' ? onGuildPage : "")
-{
-    %>
-    <script>
-        $("#<%= id %>").on("change", (e) =>
-        {
-            document.location.href = "?<%= id %>="+$("#<%= id %>").val();
-        });
-    </script>
-    <%
-}
-%>
 <% 
 /* 
 usage:

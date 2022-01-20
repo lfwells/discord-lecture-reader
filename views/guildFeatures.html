@@ -24,8 +24,7 @@
             label: "Achievements Channel:",
             selectDefaultText:"-- Select Channel--",
             id: "setAwardChannelID",
-            value: locals.awardChannel ? locals.awardChannel.id : undefined,
-            onGuildPage:true
+            value: locals.awardChannel ? locals.awardChannel.id : undefined
         }) %><%
     }
     %>
@@ -77,8 +76,7 @@
             label: "TODOs Channel:",
             selectDefaultText:"-- Select Channel--", 
             id: "setTodoChannelID",
-            value: locals.todoChannelID ? locals.todoChannelID.id : undefined,
-            onGuildPage:true
+            value: locals.todoChannelID ? locals.todoChannelID.id : undefined
         }) %><%
     }
     %>
@@ -88,13 +86,11 @@
     
         if (hasFeature("todos"))
         {
-            %><%- include("subViews/textFieldGuildProperty.html", 
+            %><%- include("subViews/guildSettingText.html", 
             { 
-                label: "TODOs Emoji (Mobile):",
+                label: "TODOs Emoji (For tagging on mobile):",
                 id: "setTodoEmoji",
-                property: "todoEmoji",
-                value: locals.todoEmoji ?? "",
-                onGuildPage:true
+                value: locals.todoEmoji ? locals.todoEmoji : ""
             }) %><%
         }
         %>

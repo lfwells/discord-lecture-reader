@@ -283,9 +283,15 @@
             padding:1em;
         }
 
-        label > span {
+        label > span:first-child {
             display:inline-block;
             min-width:200px
+        }
+        label .help {
+            margin-left:205px;
+            margin-top:8px;
+            font-size:smaller;
+            opacity: 0.5;
         }
         .filter label > span {
             display:inline !important;

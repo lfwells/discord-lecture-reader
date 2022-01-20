@@ -2,35 +2,46 @@
 
 <h2>Configure Server</h2>
 
-<h3>Role Set Up</h3>
+<form method="post">
 
-<p><%- include("subViews/roleSelect.html", 
-    { 
-        label: "Admin/Staff Role:",
-        selectDefaultText:"-- Select Role--",
-        id: "setAdminRoleID",
-        value: locals.adminRole ? locals.adminRole.id : undefined,
-        onGuildPage:true
-    }) %></p>
-<p><%- include("subViews/roleSelect.html", 
-    { 
-        label: "Current Students Role:",
-        selectDefaultText:"-- Select Role--",
-        id: "setStudentRoleID",
-        value: locals.studentRole ? locals.studentRole.id : undefined,
-        onGuildPage:true
-    }) %></p>
+    <p><%- include("subViews/guildSettingText.html", 
+        { 
+            label: "Bot Name in Server:",
+            id: "setBotName",
+            value: locals.botName ? locals.botName : "UTAS Discord Bot",
+            help: "How the bot will appear in your unit. Go on, call it 'Robo-Lindsay'!"
+        }) %></p>
 
-<h3>Channel Set Up</h3>
+    <h3>Role Set Up</h3>
 
-<p><%- include("subViews/channelSelect.html", 
-    { 
-        label: "Lecture Channel:",
-        selectDefaultText:"-- Select Channel--",
-        id: "setLectureChannelID",
-        value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
-        onGuildPage:true
-    }) %></p>
+    <p><%- include("subViews/roleSelect.html", 
+        { 
+            label: "Admin/Staff Role:",
+            selectDefaultText:"-- Select Role--",
+            id: "setAdminRoleID",
+            value: locals.adminRole ? locals.adminRole.id : undefined,
+            help: "Admin bot commands can only be run by users with this role."
+        }) %></p>
+    <p><%- include("subViews/roleSelect.html", 
+        { 
+            label: "Current Students Role:",
+            selectDefaultText:"-- Select Role--",
+            id: "setStudentRoleID",
+            value: locals.studentRole ? locals.studentRole.id : undefined,
+            help: "Used for tracking stats of only students (e.g. don't include staff posts in stats)"
+        }) %></p>
+
+    <h3>Channel Set Up</h3>
+
+    <p><%- include("subViews/channelSelect.html", 
+        { 
+            label: "Lecture Channel:",
+            selectDefaultText:"-- Select Channel--",
+            id: "setLectureChannelID",
+            value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
+            type: "GUILD_TEXT",
+            help: "Which channel do lectures take place in? Useful for polls feature if used."
+        }) %></p>
 
     <p><%- include("subViews/channelSelect.html", 
         { 
@@ -38,7 +49,8 @@
             selectDefaultText:"-- Select Channel--", 
             id: "setOffTopicChannelID",
             value: locals.offTopicChannel ? locals.offTopicChannel.id : undefined,
-            onGuildPage:true
+            type: "GUILD_TEXT",
+            help: "Used for tracking stats of how many posts are on/off topic."
         }) %></p>
     <p><%- include("subViews/channelCategorySelect.html", 
         { 
@@ -46,8 +58,10 @@
             selectDefaultText:"-- Select Category--", 
             id: "setOffTopicCategoryID",
             value: locals.offTopicCategory ? locals.offTopicCategory.id : undefined,
-            onGuildPage:true
+            help: "Used for tracking stats of how many posts are on/off topic."
         }) %></p>
 
+    <p><input type="submit" value="Save Configuration"/></p>  
+</form>
 
 <%- include('footer.html') %>

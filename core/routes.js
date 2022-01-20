@@ -53,12 +53,14 @@ function guildRouter()
     //middleware check that this is one of "our" servers 
     router.use(guild.checkGuildAdmin);
 
+    router.use(guild.loadGuildProperty("botName"));
     router.use(guild.loadGuildProperty("adminRoleID"));
     router.use(guild.loadGuildProperty("studentRoleID"));
     router.use(guild.loadGuildProperty("lectureChannelID"));
     router.use(guild.loadGuildProperty("awardChannelID"));
     router.use(guild.loadGuildProperty("offTopicChannelID"));
     router.use(guild.loadGuildProperty("todoChannelID"));
+    router.use(guild.loadGuildProperty("todoEmoji"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
@@ -70,9 +72,8 @@ function guildRouter()
     router.use(filterButtons);
 
     //guild home page (dashboard)
-    router.get("/", 
-
-    guild_routes.guildHome);
+    router.get("/", guild_routes.guildHome);
+    router.post("/", guild_routes.guildHomePost, guild_routes.guildHome);
                     
     router.get("/obs/", basic_render("obs")); 
 
