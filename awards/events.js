@@ -86,12 +86,12 @@ export default async function(client)
             required: false,
         }],
     }; 
-    
+    /*
     const awardNewCommand = {
         name: 'awardnew', 
         description: 'old, and I don\'t know how to delete this lol',
         defaultPermission: false,
-    };
+    };*/
     const leaderboardCommand = {
         name: 'leaderboard',
         description: 'Replies with the top 10 award earners (only allowed in off topic channel).',
@@ -123,7 +123,7 @@ export default async function(client)
             
         await registerCommand(guild, flexCommand);
         await registerCommand(guild, awardCommand2);
-        await registerCommand(guild, awardNewCommand); 
+        //await registerCommand(guild, awardNewCommand); 
         await registerCommand(guild, leaderboardCommand);
     });
 

@@ -42,6 +42,12 @@ export async function unAssignRole(guild, member, role)
         console.log("cannot remove role, the member has a higher role than the bot");
 }
 
+export async function hasRole(guild, member, role)
+{
+    //return await member.roles.has(role);
+    return member.roles.cache.find(r => r.id == role.id);
+}
+
 export async function botRoleHigherThanMemberRole(member)
 {
     if (member.id == member.guild.ownerId) return false;

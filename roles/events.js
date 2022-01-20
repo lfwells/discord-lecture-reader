@@ -1,6 +1,6 @@
 import { adminCommandOnly } from "../core/utils.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { assignRole, getRoleByName, getRoleByNameOrCreate, unAssignRole } from "./roles.js";
+import { assignRole, getRoleByName, getRoleByNameOrCreate, hasRole, unAssignRole } from "./roles.js";
 import { registerCommand } from "../guild/commands.js";
 
 export default async function (client)
@@ -85,68 +85,6 @@ export default async function (client)
             await doRoleSelectCommand(interaction);
         }
     });
-
-    //testing because ran out of commands for the day lol
-    //MOVE CONTENT LATER TO doRoleSelectCommand
-    client.on("messageCreate", async function(interaction)
-    {
-        if (interaction.content && interaction.content.startsWith("/role_select_command"))
-        {
-            var msg = "Please select your campus";
-            var roles = ["Hobart", "Launceston"];
-            var limit_to_one = true;
-            var roleObjects = {};
-            
-            const rows = [];
-
-            await Promise.all(roles.map( async (role) => 
-            { 
-                var roleName = role;
-                
-                //get or create the role object
-                var role = await getRoleByNameOrCreate(interaction.guild, roleName);
-                roleObjects[roleName] = role;
-
-                const row = new MessageActionRow()
-                    .addComponents(
-                        new MessageButton()
-                            .setCustomId(roleName)
-                            .setLabel(roleName)
-                            .setStyle('PRIMARY')
-                    );    
-                rows.push(row);
-            }));
-            
-            const collector = interaction.channel.createMessageComponentCollector({ time: 150000000 });
-            collector.on('collect', async i => {
-                var roleName = i.customId.toLowerCase();
-
-                await Promise.all(Object.values(roleObjects).map( async (role) => 
-                { 
-                    if (role.name.toLowerCase() == roleName)
-                    {
-                        await assignRole(interaction.guild, i.member, role);
-                        console.log(`assigned ${i.member.name} to ${role.name}`);
-                    }
-                    else
-                    {
-                        await unAssignRole(interaction.guild, i.member, role);
-                        console.log(`unassigned ${i.member.name} from ${role.name}`);
-                    }
-                }));
-
-                //TODO: unassign the others based upon the param
-
-                await i.update({ content: msg, components: rows });
-
-                //TODO: respond ephemerally
-            });
-            
-            collector.on('end', collected => console.log(`Collected ${collected.size} items`));
-
-            await interaction.reply({content: msg, components: rows});
-        }
-    });
 }
 async function doRoleSelectCommand(interaction)
 {
@@ -159,11 +97,74 @@ async function doRoleSelectCommand(interaction)
     for (var i = 1; i <= 8; i++)
     {
         var option = interaction.options.getString("role_"+i);
-        roles.push(option);
+        if (option != null)
+            roles.push(option);
     }
-    msg += roles.join(",");
+    //msg += roles.join(",");
 
-
+    var response_message = interaction.options.getString("response_message") ?? "Thanks!";
+    var limit_to_one = interaction.options.getBoolean("limit_to_one") ?? true;
+    var roleObjects = {};
     
-    await interaction.editReply({ content: msg });
+    const rows = [];
+
+    await Promise.all(roles.map( async (role) => 
+    { 
+        var roleName = role;
+        
+        //get or create the role object
+        var role = await getRoleByNameOrCreate(interaction.guild, roleName);
+        roleObjects[roleName] = role;
+
+        const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    .setCustomId(roleName)
+                    .setLabel(roleName)
+                    .setStyle('PRIMARY')
+            );    
+        rows.push(row);
+    }));
+            
+    const collector = interaction.channel.createMessageComponentCollector({ time: 150000000 });
+    collector.on('collect', async i => {
+        var humanRoleName = i.customId;
+        var unpickedRoles = [];
+        var roleName = humanRoleName.toLowerCase();
+
+        await Promise.all(Object.values(roleObjects).map( async (role) => 
+        { 
+            if (role.name.toLowerCase() == roleName)
+            {
+                await assignRole(interaction.guild, i.member, role);
+                console.log(`assigned ${i.member.name} to ${role.name}`);
+            }
+            else if (limit_to_one)
+            {
+                var hadRole = await hasRole(interaction.guild, i.member, role);
+
+                await unAssignRole(interaction.guild, i.member, role);
+                console.log(`unassigned ${i.member.name} from ${role.name}`);
+
+                if (hadRole) unpickedRoles.push(role.name);
+            }
+        }));
+
+        await i.update({ content: msg, components: rows });
+
+        var unpickedText = "";
+        if (unpickedRoles.length > 0)
+            unpickedText = `Unassigned from ${unpickedRoles.map(e => `**${e}**`).join(", ")}.\n`;
+        await i.followUp({
+            content: `Assigned **${humanRoleName}**.\n${unpickedText}\n${response_message}`,
+            ephemeral: true
+        });
+
+
+        //TODO: respond ephemerally
+    });
+    
+    collector.on('end', collected => console.log(`Collected ${collected.size} items`));
+    
+    await interaction.editReply({ content: msg, components: rows });
 }
