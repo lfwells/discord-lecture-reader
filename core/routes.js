@@ -20,12 +20,12 @@ import { renderEJS } from "./server.js";
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
 {
-    app.use(defaultRouter());
     app.use(function(req, res, next){
         res.path = req.path;
         res.locals.path = req.path;
         next();
     });
+    app.use(defaultRouter());
     app.use("/guild/:guildID", guildRouter());
 }
 

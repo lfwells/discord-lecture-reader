@@ -84,6 +84,7 @@ export async function authHandler (req, res, next)  {
 
     req.path.indexOf("/login") >= 0 || 
     req.path.indexOf("/loginComplete") >= 0 || 
+    req.path.indexOf("/guide") >= 0 || 
     req.path.indexOf("/text/") >= 0 || 
     req.path.endsWith("/text/latest/") || 
     req.path.indexOf("/poll") >= 0 || 

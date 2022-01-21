@@ -45,6 +45,14 @@
                 </div>
                 <%
             }
+            else if ((locals.path ?? "").indexOf("/guide") >= 0)
+            {
+                %>
+                <div class="discordUser" style="top:4em">
+                    <a href="/login" class="login">Login</a>
+                </div>
+                <%
+            }
             
             if (locals.guild)
             {
@@ -170,7 +178,8 @@
                 
                 <nav>
                     <ul>
-                        <li><a <%=currentTab("help")%> href="/guide">User Guide</a></li>
+                        <li><a <%=currentTab("")%> href="/">Home</a></li>
+                        <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
 
                     </ul>
                 </nav>

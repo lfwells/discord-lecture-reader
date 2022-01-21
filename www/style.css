@@ -306,7 +306,7 @@
             background-color: #7289DA;
             
             border-radius: 8px;
-            max-width:25%;
+            max-width:250px;
             padding-left:4ex !important;
             padding-right:4ex !important;
         }
@@ -317,6 +317,10 @@
         }
         .btnAdd span:nth-child(2) {
             vertical-align: middle;
+        }
+        .btnAdd + span { 
+            display:inline-block;
+            margin-left:2ex;
         }
 
         .panel { margin-left:4ex; }
