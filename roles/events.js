@@ -1,6 +1,6 @@
 import { adminCommandOnly } from "../core/utils.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { assignRole, getRoleByName, getRoleByNameOrCreate, hasRole, unAssignRole } from "./roles.js";
+import { assignRole, botRoleHigherThanMemberRole, getRoleByName, getRoleByNameOrCreate, hasRole, unAssignRole } from "./roles.js";
 import { getCachedInteraction, registerCommand } from "../guild/commands.js";
 
 //TODO: make this persistent
@@ -133,6 +133,14 @@ async function doRoleSelectCommand(interaction)
 async function doRoleSelectCommandButton(i, originalInteraction)
 {
     await i.deferReply({ephemeral:true});
+
+    if (await botRoleHigherThanMemberRole(i.member) == false)
+    {
+        return await i.followUp({
+            content: `I don't have permission to set your role, as you are a higher role than me.`,
+            ephemeral: true
+        });
+    }
 
     var response_message = originalInteraction.options.getString("response_message") ?? "Thanks!";
     var limit_to_one = originalInteraction.options.getBoolean("limit_to_one") ?? true;
