@@ -6,7 +6,7 @@ import { registerCommand } from "../guild/commands.js";
 export default async function (client)
 {
     //commands (/role_select_message)
-    //TODO: a way of allowing only one option (and unassigning from other roles)
+    //TODO: allow people to un-select a role by clicking it again
     // The data for our command
     const roleSelectCommand = {
         name: 'role_select_message',
@@ -136,15 +136,25 @@ async function doRoleSelectCommand(interaction)
         { 
             if (role.name.toLowerCase() == roleName)
             {
-                await assignRole(interaction.guild, i.member, role);
-                console.log(`assigned ${i.member.name} to ${role.name}`);
+                if (limit_to_one == false && await hasRole(interaction.guild, i.member, role))
+                {
+                    await unAssignRole(interaction.guild, i.member, role);
+                    console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);
+
+                    unpickedRoles.push(role.name);
+                }
+                else
+                {
+                    await assignRole(interaction.guild, i.member, role);
+                    console.log(`assigned ${i.member.nickname ?? i.member.username} to ${role.name}`);
+                }
             }
             else if (limit_to_one)
             {
                 var hadRole = await hasRole(interaction.guild, i.member, role);
 
                 await unAssignRole(interaction.guild, i.member, role);
-                console.log(`unassigned ${i.member.name} from ${role.name}`);
+                console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);
 
                 if (hadRole) unpickedRoles.push(role.name);
             }
@@ -159,9 +169,6 @@ async function doRoleSelectCommand(interaction)
             content: `Assigned **${humanRoleName}**.\n${unpickedText}\n${response_message}`,
             ephemeral: true
         });
-
-
-        //TODO: respond ephemerally
     });
     
     collector.on('end', collected => console.log(`Collected ${collected.size} items`));
