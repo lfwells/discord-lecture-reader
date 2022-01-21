@@ -392,12 +392,14 @@ export async function scheduleNextSessionPost(guild)
         {
             //console.log("waiting", diffInMilliseconds, "ms before next session countdown --", await getNextSessionCountdown(guild, false));
             if (diffInMilliseconds < 10000000)
-            await sleep(diffInMilliseconds); 
+            {
+                await sleep(diffInMilliseconds); 
 
-            var countdown = await getNextSessionCountdown(guild, false);
-            var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.channelID));
-            await send(channel, {embeds: [ countdown ]});
-            //await send(channel, await getNextSessionCountdown(guild, false));
+                var countdown = await getNextSessionCountdown(guild, false);
+                var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.channelID));
+                await send(channel, {embeds: [ countdown ]});
+                //await send(channel, await getNextSessionCountdown(guild, false));
+            }
         }
 
         //sleep a little, just so the next session isn't the same as this one
