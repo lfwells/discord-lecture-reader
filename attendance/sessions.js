@@ -391,6 +391,7 @@ export async function scheduleNextSessionPost(guild)
         else
         {
             //console.log("waiting", diffInMilliseconds, "ms before next session countdown --", await getNextSessionCountdown(guild, false));
+            if (diffInMilliseconds < 10000000)
             await sleep(diffInMilliseconds); 
 
             var countdown = await getNextSessionCountdown(guild, false);
