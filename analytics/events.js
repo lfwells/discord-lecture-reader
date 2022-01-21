@@ -4,7 +4,7 @@ import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js
 import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { registerCommand } from '../guild/commands.js';
+import { getCachedInteraction, registerCommand } from '../guild/commands.js';
 
 export default async function(client)
 {
@@ -67,7 +67,11 @@ export default async function(client)
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand()) return;
 
-        if (await hasFeature(interaction.guild, "analytics") == false)
+        if (interaction.commandName === "useless_button") 
+        {
+           doButtonCommand(interaction);            
+        }
+        else if (await hasFeature(interaction.guild, "analytics") == false)
         {
             interaction.reply({
                 content: "Post stats not enabled on this server",
@@ -86,10 +90,16 @@ export default async function(client)
         {
            doStatsMeCommand(interaction);            
         }
+    });
+    client.on('interactionCreate', async function(interaction) 
+    {
+        // If the interaction isn't a slash command, return
+        if (!interaction.isMessageComponent()) return;
+    
         // Check if it is the correct command
-        else if (interaction.commandName === "button") 
+        if (interaction.message.interaction.commandName === "useless_button") 
         {
-           doButtonCommand(interaction);            
+            await doButtonCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
         }
     });
 
@@ -159,7 +169,7 @@ async function doStatsMeCommand(interaction)
     await interaction.editReply({embeds: [ statsEmbed ] });
 }
 
-var clicks = 0;
+var clicks = 0; //TODO: give this command a text, give this command unique counters zz
 async function doButtonCommand(interaction)
 {
     //only allow in off topic
@@ -177,18 +187,15 @@ async function doButtonCommand(interaction)
 
     const rows = [ row ]
 
-    
-    const collector = interaction.channel.createMessageComponentCollector({ time: 150000000 });
-    collector.on('collect', async i => {
-        if (i.customId === 'primary') {
-            //await i.deferUpdate();
-            //await wait(4000);
-            clicks++;
-            await i.update({ content: pluralize(clicks, "click"), components: rows });
-        }
-    });
-    
-    collector.on('end', collected => console.log(`Collected ${collected.size} items`));
-
     await interaction.reply({content: pluralize(clicks, "click"), components: rows});
+}
+
+async function doButtonCommandButton(i, originalInteraction)
+{
+    if (i.customId === 'primary') {
+        //await i.deferUpdate();
+        //await wait(4000);
+        clicks++;
+        await i.update({ content: pluralize(clicks, "click") });
+    }
 }
