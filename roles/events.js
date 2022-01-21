@@ -1,12 +1,13 @@
 import { adminCommandOnly } from "../core/utils.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { assignRole, getRoleByName, getRoleByNameOrCreate, hasRole, unAssignRole } from "./roles.js";
-import { registerCommand } from "../guild/commands.js";
+import { getCachedInteraction, registerCommand } from "../guild/commands.js";
+
+//TODO: make this persistent
 
 export default async function (client)
 {
     //commands (/role_select_message)
-    //TODO: allow people to un-select a role by clicking it again
     // The data for our command
     const roleSelectCommand = {
         name: 'role_select_message',
@@ -85,6 +86,19 @@ export default async function (client)
             await doRoleSelectCommand(interaction);
         }
     });
+
+    client.on('interactionCreate', async function(interaction) 
+    {
+        // If the interaction isn't a slash command, return
+        if (!interaction.isMessageComponent()) return;
+    
+        // Check if it is the correct command
+        if (interaction.message.interaction.commandName === "role_select_message") 
+        {
+            await doRoleSelectCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+        }
+    });
+
 }
 async function doRoleSelectCommand(interaction)
 {
@@ -101,21 +115,8 @@ async function doRoleSelectCommand(interaction)
             roles.push(option);
     }
     //msg += roles.join(",");
-
-    var response_message = interaction.options.getString("response_message") ?? "Thanks!";
-    var limit_to_one = interaction.options.getBoolean("limit_to_one") ?? true;
-    var roleObjects = {};
-    
     const rows = [];
-
-    await Promise.all(roles.map( async (role) => 
-    { 
-        var roleName = role;
-        
-        //get or create the role object
-        var role = await getRoleByNameOrCreate(interaction.guild, roleName);
-        roleObjects[roleName] = role;
-
+    roles.forEach(roleName => {
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
@@ -124,54 +125,82 @@ async function doRoleSelectCommand(interaction)
                     .setStyle('PRIMARY')
             );    
         rows.push(row);
-    }));
-            
-    const collector = interaction.channel.createMessageComponentCollector({ time: 150000000 });
-    collector.on('collect', async i => {
-        var humanRoleName = i.customId;
-        var unpickedRoles = [];
-        var roleName = humanRoleName.toLowerCase();
-
-        await Promise.all(Object.values(roleObjects).map( async (role) => 
-        { 
-            if (role.name.toLowerCase() == roleName)
-            {
-                if (limit_to_one == false && await hasRole(interaction.guild, i.member, role))
-                {
-                    await unAssignRole(interaction.guild, i.member, role);
-                    console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);
-
-                    unpickedRoles.push(role.name);
-                }
-                else
-                {
-                    await assignRole(interaction.guild, i.member, role);
-                    console.log(`assigned ${i.member.nickname ?? i.member.username} to ${role.name}`);
-                }
-            }
-            else if (limit_to_one)
-            {
-                var hadRole = await hasRole(interaction.guild, i.member, role);
-
-                await unAssignRole(interaction.guild, i.member, role);
-                console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);
-
-                if (hadRole) unpickedRoles.push(role.name);
-            }
-        }));
-
-        await i.update({ content: msg, components: rows });
-
-        var unpickedText = "";
-        if (unpickedRoles.length > 0)
-            unpickedText = `Unassigned from ${unpickedRoles.map(e => `**${e}**`).join(", ")}.\n`;
-        await i.followUp({
-            content: `Assigned **${humanRoleName}**.\n${unpickedText}\n${response_message}`,
-            ephemeral: true
-        });
     });
     
-    collector.on('end', collected => console.log(`Collected ${collected.size} items`));
-    
     await interaction.editReply({ content: msg, components: rows });
+}
+
+async function doRoleSelectCommandButton(i, originalInteraction)
+{
+    await i.deferReply({ephemeral:true});
+
+    var response_message = originalInteraction.options.getString("response_message") ?? "Thanks!";
+    var limit_to_one = originalInteraction.options.getBoolean("limit_to_one") ?? true;
+    
+    var roles = [];
+    for (var j = 1; j <= 8; j++)
+    {
+        var option = originalInteraction.options.getString("role_"+j);
+        if (option != null)
+            roles.push(option);
+    }
+    var roleObjects = await getRoleObjectsFromOptions(i.guild, roles);
+
+    var humanRoleName = i.customId;
+    var unpickedRoles = [];
+    var roleName = humanRoleName.toLowerCase();
+    var assignedText = "";
+
+    await Promise.all(Object.values(roleObjects).map( async (role) => 
+    { 
+        if (role.name.toLowerCase() == roleName)
+        {
+            if (limit_to_one == false && await hasRole(i.guild, i.member, role))
+            {
+                await unAssignRole(i.guild, i.member, role);
+                console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);
+
+                unpickedRoles.push(role.name);
+            }
+            else
+            {
+                await assignRole(i.guild, i.member, role);
+                console.log(`assigned ${i.member.nickname ?? i.member.username} to ${role.name}`);
+                assignedText = `Assigned **${humanRoleName}**.\n`;
+            }
+        }
+        else if (limit_to_one)
+        {
+            var hadRole = await hasRole(i.guild, i.member, role);
+
+            await unAssignRole(i.guild, i.member, role);
+            console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);
+
+            if (hadRole) unpickedRoles.push(role.name);
+        }
+    }));
+
+    //await i.update({ content: msg, components: rows });
+
+    var unpickedText = "";
+    if (unpickedRoles.length > 0)
+        unpickedText = `Unassigned from ${unpickedRoles.map(e => `**${e}**`).join(", ")}.\n`;
+    await i.followUp({
+        content: `${assignedText}${unpickedText}\n${response_message}`,
+        ephemeral: true
+    });
+}
+async function getRoleObjectsFromOptions(guild, roles)
+{
+    var roleObjects = {};
+    await Promise.all(roles.map( async (role) => 
+    { 
+        var roleName = role;
+        console.log(roleName);
+        
+        //get or create the role object
+        var role = await getRoleByNameOrCreate(guild, roleName);
+        roleObjects[roleName] = role;
+    }));
+    return roleObjects;
 }

@@ -58,6 +58,7 @@ import init_poll_events from '../polls/events.js';
 import init_audit_events from '../audit/events.js';
 import init_todo_events from '../todo/events.js';
 import init_role_events from '../roles/events.js';
+import { init_interaction_cache } from '../guild/commands.js';
 
 export async function init_client(client)
 {
@@ -75,6 +76,6 @@ export async function init_client(client)
 	console.log("Init Audit Events...");	    await init_audit_events(client);   
     console.log("Init TODO Events...");	        await init_todo_events(client);
     console.log("Init Role Events...");	        await init_role_events(client);
-    
+    console.log("Init Interaction Cache...");   await init_interaction_cache(client);
     console.log("End init_client.");
 }

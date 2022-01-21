@@ -1,3 +1,5 @@
+import { getGuildDocument } from "./guild.js";
+
 /*
     TODO: Application Commands instead of these
     TODO: fix admin-only commands
@@ -35,6 +37,47 @@ export async function unregisterAllCommandsIfNecessary(guild)
             await guild.commands.delete(commandData);
         }
     }));
+}
+
+//we store every interaction by its id, and store its options, since in future we only get partial data
+export function init_interaction_cache(client)
+{
+    client.on('interactionCreate', async function(interaction) 
+    {
+        // If the interaction isn't a slash command, return
+        if (!interaction.isCommand()) return;
+    
+        await cacheInteraction(interaction);
+    });
+}
+async function cacheInteraction(interaction)
+{
+    var data = {
+        id: interaction.id,
+        commandName: interaction.commandName,
+        options: interaction.options.data //this is SUPER limited...
+    };
+    console.log(data);
+
+    var guildDocument = await getGuildDocument(interaction.guild.id);
+    await guildDocument.collection("interactions").doc(interaction.id).set(data);
+}
+export async function getCachedInteraction(guild, interactionID)
+{
+    var guildDocument = await getGuildDocument(guild.id);
+    var interactionSnapshot = await guildDocument.collection("interactions").doc(interactionID).get();
+    var interaction = interactionSnapshot.data();
+
+    //add helpers for the options getters
+    if (interaction.options)
+    {
+        interaction.options.getString = function(key)  { var r = interaction.options.find(e => e.type ==  "STRING"  && e.name == key); return r ? r.value : null; }
+        interaction.options.getBoolean = function(key) { var r =  interaction.options.find(e => e.type == "BOOLEAN" && e.name == key); return r ? r.value : null; }
+        interaction.options.getInteger = function(key) { var r =  interaction.options.find(e => e.type == "INTEGER" && e.name == key); return r ? r.value : null; }
+        //TODO: others
+    }
+
+    return interaction;
 }
 
 export async function assertOption(interaction, optionName, type, message)

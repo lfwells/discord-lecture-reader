@@ -1,7 +1,7 @@
 import * as config from '../core/config.js';
 import { getGuildDocument, hasFeature } from '../guild/guild.js';
 import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js';
-import { offTopicCommandOnly, pluralize, sleep } from '../core/utils.js';
+import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { registerCommand } from '../guild/commands.js';
