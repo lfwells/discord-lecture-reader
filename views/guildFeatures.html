@@ -96,5 +96,26 @@
         %>
         </dd>
 
+    <h3>Status Channels</h3>
+    <p>These appear at the top of the channel list, showing status information. They update slowly, and may take up to 10 minutes before they appear for the first time.</p>
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Online Member Count",
+        feature: "showOnlineMemberCount"
+    }) %></dt>
+        
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Enrolled Member Count",
+        feature: "showMemberCount"
+    }) %></dt>
+        
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Next Lecture Session",
+        feature: "showNextSession"
+    }) %></dt>
+        
+
 
 <%- include('footer.html') %>

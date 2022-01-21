@@ -1,3 +1,5 @@
+import admin from "firebase-admin";
+
 import { guildsCollection, transfer } from "../core/database.js";
 import { init_invites } from "../invite/invite.js";
 import { init_roles } from '../roles/roles.js';
@@ -8,6 +10,7 @@ import { init_sheet_for_guild } from '../sheets_test.js';
 import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
 import { isOutsideTestServer } from "../core/utils.js";
+import { init_status_channels } from "./statusChannels.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
 
@@ -38,6 +41,7 @@ export default async function init(client)
     await init_roles(guild);
     await init_sessions(guild);
     await init_sheet_for_guild(guild);
+    init_status_channels(guild);
 
     console.log("Initialised Guild",guild.name, guild.id);
   })
@@ -205,7 +209,7 @@ export async function getGuildProperty(property, guild, defaultValue, required)
   await loadGuildProperty(property, required)(req, res, () => {});
   if (defaultValue != undefined && (res.error || res.locals[property] == undefined))
   {
-    console.log(`getGuildProperty got error ${res.error}, now filling in default value ${defaultValue}`);
+    //console.log(`getGuildProperty got error ${res.error}, now filling in default value ${defaultValue}`);
     res.error = false;
     await saveGuildProperty(property, defaultValue, req, res);
   }
@@ -293,6 +297,15 @@ export async function saveGuildProperty(property, value, req, res)
   {
     req.query.message = "Set "+property+" to "+ req[property]+".";
   }*/
+}
+
+export async function deleteGuildProperty(guild, property)
+{
+  var guildDocument = await getGuildDocument(guild.id);
+  var toUpdate = {};
+  toUpdate[property] = admin.firestore.FieldValue.delete();
+  await guildDocument.update(toUpdate);
+  delete GUILD_CACHE[guild.id][property];
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed
