@@ -227,8 +227,7 @@
             cursor:pointer;
             background-color: rgba(176, 196, 222, 0.582);/*lightstellblue with alpha*/
         }
-        #guilds li span,
-        nav ul li span
+        #guilds li span.serverInfo
         {
             font-size: smaller;
         }
@@ -283,6 +282,8 @@
             padding:1em;
         }
 
+        a, .bold { font-weight: bold; }
+
         label > span:first-child {
             display:inline-block;
             min-width:200px
@@ -299,7 +300,23 @@
         }
 
         .btnAdd {
+            display:inline-block !important;
+            margin:2ex;
+            padding:2ex !important;
+            background-color: #7289DA;
+            
+            border-radius: 8px;
+            max-width:25%;
+            padding-left:4ex !important;
+            padding-right:4ex !important;
+        }
+        .btnAdd span:first-child {
             font-size:48pt; display:inline-block; vertical-align: middle;
+            margin-right:8px;
+            
+        }
+        .btnAdd span:nth-child(2) {
+            vertical-align: middle;
         }
 
         .panel { margin-left:4ex; }
@@ -316,3 +333,5 @@
         *[data-schemapath*=".descriptions"] label { display: none; }
         *[data-schemapath*="day"] select + .panel { font-size:0; height:16px; }
         *[data-schemapath*="day"] label { display:none !important; }
+
+        

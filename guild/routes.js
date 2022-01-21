@@ -1,5 +1,6 @@
 import { getClient } from "../core/client.js";
 import * as config from "../core/config.js";
+import { renderErrorPage } from "../core/server.js";
 import { isOutsideTestServer } from "../core/utils.js";
 
 import { getAdminGuilds, GUILD_CACHE, saveGuildProperty, setBotNickname } from "./guild.js";
@@ -12,6 +13,25 @@ export async function guildList(req, res)
     testMode: config.getTestMode(),
   });
 }
+
+export function serverAddedRedirect(req,res,next)
+{
+  var guildID = req.query.guild_id;
+  if (guildID)
+  {
+    console.log(guildID);
+    res.redirect(`/guild/${guildID}/serverAdded`);
+  }
+  else
+  {
+    renderErrorPage(req.query.error_description)(req,res,next);
+  }
+}
+export function serverAdded(req,res,next)
+{
+  res.render("serverAdded");
+}
+
 
 export async function guildHome(req, res) 
 { 

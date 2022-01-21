@@ -35,7 +35,9 @@
             {
                 %>
                 <div class="discordUser">
-                    <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                    <% if (locals.discordUser.avatar) { %>
+                        <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                    <% }%>
                     <div>
                         <%=locals.discordUser.username%><br />
                         <a href="/logout" class="logout">Logout</a>
@@ -141,7 +143,7 @@
                         }
                         %>
 
-                        <li><a <%=currentTab("help")%> href="/help">User Guide</a></li>
+                        <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
 
                     </ul>
                 </nav>
@@ -149,9 +151,29 @@
             } 
             else
             {
+                function currentTab(checkFor)
+                {
+                    var path = locals.path ?? "";
+                    var isCurrent = false;
+                    if (path.length == 0 && checkFor == "")
+                    {
+                        isCurrent = true;
+                    } 
+                    else if (checkFor != "" && (path.endsWith(checkFor) || path.endsWith(checkFor+"/")))
+                    {
+                        isCurrent = true;
+                    }
+                    return isCurrent ? ' class=current ' : "";
+                }
                 %>
-                <h1>UTAS Lecture Bot</h1>
-                <p>&nbsp;</p>
+                <h1><a href="/">UTAS Discord Bot</a></h1>
+                
+                <nav>
+                    <ul>
+                        <li><a <%=currentTab("help")%> href="/guide">User Guide</a></li>
+
+                    </ul>
+                </nav>
                 <%
             }
             %>

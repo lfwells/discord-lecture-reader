@@ -15,6 +15,7 @@ import * as invite_routes from "../invite/routes.js";
 import { Router } from "express";
 import * as sheet_routes from "../sheets_test.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
+import { renderEJS } from "./server.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
@@ -34,6 +35,9 @@ function defaultRouter()
 
     //home page (select guild)
     router.get("/", guild_routes.guildList);
+    router.get("/createFromTemplate", renderEJS("createFromTemplate"));
+    router.get("/serverAdded", guild_routes.serverAddedRedirect);
+    router.get("/guide", renderEJS("guide/index")); //TODO: we will see if need many folders
 
     //login
     router.get("/login", login_routes.loginPage);
@@ -69,7 +73,13 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_invites"));
     router.use(guild.loadGuildProperty("feature_obs"));
 
+
+    //TODO: this filterButtons could be expensive, I didn't realise!
     router.use(filterButtons);
+
+    router.get("/serverAdded", guild_routes.serverAdded);
+    router.get("/guide", renderEJS("guide/index")); //TODO: we will see if need many folders
+
 
     //guild home page (dashboard)
     router.get("/", guild_routes.guildHome);

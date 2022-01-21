@@ -144,3 +144,20 @@ export function beginStreamingRes(res)
       'X-Content-Type-Options': 'nosniff'});
   return res;
 }
+
+export function renderErrorPage(message)
+{
+  return function (req,res,next)
+  {
+    res.render("error", {
+      error: message
+    });
+  };
+}
+
+export function renderEJS(page, options)
+{
+  return function (req,res,next) {
+    res.render(page, options);
+  };
+}
