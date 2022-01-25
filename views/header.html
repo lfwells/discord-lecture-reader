@@ -57,7 +57,10 @@
             if (locals.guild)
             {
                 %>
-                <h1><a href="/guild/<%= guild.id %>/"><%= guild.name %></a> <a href="/" style="font-size:small">Change Server</a></h1>
+                <h1>
+                    <img src="<%=guild.iconURL()%>" />
+                    <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
+                </h1>
                 <% 
                 
                 

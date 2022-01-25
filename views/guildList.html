@@ -22,6 +22,7 @@
       { 
         %>
         <li>
+          <img src="<%=guild.iconURL()%>" />
           <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>"><%= guild.name %><br />
           <span class="serverInfo">
             <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
