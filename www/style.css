@@ -386,6 +386,7 @@
             display:block;
             padding: 1em;
         }
+        .optional > a { margin:-1em; }
         section a {
             padding: 1em;
         }
