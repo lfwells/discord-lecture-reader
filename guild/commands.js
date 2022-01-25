@@ -92,7 +92,7 @@ export function init_interaction_cache(client)
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand() || interaction.isApplicationCommand()) return;
+        if (!interaction.isCommand() || interaction.guild == undefined) return;
     
         await cacheInteraction(interaction);
     });
