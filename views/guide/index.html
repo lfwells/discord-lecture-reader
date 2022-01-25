@@ -1,8 +1,124 @@
 <%- include('../header.html') %>
 
-<h2>User Guide</h2>
-<p>A big ol' TODO</p>
-
+<h1>User Guide</h1>
 <% if (locals.guild) { %><p>User Guide opened with guild context <%=guild.name%></p><%} %>
+
+
+<p>This guide aims to give you a quick start guide to using Discord for teaching. This guide is still being written, but content is being added regularly below.</p>
+
+<p>You can also familiarise yourself with Discord for teaching with the information in this support article: <a href="https://support.discord.com/hc/en-us/articles/360041360311-Blog-How-to-use-Discord-for-your-classroom">https://support.discord.com/hc/en-us/articles/360041360311-Blog-How-to-use-Discord-for-your-classroom</a>.</p>
+
+<section id="minimum">
+    <a>
+        <h2>Minimum-Effort Discord Server Set Up</h2>
+        <p class="description">Use a Server Template to Quickly Get Started</p>
+    </a>
+    <div>
+        <h3>Download the UTAS Server Template</h3>
+        <p>Open the link <a target="_blank" href="<%- include("../subViews/templateLink.html") %>"><%- include("../subViews/templateLink.html") %></a>.</p>
+        <p>Here you should enter the name of your server. This should be the unit code, year, and optionally the unit name. Now is also a great time add a server icon. <em>This information can be changed later.</em></p>
+        <img src="/static/guide/template.png" />
+
+        <h3>Exploring the Channels in the Template</h3>
+        <p>Once you have created your server, you should see a list of channels on the left-hand side of Discord. If you find a channel or category you don't want, right-click and choose Delete (for example, you may not want the Lectures, Consultation, and Tutorial categories).</p>
+        <p>
+            <img src="/static/guide/templateChannels.png" /><img src="/static/guide/templateChannelsDelete.png" />
+         </p>
+
+         <div class="optional">
+            <a>OPTIONAL: Read about all the different included channels.</a>
+            <ul>
+                <li><strong>Rules</strong> - This is a read-only channel, and should be the first channel students see. You can define your own rules, or use the template, later in this guide.</li>
+                <li><strong>#timetable</strong> - This is a read-only channel, you can use this to paste in an image or text of the class timetable, as a useful resource for students.</li>
+                <li><strong>Staff Channels Category</strong> - Channels in this category are not visible to students. See later in the guide for information on how to assign <em>Roles</em> to people like your tutors, so that they can see these channels.
+                    <ul>
+                        <li>This includes a <strong>Staff Room</strong> voice channel, where you can chat with your tutors.</li>
+                    </ul>
+                </li>
+                <li><strong>General Channels Category</strong> - The main chat room for the server, where students should discuss on-topic things.
+                    <ul>
+                        <li><strong>#introduce-yourself</strong> - We found that encouraging students to talk a bit about who they are allowed the students to connect better, and find people with similar interests. You should post in here to get the ball rolling.</li>
+                        <li><strong>#general</strong> - For general unit discussion.</li>
+                        <li><strong>#assignment-questions</strong> - For questions and help on the assignments. You may like to have a channel per assessment task.</li>
+                        <li><strong>#references-and-resources</strong> - Use this channel to build up a collection of interesting links, maybe to external tutorials, interesting articles, etc. Students can post in here.</li>
+                    </ul>
+                </li>
+                <li><strong>Off Topic Channels Category</strong> - Gives the students somewhere to chat amongst themselves about whatever they like. Rules channel should indicate that only appropriate content should be posted here.
+                    <ul>
+                        <li>We have found having sub-channels for off-topic can help encourage students to talk about different things, like <strong>#off-topic-pets</strong>, <strong>#off-topic-outside</strong>, <strong>#game-reviews</strong>, etc.</li>
+                    </ul>
+                </li>
+                <li><strong>Lecture Channels Category</strong> - If you intend to conduct lectures through Discord screenshare, then keep this category.
+                    <ul>
+                        <li>A major factor in this decision, is that you are limited to <strong>50 participants</strong> in a lecture (or <strong>25 participants</strong> if doing screenshare + webcam).</li>
+                        <li>Conversation happens live in <strong>#lecture-chat</strong>, while the screenshare happens in the <strong>Lecture Room</strong>.</li>
+                    </ul>
+                </li>
+                <li><strong>Consultation Channels Category</strong> - If you or your tutors intend to conduct consultation through Discord screenshare, then keep this category.
+                    <ul>
+                        <li>We find posting in the read-only channel <strong>#consultation-times</strong> makes it easier for students to know you are available.</li>
+                        <li>This only makes sense if you are teaching one unit, as you cannot be live in multiple Discord servers at once (but you can be on Zoom at the same time).</li>
+                    </ul>
+                </li>
+                <li><strong>Tutorial Channels Category</strong> - If you intend to conduct online tutorials through Discord screenshare, then keep this category.
+                    <ul>
+                        <li>Conversation and text-help happens in <strong>#tutorial-chat</strong>.</li>
+                        <li>Live screenshare (for you and students) happens in <strong>Tutorial Room</strong>.</li>
+                        <li>You can move students to a <strong>Tutorial Breakout Room</strong> (and they can text-chat in the associated <strong>#tutorial-breakout-chat</strong>).</li>
+                        <li>Students can also move themselves to a <strong>Tutorial Breakout Room</strong> (but cannot move other students).</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section id="additional">
+    <a>
+        <h2>Additional Discord Server Set Up Steps</h2>
+        <p class="description">TODO</p>
+    </a>
+    <div>
+        <p>TODO</p>
+    </div>
+</section>
+
+<section id="bot">
+    <a>
+        <h2>Adding A Discord Bot to a Server</h2>
+        <p class="description">TODO</p>
+    </a>
+    <div>
+        <p>TODO</p>
+    </div>
+</section>
+
+<script>
+$(document).ready(function () {
+    $("section > a").each(function() {
+        //$(this).attr("href", "#"+$(this).parent().attr("id"));
+        $(this).attr("href", "#");
+        $(this).on("click", function(e)
+        {
+            var content = $(this).parent().find("> div");
+            content.toggle();
+            return false;
+        });
+    });
+    $("section:target div").show();
+
+    
+    $(".optional > a").each(function() {
+        $(this).attr("href", "#");
+        $(this).on("click", function(e)
+        {
+            var content = $(this).next();
+            content.toggle();
+            return false;
+        });
+    });
+});
+</script>
+
 
 <%- include('../footer.html') %>

@@ -377,3 +377,38 @@
             padding:0.5em;
             border-radius: 8px;
         }
+
+
+        section:target {
+            background-color: rgba(255,255,255,0.3);
+        }
+        section > a, .optional > a {
+            display:block;
+            padding: 1em;
+        }
+        section a {
+            padding: 1em;
+        }
+        section a:hover
+        {
+            background-color: rgba(255,255,255,0.3);
+        }
+        section > div,
+        .optional a + *
+        {
+            display:none;
+            margin-left:48px;
+        }
+        section .description
+        {
+            margin-top: -1em;
+            font-weight: normal;
+        }
+        section img 
+        {
+            padding: 1em;
+            vertical-align: top;
+        }
+        section li{
+            padding:0.5em;
+        }
