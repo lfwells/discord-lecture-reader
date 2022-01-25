@@ -100,6 +100,7 @@ export function baseName(nickname)
 export async function isAwardChannelID(fromInChannel)
 {
     var channel = await fromInChannel.fetch();
+    if (channel.guild == undefined) return false;
     var awardChannelID = await getAwardChannelID(channel.guild.id);
     return channel.id == awardChannelID;
 }

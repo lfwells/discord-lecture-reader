@@ -311,7 +311,7 @@ export async function deleteGuildProperty(guild, property)
 //TODO: this will need a refresh button or a detect that a member role has changed
 export async function init_admin_users(guild)
 {
-  console.log(`init_admin_users ${guild.name}`);
+  //console.log(`init_admin_users ${guild.name}`);
   var adminRole = await getGuildPropertyConverted("adminRoleID", guild);
   if (adminRole)
   {

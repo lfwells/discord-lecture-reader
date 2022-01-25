@@ -8,8 +8,9 @@ const client = new Client({
         Intents.FLAGS.GUILD_PRESENCES,
         Intents.FLAGS.GUILD_MESSAGES, 
         Intents.FLAGS.GUILD_VOICE_STATES,
-        Intents.FLAGS.GUILD_SCHEDULED_EVENTS
-    ],
+        Intents.FLAGS.GUILD_SCHEDULED_EVENTS,
+        Intents.FLAGS.DIRECT_MESSAGES,
+    ],partials: ["CHANNEL"],
     fetchAllMembers: true
 });
 export function getClient() { return client };
@@ -58,7 +59,8 @@ import init_poll_events from '../polls/events.js';
 import init_audit_events from '../audit/events.js';
 import init_todo_events from '../todo/events.js';
 import init_role_events from '../roles/events.js';
-import { init_interaction_cache } from '../guild/commands.js';
+import init_help_events from '../help/events.js';
+import { init_application_commands, init_interaction_cache } from '../guild/commands.js';
 
 export async function init_client(client)
 {
@@ -66,6 +68,7 @@ export async function init_client(client)
     client.removeAllListeners();
 
 	//register the appropriate discord event listeners
+    console.log("Init Application Commands...");await init_application_commands(client);
     console.log("Init Guild Events...");	    await init_guild_events(client);
 	console.log("Init Award Events...");	    await init_award_events(client);
 	console.log("Init Responder Events...");	await init_responder_events(client);
@@ -77,5 +80,6 @@ export async function init_client(client)
     console.log("Init TODO Events...");	        await init_todo_events(client);
     console.log("Init Role Events...");	        await init_role_events(client);
     console.log("Init Interaction Cache...");   await init_interaction_cache(client);
+    console.log("Init Help Events...");         await init_help_events(client);
     console.log("End init_client.");
 }

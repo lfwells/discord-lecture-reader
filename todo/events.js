@@ -6,7 +6,8 @@ export default async function(client)
 {    
     const todoCommand = {
         name: 'Mark TODO',
-        type: "MESSAGE"
+        type: "MESSAGE",
+        description: "Mark a message as a TODO (sent to either TODO channel, or as a DM, depending on config)"
     }; 
     const todoSlashCommand = {
         name: 'todo',

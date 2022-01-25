@@ -10,6 +10,8 @@ export default async function(client)
 {
     client.on('messageCreate', async (msg) =>  
     {
+        if (msg.inGuild() == false) return;
+
         if (await hasFeature(msg.guild, "analytics") == false) return;
         if (msg.channel.id == config.ERROR_LOG_CHANNEL_ID) return; //dont get stuck in a loop recording error logs lol
 
@@ -65,7 +67,7 @@ export default async function(client)
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || interaction.isApplicationCommand()) return;
 
         if (interaction.commandName === "useless_button") 
         {

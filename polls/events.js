@@ -14,7 +14,7 @@ export default async function(client)
     // The data for our command
     const pollCommand = {
         name: config.POLL_COMMAND,
-        description: 'Testing out an in-house version of polls',
+        description: 'Ask everyone a question. Displays a poll graph with buttons for voting. Different voting styles supported.',
         options: [
             { name: 'question', type: 'STRING', description: 'The poll question', required: true, },
             //TODO: options for: vote-once-only, hide-results (with admin reveal later), vertical, etc
@@ -50,7 +50,7 @@ export default async function(client)
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || interaction.isApplicationCommand()) return;
     
         // Check if it is the correct command
         if (interaction.commandName === config.POLL_COMMAND) 

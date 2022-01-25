@@ -39,7 +39,7 @@ export default async function(client)
             const invite = newInvites.find(i => i.uses > oldInvites.get(i.code));
             if (invite)
             {
-                console.log(invite); 
+                //console.log(invite); 
                 // This is just to simplify the message being sent below (inviter doesn't have a tag property)
                 const inviter = client.users.cache.get(invite.inviter.id); //TODO: this line doesnt work!
                 // Get the log channel (change to your liking)

@@ -4,7 +4,7 @@ export const ROLES = new Map();
 
 export async function init_roles(guild)
 {
-    console.log(`init_roles ${guild.name}`);
+    //console.log(`init_roles ${guild.name}`);
 
     ROLES[guild.id] = await guild.roles.fetch();
 }

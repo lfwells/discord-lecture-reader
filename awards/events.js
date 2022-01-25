@@ -12,7 +12,7 @@ export default async function(client)
 {
     client.on('interactionCreate', async (msg) => 
     {
-        if (msg.isCommand()) return;
+        if (msg.isCommand() || msg.isApplicationCommand()) return;
 
         if (await isAwardChannelID(msg.channel))
         {
@@ -130,7 +130,7 @@ export default async function(client)
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || interaction.isApplicationCommand()) return;
 
         if (["flex", "award", "leaderboard"].indexOf(interaction.commandName) >= 0)
         {

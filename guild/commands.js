@@ -1,4 +1,4 @@
-import { getGuildDocument } from "./guild.js";
+import { getGuildDocument, hasFeature } from "./guild.js";
 
 /*
     TODO: Application Commands instead of these
@@ -17,9 +17,18 @@ const unregisterAllOnStartUp = false; //put back to false
 const registerAllOnStartUp = false; //put back to false
 const commandsToRegenerate = []; //put back to []
 const commandsToUnregister = []; //put back to []
+const applicationCommandsToRegenerate = []; //put back to []
+const applicationCommandsToUnregister = []; //put back to []
+
+const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message"];
+
+export const allCommandData = {}
 
 export async function registerCommand(guild, commandData)
 {
+    if (adminOnlyCommands.findIndex(e => e == commandData.name) == -1)
+        allCommandData[commandData.name] = commandData;
+
     if (registerAllOnStartUp || commandsToRegenerate.findIndex(e => e == commandData.name) >= 0)
     {
         console.log("Registering Command", commandData.name,"...");
@@ -39,13 +48,51 @@ export async function unregisterAllCommandsIfNecessary(guild)
     }));
 }
 
+export async function init_application_commands(client)
+{
+    await unregisterAllApplicationCommandsIfNecessary(client);
+}
+
+export async function registerApplicationCommand(client, commandData)
+{
+    allCommandData[commandData.name] = commandData;
+    if (registerAllOnStartUp || applicationCommandsToRegenerate.findIndex(e => e == commandData.name) >= 0)
+    {
+        console.log("Registering Application Command", commandData.name,"...");
+        await client.application.commands.create(commandData)
+    }
+}
+export async function unregisterAllApplicationCommandsIfNecessary(client)
+{
+    var commands = await client.application.commands.fetch(); 
+    await Promise.all(commands.map( async (commandData) => 
+    { 
+        if (unregisterAllOnStartUp || applicationCommandsToUnregister.findIndex(e => e == commandData.name) >= 0)
+        {
+            console.log("Unregistering Application Command", commandData.name,"...");
+            await client.application.commands.delete(commandData);
+        }
+    }));
+}
+
+export async function commandEnabledForGuild(commandName, guild)
+{
+    if (commandName == "flex") return await hasFeature(guild, "achievements");
+    if (commandName == "leaderboard") return await hasFeature(guild, "achievements");
+    if (commandName == "stats") return await hasFeature(guild, "analytics");
+    if (commandName == "statsme") return await hasFeature(guild, "analytics");
+    if (commandName == "statsweek") return await hasFeature(guild, "analytics");
+    if (commandName == "nextsession") return await hasFeature(guild, "sessions");
+    return true;
+}
+
 //we store every interaction by its id, and store its options, since in future we only get partial data
 export function init_interaction_cache(client)
 {
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || interaction.isApplicationCommand()) return;
     
         await cacheInteraction(interaction);
     });
