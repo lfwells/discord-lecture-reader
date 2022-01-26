@@ -12,7 +12,11 @@ import { unregisterAllCommandsIfNecessary } from "./commands.js";
 import { isOutsideTestServer } from "../core/utils.js";
 import { init_status_channels } from "./statusChannels.js";
 
-export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
+export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
+
+const guessConfiguration = {
+  rulesChannelID: { type:"channel", name:"rules" },
+};
 
 export default async function init(client)
 {
@@ -159,12 +163,12 @@ export function loadGuildProperty(property, required)
     } 
     res.locals[property] = req[property];
 
-    //auto detect an ChannelID or RoleID
-    if (property == "offTopicChannelID")
+    if (property == "rulesChannelID") //special case
     {
-      //console.log("off topic", req[property], property, GUILD_CACHE[req.guild.id]);
+      //do nothing
     }
-    if (req[property])
+    //auto detect an ChannelID or RoleID
+    else if (req[property])
     {
       if (property.endsWith("ChannelID"))
       {
@@ -240,6 +244,10 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
     return null;
     //anything else?
   }
+  if (property == "rulesChannelID") //special case
+  {
+    return await guild.rulesChannel;
+  }
   if (property.endsWith("ChannelID"))
   {
     property = property.replace("ChannelID", "Channel");
@@ -276,27 +284,13 @@ export async function saveGuildProperty(property, value, req, res)
   req[property] = value;
   GUILD_CACHE[req.guild.id][property] = value;
 
+  if (property == "rulesChannelID") //special case
+  {
+    var channel = await client.channels.fetch(req[property]);
+    await req.guild.setRulesChannel(channel);
+  }
+
   await loadGuildProperty(property, false)(req, res, () => {});
-/*
-  if (property.endsWith("ChannelID"))
-  {
-    property = property.replace("ChannelID", "Channel");
-    req.query.message = "Set "+property+" to #"+ req[property].name+".";
-  }
-  else if (property.endsWith("RoleID"))
-  {
-    property = property.replace("RoleID", "Role");
-    req.query.message = "Set "+property+" to @"+ req[property].name+".";
-  }
-  else if (property.endsWith("CategoryID"))
-  {
-    property = property.replace("CategoryID", "Category");
-    req.query.message = "Set "+property+" to @"+ req[property].name+".";
-  }
-  else
-  {
-    req.query.message = "Set "+property+" to "+ req[property]+".";
-  }*/
 }
 
 export async function deleteGuildProperty(guild, property)
@@ -306,6 +300,54 @@ export async function deleteGuildProperty(guild, property)
   toUpdate[property] = admin.firestore.FieldValue.delete();
   await guildDocument.update(toUpdate);
   delete GUILD_CACHE[guild.id][property];
+}
+
+//a series of functions to auto-fill the settings of the server. Ideally will work perfectly if done on the server template
+//these functions will modify the actual server config if the guess finds something and it was null
+export async function guessConfigurationValues(guild)
+{
+  console.log(`Guessing guild ${guild.name} configuration values...`);
+  await Promise.all(Object.keys(guessConfiguration).map( async (property) => 
+  { 
+    await guessConfigurationValue(guild, property);
+  }));
+}
+export async function guessConfigurationValue(guild, property, convert)
+{
+  var guessInfo = guessConfiguration[property];
+  if (guessInfo.type == "channel")
+  {
+    return await guessChannel(guild, property, guessInfo.name, convert);
+  }
+  else if (guessInfo.type == "category")
+    return null;//TODO
+  else if (guessInfo.type == "role")
+    return null;//TODO
+}
+async function guessChannel(guild, property, guess, convert) //guess should match the template
+{
+  console.log("guess channel",property);
+  var stored = await getGuildProperty(property, guild);
+  if (stored) {
+    console.log(`guess for ${property} didn't need to happen, it was already set ${stored}`);
+    if (convert)
+      return await getGuildPropertyConverted(property, guild);
+    else
+      return stored;
+  }
+  
+  var guessedChannel = await guild.channels.cache.find(c => c.name === guess);
+  console.log(`guess for ${property} found ${guessedChannel?.id ?? "NOTHING"}`);
+
+  if (guessedChannel)
+  {
+    //await setGuildProperty(guild, property, guessedChannel.id);
+  }
+
+  if (convert)
+    return guessedChannel;
+  else
+    return guessedChannel?.id;
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed

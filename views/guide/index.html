@@ -152,7 +152,8 @@ function inGuild()
         <p><button id="copyRules">Copy Rules Template</button> <%- include("../subViews/longBotCommandButton.html", 
             { 
                 text: "Get Bot to Post Rules",
-                url: "./guide/postRules"
+                url: "./guide/postRules",
+                data: '{ rulesText: $("#rules").val() }'
             }) %></p>
             
         <p>The text above can paste directly into Discord, and the emoji should appear. You may like to adjust these rules:</p>

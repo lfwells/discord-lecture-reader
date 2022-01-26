@@ -1,5 +1,5 @@
 import { init_client } from '../core/client.js';
-import { getGuildDocument, getGuildProperty, init_admin_users } from "./guild.js";
+import { getGuildDocument, getGuildProperty, guessConfigurationValues, init_admin_users } from "./guild.js";
 import * as config from "../core/config.js";
 
 export default async function(client)
@@ -9,6 +9,7 @@ export default async function(client)
         console.log("guildCreate", Object.assign({
             name:guild.name,
         }, config.DEFAULT_GUILD_PROPERTIES)); 
+
         var guildDocument = await getGuildDocument(guild.id);
         guildDocument.set(
             Object.assign({
@@ -16,6 +17,9 @@ export default async function(client)
             }, config.DEFAULT_GUILD_PROPERTIES),
             { merge: true }
         );
+
+        await guessConfigurationValues(guild);
+
         init_client(client);
     });
 

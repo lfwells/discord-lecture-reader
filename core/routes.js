@@ -62,6 +62,7 @@ function guildRouter()
     router.use(guild.loadGuildProperty("botName"));
     router.use(guild.loadGuildProperty("adminRoleID"));
     router.use(guild.loadGuildProperty("studentRoleID"));
+    router.use(guild.loadGuildProperty("rulesChannelID"));
     router.use(guild.loadGuildProperty("lectureChannelID"));
     router.use(guild.loadGuildProperty("awardChannelID"));
     router.use(guild.loadGuildProperty("offTopicChannelID"));
@@ -81,7 +82,7 @@ function guildRouter()
 
     router.get("/serverAdded", guild_routes.serverAdded);
     router.get("/guide", renderEJS("guide/index")); 
-    router.get("/guide/postRules", guide_routes.postRules); 
+    router.post("/guide/postRules", guide_routes.postRules); 
 
 
     //guild home page (dashboard)

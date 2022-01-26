@@ -26,7 +26,11 @@ var id = locals.id ?? uuid(); %>
         var last_response_len  = false;
         $.ajax({
             url:"<%=locals.url%>",
-            method:"get",
+            method:<%-typeof(locals.data) !== 'undefined' ? "'post'" : "'get'"%>,
+            data: <% if(typeof(locals.data) !== 'undefined')
+            {
+                %>JSON.stringify(eval(<%-locals.data%>))<%
+            } else { %>null<% }%>,
             contentType: 'application/json',
             xhrFields: {
                 onprogress: function(e)

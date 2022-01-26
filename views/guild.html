@@ -35,13 +35,23 @@
 
     <p><%- include("subViews/channelSelect.html", 
         { 
-            label: "Lecture Channel:",
+            label: "Rules Channel:",
             selectDefaultText:"-- Select Channel--",
-            id: "setLectureChannelID",
-            value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
+            id: "setRulesChannelID",
+            value: locals.rulesChannel ? locals.rulesChannel.id : undefined,
             type: "GUILD_TEXT",
-            help: "Which channel do lectures take place in? Useful for polls feature if used."
+            help: "Which channel is the one that contains the server's rules?"
         }) %></p>
+
+<p><%- include("subViews/channelSelect.html", 
+    { 
+        label: "Lecture Channel:",
+        selectDefaultText:"-- Select Channel--",
+        id: "setLectureChannelID",
+        value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
+        type: "GUILD_TEXT",
+        help: "Which channel do lectures take place in? Useful for polls feature if used."
+    }) %></p>
 
     <p><%- include("subViews/channelSelect.html", 
         { 
