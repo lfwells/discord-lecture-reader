@@ -12,6 +12,7 @@ import * as lecture_text_routes from '../lecture_text/routes.js';
 import * as poll_routes from '../polls/routes.js';
 import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 import * as invite_routes from "../invite/routes.js";
+import * as guide_routes from "../guide/routes.js";
 import { Router } from "express";
 import * as sheet_routes from "../sheets_test.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
@@ -79,7 +80,8 @@ function guildRouter()
     router.use(filterButtons);
 
     router.get("/serverAdded", guild_routes.serverAdded);
-    router.get("/guide", renderEJS("guide/index")); //TODO: we will see if need many folders
+    router.get("/guide", renderEJS("guide/index")); 
+    router.get("/guide/postRules", guide_routes.postRules); 
 
 
     //guild home page (dashboard)
