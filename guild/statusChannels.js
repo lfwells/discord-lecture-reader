@@ -37,8 +37,8 @@ async function init_status_channel(guild, name, feature, f)
 		var text = await f(guild);
 
 		var channelID = await getGuildPropertyConverted(key, guild);
-		var channel = channelID != null ? await guild.channels.fetch(channelID) : null; 
-		if (channel == undefined)
+		var channel = channelID != null ? await guild.channels.cache.find(c => c.id == channelID) : null; 
+		if (channel == null)
 		{
 			//create the channel
 			channel = await guild.channels.create(text, {

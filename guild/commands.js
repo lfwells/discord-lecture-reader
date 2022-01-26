@@ -31,7 +31,7 @@ export async function registerCommand(guild, commandData)
 
     if (registerAllOnStartUp || commandsToRegenerate.findIndex(e => e == commandData.name) >= 0)
     {
-        console.log("Registering Command", commandData.name,"...");
+        console.log("Registering Command", commandData.name," on ", guild.name, "...");
         await guild.commands.create(commandData)
     }
 }
@@ -42,7 +42,7 @@ export async function unregisterAllCommandsIfNecessary(guild)
     { 
         if (unregisterAllOnStartUp || commandsToUnregister.findIndex(e => e == commandData.name) >= 0)
         {
-            console.log("Unregistering Command", commandData.name,"...");
+            console.log("Unregistering Command", commandData.name," on ", guild.name, "...");
             await guild.commands.delete(commandData);
         }
     }));

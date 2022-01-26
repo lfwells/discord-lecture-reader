@@ -14,7 +14,7 @@ export default async function(client)
     // The data for our command
     const pollCommand = {
         name: config.POLL_COMMAND,
-        description: 'Ask everyone a question. Displays a poll graph with buttons for voting. Different voting styles supported.',
+        description: 'Displays a poll graph with buttons for voting. Different voting styles supported.',
         options: [
             { name: 'question', type: 'STRING', description: 'The poll question', required: true, },
             //TODO: options for: vote-once-only, hide-results (with admin reveal later), vertical, etc
