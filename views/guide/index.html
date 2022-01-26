@@ -13,13 +13,24 @@ function hasGuilds()
 {    
     return getGuilds().length > 0;
 }
-console.log(hasGuilds());
+function guideTabLink(text, link)
+{
+    return include("guideTabLink.html", {
+        text, link
+    });
+}
 %>
 <h1>User Guide</h1>
 
 <p>This page aims to give you a quick start guide to using Discord for teaching.</p>
 
-<p>You can also familiarise yourself with Discord for teaching with the information in this support article: <a href="https://support.discord.com/hc/en-us/articles/360041360311-Blog-How-to-use-Discord-for-your-classroom">https://support.discord.com/hc/en-us/articles/360041360311-Blog-How-to-use-Discord-for-your-classroom</a>.</p>
+<p>You may also find these Discord articles helpful:
+    <ul>
+        <li><a href="https://support.discord.com/hc/en-us/articles/360041360311-Blog-How-to-use-Discord-for-your-classroom">How to Use Discord for Your Classroom</a></li>
+        <li><a href="https://support.discord.com/hc/en-us/articles/360040613072-How-to-Use-Discord-for-Your-Classroom">How to Use Discord for Your Classroom (Blog Version)</a></li>
+        <li><a href="https://support.discord.com/hc/en-us/articles/213530048-Advanced-Community-Server-Setup">Advanced Community Server Setup</a></li>
+        <li><a href="https://support.discord.com/hc/en-us/articles/214836687-Role-Management-101">Role Management 101</a></li>
+    </ul></p>
 
 <% if (inGuild()) 
 { 
@@ -279,17 +290,120 @@ else
 </section>
 
 <p class="hint">The features in the rest of this guide rely on having the Discord bot in your server.<br />
-    <%=inGuild() ? "You've alraedy done that, so great job!" : "Follow the steps earlier in the guide." %></p>
+    <%=inGuild() ? "You've already done that, so great job!" : "Follow the steps earlier in the guide." %></p>
 
 <section id="bot">
     <a>
-        <h2>Adding A Discord Bot to a Server</h2>
+        <h2>Configuring the Bot and Basic Features (~10 mins)</h2>
+        <p class="description">The bot will work straight away without any configuration, but you can tweak things yourself.</p>
+    </a>
+    <div>
+        
+        <hr />
+        <h3>Setting the Bot Name</h3>
+        <p>&quot;UTAS Discord Bot&quot; is a pretty boring name. You can change what name the bot appears under on the server on the <%-guideTabLink("Configure Server Tab", "/")%>.</p>
+        <p class="centered">
+            <img src="/static/guide/botName.png" />
+        </p>
+
+        <hr />
+        <h3>Roles and Channels</h3>
+        <p>The bot works better when it knows about some of the key channel types in your server, like which channel is for Rules, which one is where lecture chat takes place etc.</p>
+        <p>When you add the bot to your server, it takes a guess at which channels are what (and should do a good job if you used the server template), but you should check everything is correct on the <%-guideTabLink("Configure Server Tab", "/")%>.</p>
+
+        <hr />
+        <h3>Enabling Features</h3>
+        <p>You can turn on or off various bot features using the <%-guideTabLink("Features Tab", "/features")%>.</p>
+        <p>When a feature is enabled, sometimes a new tab will appear along the top. Other features are so basic in their configuration, that settings will appear on the feature tab.</p>
+        <p class="centered">
+            <img src="/static/guide/features.png" />
+        </p>
+        
+        <p>Here are some basic features:</p>
+
+        <h4>Direct-Message New Students Upon Joining</h4>
+        <p class="centered">
+            <img src="/static/guide/joinDM.png" />
+        </p>
+        <p>When a student joins a unit for the first time, the bot can direct-message them to let them know what the bot is, and how they can use it.</p>
+        <p>Students are told not ask questions of the bot, as it cannot respond.</p>
+
+        <h4>TODOs</h4>
+        <p class="centered">
+            <img src="/static/guide/todo1.png" />
+        </p>
+        <p>You can flag a message to deal with later, or write a note to yourself using this feature. TODO Notes are sent to a channel called <strong>#todo</strong> that you need to set up (generally this should be in your <strong>Staff Channels</strong>  category.</p>
+        <p>Flag a message by right-clicking it, and selecting <strong>App/TODO</strong>.</p>
+
+        <h4>Show Online Member Count / Show Enrolled Member Count</h4>
+        <p class="centered">
+            <img src="/static/guide/memberCount.png" />
+        </p>
+        <p>This information appears in Discord in the top-left, and is updated very slowly.</p>       
+        
+        <h4>Custom Invites</h4>
+        <p class="centered">
+            <img src="/static/guide/customInvites.png" />
+        </p>
+        <p>You can attach a specific invite link to a given role. Users who join using that link will be given that role. You might like to use this for a Hobart / Launceston / Online link (however using the <a href="roleSelect">Role Select</a> command may be better for this.</p>
+        
+        <h4>Other Features</h4>
+        <p>The later sections of the guide talk about some more complex bot features.</p>
+    </div>
+</section>
+
+<section id="polls">
+    <a>
+        <h2>Feature: Polls</h2>
         <p class="description">TODO</p>
     </a>
     <div>
-        <p>TODO</p>
+
+        <p class="hint">Polls can be displayed in your lecture stream using the instructions in the <a href="#obs">Open Broadcaster Studio Integration</a> feature.</p>
     </div>
 </section>
+
+<section id="analytics">
+    <a>
+        <h2>Feature: Post and Attendance Tracking</h2>
+        <p class="description">TODO</p>
+    </a>
+    <div>
+
+    </div>
+</section>
+
+<section id="achievements">
+    <a>
+        <h2>Feature: Achievement System</h2>
+        <p class="description">Give out achievements to students for various things. Add achievement icons that can appear next to student names.</p>
+    </a>
+    <div>
+
+        <p class="hint">Note that you (the server owner) cannot have achievement icons in your name, as the bot isn't allowed to do that. The same applies to anyone with <a href="https://support.discord.com/hc/en-us/articles/214836687-Role-Management-101">a higher-level role</a>.</p>
+    </div>
+</section>
+
+<section id="sessions">
+    <a>
+        <h2>Feature: Scheduled Sessions</h2>
+        <p class="description">TODO</p>
+    </a>
+    <div>
+
+    </div>
+</section>
+
+<section id="obs">
+    <a>
+        <h2>Feature: Open Broadcaster Studio Integration</h2>
+        <p class="description">TODO</p>
+    </a>
+    <div>
+        <p class="centered"><a target="_blank" href="https://obsproject.com/" class="botFunction">Download Open Broadcaster Studio</a></p>
+    </div>
+</section>
+
 
 <script>
 $(document).ready(function () {

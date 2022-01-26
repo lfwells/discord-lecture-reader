@@ -400,10 +400,10 @@
             padding: 1em;
         }
         .optional > a { margin:-1em; }
-        section a {
+        section > a {
             padding: 1em;
         }
-        section a:hover
+        section > a:hover
         {
             background-color: rgba(255,255,255,0.3);
         }
@@ -412,6 +412,10 @@
         {
             display:none;
             margin-left:48px;
+        }
+        section:target > div
+        {
+            display:block;
         }
         section .description
         {
@@ -442,10 +446,14 @@
             padding: 1em;
         }
 
-        p.botFunction
+        p.botFunction, .guideTabLink
         {
             color: #7289DA;
             font-weight: bold;
+        }
+        .guideTabLink:hover
+        {
+            background-color: white;
         }
         button.botFunction, a.botFunction
         {
