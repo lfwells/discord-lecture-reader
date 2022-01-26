@@ -37,6 +37,7 @@ function defaultRouter()
     router.get("/", guild_routes.guildList);
     router.get("/createFromTemplate", renderEJS("createFromTemplate"));
     router.get("/serverAdded", guild_routes.serverAddedRedirect);
+    router.get("/serverAddedInGuide", guild_routes.serverAddedInGuideRedirect);
     router.get("/guide", renderEJS("guide/index")); //TODO: we will see if need many folders
 
     //login

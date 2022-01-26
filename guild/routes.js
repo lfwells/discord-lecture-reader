@@ -17,15 +17,28 @@ export async function guildList(req, res)
 export function serverAddedRedirect(req,res,next)
 {
   var guildID = req.query.guild_id;
-  if (guildID)
+  return _serverAddedRedirect(`/guild/${guildID}/serverAdded`)(req,res,next);
+}
+export function serverAddedInGuideRedirect(req,res,next)
+{
+  var guildID = req.query.guild_id;
+  return _serverAddedRedirect(`/guild/${guildID}/guide#serverAdded`)(req,res,next);
+}
+function _serverAddedRedirect(redirect) 
+{
+  return function(req,res,next)
   {
-    console.log(guildID);
-    res.redirect(`/guild/${guildID}/serverAdded`);
-  }
-  else
-  {
-    renderErrorPage(req.query.error_description)(req,res,next);
-  }
+    var guildID = req.query.guild_id;
+    if (guildID)
+    {
+      console.log(guildID);
+      res.redirect(redirect);
+    }
+    else
+    {
+      renderErrorPage(req.query.error_description)(req,res,next);
+    }
+  };
 }
 export function serverAdded(req,res,next)
 {

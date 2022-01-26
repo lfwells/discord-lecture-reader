@@ -147,9 +147,11 @@
     }
 
     .discordUser {
-        position: fixed;
-        right:1em;
-        top:1em;
+        float: right;
+        margin-top: -64px;
+    }
+    .discordUser.loginButton {
+        margin-top: -32px;
     }
     .discordUser img
     {
@@ -258,6 +260,13 @@
         { 
             padding: 2em;
             padding-top:0.5em;
+            margin-top:-1em !important;
+            background-color: rgba(0,0,0,0.1);
+            min-height: 80vh;
+        }
+        main, header > *, footer
+        {
+            max-width:1000px; margin:0 auto;
         }
 
         footer {
@@ -306,6 +315,7 @@
             background-color: #7289DA;
             
             border-radius: 8px;
+            border: 4px solid #7289DA;
             max-width:250px;
             padding-left:4ex !important;
             padding-right:4ex !important;
@@ -321,6 +331,9 @@
         .btnAdd + span { 
             display:inline-block;
             margin-left:2ex;
+        }
+        .btnAdd.outline {
+            background-color: transparent;
         }
 
         .panel { margin-left:4ex; }
@@ -412,4 +425,14 @@
         }
         section li{
             padding:0.5em;
+        }
+        .centered
+        {
+            text-align: center;
+        }
+
+        .hint {
+            border: 2px solid #7289DA;
+            border-radius:8px;
+            padding: 1em;
         }
