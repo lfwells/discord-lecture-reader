@@ -83,6 +83,7 @@ function guildRouter()
     router.get("/serverAdded", guild_routes.serverAdded);
     router.get("/guide", renderEJS("guide/index")); 
     router.post("/guide/postRules", guide_routes.postRules); 
+    router.post("/guide/configureWelcomeScreen", guide_routes.configureWelcomeScreen);
 
 
     //guild home page (dashboard)

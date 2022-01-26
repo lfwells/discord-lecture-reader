@@ -8,7 +8,7 @@ function uuid() {
 
 var id = locals.id ?? uuid(); %>
 
-<button id="<%=id%>"><%=locals.text%></button>
+<button id="<%=id%>" class="botFunction"><%=locals.text%></button>
 <script>
     if (typeof(resultWindows) === 'undefined') resultWindows = {};
     document.getElementById('<%=id%>').addEventListener('click',function() 
