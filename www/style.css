@@ -447,10 +447,15 @@
             color: #7289DA;
             font-weight: bold;
         }
-        button.botFunction
+        button.botFunction, a.botFunction
         {
             background-color: #7289DA;
             font-weight: bold;
             color:white !important;
             padding:0.5em;
+        }
+        a.botFunction
+        {
+            margin:1em;
+            display:inline-block;
         }

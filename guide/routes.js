@@ -3,6 +3,17 @@ import { beginStreamingRes } from "../core/server.js";
 import { pluralize } from "../core/utils.js";
 import { guessConfigurationValue } from "../guild/guild.js";
 
+export async function guide(req,res,next)
+{
+    res.render("guide", {
+        guilds: req.guilds
+    });
+}
+export async function downloadMyLOGuideFile(req,res,next)
+{
+    res.download(`www/guide/discord_for_students.html`);
+}
+
 export async function postRules(req,res,next)
 {
     var client = getClient();

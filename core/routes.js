@@ -35,11 +35,13 @@ function defaultRouter()
     var router = Router({ mergeParams: true });
 
     //home page (select guild)
-    router.get("/", guild_routes.guildList);
+    router.get("/", guild_routes.loadGuildList, guild_routes.guildList);
     router.get("/createFromTemplate", renderEJS("createFromTemplate"));
     router.get("/serverAdded", guild_routes.serverAddedRedirect);
     router.get("/serverAddedInGuide", guild_routes.serverAddedInGuideRedirect);
-    router.get("/guide", renderEJS("guide/index")); //TODO: we will see if need many folders
+
+    router.get("/guide", guild_routes.loadGuildList, guide_routes.guide); 
+    router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
 
     //login
     router.get("/login", login_routes.loginPage);
@@ -81,7 +83,8 @@ function guildRouter()
     router.use(filterButtons);
 
     router.get("/serverAdded", guild_routes.serverAdded);
-    router.get("/guide", renderEJS("guide/index")); 
+    router.get("/guide", guide_routes.guide); 
+    router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
     router.post("/guide/postRules", guide_routes.postRules); 
     router.post("/guide/configureWelcomeScreen", guide_routes.configureWelcomeScreen);
 

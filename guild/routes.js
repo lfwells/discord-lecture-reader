@@ -3,13 +3,18 @@ import * as config from "../core/config.js";
 import { renderErrorPage } from "../core/server.js";
 import { isOutsideTestServer } from "../core/utils.js";
 
-import { getAdminGuilds, GUILD_CACHE, saveGuildProperty, setBotNickname } from "./guild.js";
+import { getAdminGuilds, saveGuildProperty, setBotNickname } from "./guild.js";
 
+export async function loadGuildList(req,res,next)
+{
+  var client = getClient();
+  req.guilds = (await getAdminGuilds(client, req)).filter(g => !isOutsideTestServer(g)).sort((a, b) => a.name.localeCompare(b.name));
+  next();
+}
 export async function guildList(req, res) 
 {  
-  var client = getClient();
   res.render('guildList', {
-    guilds: (await getAdminGuilds(client, req)).filter(g => !isOutsideTestServer(g)).sort((a, b) => a.name.localeCompare(b.name)),
+    guilds: req.guilds,
     testMode: config.getTestMode(),
   });
 }
