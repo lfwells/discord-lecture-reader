@@ -69,6 +69,7 @@ export async function guildHomePost(req, res, next)
     var value = req.body[setting];
     if (value == "__DISCORD_BOT_NONE__") return;
 
+    console.log(property, value);
     await saveGuildProperty(property, value, req, res);
   }));
 

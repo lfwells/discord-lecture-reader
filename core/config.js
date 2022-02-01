@@ -34,3 +34,6 @@ export function setTestMode(enabled) { _TEST_MODE = enabled; }
 
 //use this to speed up the analytics pages for dev testing
 export const USE_CACHED_FAKE_KIT109_DATA = false;
+
+//TODO: use this
+export const SELECT_FIELD_NONE = "__DISCORD_BOT_NONE__";

@@ -7,19 +7,24 @@
         class="<%=typeof className !== 'undefined' ? className : "" %>">
         <option value="__DISCORD_BOT_NONE__"><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
         <%
+        function displayChannel(channel)
+        {
+            if (typeof type !== 'undefined' && channel.type != type) return;
+
+            %><option value="<%= channel.id %>"
+                <% if (value && channel.id == value) { %>selected<% } %>>
+                <%= channel.name %>
+            </option><%
+        }
+
+        var noCategoryChannels =  guild.channels.cache.filter(channel => channel.type !== "GUILD_CATEGORY" && channel.parent == null).sort((a,b) => a.position - b.position)
+        noCategoryChannels.forEach(displayChannel);
+
         var categoryChannels = guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
         categoryChannels.forEach(cat => { %>
             <optgroup label="<%= cat.name %>">
                 <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
-                sortedChannels.forEach(function(channel)
-                { 
-                    if (typeof type !== 'undefined' && channel.type != type) return;
-
-                    %><option value="<%= channel.id %>"
-                        <% if (value && channel.id == value) { %>selected<% } %>>
-                        <%= channel.name %>
-                    </option><%
-                }) %>
+                sortedChannels.forEach(displayChannel) %>
             </optgroup>
         <% }); %>
     </select>    

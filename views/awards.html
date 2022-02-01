@@ -43,7 +43,7 @@ function award(studentDiscordID, emoji, button)
         data:{
             studentDiscordID:studentDiscordID,
             emoji:emoji,
-            popupChannelID:$('input[name="popupChannelID"]:checked').val(),
+            popupChannelID:$('#popupChannelID').val(),
         },
         dataType: "json",
         success:(json) =>
@@ -69,17 +69,12 @@ function award(studentDiscordID, emoji, button)
 <%- locals.classlistFilters() %>
 
 <div>
-  <% if ( (typeof locals.offTopicChannel != 'undefined' && locals.offTopicChannel)) 
-  { 
-    %><label><input name="popupChannelID" value="<%=locals.offTopicChannel.id%>" type="radio" checked /> Show achievement popup in <%=locals.offTopicChannel.name%></label><br/><%
-  }
-  %>
-  <% if ( (typeof locals.lectureChannel != 'undefined' && locals.lectureChannel)) 
-  { 
-    %><label><input name="popupChannelID" value="<%=locals.lectureChannel.id%>" type="radio" /> Show achievement popup in <%=locals.lectureChannel.name%></label><br/><%
-  }
-  %>
-    <label><input name="popupChannelID" value="" type="radio" /> No Popup</label>
+    <%- include("subViews/channelSelect.html", { 
+        label: "Post popup in channel:",
+        selectDefaultText:"-- No Popup --",
+        id: "popupChannelID",
+        value: (typeof locals.offTopicChannelID != 'undefined' && locals.offTopicChannelID) ? locals.offTopicChannelID : "__DISCORD_BOT_NONE__"
+    }) %>
 </div>
 <br/>
 <table border="1" cellpadding="0" cellspacing="0">

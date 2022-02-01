@@ -166,7 +166,9 @@ export function loadGuildProperty(property, required)
 
     if (property == "rulesChannelID") //special case
     {
-      //do nothing
+      req[channelProperty] = await req.guild.rulesChannelID;
+      res.locals[channelProperty] = req[channelProperty];
+      GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
     }
     //auto detect an ChannelID or RoleID
     else if (req[property])
@@ -247,7 +249,7 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
   }
   if (property == "rulesChannelID") //special case
   {
-    return await guild.rulesChannel;
+    return await guild.rulesChannel.id;
   }
   if (property.endsWith("ChannelID"))
   {
@@ -287,6 +289,7 @@ export async function saveGuildProperty(property, value, req, res)
 
   if (property == "rulesChannelID") //special case
   {
+    var client = getClient();
     var channel = await client.channels.fetch(req[property]);
     await req.guild.setRulesChannel(channel);
   }
