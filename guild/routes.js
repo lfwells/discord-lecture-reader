@@ -89,3 +89,12 @@ export async function guildFeatures(req, res)
 
   res.render("guildFeatures");
 }
+export async function setFeature(req, res) 
+{  
+  var property = req.body.feature;
+  var value = req.body.value ?? false;
+  console.log(property, value);
+  await saveGuildProperty("feature_"+property, value, req, res);
+
+  res.json({success:true});
+}

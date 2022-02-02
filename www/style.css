@@ -518,3 +518,8 @@
             display: inline-block;
             vertical-align: top;
         }
+
+        .saved {
+            color: #7289DA;
+            font-weight: bold;
+        }

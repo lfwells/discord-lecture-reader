@@ -96,6 +96,7 @@ function guildRouter()
     router.get("/obs/", basic_render("obs")); 
 
     router.get("/features/", guild_routes.guildFeatures); 
+    router.post("/setFeature/", guild_routes.setFeature); 
 
     //awards
     router.get("/namesTest/", award_routes.namesTest); 

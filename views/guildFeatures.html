@@ -1,4 +1,10 @@
 <%- include('header.html') %>
+<% 
+function hasFeature(feature)
+{
+    return locals["feature_"+feature];
+}
+%>
 
 <h2>Enable/Disable Features</h2>
 
@@ -6,29 +12,20 @@
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "Achievements",
-        feature: "achievements"
+        feature: "achievements",
+        onChanged: '$("#achievementsFeature").toggle(value)'
     }) %>
 </dt>
 
-    <dd>
-    <% 
-    function hasFeature(feature)
-    {
-        return locals["feature_"+feature];
-    }
-
-    if (hasFeature("achievements"))
-    {
-        %><%- include("subViews/channelSelect.html", 
+    <dd id="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+     <%- include("subViews/channelSelect.html", 
         { 
             label: "Achievements Channel:",
             selectDefaultText:"-- Select Channel--",
             id: "setAwardChannelID",
             value: locals.awardChannel ? locals.awardChannel.id : undefined
-        }) %><%
-    }
-    %>
-</dd>
+        }) %>
+    </dd>
 
 
 <dt><%- include("subViews/featureSelect.html", 
