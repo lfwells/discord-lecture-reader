@@ -478,7 +478,7 @@
             padding: 16px;
             margin-top: -8px;
             margin-left: -32px;
-            width: 200px;
+            width: 250px;
             min-height: 110vh;
             display: inline-block;
         
@@ -487,6 +487,10 @@
         {
             position:sticky;
             top:32px;
+        }
+        #toc > div > ul{
+            max-height: 95vh;
+            overflow-y: scroll;
         }
         #toc > div > ul {
             margin-top:-24px;
@@ -499,10 +503,17 @@
         #toc > div > ul > li {
             margin-top:2em;
         }
+        #toc * {
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;  /* Firefox */
+        }
+        #toc *::-webkit-scrollbar { 
+            display: none;  /* Safari and Chrome */
+        }
 
         content
         {
-            width: 770px;
+            width: 720px;
 
             display: inline-block;
             vertical-align: top;
