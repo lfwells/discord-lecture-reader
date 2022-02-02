@@ -366,7 +366,25 @@ function guideTabLink(text, link)
             <p class="centered">
                 <img src="/static/guide/memberCount.png" />
             </p>
-            <p>This information appears in Discord in the top-left, and is updated very slowly.</p>       
+            <p>This information appears in Discord in the top-left, and is updated very slowly.</p>    
+            <% if (inGuild()) {
+                %><p>
+                <%- include("../subViews/featureSelect.html", 
+                { 
+                    label: "Show Online Member Count",
+                    feature: "showOnlineMemberCount",
+                    className:"botFunction"
+                }) %></p>
+                <p>
+                <%- include("../subViews/featureSelect.html", 
+                { 
+                    label: "Show Enrolled Member Count",
+                    feature: "showMemberCount",
+                    className:"botFunction"
+                }) %>
+                </p>   
+                <%
+            }%>
             
             <h4>Custom Invites</h4>
             <p class="centered">

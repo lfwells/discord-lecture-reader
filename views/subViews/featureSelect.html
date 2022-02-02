@@ -8,9 +8,11 @@ function uuid() {
 
 var id = locals.id ?? uuid(); %>
 
-<label id="<%=id%>">
+<label 
+    id="<%=id%>"
+    class="<%=typeof className !== 'undefined' ? className : "" %>">
+    
     <input type="checkbox" 
-        class="<%=typeof className !== 'undefined' ? className : "" %>"
         <% 
         if (locals["feature_"+feature])
         {
@@ -30,7 +32,7 @@ var id = locals.id ?? uuid(); %>
             $(label).text("Loading...");
 
             $.ajax({
-                url: "../setFeature",
+                url: "/guild/<%=locals.guild.id%>/setFeature",
                 method:"post",
                 data: JSON.stringify({
                     feature: "<%=feature%>",

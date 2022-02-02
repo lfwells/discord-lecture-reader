@@ -447,7 +447,7 @@
             padding: 1em;
         }
 
-        p.botFunction, .guideTabLink
+        p.botFunction, .guideTabLink, label.botFunction
         {
             color: #7289DA;
             font-weight: bold;
