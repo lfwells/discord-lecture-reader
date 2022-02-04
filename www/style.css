@@ -440,6 +440,10 @@
         { 
             vertical-align: top;
         }
+        .centered > img
+        {
+            max-width: 100%;
+        }
 
         .hint {
             border: 2px solid #7289DA;

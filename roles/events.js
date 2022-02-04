@@ -163,7 +163,7 @@ async function doRoleSelectCommandButton(i, originalInteraction)
     { 
         if (role.name.toLowerCase() == roleName)
         {
-            if (limit_to_one == false && await hasRole(i.guild, i.member, role))
+            if (limit_to_one == false && await hasRole(i.member, role))
             {
                 await unAssignRole(i.guild, i.member, role);
                 console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);
@@ -179,7 +179,7 @@ async function doRoleSelectCommandButton(i, originalInteraction)
         }
         else if (limit_to_one)
         {
-            var hadRole = await hasRole(i.guild, i.member, role);
+            var hadRole = await hasRole(i.member, role);
 
             await unAssignRole(i.guild, i.member, role);
             console.log(`unassigned ${i.member.nickname ?? i.member.username} from ${role.name}`);

@@ -98,3 +98,14 @@ export async function setFeature(req, res)
 
   res.json({success:true});
 }
+export async function setGuildProperty(req, res)
+{
+  var property = req.body.id;
+  property = property.replace("set", "");
+  property = property.charAt(0).toLowerCase() + property.slice(1);
+  var value = req.body.value ?? false;
+  console.log(property, value);
+  await saveGuildProperty(property, value, req,res);
+  
+  res.json({success:true});
+}

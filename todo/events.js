@@ -1,6 +1,7 @@
-import { Permissions } from "discord.js";
-import { registerCommand } from "../guild/commands.js";
-import { getGuildProperty, getGuildPropertyConverted } from "../guild/guild.js";
+import { getCachedInteraction, registerCommand } from "../guild/commands.js";
+import { getGuildProperty, getGuildPropertyConverted, hasFeature } from "../guild/guild.js";
+import { isAdmin } from "../roles/roles.js";
+import { MessageActionRow, MessageButton } from 'discord.js';
 
 export default async function(client)
 {    
@@ -21,18 +22,24 @@ export default async function(client)
     });
 
     client.on('interactionCreate', async function(interaction) 
-    {
-        // If the interaction isn't a slash command, return
-        if (!interaction.isContextMenu()) return;
-    
-        // Check if it is the correct command
-        if (interaction.commandName === "Mark TODO") 
+    {    
+        if (interaction.isContextMenu())
         {
-            doTodoCommand(interaction);            
+            if (interaction.commandName === "Mark TODO") 
+            {
+                doTodoCommand(interaction);            
+            }
+            if (interaction.commandName === "todo") 
+            {
+                doTodoCommand(interaction);             
+            }
         }
-        if (interaction.commandName === "todo") 
+        else if (interaction.isMessageComponent())
         {
-            doTodoCommand(interaction);             
+            if (interaction.message.interaction.commandName === "Mark TODO") 
+            {
+                await doTodoCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            }
         }
     });
 
@@ -53,17 +60,26 @@ export default async function(client)
         //console.log("reaction.emoji.name", reaction.emoji.name, todoEmoji, todoEmoji == reaction.emoji.name);
         if (todoEmoji == reaction.emoji.name)
         {
-            doTodoCommand(null, reaction.message);   
+            doTodoCommand(null, reaction.message, user);   
         }
     });
 
 }
 
-async function doTodoCommand(interaction, reactMessage)
+async function doTodoCommand(interaction, reactMessage, reactedBy)
 {
     console.log("Todo command");
     //this can take too long to reply, so we immediately reply
     if (interaction) await interaction.deferReply({ ephemeral: true });
+
+    if (interaction)
+    {
+        if (await hasFeature(interaction.guild, "todos") == false) 
+        {
+            return await interaction.editReply("The TODO feature hasn't been enabled on this server.");
+        }
+    }
+
     //TODO: allow option to inform user that they have been marked as a todo?
 
     var originalMessage = reactMessage ?? await interaction.channel.messages.fetch(interaction.targetId);
@@ -72,18 +88,34 @@ async function doTodoCommand(interaction, reactMessage)
     var message = {
         //title:"TODO",
         author:{
-            name: (originalMessage.member && originalMessage.member.nickname) ?? originalMessage.user.username
+            name: (originalMessage.member ? originalMessage.member.displayName : "Unknown Author")
         },
         description:originalMessage.cleanContent
     };
 
+    
+    var ephemeralComponents = [];
+    if (originalMessage.member)
+    {
+        const row = new MessageActionRow()
+        .addComponents(
+            new MessageButton()
+                .setCustomId("letThemKnow")
+                .setLabel(`Let ${originalMessage.member.displayName} know you've marked this as a TODO`)
+                .setStyle('PRIMARY')
+        );
+        ephemeralComponents = [ row ];
+    }
+
     //only allow if user is admin
     var member = reactMessage ? reactMessage.member : interaction.member;
     var user = reactMessage ? reactMessage.member.user : interaction.user;
-    if (member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) == false)
+    if (await isAdmin(member) == false)
     {
+        if (reactMessage) return; //don't let non-admins do the emoji-react version, they will stumble on it
+
         var post = await user.send({ embeds:[message], content:"New TODO: "+originalMessage.url });
-        if (interaction) interaction.editReply("TODO sent as a DM "+post.url);
+        if (interaction) interaction.editReply({ content:"TODO sent as a DM "+post.url, components: ephemeralComponents});
     }
     else
     {
@@ -92,12 +124,35 @@ async function doTodoCommand(interaction, reactMessage)
         if (todoChannel)
         {
             var post = await todoChannel.send({ embeds:[message], content:"New TODO:"+originalMessage.url });   
-            if (interaction) interaction.editReply("TODO sent to <#"+todoChannel.id+"> "+post.url);
+            if (interaction) interaction.editReply({ content:"TODO sent to <#"+todoChannel.id+"> "+post.url, components: ephemeralComponents});
         }
         else
         {
-            var post = await interaction.user.send({ embeds:[message], content:"New TODO (note: you can get these messages in a todo channel if you configure it): "+originalMessage.url });
-            if (interaction) interaction.editReply("TODO send as a DM "+post.url);
+            if (isAdmin(interaction.member))
+            {
+                var post = await interaction.user.send({ embeds:[message], content:"New TODO (note: you can get these messages in a todo channel if you configure it): "+originalMessage.url });
+                if (interaction) interaction.editReply({ content:"TODO sent as a DM "+post.url, components: ephemeralComponents});
+            }
+            else
+            {
+                var post = await interaction.user.send({ embeds:[message] });
+                if (interaction) interaction.editReply({ content:"TODO sent as a DM "+post.url, components: ephemeralComponents});
+            }
         }
+        if (reactMessage)
+            reactMessage.reply({content: `Your message has been marked as a TODO by <@${reactedBy.id}>`});
     }
 }
+async function doTodoCommandButton(i, originalInteraction)
+{
+    if (i.customId === 'letThemKnow') {
+        var originalMessageID = originalInteraction.options.getMessage();
+        var originalMessage = await i.channel.messages.fetch(originalMessageID);
+        originalMessage.reply({
+            content: `Your message has been marked as a TODO by <@${i.member.id}>.`
+        });
+        
+        await i.update({ content: i.content, components:[] });
+    }
+}
+

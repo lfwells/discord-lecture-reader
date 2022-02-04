@@ -1,5 +1,5 @@
 import { init_client } from '../core/client.js';
-import { getGuildDocument, getGuildProperty, guessConfigurationValues, init_admin_users } from "./guild.js";
+import { getGuildDocument, getGuildProperty, guessConfigurationValues, hasFeature, init_admin_users } from "./guild.js";
 import * as config from "../core/config.js";
 
 export default async function(client)
@@ -43,10 +43,13 @@ export default async function(client)
     //TODO: only send a message if we've NEVER seen them before (or maybe send a "welcome back" message)
     client.on("guildMemberAdd", async function(newMember) {
         console.log("a new guild member has joined!");
-        newMember.send(`Hello ${newMember.displayName} and welcome to the **${newMember.guild.name}** Server!`);
-        newMember.send(`I'm ${await getGuildProperty("botName", newMember.guild, "Robo Lindsay")}. I'm a bot that you might see from time to time on the server. I'm here to help out and make the server more awesome!`);
-        newMember.send(`If you would like to know more about what I can do, then type \`/help\` here or on the server.`);
-        newMember.send(`Note, I *am* a robot, and staff members *won't* read these messages!`);
+        if (hasFeature("dm_intro"))
+        {
+            newMember.send(`Hello ${newMember.displayName} and welcome to the **${newMember.guild.name}** Server!`);
+            newMember.send(`I'm ${await getGuildProperty("botName", newMember.guild, "Robo Lindsay")}. I'm a bot that you might see from time to time on the server. I'm here to help out and make the server more awesome!`);
+            newMember.send(`If you would like to know more about what I can do, then type \`/help\` here or on the server.`);
+            newMember.send(`Note, I *am* a robot, and staff members *won't* read these messages!`);
+        }
     });
     //Handle DM replies
     client.on("messageCreate", function(message)

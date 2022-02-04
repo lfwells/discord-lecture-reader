@@ -3,6 +3,7 @@ import * as config from "./config.js";
 import { renderFile } from "ejs";
 import { getStats } from "../analytics/analytics.js";
 import { getClient } from "./client.js";
+import { isAdmin } from "../roles/roles.js";
 
 
 export function loadClassList(req,res,next)
@@ -74,9 +75,7 @@ export async function _loadClassList(req,res,next, includeRemoved)
     {
         console.log(req.query.includeAdmin);
 
-        var adminRoleID = await getGuildProperty("adminRoleID", req.guild, undefined, true);
-        if (adminRoleID)
-            classList = classList.filter(m => m.member.roles == null || m.member.roles.cache.has(adminRoleID) == false); 
+        classList = classList.filter(m => !isAdmin(m.member)); 
     }
     else if (req.query)
     {

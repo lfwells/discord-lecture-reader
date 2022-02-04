@@ -77,6 +77,8 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_analytics"));
     router.use(guild.loadGuildProperty("feature_invites"));
     router.use(guild.loadGuildProperty("feature_obs"));
+    router.use(guild.loadGuildProperty("feature_todos"));
+    router.use(guild.loadGuildProperty("feature_dm_intro"));
 
 
     //TODO: this filterButtons could be expensive, I didn't realise!
@@ -97,6 +99,7 @@ function guildRouter()
 
     router.get("/features/", guild_routes.guildFeatures); 
     router.post("/setFeature/", guild_routes.setFeature); 
+    router.post("/setGuildProperty/", guild_routes.setGuildProperty); 
 
     //awards
     router.get("/namesTest/", award_routes.namesTest); 

@@ -23,7 +23,8 @@ function hasFeature(feature)
             label: "Achievements Channel:",
             selectDefaultText:"-- Select Channel--",
             id: "setAwardChannelID",
-            value: locals.awardChannel ? locals.awardChannel.id : undefined
+            value: locals.awardChannelID,
+            onChangedURL: "setGuildProperty"
         }) %>
     </dd>
 
@@ -54,44 +55,43 @@ function hasFeature(feature)
         feature: "invites"
     }) %></dt>
 </dl>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Bot DMs Students On Joining Server",
+        feature: "dm_intro",
+    }) %></dt>
 
-
+    <dd>
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "TODOs",
-        feature: "todos"
+        feature: "todos",
+        onChanged: '$("#todoFeature").toggle(value)'
     }) %>
 </dt>
 
-    <dd>
-    <% 
-
-    if (hasFeature("todos"))
-    {
-        %><%- include("subViews/channelSelect.html", 
+<div id="todoFeature" >
+    <dd style="display:<%=hasFeature("todos") ? "block" : "none"%>""><%- include("subViews/channelSelect.html", 
         { 
             label: "TODOs Channel:",
             selectDefaultText:"-- Select Channel--", 
             id: "setTodoChannelID",
-            value: locals.todoChannelID ? locals.todoChannelID.id : undefined
-        }) %><%
-    }
-    %>
+            value: locals.todoChannelID,
+            onChangedURL: "setGuildProperty"
+        }) %>
     </dd>
+
     <dd>
-        <% 
-    
-        if (hasFeature("todos"))
-        {
-            %><%- include("subViews/guildSettingText.html", 
+        <%- include("subViews/guildSettingText.html", 
             { 
                 label: "TODOs Emoji (For tagging on mobile):",
                 id: "setTodoEmoji",
-                value: locals.todoEmoji ? locals.todoEmoji : ""
-            }) %><%
-        }
-        %>
+                value: locals.todoEmoji ? locals.todoEmoji : "",
+                help:"You can paste from <a href='https://emojipedia.org/'>https://emojipedia.org/</a>.",
+                onChangedURL: "setGuildProperty"
+            }) %>
         </dd>
+</div>
 
     <h3>Status Channels</h3>
     <p>These appear at the top of the channel list, showing status information. They update slowly, and may take up to 10 minutes before they appear for the first time.</p>

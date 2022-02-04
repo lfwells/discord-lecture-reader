@@ -92,17 +92,22 @@ export function init_interaction_cache(client)
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand() || interaction.guild == undefined) return;
+        if ((!interaction.isCommand() && !interaction.isContextMenu()) || interaction.guild == undefined) return;
     
         await cacheInteraction(interaction);
     });
 }
 async function cacheInteraction(interaction)
 {
+    var options = interaction.options.data;
+    options.forEach(o => {
+        if (o.message)
+            o.message = o.message.id;
+    });
     var data = {
         id: interaction.id,
         commandName: interaction.commandName,
-        options: interaction.options.data //this is SUPER limited...
+        options: options //this is SUPER limited...
     };
     console.log(data);
 
@@ -122,6 +127,9 @@ export async function getCachedInteraction(guild, interactionID)
         interaction.options.getBoolean = function(key) { var r =  interaction.options.find(e => e.type == "BOOLEAN" && e.name == key); return r ? r.value : null; }
         interaction.options.getInteger = function(key) { var r =  interaction.options.find(e => e.type == "INTEGER" && e.name == key); return r ? r.value : null; }
         //TODO: others
+        interaction.options.getMessage = function() {
+            var r =  interaction.options.find(e => e.type == "_MESSAGE" ); return r ? r.message : null; 
+        }
     }
 
     return interaction;
