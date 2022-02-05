@@ -103,8 +103,11 @@ async function cacheInteraction(interaction)
     options.forEach(o => {
         if (o.message)
             o.message = o.message.id;
+            console.log(o);
         if (o.user)
             o.user = o.user.id;
+        if (o.member)
+            o.member = o.member.id;
     });
     var data = {
         id: interaction.id,
@@ -133,7 +136,8 @@ export async function getCachedInteraction(guild, interactionID)
         interaction.options.getString = function(key)  { var r = interaction.options.find(e => e.type ==  "STRING"  && e.name == key); return r ? r.value : null; }
         interaction.options.getBoolean = function(key) { var r =  interaction.options.find(e => e.type == "BOOLEAN" && e.name == key); return r ? r.value : null; }
         interaction.options.getInteger = function(key) { var r =  interaction.options.find(e => e.type == "INTEGER" && e.name == key); return r ? r.value : null; }
-        interaction.options.getUser = function(key) { var r =  interaction.options.find(e => e.type == "USER" && e.name == key); return r ? r.value : null; }
+        interaction.options.getUser = function(key) { var r =  interaction.options.find(e => e.type == "USER" && e.name == key); return r ? r.user : null; }
+        interaction.options.getMember = function(key) { var r =  interaction.options.find(e => e.type == "USER" && e.name == key); return r ? r.member : null; }
         //TODO: others
         interaction.options.getMessage = function() {
             var r =  interaction.options.find(e => e.type == "_MESSAGE" ); return r ? r.message : null; 

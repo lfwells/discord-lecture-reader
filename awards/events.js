@@ -258,13 +258,15 @@ async function doAwardCommand(interaction)
             else
             {
                 interaction.user.send("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)");
+                //interaction.editReply("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)", {ephemeral:true});
             }
         }
     
     }
     else
     {
-        interaction.editReply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
+        interaction.user.send("You don't have permission to `/award` achievements. You can suggest an award to your UC though!");
+        //interaction.editReply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
     }
 }
 
