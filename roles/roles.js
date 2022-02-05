@@ -45,7 +45,7 @@ export async function unAssignRole(guild, member, role)
 
 export async function hasRole(member, role)
 {
-    return await hasRole(member, role.id);
+    return await hasRoleID(member, role.id);
 }
 export async function hasRoleID(member, roleID)
 {

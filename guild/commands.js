@@ -103,6 +103,8 @@ async function cacheInteraction(interaction)
     options.forEach(o => {
         if (o.message)
             o.message = o.message.id;
+        if (o.user)
+            o.user = o.user.id;
     });
     var data = {
         id: interaction.id,
@@ -114,18 +116,24 @@ async function cacheInteraction(interaction)
     var guildDocument = await getGuildDocument(interaction.guild.id);
     await guildDocument.collection("interactions").doc(interaction.id).set(data);
 }
-export async function getCachedInteraction(guild, interactionID)
+async function getCachedInteractionDocument(guild, interactionID)
 {
     var guildDocument = await getGuildDocument(guild.id);
-    var interactionSnapshot = await guildDocument.collection("interactions").doc(interactionID).get();
+    return await guildDocument.collection("interactions").doc(interactionID);
+    
+}
+export async function getCachedInteraction(guild, interactionID)
+{
+    var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
+    var interactionSnapshot = await interactionDocument.get();
     var interaction = interactionSnapshot.data();
-
     //add helpers for the options getters
     if (interaction.options)
     {
         interaction.options.getString = function(key)  { var r = interaction.options.find(e => e.type ==  "STRING"  && e.name == key); return r ? r.value : null; }
         interaction.options.getBoolean = function(key) { var r =  interaction.options.find(e => e.type == "BOOLEAN" && e.name == key); return r ? r.value : null; }
         interaction.options.getInteger = function(key) { var r =  interaction.options.find(e => e.type == "INTEGER" && e.name == key); return r ? r.value : null; }
+        interaction.options.getUser = function(key) { var r =  interaction.options.find(e => e.type == "USER" && e.name == key); return r ? r.value : null; }
         //TODO: others
         interaction.options.getMessage = function() {
             var r =  interaction.options.find(e => e.type == "_MESSAGE" ); return r ? r.message : null; 
@@ -133,6 +141,14 @@ export async function getCachedInteraction(guild, interactionID)
     }
 
     return interaction;
+}
+
+export async function storeCachedInteractionData(guild, interactionID, data)
+{
+    var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
+    await interactionDocument.update(data, {merge: true});
+    
+    return await getCachedInteraction(guild, interactionID);
 }
 
 export async function assertOption(interaction, optionName, type, message)

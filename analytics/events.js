@@ -4,7 +4,7 @@ import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js
 import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { getCachedInteraction, registerCommand } from '../guild/commands.js';
+import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 
 export default async function(client)
 {
@@ -67,41 +67,39 @@ export default async function(client)
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand() || interaction.guild == undefined) return;
-
-        if (interaction.commandName === "useless_button") 
+        if (interaction.isCommand() && interaction.guild)
         {
-           doButtonCommand(interaction);            
+            if (interaction.commandName === "useless_button") 
+            {
+                await doButtonCommand(interaction);            
+            }
+            else if (await hasFeature(interaction.guild, "analytics") == false)
+            {
+                interaction.reply({
+                    content: "Post stats not enabled on this server",
+                    ephemeral: true
+                });
+                return;
+            }
+        
+            // Check if it is the correct command
+            if (interaction.commandName === "stats" || interaction.commandName === "statsweek") 
+            {
+                doStatsCommand(interaction);
+            }
+            // Check if it is the correct command
+            else if (interaction.commandName === "statsme") 
+            {
+                doStatsMeCommand(interaction);            
+            }
         }
-        else if (await hasFeature(interaction.guild, "analytics") == false)
-        {
-            interaction.reply({
-                content: "Post stats not enabled on this server",
-                ephemeral: true
-            });
-            return;
-        }
-    
-        // Check if it is the correct command
-        if (interaction.commandName === "stats" || interaction.commandName === "statsweek") 
-        {
-            doStatsCommand(interaction);
-        }
-        // Check if it is the correct command
-        else if (interaction.commandName === "statsme") 
-        {
-           doStatsMeCommand(interaction);            
-        }
-    });
-    client.on('interactionCreate', async function(interaction) 
-    {
         // If the interaction isn't a slash command, return
-        if (!interaction.isMessageComponent()) return;
-    
-        // Check if it is the correct command
-        if (interaction.message.interaction.commandName === "useless_button") 
+        else if (interaction.isMessageComponent())
         {
-            await doButtonCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            if (interaction.message.interaction.commandName === "useless_button") 
+            {
+                await doButtonCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            }
         }
     });
 
@@ -176,7 +174,10 @@ async function doButtonCommand(interaction)
 {
     //only allow in off topic
     if (await offTopicCommandOnly(interaction)) return;
+    
+    await interaction.deferReply();
 
+    await storeCachedInteractionData(interaction.guild, interaction.id, { clicks: 0 });
 
     const row = new MessageActionRow()
     .addComponents(
@@ -189,7 +190,7 @@ async function doButtonCommand(interaction)
 
     const rows = [ row ]
 
-    await interaction.reply({content: pluralize(clicks, "click"), components: rows});
+    await interaction.editReply({content: pluralize(clicks, "click"), components: rows});
 }
 
 async function doButtonCommandButton(i, originalInteraction)
@@ -197,7 +198,17 @@ async function doButtonCommandButton(i, originalInteraction)
     if (i.customId === 'primary') {
         //await i.deferUpdate();
         //await wait(4000);
-        clicks++;
-        await i.update({ content: pluralize(clicks, "click") });
+        
+        originalInteraction = await storeCachedInteractionData(i.guild, originalInteraction.id, { clicks: originalInteraction.clicks + 1 });
+        
+        var extra = "";
+        if (config.LINDSAYS_SERVERS.indexOf(i.guild.id) >= 0)
+        {
+            if (originalInteraction.clicks == 5) extra = ", oh boy, here we go.";
+            if (originalInteraction.clicks == 69) extra = ", nice.";
+            if (originalInteraction.clicks == 420) extra = ", go to bed, kiddos.";
+        }
+
+        await i.update({ content: pluralize(originalInteraction.clicks, "click") + extra });
     }
 }

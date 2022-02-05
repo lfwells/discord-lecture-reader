@@ -43,7 +43,7 @@ export default async function(client)
     //TODO: only send a message if we've NEVER seen them before (or maybe send a "welcome back" message)
     client.on("guildMemberAdd", async function(newMember) {
         console.log("a new guild member has joined!");
-        if (hasFeature("dm_intro"))
+        if (hasFeature(newMember.guild, "dm_intro"))
         {
             newMember.send(`Hello ${newMember.displayName} and welcome to the **${newMember.guild.name}** Server!`);
             newMember.send(`I'm ${await getGuildProperty("botName", newMember.guild, "Robo Lindsay")}. I'm a bot that you might see from time to time on the server. I'm here to help out and make the server more awesome!`);
