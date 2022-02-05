@@ -6,7 +6,7 @@ export default async function(client)
 {
     var helpCommand = {
         name: "help",
-        description: "List all the commands the bot can run"
+        description: "List all the commands the bot can run."
     }
     await registerApplicationCommand(client, helpCommand);
 

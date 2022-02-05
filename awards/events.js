@@ -45,17 +45,17 @@ export default async function(client)
     // The data for our command
     const flexCommand = {
         name: 'flex',
-        description: 'Replies with your earned awards!',
+        description: 'Replies with your earned awards (only allowed in off-topic channel).',
         options: [{
             name: 'user',
             type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU). Only allowed in off topic channel.',
+            description: 'The user to see the awards for (leave blank for YOU).',
             required: false,
         }],
     };
     const awardCommand = {
         name: 'award', 
-        description: 'Gives an award to a user',
+        description: 'Gives an award to a user (admin only)',
         defaultPermission: true,
         /*permissions: [
             {
@@ -94,7 +94,7 @@ export default async function(client)
     };*/
     const leaderboardCommand = {
         name: 'leaderboard',
-        description: 'Replies with the top 10 award earners (only allowed in off topic channel).',
+        description: 'Replies with the top 10 award earners (only allowed in off-topic channel).',
         /*options: [{
             name: 'user',
             type: 'USER',

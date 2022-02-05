@@ -24,7 +24,7 @@ export default async function(client)
     // The data for our command
     const statsCommand = {
         name: 'stats',
-        description: 'Replies with the server stats (TODO: just stats for this channel, etc)',
+        description: 'Replies with the server stats (only available in off-topic channel).', //(TODO: just stats for this channel, etc)
         options: [/*{
             name: 'user',
             type: 'USER',
@@ -34,7 +34,7 @@ export default async function(client)
     };
     const statsWeekCommand = {
         name: 'statsweek',
-        description: 'Replies with the server stats for just this week',
+        description: 'Replies with the server stats for just this week (only available in off-topic channel).',
         options: [/*{
             name: 'user',
             type: 'USER',
@@ -44,7 +44,7 @@ export default async function(client)
     };
     const statsMeCommand = {
         name: 'statsme',
-        description: 'Replies with the YOUR server stats',
+        description: 'Replies with your server stats (only available in off-topic channel).',
         options: [{
             name: 'user',
             type: 'USER',
@@ -54,8 +54,13 @@ export default async function(client)
     };
     const buttonCommand = {
         name: 'useless_button',
-        description: 'Literally just a button everyone can press. Why? I DON\'T KNOW!',
-    }; 
+        description: 'Literally just a counter button everyone can press. Why? I DON\'T KNOW!',
+        options: [{
+            name: 'text',
+            type: 'STRING',
+            description: 'The text to appear on the button',
+            required: false,
+        }],}; 
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         await registerCommand(guild, statsCommand);
@@ -183,7 +188,7 @@ async function doButtonCommand(interaction)
     .addComponents(
         new MessageButton()
             .setCustomId('primary')
-            .setLabel('Click me for nothing interesting to happen')
+            .setLabel(interaction.options.getString("text") ?? 'Click me for nothing interesting to happen')
             .setStyle('PRIMARY')
             .setEmoji('😄')
     );

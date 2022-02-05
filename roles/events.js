@@ -77,25 +77,21 @@ export default async function (client)
 
     client.on('interactionCreate', async function(interaction) 
     {
-        // If the interaction isn't a slash command, return
-        if (!interaction.isCommand() || interaction.guild == undefined) return;
-    
-        // Check if it is the correct command
-        if (interaction.commandName === "role_select_message") 
+        if (interaction.isCommand() && interaction.guild) 
         {
-            await doRoleSelectCommand(interaction);
+        
+            // Check if it is the correct command
+            if (interaction.commandName === "role_select_message") 
+            {
+                await doRoleSelectCommand(interaction);
+            }
         }
-    });
-
-    client.on('interactionCreate', async function(interaction) 
-    {
-        // If the interaction isn't a slash command, return
-        if (!interaction.isMessageComponent()) return;
-    
-        // Check if it is the correct command
-        if (interaction.message.interaction.commandName === "role_select_message") 
-        {
-            await doRoleSelectCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+        else if (!interaction.isMessageComponent()) 
+        {        
+            if (interaction.message.interaction.commandName === "role_select_message") 
+            {
+                await doRoleSelectCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            }
         }
     });
 

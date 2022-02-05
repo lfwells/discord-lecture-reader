@@ -14,9 +14,9 @@ export default async function(client)
     // The data for our command
     const pollCommand = {
         name: config.POLL_COMMAND,
-        description: 'Displays a poll graph with buttons for voting. Different voting styles supported.',
+        description: 'Displays a poll with buttons for voting and a graph. Different voting styles supported.',
         options: [
-            { name: 'question', type: 'STRING', description: 'The poll question', required: true, },
+            { name: 'question', type: 'STRING', description: 'The poll question.', required: true, },
             //TODO: options for: vote-once-only, hide-results (with admin reveal later), vertical, etc
             { name: "option_1", type: "STRING", required: false, description: "Option 1" },
             { name: "option_2", type: "STRING", required: false, description: "Option 2" },
@@ -35,7 +35,7 @@ export default async function(client)
             { name: "option_15", type: "STRING", required: false, description: "Option 15" },
             { name: "option_16", type: "STRING", required: false, description: "Option 16" },
             
-            { name: "poll_emoji", type: "STRING", required: false, description: "What should the bar chart look like? Defaults to █" },
+            { name: "poll_emoji", type: "STRING", required: false, description: "What should the bar chart look like? Defaults to █." },
             { name: "multi_vote", type: "BOOLEAN", required: false, description: "Can people vote on more than one option?" },
             { name: "allow_undo", type: "BOOLEAN", required: false, description: "Can people remove their vote and change their mind?" },
         ],
