@@ -117,7 +117,7 @@ async function cacheInteraction(interaction)
     console.log(data);
 
     var guildDocument = await getGuildDocument(interaction.guild.id);
-    await guildDocument.collection("interactions").doc(interaction.id).set(data);
+    await guildDocument.collection("interactions").doc(interaction.id).update(data, {merge:true});
 }
 async function getCachedInteractionDocument(guild, interactionID)
 {
@@ -144,6 +144,7 @@ export async function getCachedInteraction(guild, interactionID)
         }
     }
 
+    interaction.guild = guild;
     return interaction;
 }
 

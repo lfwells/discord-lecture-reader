@@ -20,6 +20,7 @@ client.on('ready', async () =>
 
 	await init_client(client);
 
+	console.log('\u0007');
 	console.log("---------\nREADY\n---------"); 
 });
 
