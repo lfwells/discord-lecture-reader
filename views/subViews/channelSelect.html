@@ -1,38 +1,93 @@
-<label>
+<% 
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+var id = locals.id ?? uuid(); %>
+
+<label
+    id="<%=id%>"
+    class="<%=typeof className !== 'undefined' ? className : "" %>">
     <span><%=typeof label !== 'undefined' ? label : "" %></span>
-    <select id="<%= id %>" title="<%=typeof value !== 'undefined' ? value : "" %>"
-        name="<%=typeof name !== 'undefined' ? name : "" %>"
+    <select 
+        id="<%= id %>" 
+        name="<%=typeof name !== 'undefined' ? name : id %>"
+        title="<%=typeof value !== 'undefined' ? value : "" %>"
         class="<%=typeof className !== 'undefined' ? className : "" %>">
-        <option value=""><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
+        <option value="__DISCORD_BOT_NONE__"><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
         <%
+        function displayChannel(channel)
+        {
+            if (typeof type !== 'undefined' && channel.type != type) return;
+
+            %><option value="<%= channel.id %>"
+                <% if (value && channel.id == value) { %>selected<% } %>>
+                <%= channel.name %>
+            </option><%
+        }
+
+        var noCategoryChannels =  guild.channels.cache.filter(channel => channel.type !== "GUILD_CATEGORY" && channel.parent == null).sort((a,b) => a.position - b.position)
+        noCategoryChannels.forEach(displayChannel);
+
         var categoryChannels = guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
         categoryChannels.forEach(cat => { %>
             <optgroup label="<%= cat.name %>">
                 <% var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
-                sortedChannels.forEach(function(channel)
-                { 
-                    %><option value="<%= channel.id %>"
-                        <% if (value && channel.id == value) { %>selected<% } %>>
-                        <%= channel.name %>
-                    </option><%
-                }) %>
+                sortedChannels.forEach(displayChannel) %>
             </optgroup>
         <% }); %>
-    </select>
+    </select>    
+    <% if (typeof help !== 'undefined') { %><br/><span class="help"><%=help%></span><% } %>
 </label>
-
-<% if (typeof onGuildPage !== 'undefined' ? onGuildPage : "")
-{
-    %>
-    <script>
-        $("#<%= id %>").on("change", (e) =>
+<script>
+    (function() //closure to allow local vars
+    {
+        var onChanged = '<%-typeof onChanged !== 'undefined' ? onChanged : "" %>';
+        function changed (e) 
         {
-            document.location.href = "?<%= id %>="+$("#<%= id %>").val();
-        });
-    </script>
-    <%
-}
-%>
+            <% if (typeof onChangedURL !== 'undefined')
+            {
+                %>
+                var value = $(this).val();
+                $(label).text("Loading...");
+
+                $.ajax({
+                    url: "/guild/<%=locals.guild.id%>/<%=onChangedURL%>",
+                    method:"post",
+                    data: JSON.stringify({
+                        id: "<%=id%>",
+                        value
+                    }),
+                    contentType: 'application/json',
+                    success: (data) => {
+                        $(label).html(previousHtml);
+                        $(label).append('<span class="saved">Saved.</span>');
+                        $(label).find("select").val(value);
+                        $(label).find("select").on("change", changed);
+
+                        if (onChanged != "") eval(onChanged);
+                    }
+                });
+                <%
+            }
+            else
+            {
+                %>
+                if (onChanged != "") eval(onChanged);
+                <%
+            }
+            %>
+        }
+
+        var label = $("#<%=id%>");
+        var previousHtml = $(label).html();
+        label.find("select").on("change", changed);
+    })();
+</script>
+
 <% 
 /* 
 usage:

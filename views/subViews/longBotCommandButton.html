@@ -1,0 +1,59 @@
+<% 
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+var id = locals.id ?? uuid(); %>
+
+<button id="<%=id%>" class="botFunction"><%=locals.text%></button>
+<script>
+    if (typeof(resultWindows) === 'undefined') resultWindows = {};
+    document.getElementById('<%=id%>').addEventListener('click',function() 
+    {
+        //make a popup to display the output
+        if (resultWindows['<%=id%>']) resultWindows['<%=id%>'].close();
+        resultWindows['<%=id%>'] = window.open("", "<%=locals.title ?? "Discord Bot"%>...", "width=650,height=600");
+
+        try
+        {
+            resultWindows['<%=id%>'].document.querySelector('pre').remove();
+        } catch (e) {}
+        resultWindows['<%=id%>'].document.write("<html><head><title><%=locals.title ?? "Discord Bot"%>...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
+
+        var last_response_len  = false;
+        $.ajax({
+            url:"<%=locals.url%>",
+            method:<%-typeof(locals.data) !== 'undefined' ? "'post'" : "'get'"%>,
+            data: <% if(typeof(locals.data) !== 'undefined')
+            {
+                %>JSON.stringify(eval(<%-locals.data%>))<%
+            } else { %>null<% }%>,
+            contentType: 'application/json',
+            xhrFields: {
+                onprogress: function(e)
+                {
+                    var this_response, response = e.currentTarget.response;
+                    if(last_response_len === false)
+                    {
+                        this_response = response;
+                        last_response_len = response.length;
+                    }
+                    else
+                    {
+                        this_response = response.substring(last_response_len);
+                        last_response_len = response.length;
+                    }
+                    console.log(this_response);
+                    resultWindows['<%=id%>'].document.write(this_response);
+                },
+                success: function(data)
+                {
+                    resultWindows['<%=id%>'].document.write("</pre>");
+                }
+            },
+        });
+    });
+  </script>

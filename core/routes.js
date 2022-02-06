@@ -12,19 +12,21 @@ import * as lecture_text_routes from '../lecture_text/routes.js';
 import * as poll_routes from '../polls/routes.js';
 import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 import * as invite_routes from "../invite/routes.js";
+import * as guide_routes from "../guide/routes.js";
 import { Router } from "express";
 import * as sheet_routes from "../sheets_test.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
+import { renderEJS } from "./server.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
 {
-    app.use(defaultRouter());
     app.use(function(req, res, next){
         res.path = req.path;
         res.locals.path = req.path;
         next();
     });
+    app.use(defaultRouter());
     app.use("/guild/:guildID", guildRouter());
 }
 
@@ -33,7 +35,13 @@ function defaultRouter()
     var router = Router({ mergeParams: true });
 
     //home page (select guild)
-    router.get("/", guild_routes.guildList);
+    router.get("/", guild_routes.loadGuildList, guild_routes.guildList);
+    router.get("/createFromTemplate", renderEJS("createFromTemplate"));
+    router.get("/serverAdded", guild_routes.serverAddedRedirect);
+    router.get("/serverAddedInGuide", guild_routes.serverAddedInGuideRedirect);
+
+    router.get("/guide", guild_routes.loadGuildList, guide_routes.guide); 
+    router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
 
     //login
     router.get("/login", login_routes.loginPage);
@@ -53,12 +61,15 @@ function guildRouter()
     //middleware check that this is one of "our" servers 
     router.use(guild.checkGuildAdmin);
 
+    router.use(guild.loadGuildProperty("botName"));
     router.use(guild.loadGuildProperty("adminRoleID"));
     router.use(guild.loadGuildProperty("studentRoleID"));
+    router.use(guild.loadGuildProperty("rulesChannelID"));
     router.use(guild.loadGuildProperty("lectureChannelID"));
     router.use(guild.loadGuildProperty("awardChannelID"));
     router.use(guild.loadGuildProperty("offTopicChannelID"));
     router.use(guild.loadGuildProperty("todoChannelID"));
+    router.use(guild.loadGuildProperty("todoEmoji"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
@@ -66,17 +77,29 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_analytics"));
     router.use(guild.loadGuildProperty("feature_invites"));
     router.use(guild.loadGuildProperty("feature_obs"));
+    router.use(guild.loadGuildProperty("feature_todos"));
+    router.use(guild.loadGuildProperty("feature_dm_intro"));
 
+
+    //TODO: this filterButtons could be expensive, I didn't realise!
     router.use(filterButtons);
 
-    //guild home page (dashboard)
-    router.get("/", 
+    router.get("/serverAdded", guild_routes.serverAdded);
+    router.get("/guide", guide_routes.guide); 
+    router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
+    router.post("/guide/postRules", guide_routes.postRules); 
+    router.post("/guide/configureWelcomeScreen", guide_routes.configureWelcomeScreen);
 
-    guild_routes.guildHome);
+
+    //guild home page (dashboard)
+    router.get("/", guild_routes.guildHome);
+    router.post("/", guild_routes.guildHomePost, guild_routes.guildHome);
                     
     router.get("/obs/", basic_render("obs")); 
 
     router.get("/features/", guild_routes.guildFeatures); 
+    router.post("/setFeature/", guild_routes.setFeature); 
+    router.post("/setGuildProperty/", guild_routes.setGuildProperty); 
 
     //awards
     router.get("/namesTest/", award_routes.namesTest); 
@@ -149,6 +172,9 @@ function guildRouter()
         
     //scheduled_events
     router.get("/schedule_test", schedule_test);
+    router.get("/sessions", attendance_routes.sessionPage);
+    router.post("/sessions", attendance_routes.sessionPagePost);
+    router.get("/sessions/deleteAll", attendance_routes.deleteAllEvents);
     return router;
 }
 

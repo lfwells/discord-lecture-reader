@@ -1,6 +1,6 @@
 import * as config from '../core/config.js';
 import { getGuildPropertyConverted } from '../guild/guild.js';
-
+import { Permissions } from "discord.js";
 
 export const clamp = (a, min = 0, max = 1) => Math.min(max, Math.max(min, a));
 export const invlerp = (x, y, a) => clamp((a - x) / (y - x));
@@ -57,12 +57,24 @@ export function downloadResource(filename) {
   }
 }
 
-export async function offTopicOnly(interaction)
+export async function offTopicCommandOnly(interaction)
 {
     var offTopicChannel = await getGuildPropertyConverted("offTopicChannel", interaction.guild);
     if (offTopicChannel && interaction.channel != offTopicChannel)
     {
         interaction.reply({ content: "You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", ephemeral:true });
+        return true;
+    }
+    return false;
+}
+export async function adminCommandOnly(interaction)
+{
+    if (interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) == false)
+    {
+        interaction.reply({ 
+            content:"Only admins can run `/"+interaction.commandName+"`, sorry.",
+            ephemeral:true
+        });
         return true;
     }
     return false;

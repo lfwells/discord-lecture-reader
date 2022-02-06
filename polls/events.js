@@ -1,9 +1,10 @@
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { send } from '../core/client.js';
+import { getClient, send } from '../core/client.js';
 import { pluralize } from '../core/utils.js';
 
 import { GUILD_CACHE } from "../guild/guild.js";
 import * as config from "../core/config.js";
+import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 
 export default async function(client)
 {
@@ -13,10 +14,11 @@ export default async function(client)
     // The data for our command
     const pollCommand = {
         name: config.POLL_COMMAND,
-        description: 'Testing out an in-house version of polls',
+        description: 'Displays a poll with buttons for voting and a graph. Different voting styles supported.',
         options: [
-            { name: 'question', type: 'STRING', description: 'The poll question', required: true, },
-            //TODO: options for: vote-once-only, hide-results (with admin reveal later), vertical, etc
+            { name: 'question', type: 'STRING', description: 'The poll question.', required: true, },
+            //TODO: option for vertical??
+            //TODO: option for "Correct answer"
             { name: "option_1", type: "STRING", required: false, description: "Option 1" },
             { name: "option_2", type: "STRING", required: false, description: "Option 2" },
             { name: "option_3", type: "STRING", required: false, description: "Option 3" },
@@ -34,32 +36,34 @@ export default async function(client)
             { name: "option_15", type: "STRING", required: false, description: "Option 15" },
             { name: "option_16", type: "STRING", required: false, description: "Option 16" },
             
-            { name: "poll_emoji", type: "STRING", required: false, description: "What should the bar chart look like? Defaults to █" },
-            { name: "multi_vote", type: "BOOLEAN", required: false, description: "Can people vote on more than one option?" },
-            { name: "allow_undo", type: "BOOLEAN", required: false, description: "Can people remove their vote and change their mind?" },
+            { name: "poll_emoji", type: "STRING", required: false, description: "What should the bar chart look like? (defaults to █)." },
+            { name: "multi_vote", type: "BOOLEAN", required: false, description: "Can people vote on more than one option? (default true)" },
+            { name: "allow_undo", type: "BOOLEAN", required: false, description: "Can people remove their vote and change their mind? (default true)" },
+            { name: "restrict_see_results_button", type: "BOOLEAN", required: false, description: "Only the poll creator can show who voted for what? (default: true)" },
         ],
     };
     
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-        for (const command in commands)
-        {
-            console.log(guild.name+"delete "+await command.delete());
-        }
-        /*console.log(guild.name+"add "+*/await guild.commands.create(pollCommand);//); 
+        await registerCommand(guild, pollCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
     {
-        // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
-    
-        // Check if it is the correct command
-        if (interaction.commandName === config.POLL_COMMAND) 
+        if (interaction.isCommand() && interaction.guild)
         {
-            doPollCommand(interaction);
+            if (interaction.commandName === config.POLL_COMMAND) 
+            {
+                doPollCommand(interaction);
+            }
+        }
+        else if (interaction.isMessageComponent()) 
+        {        
+            if (interaction.message.interaction.commandName === config.POLL_COMMAND) 
+            {
+                await doPollCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            }
         }
     });
 
@@ -67,26 +71,16 @@ export default async function(client)
 
 export async function doPollCommand(interaction, scheduledOptions)
 {
-    var interaction_id = interaction.id;
-
-    var question = scheduledOptions ? scheduledOptions.question : interaction.options.getString("question", true);
-    var poll_emoji = scheduledOptions ? scheduledOptions.poll_emoji : interaction.options.getString("poll_emoji") ?? "█"; //":white_large_square:"
-    var multi_vote = scheduledOptions ? scheduledOptions.multi_vote : interaction.options.getBoolean("multi_vote") ?? true;
-    var allow_undo = scheduledOptions ? scheduledOptions.allow_undo : interaction.options.getBoolean("allow_undo") ?? true;
-
-    //var pollAuthor = interaction.user.id;
-
-    var latestFollowUp; //this stores a message, that we can update later
-
+    var pollAuthor = interaction.user.id;
     var results = [];    
     var answers = [];
-    var options = [];
+    var pollOptions = [];
     var currentRow = [];
     for (let i = 1; i <= 16; i++) 
     {
         if (currentRow.length >= 5)
         {
-            options.push(currentRow);
+            pollOptions.push(currentRow);
             currentRow = [];
         }
         var option = (scheduledOptions && (i-1) < scheduledOptions.options.length) ? scheduledOptions.options[i-1] : interaction.options != undefined ? interaction.options.getString("option_"+i, false) : null;
@@ -108,77 +102,43 @@ export async function doPollCommand(interaction, scheduledOptions)
         }
 
     }
-    options.push(currentRow);
+    pollOptions.push(currentRow);
 
-    function createButtons()
-    {
-        var id = 0;
-        var rows = [];
-        for (let i = 0; i < options.length; i++) {
-            const row = new MessageActionRow();
-            var addedAComponent = false;
-            for (let j = 0; j < options[i].length; j++) {
-                const option = options[i][j];
-                row.addComponents(
-                    new MessageButton()
-                        .setCustomId("poll_option_"+interaction_id+"_"+id++) //TODO: this may need unique?
-                        .setLabel(option)
-                        .setStyle('PRIMARY')
-                        //.setEmoji('😄') ///TODO: emoji like ABC?
-                );
-                addedAComponent = true;
-            }
-            if (addedAComponent)
-                rows.push(row);
-        }
+    await storeCachedInteractionData(interaction.guild, interaction.id, scheduledOptions ? {
+        scheduledOptions: JSON.stringify(scheduledOptions),
+        results: JSON.stringify(results),
+        answers, 
+        pollOptions: JSON.stringify(pollOptions),
+        pollAuthor
+    } : {
+        results: JSON.stringify(results),
+        answers, 
+        pollOptions: JSON.stringify(pollOptions),
+        pollAuthor
+    });
 
-        //admin only rows
-        if (!latestFollowUp)
-        {
-            var adminRow = new MessageActionRow();
-            var seeVotesButton = new MessageButton()
-                .setCustomId("poll_"+interaction_id+"_see_results") //TODO: this may need unique?
-                .setLabel("See Votes")// (Poll Poster Only)") <-- bring this back if we enable this option
-                .setStyle('SECONDARY')
-                //.setEmoji('😄') ///TODO: emoji like ABC?
-            
-            adminRow.addComponents(seeVotesButton);
-            rows.push(adminRow);
-        }
-
-        return rows;
-    }
-
-    function resultsText()
-    {
-        var resultsEmbed = {
-            title: question,
-            fields: [],
-            thumbnail: { 
-                url:interaction.guild.iconURL() //this is null and at this point I don't care lol
-            }
-        };
-
-        
-        var text = "";
-        for (let i = 0; i < answers.length; i++) {
-            const answer = answers[i];
-            const result = results[i].length;
-            
-            resultsEmbed.fields.push({
-                name: answer,
-                //two liner
-                //value: pluralize(result, "vote")+"\n"+(result == 0 ? "‎" : poll_emoji.repeat(result) )
-                value: poll_emoji.repeat(result)+ " "+pluralize(result, "vote") 
-            });
-        }
-
-        GUILD_CACHE[interaction.guild.id].latestRoboLindsPoll = resultsEmbed;
-        GUILD_CACHE[interaction.guild.id].latestRoboLindsPollTimestamp = interaction.createdTimestamp;
-
-        return resultsEmbed;
-    }
+    await interaction.reply({embeds: [ await resultsText(interaction) ], components: await createButtons(interaction, interaction.channel)});
+}
+async function doPollCommandButton(i, originalInteraction) 
+{  
+    var cache = await getCachedInteraction(i.guild, originalInteraction.id);
+    var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) :undefined;
+    var results = JSON.parse(cache.results);
+    var answers = cache.answers;
+    var options = JSON.parse(cache.pollOptions);
+    var pollAuthor = cache.pollAuthor;
     
+    var latestFollowUpID = cache.latestFollowUpID;
+    var client = await getClient();
+    var latestFollowUp = latestFollowUpID ? await i.channel.messages.fetch(latestFollowUpID) : undefined;
+    
+    var question = scheduledOptions ? scheduledOptions.question : originalInteraction.options.getString("question", true);
+
+
+    var multi_vote = scheduledOptions ? scheduledOptions.multi_vote : originalInteraction.options.getBoolean("multi_vote") ?? true;
+    var allow_undo = scheduledOptions ? scheduledOptions.allow_undo : originalInteraction.options.getBoolean("allow_undo") ?? true;
+    var restrict_see_results_button = scheduledOptions ? scheduledOptions.allow_undo : originalInteraction.options.getBoolean("restrict_see_results_button") ?? true;
+
     async function seeResults()
     {
         var mostVotes = 0;
@@ -218,85 +178,172 @@ export async function doPollCommand(interaction, scheduledOptions)
         }
         else
         {
-            if (interaction.followUp)
+            if (i.followUp)
             {
                 try
                 {
-                    latestFollowUp = await interaction.followUp(postContent);
+                    latestFollowUp = await i.followUp(postContent);
                 }
                 catch (DiscordAPIError) //invalid webook error, more than 15 mins have passed
                 {
-                    latestFollowUp = await send(interaction.channel, postContent);
+                    latestFollowUp = await send(i.channel, postContent);
                 }
             }
             else
             {
-                latestFollowUp = await send(interaction.channel, postContent);
+                latestFollowUp = await send(i.channel, postContent);
             }
+            await storeCachedInteractionData(i.guild, originalInteraction.id, {
+                latestFollowUpID : latestFollowUp.id
+            });
         }
     }
 
-    const collector = interaction.channel.createMessageComponentCollector({ time: 150000000 });
-    collector.on('collect', async i => {
+    if (i.customId.startsWith("poll_option_")) 
+    {
         
-        if (i.customId.startsWith("poll_option_"+interaction_id+"_")) {
-            //await i.deferUpdate();
-            //await wait(4000);
+        var answer = parseInt(i.customId.replace("poll_option_", ""));
+        var user = i.user.id;
+        
+        if (multi_vote == false)
+        {
+            //check all others
+            for (let j = 0; j < results.length; j++) {
+                if (j == answer) continue;
 
-            var answer = parseInt(i.customId.replace("poll_option_"+interaction_id+"_", ""));
-            var user = i.user.id;
-            
-            if (multi_vote == false)
-            {
-                //check all others
-                for (let j = 0; j < results.length; j++) {
-                    if (j == answer) continue;
-
-                    const result = results[j];
-                    if (result.indexOf(user) != -1) 
-                    {
-                        //console.log("voted before, cancel out");
-                        await i.update({ embeds: [ resultsText() ], components: createButtons() });
-                        return;
-                    }
-                }
-            }
-
-            if (results[answer].indexOf(user) == -1)
-            {
-                results[answer].push(user); 
-                //TODO: you've already voted logic if option turned on
-            }
-            else
-            {
-                if (allow_undo)
+                const result = results[j];
+                if (result.indexOf(user) != -1) 
                 {
-                    results[answer] = results[answer].filter(u => u != user);
+                    //console.log("voted before, cancel out");
+                    //await i.update({ embeds: [ await resultsText(originalInteraction) ]});//, components: await createButtons(originalInteraction) });
+                    await i.reply({content: "You've already voted for something else, and the poll creator made it so you can only vote for one thing.", ephemeral:true });
+                    return;
                 }
             }
-            
-            await i.update({ embeds: [ resultsText() ], components: createButtons() });
+        }
 
-            if (latestFollowUp)
-            {
-                await seeResults();
-            }
+        if (results[answer].indexOf(user) == -1)
+        {
+            results[answer].push(user); 
+            //TODO: you've already voted logic if option turned on
         }
         else
         {
-            if (i.customId == "poll_"+interaction_id+"_see_results")
+            if (allow_undo)
             {
-                //if (i.user.id == pollAuthor) //an option for this? or just ok i think
-                {
-                    await seeResults();
-        
-                    await i.update({ embeds: [ resultsText() ], components: createButtons() });
-                }
+                results[answer] = results[answer].filter(u => u != user);
+            }
+            else
+            {
+                await i.reply({content: "You've already voted for this option, and the poll creator made it so you cannot undo your vote.", ephemeral:true });
             }
         }
-    });
-    
-    collector.on('end', collected => console.log(`Collected ${collected.size} items`));
+        
+        await storeCachedInteractionData(i.guild, originalInteraction.id, { results: JSON.stringify(results) });
+        await i.update({ embeds: [ await resultsText(originalInteraction) ]});//, components: await createButtons(originalInteraction) });
 
-    await interaction.reply({embeds: [ resultsText() ], components: createButtons()});
+        if (latestFollowUp)
+        {
+            await seeResults(originalInteraction);
+        }
+    }
+    else if (i.customId == "poll_see_results")
+    {
+        if (restrict_see_results_button == false || i.user.id == pollAuthor) 
+        {
+            await seeResults();
+
+            await i.update({ embeds: [ await resultsText(originalInteraction) ], components: await createButtons(originalInteraction,i.channel) });
+        }
+    }
+
+}
+
+
+async function createButtons(interaction, channel)
+{
+    var cache = await getCachedInteraction(interaction.guild, interaction.id);
+    var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) :undefined;
+    var options = JSON.parse(cache.pollOptions);
+    var latestFollowUpID = cache.latestFollowUpID;
+    var client = await getClient();
+    var latestFollowUp = latestFollowUpID ? await channel.messages.fetch(latestFollowUpID) : undefined;
+    var restrict_see_results_button = scheduledOptions ? scheduledOptions.allow_undo : interaction.options.getBoolean("restrict_see_results_button") ?? true;
+
+
+    var id = 0;
+    var rows = [];
+    for (let i = 0; i < options.length; i++) {
+        const row = new MessageActionRow();
+        var addedAComponent = false;
+        for (let j = 0; j < options[i].length; j++) {
+            const option = options[i][j];
+            row.addComponents(
+                new MessageButton()
+                    .setCustomId("poll_option_"+id++) //TODO: this may need unique?
+                    .setLabel(option)
+                    .setStyle('PRIMARY')
+                    //.setEmoji('😄') ///TODO: emoji like ABC?
+            );
+            addedAComponent = true;
+        }
+        if (addedAComponent)
+            rows.push(row);
+    }
+
+    //admin only rows
+    if (latestFollowUp == undefined)
+    {
+        var authorOnlyText = "";
+        if (restrict_see_results_button) authorOnlyText = " (Poll Author Only)";
+        var adminRow = new MessageActionRow();
+        var seeVotesButton = new MessageButton()
+            .setCustomId("poll_see_results") //TODO: this may need unique?
+            .setLabel("See Full Results"+authorOnlyText)// (Poll Poster Only)") <-- bring this back if we enable this option
+            .setStyle('SECONDARY')
+            //.setEmoji('😄') ///TODO: emoji like ABC?
+        
+        adminRow.addComponents(seeVotesButton);
+        rows.push(adminRow);
+    }
+    return rows;
+}
+async function resultsText(interaction)
+{
+    var cache = await getCachedInteraction(interaction.guild, interaction.id);
+
+    var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) : undefined;
+    var options = cache.pollOptions ? JSON.parse(cache.pollOptions) : undefined;
+    var question = cache.question;
+    var answers = cache.answers;
+    var results = cache.results ? JSON.parse(cache.results) : undefined;
+    
+    var poll_emoji = scheduledOptions ? scheduledOptions.poll_emoji : interaction.options.getString("poll_emoji") ?? "█"; //":white_large_square:"
+
+    var resultsEmbed = {
+        title: question,
+        fields: [],
+        thumbnail: { 
+            url:interaction.guild.iconURL() //this is null and at this point I don't care lol
+        }
+    };
+
+    
+    var text = "";
+    for (let i = 0; i < answers.length; i++) {
+        const answer = answers[i];
+        const result = results[i].length;
+        
+        resultsEmbed.fields.push({
+            name: answer,
+            //two liner
+            //value: pluralize(result, "vote")+"\n"+(result == 0 ? "‎" : poll_emoji.repeat(result) )
+            value: poll_emoji.repeat(result)+ " "+pluralize(result, "vote") 
+        });
+    }
+
+    GUILD_CACHE[interaction.guild.id].latestRoboLindsPoll = resultsEmbed;
+    GUILD_CACHE[interaction.guild.id].latestRoboLindsPollTimestamp = interaction.createdTimestamp;
+
+    return resultsEmbed;
 }

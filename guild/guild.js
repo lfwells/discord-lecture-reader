@@ -1,45 +1,57 @@
-import * as config from '../core/config.js'; 
+import admin from "firebase-admin";
+
 import { guildsCollection, transfer } from "../core/database.js";
-import { getStatus, isOutsideTestServer } from "../core/utils.js";
 import { init_invites } from "../invite/invite.js";
-import { init_roles } from '../invite/roles.js';
+import { init_roles } from '../roles/roles.js';
 
 import { getClient } from "../core/client.js";
-import {  oauth } from '../core/login.js';
+import { oauth } from '../core/login.js';
 import { init_sheet_for_guild } from '../sheets_test.js';
-import { init_sessions, SESSIONS } from '../attendance/sessions.js';
+import { init_sessions } from '../attendance/sessions.js';
+import { unregisterAllCommandsIfNecessary } from "./commands.js";
+import { isOutsideTestServer } from "../core/utils.js";
+import { init_status_channels } from "./statusChannels.js";
 
-export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)s
+export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
-export async function init(client)
+const guessConfiguration = {
+  rulesChannelID: { type:"channel", name:"rules" },
+  lectureChannelID: { type:"channel", name:"lecture-chat" }
+};
+
+export default async function init(client)
 {
   var guilds = client.guilds.cache;
   //store them in the db
   await Promise.all(guilds.map( async (guild) => 
   { 
+    //load guild info
     await guild.fetch();
     (await guildsCollection.doc(guild.id)).set({    
       name:guild.name
     }, {merge:true}); 
 
+    //cache the info (reduce firebase reads)
     GUILD_CACHE[guild.id] = guild;//{}
     
+    //aspriational function to move away from firebase and store in mongo one day
     await transfer(guild.id);
+
+    //wipe all the commands (they get generated again by the init functions)
+    await unregisterAllCommandsIfNecessary(guild);
     
+    //run the init functions
     await init_admin_users(guild);
     await init_invites(guild);
     await init_roles(guild);
     await init_sessions(guild);
     await init_sheet_for_guild(guild);
+    init_status_channels(guild);
 
-    if (guild.id == config.TEST_SERVER_ID)
-    {
-      console.log(await getStatus(config.LINDSAY_ID, guild));
-    }
-    console.log("initialised Guild",guild.name, guild.id);
+    console.log("Initialised Guild",guild.name, guild.id);
   })
   );;
-  console.log("---------\nDone awaiting all guilds\n---------"); 
+  console.log("Done awaiting all guilds"); 
 }
 
 //TODO: these two need to return error if not authed or wrong id
@@ -139,39 +151,49 @@ export function loadGuildProperty(property, required)
 
     if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id][property]))
     {
-        req.guildDocumentSnapshot = await req.guildDocument.get();
-        req[property] = await req.guildDocumentSnapshot.get(property);
-        if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-        GUILD_CACHE[req.guild.id][property] = req[property];
+      //console.log("loadGuildProperty cache miss --", property, "- ", req.guild.name, GUILD_CACHE[req.guild.id][property]);
+      //console.log(Object.keys(GUILD_CACHE[req.guild.id]).indexOf(property));
+      req.guildDocumentSnapshot = await req.guildDocument.get();
+      req[property] = await req.guildDocumentSnapshot.get(property);
+      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+      
+      GUILD_CACHE[req.guild.id][property] = req[property];
+      //console.log("loadGuildProperty setting", property, GUILD_CACHE[req.guild.id][property]);
+      //console.log(Object.keys(GUILD_CACHE[req.guild.id]).indexOf(property)); 
       
     } 
     res.locals[property] = req[property];
 
-    //auto detect an ChannelID or RoleID
-    if (property == "offTopicChannelID")
+    if (property == "rulesChannelID") //special case
     {
-      //console.log("off topic", req[property], property, GUILD_CACHE[req.guild.id]);
+      req[channelProperty] = await req.guild.rulesChannelID;
+      res.locals[channelProperty] = req[channelProperty];
+      GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
     }
-    if (req[property])
+    //auto detect an ChannelID or RoleID
+    else if (req[property])
     {
       if (property.endsWith("ChannelID"))
       {
         var channelProperty = property.replace("ChannelID", "Channel");
-        req[channelProperty] = await client.channels.fetch(req[property]);
+        req[channelProperty] = GUILD_CACHE[req.guild.id][channelProperty] ?? await client.channels.fetch(req[property]);
         res.locals[channelProperty] = req[channelProperty];
+        GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
         
       }
       if (property.endsWith("RoleID"))
       {
         var roleProperty = property.replace("RoleID", "Role");
-        req[roleProperty] = await req.guild.roles.fetch(req[property]);
+        req[roleProperty] = GUILD_CACHE[req.guild.id][roleProperty] ?? await req.guild.roles.fetch(req[property]);
         res.locals[roleProperty] = req[roleProperty];
+        GUILD_CACHE[req.guild.id][roleProperty] = req[roleProperty];
       }
       if (property.endsWith("CategoryID"))
       {
         var categoryProperty = property.replace("CategoryID", "Category");
-        req[categoryProperty] = await req.guild.channels.fetch(req[property]);
+        req[categoryProperty] = GUILD_CACHE[req.guild.id][categoryProperty] ?? await req.guild.channels.fetch(req[property]);
         res.locals[categoryProperty] = req[categoryProperty];
+        GUILD_CACHE[req.guild.id][categoryProperty] = req[categoryProperty];
       }
     }
     else
@@ -189,16 +211,17 @@ export function loadGuildProperty(property, required)
 //non-route version (but still spoofing route version)
 export async function getGuildProperty(property, guild, defaultValue, required)
 {
+  var req = await getFakeReq(guild);
   var res = {locals:{}, end:(a)=>{}};
-  await loadGuildProperty(property, required)(await getFakeReq(guild), res, () => {});
-
-  if (defaultValue != undefined && res.error)
+  await loadGuildProperty(property, required)(req, res, () => {});
+  if (defaultValue != undefined && (res.error || res.locals[property] == undefined))
   {
+    //console.log(`getGuildProperty got error ${res.error}, now filling in default value ${defaultValue}`);
     res.error = false;
     await saveGuildProperty(property, defaultValue, req, res);
   }
 
-  if (required && res.error)
+  if (required && (res.error || res.locals[property] == undefined))
   {
     console.log(res.error);
     return null;
@@ -208,8 +231,9 @@ export async function getGuildProperty(property, guild, defaultValue, required)
 }
 export async function getGuildPropertyConverted(property, guild, defaultValue, required) //this version will return the channel/role object itself
 {
+  var req = await getFakeReq(guild);
   var res = {locals:{}};
-  await loadGuildProperty(property, required)(await getFakeReq(guild), res, () => {});
+  await loadGuildProperty(property, required)(req, res, () => {});
 
   if (defaultValue && res.error)
   {
@@ -222,6 +246,10 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
     console.log(res.error);
     return null;
     //anything else?
+  }
+  if (property == "rulesChannelID") //special case
+  {
+    return await guild.rulesChannel.id;
   }
   if (property.endsWith("ChannelID"))
   {
@@ -259,33 +287,77 @@ export async function saveGuildProperty(property, value, req, res)
   req[property] = value;
   GUILD_CACHE[req.guild.id][property] = value;
 
-  await loadGuildProperty(property, false)(req, res, () => {});
+  if (property == "rulesChannelID") //special case
+  {
+    var client = getClient();
+    var channel = await client.channels.fetch(req[property]);
+    await req.guild.setRulesChannel(channel);
+  }
 
-  if (property.endsWith("ChannelID"))
+  await loadGuildProperty(property, false)(req, res, () => {});
+}
+
+export async function deleteGuildProperty(guild, property)
+{
+  var guildDocument = await getGuildDocument(guild.id);
+  var toUpdate = {};
+  toUpdate[property] = admin.firestore.FieldValue.delete();
+  await guildDocument.update(toUpdate);
+  delete GUILD_CACHE[guild.id][property];
+}
+
+//a series of functions to auto-fill the settings of the server. Ideally will work perfectly if done on the server template
+//these functions will modify the actual server config if the guess finds something and it was null
+export async function guessConfigurationValues(guild)
+{
+  console.log(`Guessing guild ${guild.name} configuration values...`);
+  await Promise.all(Object.keys(guessConfiguration).map( async (property) => 
+  { 
+    await guessConfigurationValue(guild, property);
+  }));
+}
+export async function guessConfigurationValue(guild, property, convert)
+{
+  var guessInfo = guessConfiguration[property];
+  if (guessInfo.type == "channel")
   {
-    property = property.replace("ChannelID", "Channel");
-    req.query.message = "Set "+property+" to #"+ req[property].name+".";
+    return await guessChannel(guild, property, guessInfo.name, convert);
   }
-  else if (property.endsWith("RoleID"))
+  else if (guessInfo.type == "category")
+    return null;//TODO
+  else if (guessInfo.type == "role")
+    return null;//TODO
+}
+async function guessChannel(guild, property, guess, convert) //guess should match the template
+{
+  console.log("guess channel",property);
+  var stored = await getGuildProperty(property, guild);
+  if (stored) {
+    console.log(`guess for ${property} didn't need to happen, it was already set ${stored}`);
+    if (convert)
+      return await getGuildPropertyConverted(property, guild);
+    else
+      return stored;
+  }
+  
+  var guessedChannel = await guild.channels.cache.find(c => c.name === guess);
+  console.log(`guess for ${property} found ${guessedChannel?.id ?? "NOTHING"}`);
+
+  if (guessedChannel)
   {
-    property = property.replace("RoleID", "Role");
-    req.query.message = "Set "+property+" to @"+ req[property].name+".";
+    //await setGuildProperty(guild, property, guessedChannel.id);
   }
-  else if (property.endsWith("CategoryID"))
-  {
-    property = property.replace("CategoryID", "Category");
-    req.query.message = "Set "+property+" to @"+ req[property].name+".";
-  }
+
+  if (convert)
+    return guessedChannel;
   else
-  {
-    req.query.message = "Set "+property+" to "+ req[property]+".";
-  }
+    return guessedChannel?.id;
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed
 export async function init_admin_users(guild)
 {
-  console.log(`init_admin_users ${guild.name}`);
+  //console.log(`init_admin_users ${guild.name}`);
   var adminRole = await getGuildPropertyConverted("adminRoleID", guild);
   if (adminRole)
   {
@@ -308,4 +380,15 @@ async function getFakeReq(guild)
 export async function hasFeature(guild, feature, defaultValue)
 {
   return await getGuildProperty("feature_"+feature, guild, defaultValue ?? false);
+}
+
+export async function setBotNickname(guild, nickname)
+{
+  console.log("Setting Bot Nickname", nickname, "...");
+  return await (await getBotMemberForGuild(guild)).setNickname(nickname);
+}
+export async function getBotMemberForGuild(guild)
+{
+  var client = getClient();
+  return await guild.members.cache.get(client.user.id);
 }

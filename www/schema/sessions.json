@@ -1,0 +1,145 @@
+  {
+    "required": ["semester", "types"],
+
+    "title": "Sessions Configuration",
+    "properties": {
+      "semester": {
+        "title": "Semester",
+        "type": "string",
+        "default": "sem1_2022",
+        "enum": [
+          "sem1_2021",
+          "sem2_2021",
+          "sem1_2022",
+          "sem2_2022",
+          "asp1_2022",
+          "asp2_2022"
+        ],
+        "options":{
+          "enum_titles": [
+            "Semester 1 2021",
+            "Semester 2 2021",
+            "Semester 1 2022",
+            "Semester 2 2022",
+            "ASP1 2022",
+            "ASP2 2022"
+          ]
+        }
+      },
+      "types": {
+
+        "type": "array",
+        "title": "Sessions",
+        "items":{
+          "type": "object",
+          "title": "Session",
+          
+          "required": ["type", "weeks", "sessionsPerWeek"],
+          "properties": {
+            "type": {
+              "title": "Session Type",
+              "type": "string",
+              "default": "Lecture"
+            },
+            "weeks": {
+              "title": "Scheduled Weeks",
+              "type": "string",
+              "default": "1,2,3,4,5,6,7,8,9,10,11,12,13",
+              "description": "Comma-separated list of weeks this event occurs in"
+            },
+            "sessionsPerWeek": {
+              "title": "Sessions Per Week",
+              "type": "array",
+              "format": "table",
+              "minItems": 1,
+              "items": {
+                "headerTemplate ": "{{self.day}} {{self.hour}}",
+                "type": "object",
+                "required": ["day", "hour", "minute"],
+                "properties": {
+                  "day": {
+                    "title": "Day of Week",
+                    "type": "enum",
+                    "default": 1,
+                    "enum": [0,1,2,3,4,5,6],
+                    "options": { 
+                      "enum_titles": [
+                        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+                      ],
+                      "inputAttributes": {"class": "myclass"}
+                    }
+                  },
+                  "hour": {
+                    "title": "Hour of Day",
+                    "description": "24hr time",
+                    "type": "integer",
+                    "minimum": 0, 
+                    "maximum": 23,
+                    "default": 13
+                  },
+                  "minute": {
+                    "title": "Minute",
+                    "type": "integer",
+                    "description": "0-59",
+                    "minimum": 0,
+                    "maximum": 59,
+                    "default": 0
+                  },
+                  "channelID": {
+                    "title": "Discord Channel",
+                    "description": "Leave blank if physical location",
+                    "type": "string",
+                    "enumSource": [
+                      {
+                        "value": "",
+                        "title": "-- Select Channel --"
+                      },
+                      {
+                        "source": "channels",
+                        "value": "{{item.id}}",
+                        "title": "{{item.category}} - {{item.name}}"
+                      }
+                    ]
+                  },
+                  "location": {
+                    "title": "Location",
+                    "description": "If applicable, shown in description",
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            
+            "duration": {
+              "title": "Duration",
+              "description": "in mins",
+              "type": "integer",
+              "minimum": 0,
+              "default": 120
+            },
+
+            "description": {
+              "title": "Session Description",
+              "description": "Can include links and markdown",
+              "type": "string",
+              "format": "textarea",
+              "options": { "input_height": "64px" }
+            }, 
+            "descriptions": {
+              "title": "Weekly Descriptions",
+              "type": "array",
+              "description": "Override the description per week (e.g. topic names). Is appended to description above (if given).",
+              "items": {
+                "headerTemplate": " ",
+                "type": "string",
+                "format": "textarea",
+                "options": { "input_height": "64px" }
+              }
+            }
+            
+          }
+        }
+      }
+    }
+
+}

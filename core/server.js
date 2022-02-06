@@ -84,6 +84,7 @@ export async function authHandler (req, res, next)  {
 
     req.path.indexOf("/login") >= 0 || 
     req.path.indexOf("/loginComplete") >= 0 || 
+    req.path.indexOf("/guide") >= 0 || 
     req.path.indexOf("/text/") >= 0 || 
     req.path.endsWith("/text/latest/") || 
     req.path.indexOf("/poll") >= 0 || 
@@ -143,4 +144,21 @@ export function beginStreamingRes(res)
       'Transfer-Encoding': 'chunked',
       'X-Content-Type-Options': 'nosniff'});
   return res;
+}
+
+export function renderErrorPage(message)
+{
+  return function (req,res,next)
+  {
+    res.render("error", {
+      error: message
+    });
+  };
+}
+
+export function renderEJS(page, options)
+{
+  return function (req,res,next) {
+    res.render(page, options);
+  };
 }

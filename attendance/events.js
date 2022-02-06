@@ -5,6 +5,7 @@ import { guildsCollection } from "../core/database.js"
 import * as sessions from "./sessions.js";
 import { ATTENDANCE_CACHE } from "./routes.js";
 import { hasFeature } from "../guild/guild.js";
+import { registerCommand } from "../guild/commands.js";
 
 //attendance (TODO: if you start the bot after people are already in there its not smort enough to track they are there (But could do), and I realise a better data structure would be <name,room,started,left>, but I don't have a database or anything like that)
 export default async function (client)
@@ -192,35 +193,32 @@ export default async function (client)
     const nextSessionCommand = {
         name: 'nextsession',
         description: 'Replies with when the next session is!',
-        options: [/*{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+        options: [{
+            name: 'type',
+            type: 'STRING',
+            description: 'Find out the next lecture or tutorial session',
             required: false,
-        }*/],
+        }],
     };
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-            for (const command in commands)
-            {
-                console.log(guild.name+"delete "+await command.delete());
-            }
-        /*console.log(guild.name+"add "+*/await guild.commands.create(nextSessionCommand);//); 
+        await registerCommand(guild, nextSessionCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || interaction.guild == undefined) return;
     
         // Check if it is the correct command
         if (interaction.commandName === "nextsession") 
         {
             await interaction.deferReply();
 
-            var msg = await sessions.getNextSessionCountdown(interaction.guild, true);//show channel name
+            var ofType = interaction.options.getString("type");
+
+            var msg = await sessions.getNextSessionCountdown(interaction.guild, true, ofType);//show channel name
             await interaction.editReply({embeds: [ msg ]});
         }
     });

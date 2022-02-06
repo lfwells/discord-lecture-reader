@@ -1,8 +1,18 @@
-<label>
+<% 
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+var id = locals.id ?? uuid(); %>
+
+<label 
+    id="<%=id%>"
+    class="<%=typeof className !== 'undefined' ? className : "" %>">
+    
     <input type="checkbox" 
-        id="setFeature_<%= feature %>" 
-        name="setFeature_<%= feature %>" 
-        class="<%=typeof className !== 'undefined' ? className : "" %>"
         <% 
         if (locals["feature_"+feature])
         {
@@ -13,8 +23,36 @@
         <%=typeof label !== 'undefined' ? label : "" %>
 </label>
 <script>
-    $("#setFeature_<%= feature %>").on("change", (e) =>
+    (function() //closure to allow local vars
     {
-        document.location.href = "?setFeature_<%= feature %>="+$("#setFeature_<%= feature %>").prop("checked");
-    });
+        var onChanged = '<%-typeof onChanged !== 'undefined' ? onChanged : "" %>';
+        function changed (e) 
+        {
+            var value = $(this).is(":checked");
+            $(label).text("Loading...");
+
+            $.ajax({
+                url: "/guild/<%=locals.guild.id%>/setFeature",
+                method:"post",
+                data: JSON.stringify({
+                    feature: "<%=feature%>",
+                    value
+                }),
+                contentType: 'application/json',
+                success: (data) => {
+                    $(label).html(previousHtml);
+                    $(label).append('<span class="saved">Saved.</span>');
+                    $(label).find("input").prop("checked", value);
+                    label.find("input").on("change", changed);
+
+                    if (onChanged != "") eval(onChanged);
+                }
+            });
+            //document.location.href = "?setFeature_<%= feature %>="+$("#setFeature_<%= feature %>").prop("checked");
+        }
+
+        var label = $("#<%=id%>");
+        var previousHtml = $(label).html();
+        label.find("input").on("change", changed);
+    })();
 </script>

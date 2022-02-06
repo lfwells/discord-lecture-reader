@@ -1,12 +1,76 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { didAttendSession, getSessions, postWasForSession } from "./sessions.js";
+import { deleteAllScheduledEvents, didAttendSession, postWasForSession, scheduleAllSessions } from "./sessions.js";
+import { getSessions } from "../attendance/old_sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 import { getPostsData } from "../analytics/analytics.js";
 import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } from "../core/config.js";
+import { beginStreamingRes } from "../core/server.js";
+import { getGuildDocument, getGuildProperty, setGuildProperty } from "../guild/guild.js";
 
 export var ATTENDANCE_CACHE = {}; //because querying the db for all attendances on demand is bad (cannot cache on node js firebase it seems)s
+
+//TODO: move this to sessions.js (and create that lol)
+export async function sessionPage(req, res) 
+{
+
+
+
+
+/*TODO 
+- delete generated events using "reason" field (if we can)
+- import using ical or somethign
+- bugfix and test the old analytics pages
+*/
+
+
+
+    
+    var sessions = await getGuildProperty("sessionsJSON", req.guild, {});
+    console.log(sessions);
+
+    var channels = [];
+    var categoryChannels = req.guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
+    categoryChannels.forEach(cat => {
+        var sortedChannels = cat.children.sort((a,b) => a.position - b.position).filter((v) => v.type == "GUILD_VOICE");
+        channels.push(...sortedChannels.map((v,i) => {
+            var result = v;
+            result.category = cat.name;
+            return result;
+        }));
+    });
+
+    channels.unshift({
+        id: "",
+        name: "Select Channel -",
+        category: ""
+    });
+
+    res.render("sessions", {
+        sessions: sessions,
+        channels: channels
+    });
+}
+export async function sessionPagePost(req,res,next)
+{
+    beginStreamingRes(res);
+
+    await setGuildProperty(req.guild, "sessionsJSON", req.body);
+    await scheduleAllSessions(res, req.guild, req.body);
+
+    res.write("\nDone!");
+    res.end();
+
+}
+export async function deleteAllEvents(req,res,next)
+{
+    beginStreamingRes(res)
+    await deleteAllScheduledEvents(res, req.guild);
+    
+    res.write("\nDone!");
+    res.end();
+}
 
 export async function displayAttendanceOld(req, res, next) 
 {
@@ -326,6 +390,7 @@ export async function getAttendanceData(req,res,next)
         ATTENDANCE_CACHE[req.guild.id] = req.attendanceData;
     }
 
+    //TODO: return of this function is not compatible with these now
     res.locals.weeks = await getSessions(req.guild);
 
     var rawStatsData = await getPostsData(req.guild);

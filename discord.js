@@ -2,7 +2,7 @@
 import { getClient, init_client } from './core/client.js'; 
 
 //import things need to initialize discord
-import * as guild from "./guild/guild.js";
+import init_guilds from "./guild/guild.js";
 
 
 import { init_db } from './core/database.js';
@@ -11,16 +11,17 @@ import { init_db } from './core/database.js';
 const client = getClient();
 client.on('ready', async () => 
 {
-
 	await init_db(); 
-	
 
 	console.log(`Logged in as ${client.user.tag}!`);
 
 	//save all the guilds etc to db
-	guild.init(client);
+	await init_guilds(client);
 
-	init_client(client);
+	await init_client(client);
+
+	console.log('\u0007');
+	console.log("---------\nREADY\n---------"); 
 });
 
 //login with discord auth token

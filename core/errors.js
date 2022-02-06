@@ -5,7 +5,7 @@ import { getGuildProperty } from '../guild/guild.js';
 export function initErrorHandler(client) {
 
     process.on('uncaughtException', async function(err) {
-        console.error('!!! Caught exception: ', err);
+        //console.error('!!! Caught exception: ', err);
         var str = JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700);
         if (str.toLocaleLowerCase().indexOf("quota") > 0)
             return; 
@@ -17,13 +17,13 @@ export function initErrorHandler(client) {
             var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
             if(errorChannel)
             {
-                await send(errorChannel, "<@"+config.LINDSAY_ID+"> Exception on server "+(await getGuildNameFromError(err))+"```"+str+"```");
+                await send(errorChannel, "<@"+config.LINDSAY_ID+"> Exception on server "+(await getGuildNameFromError(err))+"```"+str+"```", true);
             }
         } catch (e) { console.error(e)}
         process.nextTick(function() { process.exit(1) })
     });
     process.on('unhandledRejection', async function(err) {
-        console.error('!!! Unhandled rejection: ',err); 
+        //console.error('!!! Unhandled rejection: ',err); 
         var str = JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700);
         if (str.toLocaleLowerCase().indexOf("quota") > 0)
             return; 
@@ -35,7 +35,7 @@ export function initErrorHandler(client) {
             var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
             if(errorChannel)
             {
-                await send(errorChannel, "<@"+config.LINDSAY_ID+"> Rejection on server "+(await getGuildNameFromError(err))+"```"+str+"```");//TODO: indicate server that caused the problem
+                await send(errorChannel, "<@"+config.LINDSAY_ID+"> Rejection on server "+(await getGuildNameFromError(err))+"```"+str+"```", true);//TODO: indicate server that caused the problem
             }
         } catch (e) { console.error(e)}
     
@@ -55,15 +55,19 @@ async function getEmbedFromError(error)
 
 async function getGuildNameFromError(error)
 {
-    var path = error.path;
-    if (path)
+    try
     {
-        if (path.indexOf("/guilds/") > 0)
+        var path = error.path;
+        if (path)
         {
-            path = path.replace("/guilds/", "");
-            path = path.substr(0, path.indexOf("/"));
-            return await getGuildProperty("name", path, null, false);
+            if (path.indexOf("/guilds/") > 0)
+            {
+                path = path.replace("/guilds/", "");
+                path = path.substr(0, path.indexOf("/"));
+                return await getGuildProperty("name", path, null, false);
+            }
         }
     }
+    catch (e) {}
     return null;
 }

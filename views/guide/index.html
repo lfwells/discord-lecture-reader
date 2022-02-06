@@ -1,0 +1,530 @@
+<%- include('../header.html') %>
+<% 
+function inGuild()
+{
+    return !(typeof(locals.guild) === 'undefined');
+}
+function getGuilds()
+{
+    if (typeof(guilds) === 'undefined') return [];
+    return guilds.map(g => g.id);
+}
+function hasGuilds()
+{    
+    return getGuilds().length > 0;
+}
+function guideTabLink(text, link)
+{
+    return include("guideTabLink.html", {
+        text, link
+    });
+}
+%>
+<div id="toc">
+    <div>
+        <ul></ul>
+    </div>
+</div>
+
+<content>
+    <h1>User Guide</h1>
+
+    <p>This page aims to give you a quick start guide to using Discord for teaching.</p>
+
+    <p>You may also find these articles helpful:
+        <ul>
+            <li><a href="https://support.discord.com/hc/en-us/articles/360041360311-Blog-How-to-use-Discord-for-your-classroom">How to Use Discord for Your Classroom (Discord Support Article)</a></li>
+            <li><a href="https://support.discord.com/hc/en-us/articles/360040613072-How-to-Use-Discord-for-Your-Classroom">How to Use Discord for Your Classroom (Discord Blog Version)</a></li>
+            <li><a href="https://support.discord.com/hc/en-us/articles/213530048-Advanced-Community-Server-Setup">Advanced Community Server Setup (Discord Support Article)</a></li>
+            <li><a href="https://support.discord.com/hc/en-us/articles/214836687-Role-Management-101">Role Management 101 (Discord Support Article)</a></li>
+            <li>Check out some talks we've done on using Discord for teaching in this <a href="https://www.youtube.com/playlist?list=PLEQ0dw7cj0Ncu3npwGS7HTjEJqwrNcMpp">YouTube playlist of Teaching Matters Lightning Talks</a></li>
+            <li><a href="https://www.utas.edu.au/mylo/staff/staff-resources/general-advice/guidelines-for-online-communication">UTAS guidelines for communication</a></li>
+            <li><a href="https://www.utas.edu.au/mylo/student-support/student-resources/section-03/netiquette-for-online-communication">Netiquette (UTAS Guide)</a></li>
+        </ul></p>
+
+    <p><strong>Thinking about using Discord for Online Lectures or Tutorials?</strong><br />Beware the following:
+    <ul>
+        <li>You are limited to only 50 people in a voice channel when using screenshare (you can up-vote the feature request to raise the limit <a href="https://support.discord.com/hc/en-us/community/posts/360059940851-More-Screen-Sharing">here</a>.)</li>
+        <li>You cannot control student screens on screenshare on Discord (yet), so you may need to open a Zoom call when people need that feature.</li>
+        <li>Discord <em>does</em> work in China, but students will need to use a VPN, and their connection may be unstable.</li>
+    </ul></p>
+
+
+    <% if (inGuild()) 
+    { 
+        %><p class="hint">Because you already have the Bot in your server, some steps of this guide can be automated for you!</p><%
+    } 
+    else
+    { 
+        if (hasGuilds())
+        {
+            %><p class="hint">It looks like you already have a server with the bot in it. 
+                <% if (getGuilds().length > 1) 
+                {
+                    %><br />You can automate some of steps below by visiting the user guide after clicking your server in the <a href="/">Unit List</a><%
+                }
+                else
+                {
+                    %>You can automate some of steps below. <br /><a class="botFunction" href="/guild/<%=getGuilds()[0]%>/guide">Enable Automated Steps</a><%
+                }
+                %>
+            </p><%
+        }
+        else
+        {
+            %><p class="hint">If you connect the Bot to your server early on, you can automate some steps below!</p><%
+        }
+    } %>
+
+    <section id="minimum">
+        <a>
+            <h2>Minimum-Effort Server Set Up (~5 minutes)</h2>
+            <p class="description">Use a Server Template to Quickly Get Started</p>
+        </a>
+        <div>
+            
+            <hr />
+            <h3>Download the UTAS Server Template</h3>
+            <p>Open the link <a target="_blank" href="<%- include("../subViews/templateLink.html") %>"><%- include("../subViews/templateLink.html") %></a>.</p>
+            <p>Here you should enter the name of your server. This should be the unit code, year, and optionally the unit name. Now is also a great time add a server icon. <em>This information can be changed later.</em></p>
+            <p class="centered">
+                <img src="/static/guide/template.png" />
+            </p>
+
+            <hr />
+            <h3>Exploring the Channels in the Template</h3>
+            <p>Once you have created your server, you should see a list of channels on the left-hand side of Discord. If you find a channel or category you don't want, right-click and choose Delete (for example, you may not want the Lectures, Consultation, and Tutorial categories).</p>
+            <p class="centered">
+                <img src="/static/guide/templateChannels.png" /><img src="/static/guide/templateChannelsDelete.png" />
+            </p>
+
+            <hr />
+            <div class="optional">
+                <a><h3>OPTIONAL: Read about all the different channels included in the template.</h3></a>
+                <ul>
+                    <li><strong>Rules</strong> - This is a read-only channel, and should be the first channel students see. You can define your own rules, or use the template, later in this guide.</li>
+                    <li><strong>#timetable</strong> - This is a read-only channel, you can use this to paste in an image or text of the class timetable, as a useful resource for students.</li>
+                    <li><strong>Staff Channels Category</strong> - Channels in this category are not visible to students. See later in the guide for information on how to assign <em>Roles</em> to people like your tutors, so that they can see these channels.
+                        <ul>
+                            <li>This includes a <strong>Staff Room</strong> voice channel, where you can chat with your tutors.</li>
+                        </ul>
+                    </li>
+                    <li><strong>General Channels Category</strong> - The main chat room for the server, where students should discuss on-topic things.
+                        <ul>
+                            <li><strong>#announcements</strong> - A channel that only you can post in, but students can see. You may choose to mirror MyLO announcements here. To alert students who have Discord open, you can also tag people in posts using <strong>@everyone</strong> or <strong>@here</strong>.</li>
+                            <li><strong>#introduce-yourself</strong> - We found that encouraging students to talk a bit about who they are allowed the students to connect better, and find people with similar interests. You should post in here to get the ball rolling.</li>
+                            <li><strong>#general</strong> - For general unit discussion.</li>
+                            <li><strong>#assignment-questions</strong> - For questions and help on the assignments. You may like to have a channel per assessment task.</li>
+                            <li><strong>#references-and-resources</strong> - Use this channel to build up a collection of interesting links, maybe to external tutorials, interesting articles, etc. Students can post in here.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Off Topic Channels Category</strong> - Gives the students somewhere to chat amongst themselves about whatever they like. Rules channel should indicate that only appropriate content should be posted here.
+                        <ul>
+                            <li>We have found having sub-channels for off-topic can help encourage students to talk about different things, like <strong>#off-topic-pets</strong>, <strong>#off-topic-outside</strong>, <strong>#game-reviews</strong>, etc.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Lecture Channels Category</strong> - If you intend to conduct lectures through Discord screenshare, then keep this category.
+                        <ul>
+                            <li>A major factor in this decision, is that you are limited to <strong>50 participants</strong> in a lecture (or <strong>25 participants</strong> if doing screenshare + webcam).</li>
+                            <li>Conversation happens live in <strong>#lecture-chat</strong>, while the screenshare happens in the <strong>Lecture Room</strong>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Consultation Channels Category</strong> - If you or your tutors intend to conduct consultation through Discord screenshare, then keep this category.
+                        <ul>
+                            <li>We find posting in the read-only channel <strong>#consultation-times</strong> makes it easier for students to know you are available.</li>
+                            <li>This only makes sense if you are teaching one unit, as you cannot be live in multiple Discord servers at once (but you can be on Zoom at the same time).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Tutorial Channels Category</strong> - If you intend to conduct online tutorials through Discord screenshare, then keep this category.
+                        <ul>
+                            <li>Conversation and text-help happens in <strong>#tutorial-chat</strong>.</li>
+                            <li>Live screenshare (for you and students) happens in <strong>Tutorial Room</strong>.</li>
+                            <li>You can move students to a <strong>Tutorial Breakout Room</strong> (and they can text-chat in the associated <strong>#tutorial-breakout-chat</strong>).</li>
+                            <li>Students can also move themselves to a <strong>Tutorial Breakout Room</strong> (but cannot move other students).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <hr />
+            <div class="optional" id="serverAdded">
+                <a><h3>OPTIONAL (but encouraged): Add the UTAS Discord Bot to Your Server</h3></a>
+                <div>
+                    <p>Adding the Discord Bot to your server will unlock additional features, such as post analytics, polls, even an achievement system (if you want it!).</p>
+                    <p>Adding the bot at this stage will also help automate some of the other steps in this user guide.</p>
+                    <p class="centered">
+                        <span style="width:50%; float:left; text-align:left">
+                            <% if (inGuild() == false ) 
+                            {
+                                %>
+                                Just click the link below, and in the popup that appears, choose your server from the dropdown list. You'll be redirected back to this guide when you're done. <br />
+                                <a href="<%- include("../subViews/authLink.html", { redirect: "serverAddedInGuide" }) %>" class="btnAdd outline"><span>+</span><span>Add Bot to Your Server</span></a>
+                                <%
+                            }
+                            else
+                            {
+                                %>
+                                <h4 class="hint" style="display:inline-block">Discord Bot added to your server, great job!</h4>
+                                <%
+                            }
+                            %>
+                        </span>
+                        <img src="/static/guide/addBot.png" />
+                    </p>
+                        
+                </div>
+            </div>
+
+            <hr />
+            <h3>Set Your Display Name</h3>
+            <p>Depending on how your created your account, your <em>Discord username</em> may be different to how you want to appear to your students. You can have a <em>server nickname</em> which is just for that server.</p>
+            <p>Right-click on your username on the right-hand side of Discord, and select <strong>Profile</strong>.</p>
+            <p class="centered">
+                <img src="/static/guide/mylo/profile.png" />
+            </p>
+
+            <hr />
+            <h3>Final Step: Invite Students</h3>
+            <p>Make sure you are in the channel that you want students to first see (recommend the <strong>#rules</strong> channel.</p>
+            <p>Click on the Server Options dropdown in the top-left, and select <strong>Invite People</strong>.</p>
+            <p class="centered">
+                <img src="/static/guide/invite1.png" /><img src="/static/guide/invite2.png" />
+            </p>
+            <p>This generates an invite link which expires in 7 days. You should generate a link that doesn't expire, by clicking the <strong>Edit invite link</strong> button.</p>
+            <p class="centered">
+                <img src="/static/guide/invite3.png" /><img src="/static/guide/invite4.png" />
+            </p>
+            <p>You can now share this link with the students so they can join the server!</p>
+
+            <hr />
+            <div class="optional">
+                <a><h3>OPTIONAL: Add a Guide to Using Discord to Your MyLO Site</h3></a>
+                <div>
+                    <p>Click the link below to download a template webpage for MyLO that explains the basics of using Discord. You can upload the file to your MyLO site directly.</p>
+                    <p>Note that this guide has sections and mentions of online lectures and tutorials. If you don't have these, you will need to remove these sections. There are other parts of the guide highlighted in red that you may want to edit or delete. Overall you should tailor this guide to suit your unit--it is just a starting point.</p>
+                    <p class="centered">
+                        <a href="/guide/downloadMyLOGuide">Download Discord Guide for MyLo</a>
+                    </p>
+                    <p>This guide uses the D2L template.</p>                    
+                </div>
+            </div>
+
+            <hr />
+            <h3>Set-Up Complete!</h3>
+            <p>You've completed the bare minimum set up for Discord for teaching, great job! Take the rest of the day off (then come back and try out some of the additional set up later in this guide).</p>
+        </div>
+    </section>
+
+    <section id="additional">
+        <a>
+            <h2>Additional Server Set Up Steps (~15 minutes)</h2>
+            <p class="description">Add a little bit of polish to the user experience by adding a welcome screen, rules template, and enabling the Community Server option.</p>
+        </a>
+
+        <div>
+
+            <hr />
+            <h3>Fill in the Rules Channel</h3>
+            <p>You can write your own rules, or you might like to use the following template as a guide.</p>
+
+            <textarea id="rules" style="width:100%; height:20em">
+    <%- include("rulesTemplate.html") %></textarea>
+            <p><button id="copyRules">Copy Rules Template</button> <%- include("../subViews/longBotCommandButton.html", 
+                { 
+                    text: "Get Bot to Post Rules",
+                    url: "./guide/postRules",
+                    data: '{ rulesText: $("#rules").val() }'
+                }) %></p>
+                
+            <p>The text above can paste directly into Discord, and the emoji should appear. You may like to adjust these rules:</p>
+            <ul>
+                <li>You might not like the nickname format in (1), or care about the students using their names.</li>
+                <li>Rule (4) is for programming units, adjust as needed.</li>
+                <li>You should set your own ground rules for how students contact you via discord in rule (8).</li>
+            </ul>
+        
+
+            <hr />
+            <h3>Enable Community Server</h3>
+            <p>Turning your server into a Community Server allows you to have a welcome screen, and a more advanced rules channel.</p>
+            <p>This setting, like the other options in this section can be found under the <strong>Server Settings</strong> page, accessible from the top-left corner.</p>
+            <p class="centered">
+                <img src="/static/guide/invite1.png"  style="width:45%" /><img src="/static/guide/serverSettings.png"  style="width:28%" />
+            </p>
+            <p>On the <strong>Server Settings</strong> page, choose <strong>Enable Community</strong> on the left-hand side. Then click <strong>Get Started</strong></p>
+            <p class="centered">
+                <img src="/static/guide/community1.png" style="width:28%" /><img src="/static/guide/community2.png" style="width:45%" />
+            </p>
+            <p>Follow the steps in the wizard. You need to enable all options to continue. You'll need to select the <strong>#rules</strong> channel from the dropdown list.</p>
+            <p class="centered">
+                <img src="/static/guide/community3.png" style="width:28%" />
+                <img src="/static/guide/community4.png" style="width:28%" />
+                <img src="/static/guide/community5.png" style="width:28%" />
+            </p>
+            <p>Once this is complete, it is recommended to add a short <strong>description</strong> on the <strong>Community Server</strong> settings page. This will appear on the <strong>Welcome Screen</strong> (see below).</p>
+
+            <hr />
+            <h3>Set Up a Welcome Screen</h3></a>
+            <p>When students first join your server, you can show them a welcome screen like the one below:</p>
+            <p class="centered">
+                <img src="/static/guide/welcome1.png" />
+            </p>
+            <% if (inGuild())
+            {
+                %><p class="botFunction">You can follow the steps below, or you can get the bot to do it for you: </p>
+                    
+                <p class="centered">
+                    <textarea id="description" style="width:65%; height:4em" placeholder="Enter a short unit description/welcome message."></textarea><%- include("../subViews/longBotCommandButton.html", 
+                    { 
+                        text: "Get Bot to Configure a Basic Welcome Screen",
+                        url: "./guide/configureWelcomeScreen",
+                        data: '{ description: $("#description").val() }'
+                    }) %>
+                </p><%
+            }
+            %>
+            <p>On the <strong>Server Settings</strong> page, choose <strong>Welcome Screen</strong> on the left-hand side. Then click <strong>Set Up Membership Screening</strong>. Then click <strong>Get Started</strong>.</strong></p>
+            <p>You will be prompted to add a recommended channel for people to visit, along with a description. See the picture above for examples. Make it pretty, by clicking the <strong>emoji</strong> icon.</p>
+            <p class="centered">
+                <img src="/static/guide/welcome2.png" />
+            </p>
+            <p>Once you are done, be sure to click <strong>Enable</strong> on the <strong>Welcome Screen</strong> settings page.</p>
+        
+            <hr />
+            <h3>Set Up a Membership Screening (Rules Popup)</h3>
+            <p>After the welcome screen, you can prevent students from posting until they have accepted the server rules:</p>
+            <p class="centered">
+                <img src="/static/guide/screening1.png" />
+            </p>
+            <p class="centered">
+                <img src="/static/guide/screening2.png" />
+            </p>
+            
+            <p>On the <strong>Server Settings</strong> page, choose <strong>Membership Screening</strong> on the left-hand side. Then click <strong>Set Up Welcome Screen</strong>.</p>
+            <p>You will be prompted to enter in each individual rule. You may want to copy and paste from the rules post you set up earlier.</p>
+            <p class="hint">Currently, screening is just acceptance of the rules, but in the future Discord will add additional features to the screening page.</p>
+            <p>Once you are done, be sure to click <strong>Enable</strong> on the <strong>Membership Screening</strong> settings page.</p>
+
+            <hr />
+            <h3>Additional Channel Ideas</h3>
+            <p>The given template has most of the channels you might need, but here are some suggestions for channels you could add:</p>
+            <ul>
+                <li><strong>#suggestions</strong> -- Allow students to provide feedback on the unit/Discord</li>
+                <li><strong>#reminders</strong> -- Remind students about specific deadlines etc (e.g. tag people who haven't completed the weekly quiz etc.)</li>
+            </ul>
+            <p>You might like to have channels which students can see but cannot post in. The best approach to this is to create an <strong>Announcement</strong> channel in the Create Channel popup. You can have as many announcement channels as you like, and can name them whatever you like.</p>
+        </div>
+    </section>
+
+    <p class="hint">The features in the rest of this guide rely on having the Discord bot in your server.<br />
+        <%=inGuild() ? "You've already done that, so great job!" : "Follow the steps earlier in the guide." %></p>
+
+    <section id="bot">
+        <a>
+            <h2>Configuring the Bot and Basic Features (~10 mins)</h2>
+            <p class="description">The bot will work straight away without any configuration, but you can tweak things yourself.</p>
+        </a>
+        <div>
+            
+            <hr />
+            <h3>Setting the Bot Name</h3>
+            <p>&quot;UTAS Discord Bot&quot; is a pretty boring name. You can change what name the bot appears under on the server on the <%-guideTabLink("Configure Server Tab", "/")%>.</p>
+            <p class="centered">
+                <img src="/static/guide/botName.png" />
+            </p>
+
+            <hr />
+            <h3>Roles and Channels</h3>
+            <p>The bot works better when it knows about some of the key channel types in your server, like which channel is for Rules, which one is where lecture chat takes place etc.</p>
+            <p>When you add the bot to your server, it takes a guess at which channels are what (and should do a good job if you used the server template), but you should check everything is correct on the <%-guideTabLink("Configure Server Tab", "/")%>.</p>
+
+            <hr />
+            <h3>Enabling Features</h3>
+            <p>You can turn on or off various bot features using the <%-guideTabLink("Features Tab", "/features")%>.</p>
+            <p>When a feature is enabled, sometimes a new tab will appear along the top. Other features are so basic in their configuration, that settings will appear on the feature tab.</p>
+            <p class="centered">
+                <img src="/static/guide/features.png" />
+            </p>
+            
+            <p>Here are some basic features:</p>
+
+            <h4>Direct-Message New Students Upon Joining</h4>
+            <p class="centered">
+                <img src="/static/guide/joinDM.png" />
+            </p>
+            <p>When a student joins a unit for the first time, the bot can direct-message them to let them know what the bot is, and how they can use it.</p>
+            <p>Students are told not ask questions of the bot, as it cannot respond.</p>
+
+            <h4>TODOs</h4>
+            <p class="centered">
+                <img src="/static/guide/todo1.png" />
+                </p>
+            <p>
+                <img src="/static/guide/todo2.png" />
+            </p>
+            <p class="centered">
+                <img src="/static/guide/todo3.png" />
+            </p>
+            <p>You can flag a message to deal with later, or write a note to yourself using this feature. TODO Notes are sent to a channel called <strong>#todo</strong> that you need to set up (generally this should be in your <strong>Staff Channels</strong>  category.</p>
+            <p>Flag a message by right-clicking it, and selecting <strong>App/TODO</strong>.</p>
+            <p>Students can also use this feature, however flagged messages will just be relayed to themselves via a DM from the bot.</p>
+            <p>Unfortunately this feature isn't available in the Discord Mobile App, but if you react to a message with a specific emoji (default 🤞), the same process will happen.</p>
+
+            <h4>Show Online Member Count / Show Enrolled Member Count</h4>
+            <p class="centered">
+                <img src="/static/guide/memberCount.png" />
+            </p>
+            <p>This information appears in Discord in the top-left, and is updated very slowly.</p>    
+            <% if (inGuild()) {
+                %><p>
+                <%- include("../subViews/featureSelect.html", 
+                { 
+                    label: "Show Online Member Count",
+                    feature: "showOnlineMemberCount",
+                    className:"botFunction"
+                }) %></p>
+                <p>
+                <%- include("../subViews/featureSelect.html", 
+                { 
+                    label: "Show Enrolled Member Count",
+                    feature: "showMemberCount",
+                    className:"botFunction"
+                }) %>
+                </p>   
+                <%
+            }%>
+            
+            <h4>Custom Invites</h4>
+            <p class="centered">
+                <img src="/static/guide/customInvites.png" />
+            </p>
+            <p>You can attach a specific invite link to a given role. Users who join using that link will be given that role. You might like to use this for a Hobart / Launceston / Online link (however using the <a href="roleSelect">Role Select</a> command may be better for this.</p>
+            
+            <h4>Other Features</h4>
+            <p>The later sections of the guide talk about some more complex bot features.</p>
+        </div>
+    </section>
+
+    <section id="polls">
+        <a>
+            <h2>Feature: Polls</h2>
+            <p class="description">TODO</p>
+        </a>
+        <div>
+
+            <p class="hint">Polls can be displayed in your lecture stream using the instructions in the <a href="#obs">Open Broadcaster Studio Integration</a> feature.</p>
+        </div>
+    </section>
+
+    <section id="analytics">
+        <a>
+            <h2>Feature: Post and Attendance Tracking</h2>
+            <p class="description">TODO</p>
+        </a>
+        <div>
+
+        </div>
+    </section>
+
+    <section id="achievements">
+        <a>
+            <h2>Feature: Achievement System</h2>
+            <p class="description">Give out achievements to students for various things. Add achievement icons that can appear next to student names.</p>
+        </a>
+        <div>
+
+            <p class="hint">Note that you (the server owner) cannot have achievement icons in your name, as the bot isn't allowed to do that. The same applies to anyone with <a href="https://support.discord.com/hc/en-us/articles/214836687-Role-Management-101">a higher-level role</a>.</p>
+        </div>
+    </section>
+
+    <section id="sessions">
+        <a>
+            <h2>Feature: Scheduled Sessions</h2>
+            <p class="description">TODO</p>
+        </a>
+        <div>
+
+        </div>
+    </section>
+
+    <section id="obs">
+        <a>
+            <h2>Feature: Open Broadcaster Studio Integration</h2>
+            <p class="description">TODO</p>
+        </a>
+        <div>
+            <p class="centered"><a target="_blank" href="https://obsproject.com/" class="botFunction">Download Open Broadcaster Studio</a></p>
+        </div>
+    </section>
+</content>
+
+<script>
+$(document).ready(function () {
+    $("#toc ul").toc({
+        content:"content",
+        headings:"h2,h3"
+    });
+/*
+    $("section > a").each(function() {
+        //$(this).attr("href", "#"+$(this).parent().attr("id"));
+        $(this).attr("href", "#");
+        $(this).on("click", function(e)
+        {
+            var content = $(this).parent().find("> div");
+            content.toggle();
+            return false;
+        });
+    });
+    $("section:target div").show();
+
+    
+    $(".optional > a").each(function() {
+        $(this).attr("href", "#");
+        $(this).on("click", function(e)
+        {
+            var content = $(this).next();
+            content.toggle();
+            return false;
+        });
+    });
+*/
+    if (document.location.href.indexOf("#serverAdded") > 0)
+    {
+        $("#minimum > div, #serverAdded > div").show();
+        setTimeout(function() {
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#serverAdded").offset().top
+            }, 100);
+            setTimeout(function() {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $("#serverAdded").offset().top
+                }, 100);
+            }, 750);
+        }, 750);
+    }
+
+    $("#copyRules").on("click", function()
+    {
+        CopyHTMLToClipboard("rules");
+        $(this).text("Copied to Clipboard!");
+    });
+});
+
+function CopyHTMLToClipboard(id) {    
+    var box = document.getElementById(id);     
+    box.select();
+    box.setSelectionRange(0,99999);
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        // navigator clipboard api method'
+        navigator.clipboard.writeText(box.value);
+    } else {
+        // text area method
+        document.execCommand('copy');
+    }
+    
+
+}  
+</script>
+
+<%- include('../footer.html') %>

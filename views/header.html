@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Robo Lindsay Mk II</title>
+        <title>UTAS Discord Bot</title>
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/pure-min.css" integrity="sha384-LTIDeidl25h2dPxrB2Ekgc9c7sEC3CWGM6HeFmuDNUjX76Ert4Z4IY714dhZHPLd" crossorigin="anonymous /">
         <link rel="stylesheet" href="/static/style.css">
         <style type="text/css">
@@ -9,6 +9,21 @@
             }
         </style>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+        <!-- Font Awesome icons (Bootstrap, Foundation, and jQueryUI also supported) -->
+        <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+
+        <script src="/static/dist/jsoneditor.js"></script>
+        <script src="/static/dist/jquery.toc.min.js"></script>
+    
+        <script>
+        // Set the default CSS theme and icon library globally
+        JSONEditor.defaults.theme = 'foundation5';
+        JSONEditor.defaults.iconlib = 'fontawesome4';
+        </script>
+        
     </head>
     <body>
         <% 
@@ -17,23 +32,13 @@
             %>
             <header>
             <% 
-            if (locals.discordUser)
-            {
-                %>
-                <div class="discordUser">
-                    <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
-                    <div>
-                        <%=locals.discordUser.username%><br />
-                        <a href="/logout" class="logout">Logout</a>
-                    </div>
-                </div>
-                <%
-            }
-            
             if (locals.guild)
             {
                 %>
-                <h1><a href="/guild/<%= guild.id %>/"><%= guild.name %></a> <a href="/" style="font-size:small">Change Server</a></h1>
+                <h1>
+                    <img src="<%=guild.iconURL()%>" />
+                    <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
+                </h1>
                 <% 
                 
                 
@@ -67,6 +72,30 @@
                 %>
                 
                 <nav>
+                            
+                    <% if (locals.discordUser)
+                    {
+                        %>
+                        <div class="discordUser">
+                            <% if (locals.discordUser.avatar) { %>
+                                <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                            <% }%>
+                            <div>
+                                <%=locals.discordUser.username%><br />
+                                <a href="/logout" class="logout">Logout</a>
+                            </div>
+                        </div>
+                        <%
+                    }
+                    else if ((locals.path ?? "").indexOf("/guide") >= 0)
+                    {
+                        %>
+                        <div class="discordUser loginButton" style="top:4em">
+                            <a href="/login" class="login">Login</a>
+                        </div>
+                        <%
+                    } %>
+            
                     <ul>
                         <li><a <%=currentTab("")%> href="/guild/<%= guild.id %>/">Configure Server</a></li>
                         <li><a <%=currentTab("features")%> href="/guild/<%= guild.id %>/features/">Features</a></li>
@@ -75,6 +104,14 @@
                         {
                             %>
                             <li><a <%=currentTab("attendance")%> href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
+                            <%
+                        }
+                        %>
+
+                        <% if (hasFeature("sessions"))
+                        {
+                            %>
+                            <li><a <%=currentTab("sessions")%> href="/guild/<%= guild.id %>/sessions/">Sessions</a></li>
                             <%
                         }
                         %>
@@ -119,7 +156,7 @@
                         }
                         %>
 
-                        <li><a <%=currentTab("help")%> href="/help">User Guide</a></li>
+                        <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
 
                     </ul>
                 </nav>
@@ -127,9 +164,54 @@
             } 
             else
             {
+                function currentTab(checkFor)
+                {
+                    var path = locals.path ?? "";
+                    var isCurrent = false;
+                    if (path.length == 0 && checkFor == "")
+                    {
+                        isCurrent = true;
+                    } 
+                    else if (checkFor != "" && (path.endsWith(checkFor) || path.endsWith(checkFor+"/")))
+                    {
+                        isCurrent = true;
+                    }
+                    return isCurrent ? ' class=current ' : "";
+                }
                 %>
-                <h1>UTAS Lecture Bot</h1>
-                <p>&nbsp;</p>
+                <h1><a href="/">UTAS Discord Bot</a></h1>
+                
+                <nav>
+
+                    <% if (locals.discordUser)
+                    {
+                        %>
+                        <div class="discordUser">
+                            <% if (locals.discordUser.avatar) { %>
+                                <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                            <% }%>
+                            <div>
+                                <%=locals.discordUser.username%><br />
+                                <a href="/logout" class="logout">Logout</a>
+                            </div>
+                        </div>
+                        <%
+                    }
+                    else if ((locals.path ?? "").indexOf("/guide") >= 0)
+                    {
+                        %>
+                        <div class="discordUser loginButton" style="top:4em">
+                            <a href="/login" class="login">Login</a>
+                        </div>
+                        <%
+                    } %>
+
+                    <ul>
+                        <li><a <%=currentTab("")%> href="/"><%=locals.discordUser ? "Unit List" : "Home" %></a></li>
+                        <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
+
+                    </ul>
+                </nav>
                 <%
             }
             %>

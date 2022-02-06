@@ -1,4 +1,10 @@
 <%- include('header.html') %>
+<% 
+function hasFeature(feature)
+{
+    return locals["feature_"+feature];
+}
+%>
 
 <h2>Enable/Disable Features</h2>
 
@@ -6,36 +12,32 @@
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "Achievements",
-        feature: "achievements"
+        feature: "achievements",
+        onChanged: '$("#achievementsFeature").toggle(value)'
     }) %>
 </dt>
 
-    <dd>
-    <% 
-    function hasFeature(feature)
-    {
-        return locals["feature_"+feature];
-    }
-
-    if (hasFeature("achievements"))
-    {
-        %><%- include("subViews/channelSelect.html", 
+    <dd id="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+     <%- include("subViews/channelSelect.html", 
         { 
             label: "Achievements Channel:",
             selectDefaultText:"-- Select Channel--",
             id: "setAwardChannelID",
-            value: locals.awardChannel ? locals.awardChannel.id : undefined,
-            onGuildPage:true
-        }) %><%
-    }
-    %>
-</dd>
+            value: locals.awardChannelID,
+            onChangedURL: "setGuildProperty"
+        }) %>
+    </dd>
 
 
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "Attendance Tracking",
         feature: "attendance",
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Scheduled Sessions",
+        feature: "sessions",
     }) %></dt>
 <dt><%- include("subViews/featureSelect.html", 
     { 
@@ -53,47 +55,64 @@
         feature: "invites"
     }) %></dt>
 </dl>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Bot DMs Students On Joining Server",
+        feature: "dm_intro",
+    }) %></dt>
 
-
+    <dd>
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "TODOs",
-        feature: "todos"
+        feature: "todos",
+        onChanged: '$("#todoFeature").toggle(value)'
     }) %>
 </dt>
 
-    <dd>
-    <% 
-
-    if (hasFeature("todos"))
-    {
-        %><%- include("subViews/channelSelect.html", 
+<div id="todoFeature" >
+    <dd style="display:<%=hasFeature("todos") ? "block" : "none"%>""><%- include("subViews/channelSelect.html", 
         { 
             label: "TODOs Channel:",
             selectDefaultText:"-- Select Channel--", 
             id: "setTodoChannelID",
-            value: locals.todoChannelID ? locals.todoChannelID.id : undefined,
-            onGuildPage:true
-        }) %><%
-    }
-    %>
+            value: locals.todoChannelID,
+            onChangedURL: "setGuildProperty"
+        }) %>
     </dd>
+
     <dd>
-        <% 
-    
-        if (hasFeature("todos"))
-        {
-            %><%- include("subViews/textFieldGuildProperty.html", 
+        <%- include("subViews/guildSettingText.html", 
             { 
-                label: "TODOs Emoji (Mobile):",
+                label: "TODOs Emoji (For tagging on mobile):",
                 id: "setTodoEmoji",
-                property: "todoEmoji",
-                value: locals.todoEmoji ?? "",
-                onGuildPage:true
-            }) %><%
-        }
-        %>
+                value: locals.todoEmoji ? locals.todoEmoji : "",
+                help:"You can paste from <a href='https://emojipedia.org/'>https://emojipedia.org/</a>.",
+                onChangedURL: "setGuildProperty"
+            }) %>
         </dd>
+</div>
+
+    <h3>Status Channels</h3>
+    <p>These appear at the top of the channel list, showing status information. They update slowly, and may take up to 10 minutes before they appear for the first time.</p>
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Online Member Count",
+        feature: "showOnlineMemberCount"
+    }) %></dt>
+        
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Enrolled Member Count",
+        feature: "showMemberCount"
+    }) %></dt>
+        
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Next Lecture Session",
+        feature: "showNextSession"
+    }) %></dt>
+        
 
 
 <%- include('footer.html') %>

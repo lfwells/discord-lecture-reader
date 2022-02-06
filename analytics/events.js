@@ -1,14 +1,17 @@
 import * as config from '../core/config.js';
 import { getGuildDocument, hasFeature } from '../guild/guild.js';
 import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js';
-import { offTopicOnly, pluralize, sleep } from '../core/utils.js';
+import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
+import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 
 export default async function(client)
 {
     client.on('messageCreate', async (msg) =>  
     {
+        if (msg.inGuild() == false) return;
+
         if (await hasFeature(msg.guild, "analytics") == false) return;
         if (msg.channel.id == config.ERROR_LOG_CHANNEL_ID) return; //dont get stuck in a loop recording error logs lol
 
@@ -21,7 +24,7 @@ export default async function(client)
     // The data for our command
     const statsCommand = {
         name: 'stats',
-        description: 'Replies with the server stats (TODO: just stats for this channel, etc)',
+        description: 'Replies with the server stats (only available in off-topic channel).', //(TODO: just stats for this channel, etc)
         options: [/*{
             name: 'user',
             type: 'USER',
@@ -31,7 +34,7 @@ export default async function(client)
     };
     const statsWeekCommand = {
         name: 'statsweek',
-        description: 'Replies with the server stats for just this week',
+        description: 'Replies with the server stats for just this week (only available in off-topic channel).',
         options: [/*{
             name: 'user',
             type: 'USER',
@@ -41,7 +44,7 @@ export default async function(client)
     };
     const statsMeCommand = {
         name: 'statsme',
-        description: 'Replies with the YOUR server stats',
+        description: 'Replies with your server stats (only available in off-topic channel).',
         options: [{
             name: 'user',
             type: 'USER',
@@ -50,57 +53,58 @@ export default async function(client)
         }],
     };
     const buttonCommand = {
-        name: 'button',
-        description: 'this is dumb',
-    }; 
-    
-    const contextCommand = {
-        name: 'context_test',
-        type: "MESSAGE"
-    }; 
-    
+        name: 'useless_button',
+        description: 'Literally just a counter button everyone can press. Why? I DON\'T KNOW!',
+        options: [{
+            name: 'text',
+            type: 'STRING',
+            description: 'The text to appear on the button',
+            required: false,
+        }],}; 
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-        for (const command in commands)
-        {
-            console.log(guild.name+"delete "+await command.delete());
-        }
-        /*console.log(guild.name+"add "+*/await guild.commands.create(statsCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(statsWeekCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(statsMeCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(buttonCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(contextCommand);//); 
+        await registerCommand(guild, statsCommand);
+        await registerCommand(guild, statsWeekCommand); 
+        await registerCommand(guild, statsMeCommand); 
+        await registerCommand(guild, buttonCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
-
-        if (await hasFeature(interaction.guild, "analytics") == false)
+        if (interaction.isCommand() && interaction.guild)
         {
-            interaction.reply({
-                content: "Post stats not enabled on this server",
-                ephemeral: true
-            });
-            return;
+            if (interaction.commandName === "useless_button") 
+            {
+                await doButtonCommand(interaction);            
+            }
+            else if (await hasFeature(interaction.guild, "analytics") == false)
+            {
+                interaction.reply({
+                    content: "Post stats not enabled on this server",
+                    ephemeral: true
+                });
+                return;
+            }
+        
+            // Check if it is the correct command
+            if (interaction.commandName === "stats" || interaction.commandName === "statsweek") 
+            {
+                doStatsCommand(interaction);
+            }
+            // Check if it is the correct command
+            else if (interaction.commandName === "statsme") 
+            {
+                doStatsMeCommand(interaction);            
+            }
         }
-    
-        // Check if it is the correct command
-        if (interaction.commandName === "stats" || interaction.commandName === "statsweek") 
+        // If the interaction isn't a slash command, return
+        else if (interaction.isMessageComponent())
         {
-            doStatsCommand(interaction);
-        }
-        // Check if it is the correct command
-        else if (interaction.commandName === "statsme") 
-        {
-           doStatsMeCommand(interaction);            
-        }
-        // Check if it is the correct command
-        else if (interaction.commandName === "button") 
-        {
-           doButtonCommand(interaction);            
+            if (interaction.message.interaction.commandName === "useless_button") 
+            {
+                await doButtonCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            }
         }
     });
 
@@ -111,7 +115,7 @@ async function doStatsCommand(interaction)
     var thisWeek = interaction.commandName === "statsweek";
 
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
 
     //this can take too long to reply, so we immediately reply
     await interaction.deferReply();
@@ -139,7 +143,7 @@ async function doStatsCommand(interaction)
 async function doStatsMeCommand(interaction)
 {
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
 
     var member = interaction.options.getMember("user") ?? interaction.member; 
 
@@ -170,36 +174,46 @@ async function doStatsMeCommand(interaction)
     await interaction.editReply({embeds: [ statsEmbed ] });
 }
 
-var clicks = 0;
+var clicks = 0; //TODO: give this command a text, give this command unique counters zz
 async function doButtonCommand(interaction)
 {
     //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    if (await offTopicCommandOnly(interaction)) return;
+    
+    await interaction.deferReply();
 
+    await storeCachedInteractionData(interaction.guild, interaction.id, { clicks: 0 });
 
     const row = new MessageActionRow()
     .addComponents(
         new MessageButton()
             .setCustomId('primary')
-            .setLabel('Click me for nothing interesting to happen')
+            .setLabel(interaction.options.getString("text") ?? 'Click me for nothing interesting to happen')
             .setStyle('PRIMARY')
             .setEmoji('😄')
     );
 
     const rows = [ row ]
 
-    
-    const collector = interaction.channel.createMessageComponentCollector({ time: 150000000 });
-    collector.on('collect', async i => {
-        if (i.customId === 'primary') {
-            //await i.deferUpdate();
-            //await wait(4000);
-            clicks++;
-            await i.update({ content: pluralize(clicks, "click"), components: rows });
-        }
-    });
-    
-    collector.on('end', collected => console.log(`Collected ${collected.size} items`));
+    await interaction.editReply({content: pluralize(clicks, "click"), components: rows});
+}
 
-    await interaction.reply({content: pluralize(clicks, "click"), components: rows});
+async function doButtonCommandButton(i, originalInteraction)
+{
+    if (i.customId === 'primary') {
+        //await i.deferUpdate();
+        //await wait(4000);
+        
+        originalInteraction = await storeCachedInteractionData(i.guild, originalInteraction.id, { clicks: originalInteraction.clicks + 1 });
+        
+        var extra = "";
+        if (config.LINDSAYS_SERVERS.indexOf(i.guild.id) >= 0)
+        {
+            if (originalInteraction.clicks == 5) extra = ", oh boy, here we go.";
+            if (originalInteraction.clicks == 69) extra = ", nice.";
+            if (originalInteraction.clicks == 420) extra = ", go to bed, kiddos.";
+        }
+
+        await i.update({ content: pluralize(originalInteraction.clicks, "click") + extra });
+    }
 }
