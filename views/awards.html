@@ -43,7 +43,7 @@ function award(studentDiscordID, emoji, button)
         data:{
             studentDiscordID:studentDiscordID,
             emoji:emoji,
-            popupChannelID:$('#popupChannelID').val(),
+            popupChannelID:$('select#popupChannelID').val(),
         },
         dataType: "json",
         success:(json) =>

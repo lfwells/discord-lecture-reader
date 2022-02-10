@@ -3,7 +3,8 @@ import * as config from "./config.js";
 import { renderFile } from "ejs";
 import { getStats } from "../analytics/analytics.js";
 import { getClient } from "./client.js";
-import { isAdmin } from "../roles/roles.js";
+import { hasRole, hasRoleID, isAdmin } from "../roles/roles.js";
+import { asyncFilter } from "./utils.js";
 
 
 export function loadClassList(req,res,next)
@@ -57,7 +58,6 @@ export async function _loadClassList(req,res,next, includeRemoved)
     {
         classList = classList.filter(m => m.discordID != config.LINDSAY_ID);
     }
-
     if (req.query && req.query.filterByRole)
     {
         if (req.query.filterByRole.startsWith(config.SELECT_FIELD_NONE))
@@ -71,11 +71,12 @@ export async function _loadClassList(req,res,next, includeRemoved)
             delete req.query.includeAdmin;
         }
     }
+
     if (req.query && req.query.includeAdmin == undefined)
     {
         console.log(req.query.includeAdmin);
 
-        classList = classList.filter(m => !isAdmin(m.member)); 
+        classList = await asyncFilter(classList, async (m) => !(await isAdmin(m.member)) );
     }
     else if (req.query)
     {
@@ -89,7 +90,8 @@ export async function _loadClassList(req,res,next, includeRemoved)
 
         var studentRoleID = await getGuildProperty("studentRoleID", req.guild, undefined, true);
         if (studentRoleID)
-            classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(studentRoleID)); 
+            classList = await asyncFilter(classList, async (m) => await hasRoleID(m.member, studentRoleID) );
+            //classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(studentRoleID)); 
         //else
             //classList = [];
     }
