@@ -52,8 +52,8 @@ async function doHelpCommand(interaction)
                     }
 
                     return {
-                        name:"`/"+key+optionsText+"`",
-                        value:data.description
+                        name:"`/"+(key+optionsText).substring(0, 250)+"`",
+                        value:data.description.substring(0, 255)
                     }
                 })
             }
