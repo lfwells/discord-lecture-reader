@@ -9,3 +9,4 @@ awards/namesBackup kit305.json
 ~*.docx
 ~*.tmp
 .DS_Store
+.vscode/sftp.json
