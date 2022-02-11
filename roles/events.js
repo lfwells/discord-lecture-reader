@@ -86,7 +86,7 @@ export default async function (client)
                 await doRoleSelectCommand(interaction);
             }
         }
-        else if (interaction.isMessageComponent()) 
+        else if (interaction.isMessageComponent() && interaction.message.interaction) 
         {        
             if (interaction.message.interaction.commandName === "role_select_message") 
             {

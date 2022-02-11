@@ -228,6 +228,7 @@ export async function postPollRoboLinds(req, res)
   var pollText = req.params.pollText;
 
   pollText = pollText.replace("/poll ", "");
+  pollText = pollText.replace("%2Fpoll ", "");
   
   //turn it into a simple poll command
   console.log("post poll",pollText);
@@ -258,13 +259,15 @@ export async function postPollRoboLinds(req, res)
 
   //send the message on discord
   
-  var post = await send(req.lectureChannel, "poll");
+  var post = await send(req.lectureChannel, {embeds:[{title:"Loading..."}]});
   await doPollCommand(post, {
     question: myArray[0],
     options: myArray.slice(1),
-    multi_vote: true,
+    multi_vote: true, //TODO: get ALL of these from the json
     allow_undo: true,
-    poll_emoji: "█"
+    poll_emoji: "█",
+    restrict_see_results_button: false,
+    authorID: req.query.authorID ?? "" //TODO: get this from the logged in discordID
   });
   
   //show web page

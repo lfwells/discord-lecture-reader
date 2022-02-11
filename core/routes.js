@@ -2,6 +2,7 @@ import { downloadResource, removeQuestionMark } from "./utils.js";
 
 import * as guild from "../guild/guild.js";
 import { filterButtons, loadClassList, loadClassListWithRemoved } from "../core/classList.js";
+import * as commands from "../guild/commands.js";
 
 import * as login_routes from '../core/login.js';
 import * as guild_routes from '../guild/routes.js';
@@ -26,6 +27,9 @@ export default function(app)
         res.locals.path = req.path;
         next();
     });
+    
+    app.use(commands.loadCommands);
+
     app.use(defaultRouter());
     app.use("/guild/:guildID", guildRouter());
 }

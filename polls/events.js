@@ -58,11 +58,12 @@ export default async function(client)
                 doPollCommand(interaction);
             }
         }
-        else if (interaction.isMessageComponent()) 
+        else if (interaction.isMessageComponent())// && interaction.message.interaction) 
         {        
-            if (interaction.message.interaction.commandName === config.POLL_COMMAND) 
+            if (interaction.customId.startsWith("poll_") || interaction.message.interaction.commandName === config.POLL_COMMAND) 
             {
-                await doPollCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+                console.log((interaction.message.interaction ?? interaction.message).id);
+                await doPollCommandButton(interaction, (interaction.message.interaction ?? interaction.message));
             }
         }
     });
@@ -71,7 +72,7 @@ export default async function(client)
 
 export async function doPollCommand(interaction, scheduledOptions)
 {
-    var pollAuthor = interaction.user.id;
+    var pollAuthor = interaction.user?.id ?? scheduledOptions.authorID;
     var results = [];    
     var answers = [];
     var pollOptions = [];
@@ -117,7 +118,14 @@ export async function doPollCommand(interaction, scheduledOptions)
         pollAuthor
     });
 
-    await interaction.reply({embeds: [ await resultsText(interaction) ], components: await createButtons(interaction, interaction.channel)});
+    if (scheduledOptions)
+    {
+        return interaction.edit({embeds: [ await resultsText(interaction) ], components: await createButtons(interaction, interaction.channel), content:undefined});
+    }
+    else
+    {
+        await interaction.reply({embeds: [ await resultsText(interaction) ], components: await createButtons(interaction, interaction.channel)});
+    }
 }
 async function doPollCommandButton(i, originalInteraction) 
 {  
@@ -137,7 +145,7 @@ async function doPollCommandButton(i, originalInteraction)
 
     var multi_vote = scheduledOptions ? scheduledOptions.multi_vote : originalInteraction.options.getBoolean("multi_vote") ?? true;
     var allow_undo = scheduledOptions ? scheduledOptions.allow_undo : originalInteraction.options.getBoolean("allow_undo") ?? true;
-    var restrict_see_results_button = scheduledOptions ? scheduledOptions.allow_undo : originalInteraction.options.getBoolean("restrict_see_results_button") ?? true;
+    var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : originalInteraction.options.getBoolean("restrict_see_results_button") ?? true;
 
     async function seeResults()
     {
@@ -255,6 +263,10 @@ async function doPollCommandButton(i, originalInteraction)
 
             await i.update({ embeds: [ await resultsText(originalInteraction) ], components: await createButtons(originalInteraction,i.channel) });
         }
+        else
+        {
+            await i.reply({content: "This option has been disabled for everyone other than the poll author.", ephemeral:true });
+        }
     }
 
 }
@@ -268,7 +280,7 @@ async function createButtons(interaction, channel)
     var latestFollowUpID = cache.latestFollowUpID;
     var client = await getClient();
     var latestFollowUp = latestFollowUpID ? await channel.messages.fetch(latestFollowUpID) : undefined;
-    var restrict_see_results_button = scheduledOptions ? scheduledOptions.allow_undo : interaction.options.getBoolean("restrict_see_results_button") ?? true;
+    var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : interaction.options.getBoolean("restrict_see_results_button") ?? true;
 
 
     var id = 0;

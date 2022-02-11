@@ -7,10 +7,9 @@
 <ul>
     <% polls.forEach((poll) => { %>
         <li><%= poll.note %>
-            <ul>
+            <ul style="list-style:none">
                 <li><%= poll.poll %></li>
-                <li><a class="post" href="javascript:poll('../poll/<%= encodeURIComponent(poll.poll.replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23")) %>')">POST</a></li>
-                <li><a class="post" href="javascript:poll('../pollRoboLinds/<%= encodeURIComponent(poll.poll.replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23")) %>')">POST ROBO LINDS POLL</a></li>
+                <li><button onclick="poll('../pollRoboLinds/<%= encodeURIComponent(poll.poll.replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23")) %>')">POST POLL</a></li>
             </ul>
         </li>
     <% }) %>
@@ -19,10 +18,10 @@
 <form method="post">
     <p>Format is new line per poll, everything before first &quot; is a note. E.g.</p>
     <pre style="width:100%">
-        Slide 1 /poll "Homework/Pracs I've already done:" "Watched the Intro to Unity lecture" "Set up itch.io and shared it on the #itch-io channel" "Installed Unity 2020.2.3f1" "Finished Prac 1" "Finished and shown Exercise 1" "Started Prac 2" "Finished Prac 2" "Finished and shown Exercise 2" "More Pracs/Exercises than that"
+Slide 1 /poll "Homework/Pracs I've already done:" "Watched the Intro to Unity lecture" "Set up itch.io and shared it on the #itch-io channel" "Installed Unity 2020.2.3f1" "Finished Prac 1" "Finished and shown Exercise 1" "Started Prac 2" "Finished Prac 2" "Finished and shown Exercise 2" "More Pracs/Exercises than that"
     </pre>
     <textarea name="polls" style="width:100%; height:500px">
-<% polls.forEach((poll) => { %><%= poll.note %> /poll <%= poll.poll %>
+<% polls.forEach((poll) => { %><%= poll.note %> <%= poll.poll %>
     
 <% }) %>
     </textarea>

@@ -366,7 +366,7 @@ function guideTabLink(text, link)
                 <img src="/static/guide/todo3.png" />
             </p>
             <p>You can flag a message to deal with later, or write a note to yourself using this feature. TODO Notes are sent to a channel called <strong>#todo</strong> that you need to set up (generally this should be in your <strong>Staff Channels</strong>  category.</p>
-            <p>Flag a message by right-clicking it, and selecting <strong>App/TODO</strong>.</p>
+            <p>Flag a message by right-clicking it, and selecting <strong>App/TODO</strong>. You can optionally alert the original poster that their message has been flagged as a TODO.</p>
             <p>Students can also use this feature, however flagged messages will just be relayed to themselves via a DM from the bot.</p>
             <p>Unfortunately this feature isn't available in the Discord Mobile App, but if you react to a message with a specific emoji (default 🤞), the same process will happen.</p>
 
@@ -398,7 +398,7 @@ function guideTabLink(text, link)
             <p class="centered">
                 <img src="/static/guide/customInvites.png" />
             </p>
-            <p>You can attach a specific invite link to a given role. Users who join using that link will be given that role. You might like to use this for a Hobart / Launceston / Online link (however using the <a href="roleSelect">Role Select</a> command may be better for this.</p>
+            <p>You can attach a specific invite link to a given role using the <%-guideTabLink("Invites Tab", "/invites")%>. Users who join using that link will be given that role. You might like to use this for a Hobart / Launceston / Online link (however using the <a href="#roleSelect"><code>/role_select</code></a> command may be better for this.</p>
             
             <h4>Other Features</h4>
             <p>The later sections of the guide talk about some more complex bot features.</p>
@@ -408,11 +408,29 @@ function guideTabLink(text, link)
     <section id="polls">
         <a>
             <h2>Feature: Polls</h2>
-            <p class="description">TODO</p>
+            <p class="description">Gather student responses at any time in a text channel.</p>
         </a>
         <div>
-
             <p class="hint">Polls can be displayed in your lecture stream using the instructions in the <a href="#obs">Open Broadcaster Studio Integration</a> feature.</p>
+            
+            <p class="centered">
+                <img src="/static/guide/poll.png" />
+            </p>
+            
+            <%- include("commandInfo.html", {
+                command: "poll",
+            }) %>
+
+            <h3>Schedule Polls Ahead of Time</h3>
+            <p>You can specify a set of pre-defined polls using the <%-guideTabLink("Scheduled Polls Tab", "/pollSchedule")%>.</p>
+            
+            <p class="centered">
+                <img src="/static/guide/scheduledPolls.png" />
+            </p>
+
+            <p>Enter your pre-written polls in the following format:</p>
+            <p><code>Note to Self /poll "Question" "Option 1" "Option 2" "Option N"</code></p>
+            <p>Press <strong>Save</strong>, and your schedule polls will appear at the top of the page, with a <strong>Post Poll</strong> button for each.</p>
         </div>
     </section>
 
@@ -432,7 +450,6 @@ function guideTabLink(text, link)
             <p class="description">Give out achievements to students for various things. Add achievement icons that can appear next to student names.</p>
         </a>
         <div>
-
             <p class="hint">Note that you (the server owner) cannot have achievement icons in your name, as the bot isn't allowed to do that. The same applies to anyone with <a href="https://support.discord.com/hc/en-us/articles/214836687-Role-Management-101">a higher-level role</a>.</p>
         </div>
     </section>

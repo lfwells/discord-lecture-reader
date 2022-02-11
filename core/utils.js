@@ -85,7 +85,7 @@ export async function adminCommandOnly(interaction)
 //use this handie little tool to allow question marks in poll urls
 export function removeQuestionMark(req, res, next)
 {
-  console.log("index of q", req.originalUrl.indexOf("?"));
+  console.log("index of q", req.originalUrl.indexOf("?"), req.originalUrl);
   if (req.originalUrl.indexOf("?") > 0)
   {
     res.redirect(req.originalUrl.replace("?", "%3F"));

@@ -99,7 +99,7 @@ export default async function(client)
             }
         }
         // If the interaction isn't a slash command, return
-        else if (interaction.isMessageComponent())
+        else if (interaction.isMessageComponent() && interaction.message.interaction)
         {
             if (interaction.message.interaction.commandName === "useless_button") 
             {
