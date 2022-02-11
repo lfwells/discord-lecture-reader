@@ -127,6 +127,7 @@ async function getCachedInteractionDocument(guild, interactionID)
 }
 export async function getCachedInteraction(guild, interactionID)
 {
+    console.log(guild.id, interactionID);
     var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
     var interactionSnapshot = await interactionDocument.get();
     var interaction = interactionSnapshot.data();
@@ -165,4 +166,11 @@ export async function assertOption(interaction, optionName, type, message)
         return true;
     }
     return false;
+}
+
+export function loadCommands(req,res,next)
+{
+    req.commands = allCommandData;
+    res.locals.commands = allCommandData;
+    next();
 }
