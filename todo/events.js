@@ -131,7 +131,7 @@ async function doTodoCommand(interaction, reactMessage, reactedBy)
         }
         else
         {
-            if (isAdmin(interaction.member))
+            if (await isAdmin(interaction.member))
             {
                 var post = await interaction.user.send({ embeds:[message], content:"New TODO (note: you can get these messages in a todo channel if you configure it): "+originalMessage.url });
                 if (interaction) interaction.editReply({ content:"TODO sent as a DM "+post.url, components: ephemeralComponents});
