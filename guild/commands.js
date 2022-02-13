@@ -15,12 +15,12 @@ import { getGuildDocument, hasFeature } from "./guild.js";
 */
 const unregisterAllOnStartUp = false; //put back to false
 const registerAllOnStartUp = false; //put back to false
-const commandsToRegenerate = []; //put back to []
+const commandsToRegenerate = []; //put back to [] 
 const commandsToUnregister = []; //put back to []
 const applicationCommandsToRegenerate = []; //put back to []
 const applicationCommandsToUnregister = []; //put back to []
 
-const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message"];
+const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "copy_flagged", "move_flagged"];
 
 export const allCommandData = {}
 

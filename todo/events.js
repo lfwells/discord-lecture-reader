@@ -29,6 +29,9 @@ export default async function(client)
             {
                 doTodoCommand(interaction);            
             }
+        } 
+        else if (!interaction.isMessageComponent())
+        {
             if (interaction.commandName === "todo") 
             {
                 doTodoCommand(interaction);             
