@@ -425,8 +425,11 @@
         }
         section img 
         {
-            padding: 1em;
+            padding: 0em;
+            margin: 1em;
             vertical-align: top;
+            border:1px solid #aaa;
+            border-radius: 8px;
         }
         section li{
             padding:0.5em;
@@ -443,7 +446,6 @@
         .centered > img
         {
             max-width: 100%;
-            border:1px solid #ccc;
         }
 
         .hint {
