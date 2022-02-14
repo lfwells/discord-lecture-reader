@@ -44,11 +44,20 @@ export async function addFlaggedMessage(guild, user, message, channel)
         data.messages = [];
     }
     console.log(message);
-    data.messages.push({ 
-        message,
-        channel
-    });
+    
+    var lenBefore = data.messages.length;
+    if (data.messages.findIndex(m => m.message == message) == -1)
+    {
+        data.messages.push({ 
+            message,
+            channel
+        });
+    }
+    var lenAfter = data.messages.length;
+
     await saveFlaggedDocumentData(guild, user, data);
+
+    return lenAfter > lenBefore;
 }
 export async function removeFlaggedMessage(guild, user, message)
 {
@@ -73,10 +82,45 @@ export async function clearFlaggedMessages(guild, user)
 
     return messages.length;
 }
-export async function postFlaggedMessagesEphemeral(guild, user, channel)
+export async function deleteFlaggedDocument(guild, user)
 {
+    var deleteCount = await clearFlaggedMessages(guild, user);
+    var document = await getFlaggedDocument(guild, user);
+    await document.delete();
+    return deleteCount;
+}
+export async function postFlaggedMessagesEphemeral(interaction, message)
+{
+    message.ephemeral = true;
+
+    var postedMessage = await interaction.editReply(message);
+
+    /* TODO: the below doesn't quite work due to ephemeral not having an id
+    potential solution = DM a message and store that
+
     //get the stored message
+    var data = await getFlaggedDocumentData(interaction.guild, interaction.user);
+
     //if none, post and store message
     //if found, but not the same channel, post new and store message
+    if (data.ephemeral == undefined || data.ephemeral.channel != interaction.channel.id)
+    {
+        var postedMessage = await interaction.editReply(message);
+        console.log(postedMessage);
+        return;
+        data.ephemeral = {
+            message:postedMessage.id,
+            channel:interaction.channel.id
+        };
+        console.log(data);
+        await saveFlaggedDocumentData(interaction.guild, interaction.user, data);
+    }
     //if found, and same message, update message
+    else
+    {
+        var channelObj = await interaction.guild.channels.fetch(interaction.channel.id);
+        var postedMessage = await channelObj.messages.fetch(data.ephemeral.message);
+        await postedMessage.edit(message);
+    }
+    */
 }

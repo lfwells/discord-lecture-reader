@@ -1,12 +1,13 @@
 import { adminCommandOnly, asyncForEach, dateToHuman, pluralize } from "../core/utils.js";
 import { registerCommand } from "../guild/commands.js";
-import { addFlaggedMessage, clearFlaggedMessages, getFlaggedMessageIDs, getFlaggedMessages, removeFlaggedMessage } from "./threader.js";
+import { addFlaggedMessage, clearFlaggedMessages, deleteFlaggedDocument, getFlaggedMessageIDs, getFlaggedMessages, postFlaggedMessagesEphemeral, removeFlaggedMessage } from "./threader.js";
 
 export default async function(client)
 {    
     /*TODO:
 
-    make the progress ephemeral work properly
+    make the progress ephemeral work properly (needs to be DM qq)
+    admin permissions bs
 
     handle images etc
     */
@@ -25,11 +26,11 @@ export default async function(client)
         description: "(ADMIN ONLY) Handles messages you have flagged with right-click.",
         options: [
             {
-                name: "copy", type:"SUB_COMMAND", description: "Copy the flagged messages here.",
+                name: "copy", type:"SUB_COMMAND", description: "(ADMIN ONLY) Copy the flagged messages here.",
                 options: 
                 [
                     { 
-                        name: "type", type: "STRING", description: "How should the messages be copied? (default is Thread)",
+                        name: "type", type: "STRING", description: "(ADMIN ONLY) How should the messages be copied? (default is Thread)",
                         choices: [
                             { name: "Thread", value:"thread", description: "Post indvidual messages in a seperate thread." },
                             { name: "Combined", value:"combined", description: "Post as a big Discord embed" },
@@ -42,7 +43,7 @@ export default async function(client)
                 ]
             },
             {
-                name: "move", type:"SUB_COMMAND", description: "Move the flagged messages here.",
+                name: "move", type:"SUB_COMMAND", description: "(ADMIN ONLY) Move the flagged messages here.",
                 options: 
                 [
                     { 
@@ -59,10 +60,10 @@ export default async function(client)
                 ]
             },
             {
-                name: "clear", type:"SUB_COMMAND", description: "Clear the messages you have flagged (doesn't delete them).",
+                name: "clear", type:"SUB_COMMAND", description: "(ADMIN ONLY) Clear the messages you have flagged (doesn't delete them).",
             },
             {
-                name: "preview", type:"SUB_COMMAND", description: "See which messages you have flagged (doesn't post publically).",
+                name: "preview", type:"SUB_COMMAND", description: "(ADMIN ONLY) See which messages you have flagged (doesn't post publically).",
             }
         ]
     }; 
@@ -120,9 +121,20 @@ async function doFlagCommand(interaction)
     await interaction.deferReply({ ephemeral: true });
     if (await adminCommandOnly(interaction)) return;
 
-    await addFlaggedMessage(interaction.guild, interaction.user, interaction.targetId, interaction.channel.id);
+    var added = await addFlaggedMessage(interaction.guild, interaction.user, interaction.targetId, interaction.channel.id);
     var flagged = await getFlaggedMessageIDs(interaction.guild, interaction.user);
-    await interaction.editReply({ content: `Message flagged. You now have ${pluralize(flagged.length, "message")}.`});
+    if (added)
+    {
+        var msg = { content: `Message flagged. You now have ${pluralize(flagged.length, "message")}.`};
+        await postFlaggedMessagesEphemeral(interaction, msg);
+        //await interaction.editReply();
+    }
+    else
+    {
+        var msg = { content: `Message was already flagged, no action taken. You have ${pluralize(flagged.length, "message")}.`};
+        await postFlaggedMessagesEphemeral(interaction, msg);
+        //await interaction.editReply();
+    }
 }
 async function doUnflagCommand(interaction)
 {
@@ -134,9 +146,17 @@ async function doUnflagCommand(interaction)
     var found = await removeFlaggedMessage(interaction.guild, interaction.user, interaction.targetId, interaction.channel.id);
     var flagged = await getFlaggedMessageIDs(interaction.guild, interaction.user);
     if (found)
-        await interaction.editReply({ content: `Message un-flagged. You now have ${pluralize(flagged.length, "message")}.`});
+    {
+        var msg = { content: `Message un-flagged. You now have ${pluralize(flagged.length, "message")}.`};
+        await postFlaggedMessagesEphemeral(interaction, msg);
+        //await interaction.editReply();
+    }
     else
-        await interaction.editReply({ content: `Message was not previously flagged, no action taken. You have ${pluralize(flagged.length, "message")}.`});
+    {
+        var msg = { content: `Message was not previously flagged, no action taken. You have ${pluralize(flagged.length, "message")}.`};
+        await postFlaggedMessagesEphemeral(interaction, msg);
+        //await interaction.editReply();
+    }
 }
 
 
@@ -167,7 +187,8 @@ async function doFlagCopyCommand(interaction, move)
         };
         await asyncForEach(flagged, async (message)  => {
             combinedEmbed.fields.push({
-                name: `**<@${message.author.id}>** - *${dateToHuman(message.createdAt)}*`,
+                //name: `**<@${message.author.id}>** - *${dateToHuman(message.createdAt)}*`,
+                name: `<@${message.author.id}>** - *${dateToHuman(message.createdAt)}*`,
                 value: message.content
             });
         });
@@ -212,7 +233,7 @@ async function doFlagClearCommand(interaction)
     await interaction.deferReply({ ephemeral: true });
     if (await adminCommandOnly(interaction)) return;
 
-    var deleteCount = await clearFlaggedMessages(interaction.guild, interaction.user);
+    var deleteCount = await deleteFlaggedDocument(interaction.guild, interaction.user);
 
     await interaction.editReply({ content: `Cleared ${pluralize(deleteCount, "flagged message")}.`});
 }

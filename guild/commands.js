@@ -20,7 +20,7 @@ const commandsToUnregister = []; //put back to []
 const applicationCommandsToRegenerate = []; //put back to []
 const applicationCommandsToUnregister = []; //put back to []
 
-const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "copy_flagged", "move_flagged"];
+const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "Un-flag Message", "flagged"];
 
 export const allCommandData = {}
 
