@@ -2,7 +2,7 @@ import { MessageActionRow, MessageButton } from 'discord.js';
 import { getClient, send } from '../core/client.js';
 import { pluralize } from '../core/utils.js';
 
-import { GUILD_CACHE } from "../guild/guild.js";
+import { GUILD_CACHE, saveGuildProperty, setGuildProperty } from "../guild/guild.js";
 import * as config from "../core/config.js";
 import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 
@@ -73,6 +73,8 @@ export default async function(client)
 export async function doPollCommand(interaction, scheduledOptions)
 {
     var pollAuthor = interaction.user?.id ?? scheduledOptions.authorID;
+    
+    var question = scheduledOptions ? scheduledOptions.question : interaction.options.getString("question", true);
     var results = [];    
     var answers = [];
     var pollOptions = [];
@@ -108,23 +110,31 @@ export async function doPollCommand(interaction, scheduledOptions)
     await storeCachedInteractionData(interaction.guild, interaction.id, scheduledOptions ? {
         scheduledOptions: JSON.stringify(scheduledOptions),
         results: JSON.stringify(results),
+        question,
         answers, 
         pollOptions: JSON.stringify(pollOptions),
         pollAuthor
     } : {
         results: JSON.stringify(results),
+        question,
         answers, 
         pollOptions: JSON.stringify(pollOptions),
         pollAuthor
     });
 
+    var resultsEmbed = await resultsText(interaction.guild, interaction);
+    await setGuildProperty(interaction.guild, "latestRoboLindsPoll", JSON.stringify(resultsEmbed));
+    await setGuildProperty(interaction.guild, "latestRoboLindsPollTimestamp", interaction.createdTimestamp);
+    //GUILD_CACHE[interaction.guild.id].latestRoboLindsPoll = resultsEmbed;
+    //GUILD_CACHE[interaction.guild.id].latestRoboLindsPollTimestamp = interaction.createdTimestamp;
+
     if (scheduledOptions)
     {
-        return interaction.edit({embeds: [ await resultsText(interaction) ], components: await createButtons(interaction, interaction.channel), content:undefined});
+        return interaction.edit({embeds: [ resultsEmbed ], components: await createButtons(interaction, interaction.channel), content:undefined});
     }
     else
     {
-        await interaction.reply({embeds: [ await resultsText(interaction) ], components: await createButtons(interaction, interaction.channel)});
+        await interaction.reply({embeds: [ resultsEmbed ], components: await createButtons(interaction, interaction.channel)});
     }
 }
 async function doPollCommandButton(i, originalInteraction) 
@@ -132,6 +142,7 @@ async function doPollCommandButton(i, originalInteraction)
     var cache = await getCachedInteraction(i.guild, originalInteraction.id);
     var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) :undefined;
     var results = JSON.parse(cache.results);
+    var question = cache.question;
     var answers = cache.answers;
     var options = JSON.parse(cache.pollOptions);
     var pollAuthor = cache.pollAuthor;
@@ -140,12 +151,9 @@ async function doPollCommandButton(i, originalInteraction)
     var client = await getClient();
     var latestFollowUp = latestFollowUpID ? await i.channel.messages.fetch(latestFollowUpID) : undefined;
     
-    var question = scheduledOptions ? scheduledOptions.question : originalInteraction.options.getString("question", true);
-
-
-    var multi_vote = scheduledOptions ? scheduledOptions.multi_vote : originalInteraction.options.getBoolean("multi_vote") ?? true;
-    var allow_undo = scheduledOptions ? scheduledOptions.allow_undo : originalInteraction.options.getBoolean("allow_undo") ?? true;
-    var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : originalInteraction.options.getBoolean("restrict_see_results_button") ?? true;
+    var multi_vote = scheduledOptions ? scheduledOptions.multi_vote : cache.options.getBoolean("multi_vote") ?? true;
+    var allow_undo = scheduledOptions ? scheduledOptions.allow_undo : cache.options.getBoolean("allow_undo") ?? true;
+    var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : cache.options.getBoolean("restrict_see_results_button") ?? true;
 
     async function seeResults()
     {
@@ -248,7 +256,12 @@ async function doPollCommandButton(i, originalInteraction)
         }
         
         await storeCachedInteractionData(i.guild, originalInteraction.id, { results: JSON.stringify(results) });
-        await i.update({ embeds: [ await resultsText(originalInteraction) ]});//, components: await createButtons(originalInteraction) });
+
+        var resultsEmbed = await resultsText(i.guild, originalInteraction);
+        await setGuildProperty(i.guild, "latestRoboLindsPoll", JSON.stringify(resultsEmbed));
+        await setGuildProperty(i.guild, "latestRoboLindsPollTimestamp", i.createdTimestamp);
+
+        await i.update({ embeds: [ resultsEmbed ]});//, components: await createButtons(originalInteraction) });
 
         if (latestFollowUp)
         {
@@ -261,7 +274,7 @@ async function doPollCommandButton(i, originalInteraction)
         {
             await seeResults();
 
-            await i.update({ embeds: [ await resultsText(originalInteraction) ], components: await createButtons(originalInteraction,i.channel) });
+            await i.update({ embeds: [ await resultsText(i.guild, originalInteraction) ], components: await createButtons(originalInteraction,i.channel) });
         }
         else
         {
@@ -320,9 +333,9 @@ async function createButtons(interaction, channel)
     }
     return rows;
 }
-async function resultsText(interaction)
+async function resultsText(guild, interaction)
 {
-    var cache = await getCachedInteraction(interaction.guild, interaction.id);
+    var cache = await getCachedInteraction(guild, interaction.id);
 
     var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) : undefined;
     var options = cache.pollOptions ? JSON.parse(cache.pollOptions) : undefined;
@@ -330,13 +343,13 @@ async function resultsText(interaction)
     var answers = cache.answers;
     var results = cache.results ? JSON.parse(cache.results) : undefined;
     
-    var poll_emoji = scheduledOptions ? scheduledOptions.poll_emoji : interaction.options.getString("poll_emoji") ?? "█"; //":white_large_square:"
+    var poll_emoji = scheduledOptions ? scheduledOptions.poll_emoji : cache.options.getString("poll_emoji") ?? "█"; //":white_large_square:"
 
     var resultsEmbed = {
         title: question,
         fields: [],
         thumbnail: { 
-            url:interaction.guild.iconURL() //this is null and at this point I don't care lol
+            url:guild.iconURL() //this is null and at this point I don't care lol
         }
     };
 
@@ -353,9 +366,6 @@ async function resultsText(interaction)
             value: poll_emoji.repeat(result)+ " "+pluralize(result, "vote") 
         });
     }
-
-    GUILD_CACHE[interaction.guild.id].latestRoboLindsPoll = resultsEmbed;
-    GUILD_CACHE[interaction.guild.id].latestRoboLindsPollTimestamp = interaction.createdTimestamp;
 
     return resultsEmbed;
 }

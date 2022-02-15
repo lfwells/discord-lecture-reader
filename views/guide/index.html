@@ -467,10 +467,90 @@ function guideTabLink(text, link)
     <section id="obs">
         <a>
             <h2>Feature: Open Broadcaster Studio Integration</h2>
-            <p class="description">TODO</p>
+            <p class="description">Display content from your Discord server directly on your lecture live stream.</p>
         </a>
         <div>
+            <p>Open Broadcaster Studio (OBS) is a tool used by streamers (and lecturers) to provide custom layouts and scenes for live streams. It lets you mix multiple sources (e.g. webcam, desktop capture, microphone, external computers, websites, video files), and lay them out however you like.</p>
+            <p>OBS is a great way of having different "contexts" in your streams or recordings, moving from say a title card, to a full-screen view of yourself, to a picture-in-picture overlay of your content plus your webcam, and to a ending card -- effectively editing your recording during the broadcast. You can add in more advanced techniques like green screen or colour correction too!</p>
             <p class="centered"><a target="_blank" href="https://obsproject.com/" class="botFunction">Download Open Broadcaster Studio</a></p>
+            <p class="centered">
+                <img src="/static/guide/obs1.png" />
+            </p>
+            <p>Here is a great guide to <a target="_blank" href="https://www.youtube.com/watch?v=5c5S5NBW-wI&ab_channel=ChapmanHistology">setting up a basic OBS scene</a> made by UTAS Medicine Senior Lecturer Dr Jamie Chapman.</p>
+            <p>Once you have a set up in OBS, it is simple to share it on Zoom using the OBS Virtual Camera. Check out this guide to <a target="_blank" href="https://www.youtube.com/watch?v=Ki9E8mxsXRI&ab_channel=MarkusPresents">OBS for Zoom</a> by Markus Presents.</p>
+            <p>OBS lets you include web pages in your scene, and this is the basis of many interesting on-screen elements. In the example image above are:<ul>
+                <li><strong>#lecture-chat</strong> channel overlay</li>
+                <li>Online member count</li>
+                <li>Post leaderboard (also switches to achievement leaderboard)</li>
+                <li>Lecture start-time countdown</li>
+                <li>(not pictured) Popup-messages with emojis</li>
+            </ul></p>
+            
+            <h3>Discord Chat Overlay</h3>
+            <p>You can overlay the chat from any of your Discord channels (usually <strong>#lecture-chat</strong> using a tool called Stream Kit Overlay.</p>
+            <p class="centered"><a target="_blank" href="https://streamkit.discord.com/overlay" class="botFunction">Stream Kit Overlay</a></p>
+            <p>Choose <strong>Install for OBS</strong>, and choose the <strong>Chat Widget</strong>. Configure your widget here, and then on this page you will be given a URL to copy to your clipboard. Do that, and then in OBS create a new <strong>Browser Source</strong>:</p>
+            <p class="centered">
+                <img src="/static/guide/obs_overlay.png" />
+                <img src="/static/guide/obs_browser.png" />
+            </p>
+            <p>In the popup, paste in the URL. You can apply any CSS styling you want to the overlay, and also set a width and a height for the box to appear on screen. To allow for a custom width and height, I recommend using the following CSS:</p>
+            <textarea>
+body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }
+.chat-container { width:auto; }
+.chat-container .messages { 
+    height: auto;
+    position: relative;
+    z-index:-1;
+    height: calc(100vh - 55px); 
+}
+.chat-container .messages .message {  font-size:larger; }
+            </textarea>
+            <p>Drag and resize the overlay to anywhere you like on the screen.</p>
+
+            <h3>Lecture Start Countdown</h3>
+            <p>Streamers tend to start their stream earlier than the specified start time, and a show a countdown until when the actual stream is supposed to start (this it to allow people to join the room early, so they don't miss the start of the stream.</p>
+            <p>You can show a countdown in OBS using a plugin like the Stream Countdown:</p>
+            <p class="centered"><a target="_blank" href="https://voakie.com/projects/stream-countdown/new.html" class="botFunction">Stream Countdown</a></p>
+            <p>Configure the countdown at the link above, and click <strong>Create</strong>. This will take you to a page for your countdown. Copy the URL from your browser, and use the steps above to create a new <strong>Browser Source</strong> using this URL. <a href="https://voakie.com/projects/stream-countdown/index.html?t=white&i=&c=TODAY1300&l=&txt=&td=0" target="_blank">Here is a sample countdown that I use for my lectures which start at 1pm</a>.</p>
+
+            <h3>On-screen Polls</h3>
+            <p>If you enable <strong>OBS Integration</strong> on the <%-guideTabLink("Features Tab", "features")%>, you will be able to use some widgets specific to the bot. With this feature enabled, you will be able to see the <%-guideTabLink("COBS Links Tab", "obs")%></p>
+            <% if (inGuild()) {
+                %><p>
+                <%- include("../subViews/featureSelect.html", 
+                { 
+                    label: "OBS Integration",
+                    feature: "obs",
+                    className:"botFunction"
+                }) %></p>  
+                <%
+            }%>
+            <p>Copy the URLs on the OBS Links tab and use the instructions above to create a new <strong>Browser Source</strong> using those URLs.</p>
+            <p>The <strong>Poll Widget</strong> looks for the most recently posted poll in your lecture channel, and will show the current results.</p>
+            <p class="centered">
+                <img src="/static/guide/obs_poll.png" />
+            </p>
+            <p>If you would like the right-align or bottom-align the polls within the browser source, you can try a variation of this custom CSS for the source:</p>
+            <textarea>
+body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }
+#results {
+    position:absolute;
+    bottom:1em;
+	right:1em;
+}
+            </textarea>
+
+            <h3>Lecture Popup Text</h3>
+            <p>Lecture popups are full-screen text messages (with optional emoji) that can be triggered on the <%-guideTabLink("Lecture Popups Tab", "text/input")%>. Streamers usually display these kinds of messages when something interesting happens (like getting a new subscriber, or when a VIP enters the chat). You could use these to flag in-lecture events like "Great Question!", "Discussion Time!", or "Live-Coding Fail!".</p>
+            <p class="centered">
+                <img src="/static/guide/obs_popup.png" />
+            </p>
+            <p>Popups can be from a range of select styles and animations, and a giant list of all supported emoji a provided to make it easy to search for and copy. Previously-used popup messages are saved, so that you can re-use them with a single click.</p>
+            <p class="centered">
+                <img src="/static/guide/obs_popup_2.png" />
+            </p>
+            <p>You can even trigger popup message directly via a URL, which you could hook up to a hot-key on your keyboard or Stream deck. The URL is in the format: <code>http://131.217.172.176/guild/[YOUR_SERVER_ID_HERE]/text/input/?text=[YOUR_TEXT_HERE]</code></p>
         </div>
     </section>
 </content>

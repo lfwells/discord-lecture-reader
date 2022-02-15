@@ -32,7 +32,7 @@
             %>
             <header>
             <% 
-            if (locals.guild)
+            if (locals.guild && locals.discordUser)
             {
                 %>
                 <h1>
@@ -219,6 +219,11 @@
             </header>
             <%
         }
-        %>
-
+        
+if ( (typeof showTitle == 'undefined' || showTitle)) 
+{ 
+    %>
     <main>
+    <%
+}
+%>

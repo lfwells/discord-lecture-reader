@@ -4,7 +4,7 @@ import { getClient, send } from "../core/client.js";
 import * as config from "../core/config.js";
 import { redirectToWhereWeCameFrom } from "../core/utils.js";
 
-import { GUILD_CACHE } from "../guild/guild.js";
+import { getGuildProperty, GUILD_CACHE } from "../guild/guild.js";
 import { doPollCommand } from "./events.js";
 var previousRequest;
 
@@ -24,8 +24,8 @@ export async function load(req,res,next)
   var latestSimplePoll = simplePollMessages.first();
   var latestSimplePollTimestamp = latestSimplePoll ? latestSimplePoll.createdTimestamp : 0;
 
-  var latestRoboLindsPoll = GUILD_CACHE[req.guild.id].latestRoboLindsPoll;
-  var latestRoboLindsPollTimestamp = GUILD_CACHE[req.guild.id].latestRoboLindsPollTimestamp;
+  var latestRoboLindsPoll = await getGuildProperty("latestRoboLindsPoll", req.guild, null);//GUILD_CACHE[req.guild.id].latestRoboLindsPoll;
+  var latestRoboLindsPollTimestamp = await getGuildProperty("latestRoboLindsPollTimestamp", req.guild, null);//GUILD_CACHE[req.guild.id].latestRoboLindsPollTimestamp;
   if (latestRoboLindsPoll && latestSimplePoll)
   {
     if (latestRoboLindsPollTimestamp > latestSimplePollTimestamp)
@@ -142,6 +142,8 @@ async function readSimplePoll(post)
 }
 async function readRoboLindsayPoll(post)
 {
+  post = JSON.parse(post);
+  
   var req = {};
   var question = post.title;
   //display question
