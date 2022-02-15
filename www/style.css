@@ -488,6 +488,7 @@
             margin-right: 24px;
             background-color: rgba(0,0,0,0.1);
             padding: 16px;
+            padding-top:32px;
             margin-top: -8px;
             margin-left: -32px;
             width: 250px;
@@ -513,7 +514,7 @@
             margin-top:0.5em;
         }
         #toc > div > ul > li {
-            margin-top:2em;
+            margin-top:1em;
         }
         #toc * {
             -ms-overflow-style: none;  /* Internet Explorer 10+ */
@@ -522,6 +523,7 @@
         #toc *::-webkit-scrollbar { 
             display: none;  /* Safari and Chrome */
         }
+        #toc hr { margin-bottom:2em}
 
         content
         {

@@ -27,7 +27,7 @@ export function serverAddedRedirect(req,res,next)
 export function serverAddedInGuideRedirect(req,res,next)
 {
   var guildID = req.query.guild_id;
-  return _serverAddedRedirect(`/guild/${guildID}/guide#serverAdded`)(req,res,next);
+  return _serverAddedRedirect(`/guild/${guildID}/guide/minimum#serverAdded`)(req,res,next);
 }
 function _serverAddedRedirect(redirect) 
 {

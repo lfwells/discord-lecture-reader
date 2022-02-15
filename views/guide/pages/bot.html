@@ -1,0 +1,109 @@
+<%- include('../guideHeader.html') %>
+<% 
+//have to include these in each file sadly
+function inGuild()
+{
+    return !(typeof(locals.guild) === 'undefined');
+}
+function getGuilds()
+{
+    if (typeof(guilds) === 'undefined') return [];
+    return guilds.map(g => g.id);
+}
+function hasGuilds()
+{    
+    return getGuilds().length > 0;
+}
+function guideTabLink(text, link)
+{
+    return include("../guideTabLink.html", {
+        text, link
+    });
+}
+%>
+       
+        <a>
+            <h2>Configuring the Bot and Basic Features (~10 mins)</h2>
+            <p class="description">The bot will work straight away without any configuration, but you can tweak things yourself.</p>
+        </a>
+        <div>
+            
+            <hr />
+            <h3>Setting the Bot Name</h3>
+            <p>&quot;UTAS Discord Bot&quot; is a pretty boring name. You can change what name the bot appears under on the server on the <%-guideTabLink("Configure Server Tab", "/")%>.</p>
+            <p class="centered">
+                <img src="/static/guide/botName.png" />
+            </p>
+
+            <hr />
+            <h3>Roles and Channels</h3>
+            <p>The bot works better when it knows about some of the key channel types in your server, like which channel is for Rules, which one is where lecture chat takes place etc.</p>
+            <p>When you add the bot to your server, it takes a guess at which channels are what (and should do a good job if you used the server template), but you should check everything is correct on the <%-guideTabLink("Configure Server Tab", "/")%>.</p>
+
+            <hr />
+            <h3>Enabling Features</h3>
+            <p>You can turn on or off various bot features using the <%-guideTabLink("Features Tab", "/features")%>.</p>
+            <p>When a feature is enabled, sometimes a new tab will appear along the top. Other features are so basic in their configuration, that settings will appear on the feature tab.</p>
+            <p class="centered">
+                <img src="/static/guide/features.png" />
+            </p>
+            
+            <p>Here are some basic features:</p>
+
+            <h4>Direct-Message New Students Upon Joining</h4>
+            <p class="centered">
+                <img src="/static/guide/joinDM.png" />
+            </p>
+            <p>When a student joins a unit for the first time, the bot can direct-message them to let them know what the bot is, and how they can use it.</p>
+            <p>Students are told not ask questions of the bot, as it cannot respond.</p>
+
+            <h4>TODOs</h4>
+            <p class="centered">
+                <img src="/static/guide/todo1.png" />
+                </p>
+            <p>
+                <img src="/static/guide/todo2.png" />
+            </p>
+            <p class="centered">
+                <img src="/static/guide/todo3.png" />
+            </p>
+            <p>You can flag a message to deal with later, or write a note to yourself using this feature. TODO Notes are sent to a channel called <strong>#todo</strong> that you need to set up (generally this should be in your <strong>Staff Channels</strong>  category.</p>
+            <p>Flag a message by right-clicking it, and selecting <strong>App/TODO</strong>. You can optionally alert the original poster that their message has been flagged as a TODO.</p>
+            <p>Students can also use this feature, however flagged messages will just be relayed to themselves via a DM from the bot.</p>
+            <p>Unfortunately this feature isn't available in the Discord Mobile App, but if you react to a message with a specific emoji (default 🤞), the same process will happen.</p>
+
+            <h4>Show Online Member Count / Show Enrolled Member Count</h4>
+            <p class="centered">
+                <img src="/static/guide/memberCount.png" />
+            </p>
+            <p>This information appears in Discord in the top-left, and is updated very slowly.</p>    
+            <% if (inGuild()) {
+                %><p>
+                <%- include("../../subViews/featureSelect.html", 
+                { 
+                    label: "Show Online Member Count",
+                    feature: "showOnlineMemberCount",
+                    className:"botFunction"
+                }) %></p>
+                <p>
+                <%- include("../../subViews/featureSelect.html", 
+                { 
+                    label: "Show Enrolled Member Count",
+                    feature: "showMemberCount",
+                    className:"botFunction"
+                }) %>
+                </p>   
+                <%
+            }%>
+            
+            <h4>Custom Invites</h4>
+            <p class="centered">
+                <img src="/static/guide/customInvites.png" />
+            </p>
+            <p>You can attach a specific invite link to a given role using the <%-guideTabLink("Invites Tab", "/invites")%>. Users who join using that link will be given that role. You might like to use this for a Hobart / Launceston / Online link (however using the <a href="#roleSelect"><code>/role_select</code></a> command may be better for this.</p>
+            
+            <h4>Other Features</h4>
+            <p>The later sections of the guide talk about some more complex bot features.</p>
+        </div>
+    
+<%- include('../guideFooter.html') %>

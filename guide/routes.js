@@ -6,7 +6,15 @@ import { guessConfigurationValue } from "../guild/guild.js";
 export async function guide(req,res,next)
 {
     res.render("guide", {
-        guilds: req.guilds
+        guilds: req.guilds,
+        baseLink: "guide"
+    });
+}
+export async function guidePage(req,res,next)
+{
+    res.render("guide/pages/"+req.params.page, {
+        guilds: req.guilds,
+        baseLink: "../guide"
     });
 }
 export async function downloadMyLOGuideFile(req,res,next)

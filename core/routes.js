@@ -45,6 +45,7 @@ function defaultRouter()
     router.get("/serverAddedInGuide", guild_routes.serverAddedInGuideRedirect);
 
     router.get("/guide", guild_routes.loadGuildList, guide_routes.guide); 
+    router.get("/guide/:page", guild_routes.loadGuildList, guide_routes.guidePage); 
     router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
 
     //login
@@ -90,6 +91,7 @@ function guildRouter()
 
     router.get("/serverAdded", guild_routes.serverAdded);
     router.get("/guide", guide_routes.guide); 
+    router.get("/guide/:page", guide_routes.guidePage); 
     router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
     router.post("/guide/postRules", guide_routes.postRules); 
     router.post("/guide/configureWelcomeScreen", guide_routes.configureWelcomeScreen);

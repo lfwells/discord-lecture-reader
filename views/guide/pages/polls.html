@@ -1,0 +1,53 @@
+<%- include('../guideHeader.html') %>
+<% 
+//have to include these in each file sadly
+function inGuild()
+{
+    return !(typeof(locals.guild) === 'undefined');
+}
+function getGuilds()
+{
+    if (typeof(guilds) === 'undefined') return [];
+    return guilds.map(g => g.id);
+}
+function hasGuilds()
+{    
+    return getGuilds().length > 0;
+}
+function guideTabLink(text, link)
+{
+    return include("../guideTabLink.html", {
+        text, link
+    });
+}
+%>
+       
+      
+        <a>
+            <h2>Feature: Polls</h2>
+            <p class="description">Gather student responses at any time in a text channel.</p>
+        </a>
+        <div>
+            <p class="hint">Polls can be displayed in your lecture stream using the instructions in the <a href="#obs">Open Broadcaster Studio Integration</a> feature.</p>
+            
+            <p class="centered">
+                <img src="/static/guide/poll.png" />
+            </p>
+            
+            <%- include("../commandInfo.html", {
+                command: "poll",
+            }) %>
+
+            <h3>Schedule Polls Ahead of Time</h3>
+            <p>You can specify a set of pre-defined polls using the <%-guideTabLink("Scheduled Polls Tab", "/pollSchedule")%>.</p>
+            
+            <p class="centered">
+                <img src="/static/guide/scheduledPolls.png" />
+            </p>
+
+            <p>Enter your pre-written polls in the following format:</p>
+            <p><code>Note to Self /poll "Question" "Option 1" "Option 2" "Option N"</code></p>
+            <p>Press <strong>Save</strong>, and your schedule polls will appear at the top of the page, with a <strong>Post Poll</strong> button for each.</p>
+        </div>
+    
+<%- include('../guideFooter.html') %>
