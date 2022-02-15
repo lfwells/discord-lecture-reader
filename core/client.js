@@ -88,6 +88,6 @@ export async function init_client(client)
     console.log("Init Role Events...");	        await init_role_events(client);
     console.log("Init Interaction Cache...");   await init_interaction_cache(client);
     console.log("Init Help Events...");         await init_help_events(client);
-    console.log("Init Threader Events...");        await init_threader_events(client);
+    console.log("Init Threader Events...");     await init_threader_events(client);
     console.log("End init_client.");
 }

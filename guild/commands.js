@@ -20,6 +20,8 @@ const commandsToUnregister = []; //put back to []
 const applicationCommandsToRegenerate = []; //put back to []
 const applicationCommandsToUnregister = []; //put back to []
 
+export const newGuilds = []; //managed by the guildCreate event, to make sure new servers get commands registered when the bot is added 
+
 const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "Un-flag Message", "flagged"];
 
 export const allCommandData = {}
@@ -32,7 +34,7 @@ export async function registerCommand(guild, commandData)
     else
         adminCommandData[commandData.name] = commandData;
 
-    if (registerAllOnStartUp || commandsToRegenerate.findIndex(e => e == commandData.name) >= 0)
+    if (registerAllOnStartUp || commandsToRegenerate.findIndex(e => e == commandData.name) >= 0 || newGuilds.findIndex(g => g.id == guild.id) >= 0)
     {
         console.log("Registering Command", commandData.name," on ", guild.name, "...");
         await guild.commands.create(commandData)

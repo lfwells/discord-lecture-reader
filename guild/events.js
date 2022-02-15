@@ -1,6 +1,7 @@
 import { init_client } from '../core/client.js';
 import { getGuildDocument, getGuildProperty, guessConfigurationValues, hasFeature, init_admin_users } from "./guild.js";
 import * as config from "../core/config.js";
+import { newGuilds } from './commands.js';
 
 export default async function(client)
 {
@@ -9,6 +10,9 @@ export default async function(client)
         console.log("guildCreate", Object.assign({
             name:guild.name,
         }, config.DEFAULT_GUILD_PROPERTIES)); 
+
+        newGuilds.push(guild);
+        
 
         var guildDocument = await getGuildDocument(guild.id);
         guildDocument.set(
@@ -20,7 +24,13 @@ export default async function(client)
 
         await guessConfigurationValues(guild);
 
-        init_client(client);
+        await init_client(client);
+
+        const index = newGuilds.indexOf(guild);
+        if (index > -1) {
+            newGuilds.splice(index, 1); // 2nd parameter means remove one item only
+        }
+
     });
 
     client.on("guildUpdate", async (oldGuild, newGuild) => {
@@ -37,7 +47,10 @@ export default async function(client)
 
     client.on("guildMemberUpdate", function(oldMember, newMember){
         console.log(`a guild member changes - i.e. new role, removed role, nickname.`);
-        init_admin_users(oldMember.guild);
+        if (oldMember.user.id != client.user.id)
+        {
+            init_admin_users(oldMember.guild);
+        }
     });
 
     //TODO: only send a message if we've NEVER seen them before (or maybe send a "welcome back" message)
