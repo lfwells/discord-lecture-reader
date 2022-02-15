@@ -1,6 +1,7 @@
 import { asyncFilter } from '../core/utils.js';
-import { allCommandData, commandEnabledForGuild, registerApplicationCommand } from '../guild/commands.js';
+import { adminCommandData, allCommandData, commandEnabledForGuild, registerApplicationCommand } from '../guild/commands.js';
 import { getGuildProperty } from '../guild/guild.js';
+import { isAdmin } from '../roles/roles.js';
 
 export default async function(client)
 {
@@ -32,7 +33,12 @@ async function doHelpCommand(interaction)
     var note = "";
     if (interaction.guild == undefined) note = "\n\nNote that you can only run these commands on a server, not in this DM channel.\n\nNote that not all classes use all of these commands.";
 
-    var commands = await asyncFilter(Object.entries(allCommandData), async (c) => interaction.guild == undefined || await commandEnabledForGuild(c[0], interaction.guild));
+    var commandData = Object.entries(allCommandData);
+    if (await isAdmin(interaction.user))
+    {
+        commandData = Object.entries(adminCommandData);
+    }
+    var commands = await asyncFilter(commandData, async (c) => interaction.guild == undefined || await commandEnabledForGuild(c[0], interaction.guild));
 
     await interaction.editReply({
         content:"Here are the commands that you can run on me!"+note,

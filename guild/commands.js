@@ -23,11 +23,14 @@ const applicationCommandsToUnregister = []; //put back to []
 const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "Un-flag Message", "flagged"];
 
 export const allCommandData = {}
+export const adminCommandData = {}
 
 export async function registerCommand(guild, commandData)
 {
     if (adminOnlyCommands.findIndex(e => e == commandData.name) == -1)
         allCommandData[commandData.name] = commandData;
+    else
+        adminCommandData[commandData.name] = commandData;
 
     if (registerAllOnStartUp || commandsToRegenerate.findIndex(e => e == commandData.name) >= 0)
     {
@@ -170,7 +173,7 @@ export async function assertOption(interaction, optionName, type, message)
 
 export function loadCommands(req,res,next)
 {
-    req.commands = allCommandData;
-    res.locals.commands = allCommandData;
+    req.commands = {...allCommandData, ...adminCommandData};
+    res.locals.commands = req.commands;
     next();
 }
