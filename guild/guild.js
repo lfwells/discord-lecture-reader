@@ -16,7 +16,8 @@ export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot 
 
 const guessConfiguration = {
   rulesChannelID: { type:"channel", name:"rules" },
-  lectureChannelID: { type:"channel", name:"lecture-chat" }
+  lectureChannelID: { type:"channel", name:"lecture-chat" },
+  awardChannelID: { type:"channel", name:"achievements" },
 };
 
 export default async function init(client)

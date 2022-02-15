@@ -1,6 +1,6 @@
 import { getClient } from "../core/client.js";
 import { beginStreamingRes } from "../core/server.js";
-import { pluralize } from "../core/utils.js";
+import { asyncForEach, pluralize } from "../core/utils.js";
 import { guessConfigurationValue } from "../guild/guild.js";
 
 export async function guide(req,res,next)
@@ -161,6 +161,50 @@ export async function configureWelcomeScreen(req,res,next)
     console.log(result);
 
     res.write("\nWelcome Screen Configured.");
+
+    res.end();
+}
+
+//TODO: this should use bold etc, but when i replace with db it will all be different anyhows
+export async function postAwards(req,res,next)
+{
+    var client = getClient();
+
+    beginStreamingRes(res);
+
+    var awardsChannel = await guessConfigurationValue(req.guild, "awardChannelID", true); //convert = true
+    if (!awardsChannel)
+    {
+        res.write(`No #achievements channel found. Cannot complete operation.`);
+    }
+    else
+    {
+        res.write(`Found ${awardsChannel.name} channel.\n`);
+
+        res.write(`Posting Achievements...\n`);
+        var awards = req.body.awards.split("\n");
+        for (let i = 0; i < awards.length; i++) {
+            awards[i] = awards[i].replace("<li>", "");
+            awards[i] = awards[i].replace("</li>", "");
+            awards[i] = awards[i].trim();
+        }
+        
+        try
+        {
+            await asyncForEach(awards, async (a) => {
+                if (a == "") return;
+                res.write(`Posting ${a}\n`);
+                await awardsChannel.send({ content:a });
+            });
+        }
+        catch (e)
+        {
+            res.write("\n\n"+e.message);
+            return res.end();
+        }
+
+        res.write(`\nAchievements Posted!\n`);
+    }
 
     res.end();
 }

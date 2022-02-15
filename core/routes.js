@@ -93,6 +93,7 @@ function guildRouter()
     router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
     router.post("/guide/postRules", guide_routes.postRules); 
     router.post("/guide/configureWelcomeScreen", guide_routes.configureWelcomeScreen);
+    router.post("/guide/postAwards", guide_routes.postAwards); 
 
 
     //guild home page (dashboard)
