@@ -34,7 +34,7 @@ async function doHelpCommand(interaction)
     if (interaction.guild == undefined) note = "\n\nNote that you can only run these commands on a server, not in this DM channel.\n\nNote that not all classes use all of these commands.";
 
     var commandData = Object.entries(allCommandData);
-    if (await isAdmin(interaction.member))
+    if (interaction.member && await isAdmin(interaction.member))
     {
         commandData = [...commandData, ...Object.entries(adminCommandData)];
     }
