@@ -209,6 +209,8 @@ async function doFlexCommand(interaction)
 async function doAwardCommand(interaction)
 {
     var member = interaction.options.getMember("user");
+    member = await interaction.guild.members.fetch(member);
+
     var emoji = interaction.options.getString("award");//interaction.options[1].value;
     var award_text = interaction.options.getString("title");//interaction.options[2].value;
     var description = interaction.options.getString("description");
@@ -221,7 +223,7 @@ async function doAwardCommand(interaction)
         var awardChannel = await getAwardChannel(interaction.guild);
 
         var award = await getAwardByEmoji(interaction.guild, emoji);
-        console.log("award", member.id, award, emoji);
+        //console.log("award", member.id, award, emoji);
         if (award)
         {
             var achievementEmbed = await giveAward(interaction.guild, award, member); 

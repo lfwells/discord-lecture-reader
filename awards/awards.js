@@ -126,7 +126,7 @@ export async function getAwardList(guild, member) //optionally get award list fo
   {
     var emoji = getAwardEmoji(award);
     //check that they have the award
-    if (!member || award.mentions.users.has(member.user.id))
+    if (!member || award.mentions.members.has(member.id))
     {
       awards[emoji] = getAwardName(award);
     }
