@@ -34,9 +34,9 @@ async function doHelpCommand(interaction)
     if (interaction.guild == undefined) note = "\n\nNote that you can only run these commands on a server, not in this DM channel.\n\nNote that not all classes use all of these commands.";
 
     var commandData = Object.entries(allCommandData);
-    if (await isAdmin(interaction.user))
+    if (await isAdmin(interaction.member))
     {
-        commandData = Object.entries(adminCommandData);
+        commandData = [...commandData, ...Object.entries(adminCommandData)];
     }
     var commands = await asyncFilter(commandData, async (c) => interaction.guild == undefined || await commandEnabledForGuild(c[0], interaction.guild));
 
@@ -50,6 +50,8 @@ async function doHelpCommand(interaction)
                     var key = kvp[0];
                     var data = kvp[1];
 
+                    if (data.description == undefined) return null;
+
                     var optionsText = "";
                     if (data.options && data.options.length > 0)
                     {
@@ -61,7 +63,7 @@ async function doHelpCommand(interaction)
                         name:"`/"+(key+optionsText).substring(0, 250)+"`",
                         value:data.description.substring(0, 255)
                     }
-                })
+                }).filter(e => e != null)
             }
         ]
     });
