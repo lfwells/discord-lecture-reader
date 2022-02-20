@@ -39,14 +39,24 @@ export default async function(client)
             { name: "poll_emoji", type: "STRING", required: false, description: "What should the bar chart look like? (defaults to █)." },
             { name: "multi_vote", type: "BOOLEAN", required: false, description: "Can people vote on more than one option? (default true)" },
             { name: "allow_undo", type: "BOOLEAN", required: false, description: "Can people remove their vote and change their mind? (default true)" },
-            { name: "restrict_see_results_button", type: "BOOLEAN", required: false, description: "Only the poll creator can show who voted for what? (default: true)" },
+            { name: "restrict_see_results_button", type: "BOOLEAN", required: false, description: "Only the poll creator can show who voted for what? (default true)" },
+            { name: "anonymous", type: "BOOLEAN", required: false, description: "Hide the Show Results button (default false)" },
+            
         ],
     };
     
+    const checklistCommand = {
+        name: "checklist",
+        description: '(ADMIN) Displays a button for checking off a task.',
+        options: [
+            { name: 'question', type: 'STRING', description: 'The checklist item.', required: true, },            
+        ],
+    };
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         await registerCommand(guild, pollCommand);
+        await registerCommand(guild, checklistCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -55,7 +65,16 @@ export default async function(client)
         {
             if (interaction.commandName === config.POLL_COMMAND) 
             {
-                doPollCommand(interaction);
+                await doPollCommand(interaction);
+            }
+            if (interaction.commandName === "checklist") 
+            {
+                await doPollCommand(interaction, {
+                    question: interaction.options.getString("question"),
+                    options: ["DONE"],
+                    hide_results_button: true,
+                    poll_emoji: "✅"
+                }, true);
             }
         }
         else if (interaction.isMessageComponent())// && interaction.message.interaction) 
@@ -69,8 +88,7 @@ export default async function(client)
     });
 
 }
-
-export async function doPollCommand(interaction, scheduledOptions)
+export async function doPollCommand(interaction, scheduledOptions, checklist)
 {
     var pollAuthor = interaction.user?.id ?? scheduledOptions.authorID;
     
@@ -113,13 +131,15 @@ export async function doPollCommand(interaction, scheduledOptions)
         question,
         answers, 
         pollOptions: JSON.stringify(pollOptions),
-        pollAuthor
+        pollAuthor,
+        checklist: checklist ?? false
     } : {
         results: JSON.stringify(results),
         question,
         answers, 
         pollOptions: JSON.stringify(pollOptions),
-        pollAuthor
+        pollAuthor,
+        checklist: checklist ?? false
     });
 
     var resultsEmbed = await resultsText(interaction.guild, interaction);
@@ -128,7 +148,7 @@ export async function doPollCommand(interaction, scheduledOptions)
     //GUILD_CACHE[interaction.guild.id].latestRoboLindsPoll = resultsEmbed;
     //GUILD_CACHE[interaction.guild.id].latestRoboLindsPollTimestamp = interaction.createdTimestamp;
 
-    if (scheduledOptions)
+    if (scheduledOptions && !checklist)
     {
         return interaction.edit({embeds: [ resultsEmbed ], components: await createButtons(interaction, interaction.channel), content:undefined});
     }
@@ -146,6 +166,7 @@ async function doPollCommandButton(i, originalInteraction)
     var answers = cache.answers;
     var options = JSON.parse(cache.pollOptions);
     var pollAuthor = cache.pollAuthor;
+    var checklist = cache.checklist;
     
     var latestFollowUpID = cache.latestFollowUpID;
     var client = await getClient();
@@ -154,6 +175,7 @@ async function doPollCommandButton(i, originalInteraction)
     var multi_vote = scheduledOptions ? scheduledOptions.multi_vote : cache.options.getBoolean("multi_vote") ?? true;
     var allow_undo = scheduledOptions ? scheduledOptions.allow_undo : cache.options.getBoolean("allow_undo") ?? true;
     var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : cache.options.getBoolean("restrict_see_results_button") ?? true;
+    var hide_results_button = scheduledOptions ? scheduledOptions.hide_results_button : cache.options.getBoolean("hide_results_button") ?? true;
 
     async function seeResults()
     {
@@ -294,6 +316,7 @@ async function createButtons(interaction, channel)
     var client = await getClient();
     var latestFollowUp = latestFollowUpID ? await channel.messages.fetch(latestFollowUpID) : undefined;
     var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : interaction.options.getBoolean("restrict_see_results_button") ?? true;
+    var hide_results_button = scheduledOptions ? scheduledOptions.hide_results_button : cache.options.getBoolean("hide_results_button") ?? false;
 
 
     var id = 0;
@@ -317,7 +340,7 @@ async function createButtons(interaction, channel)
     }
 
     //admin only rows
-    if (latestFollowUp == undefined)
+    if (latestFollowUp == undefined && !hide_results_button)
     {
         var authorOnlyText = "";
         if (restrict_see_results_button) authorOnlyText = " (Poll Author Only)";
@@ -342,29 +365,37 @@ async function resultsText(guild, interaction)
     var question = cache.question;
     var answers = cache.answers;
     var results = cache.results ? JSON.parse(cache.results) : undefined;
+    var checklist = cache.checklist ?? false;
     
     var poll_emoji = scheduledOptions ? scheduledOptions.poll_emoji : cache.options.getString("poll_emoji") ?? "█"; //":white_large_square:"
 
     var resultsEmbed = {
         title: question,
         fields: [],
-        thumbnail: { 
+        thumbnail: checklist ? null : { 
             url:guild.iconURL() //this is null and at this point I don't care lol
         }
     };
 
-    
-    var text = "";
-    for (let i = 0; i < answers.length; i++) {
-        const answer = answers[i];
-        const result = results[i].length;
-        
-        resultsEmbed.fields.push({
-            name: answer,
-            //two liner
-            //value: pluralize(result, "vote")+"\n"+(result == 0 ? "‎" : poll_emoji.repeat(result) )
-            value: poll_emoji.repeat(result)+ " "+pluralize(result, "vote") 
-        });
+    if (checklist)
+    {
+        var result = results[0].length ?? 0;
+        resultsEmbed.description = poll_emoji.repeat(result)+ " "+result+(result == 1 ? " person completed." : " people completed.");
+    }
+    else
+    {
+        var text = "";
+        for (let i = 0; i < answers.length; i++) {
+            const answer = answers[i];
+            const result = results[i].length;
+            
+            resultsEmbed.fields.push({
+                name: answer,
+                //two liner
+                //value: pluralize(result, "vote")+"\n"+(result == 0 ? "‎" : poll_emoji.repeat(result) )
+                value: poll_emoji.repeat(result)+ " "+pluralize(result, "vote")
+            });
+        }
     }
 
     return resultsEmbed;
