@@ -3,6 +3,7 @@ var commandInfo = locals.commands[command];
 %>
 <<%=level%> style="margin-bottom:-0.75em"><code>/<%=command%></code> Command</<%=level%>>
 <p><%=commandInfo.description%></p>
+<table>
 <% commandInfo.options.forEach(option =>
 {
     var name = option.name;
@@ -18,7 +19,8 @@ var commandInfo = locals.commands[command];
 
     var requiredText = option.required ? " - (required)" : "";
     %>
-    <div><code style="min-width:200px; display:inline-block" title="<%=type%>"><%=name%></code><%=description%><%=requiredText%></div>
+    <tr><th><code style="min-width:200px; display:inline-block; text-align: left;" title="<%=type%>"><%=name%></code></th><td><%=description%><%=requiredText%></td></tr>
     <%
 });
 %>
+</table>

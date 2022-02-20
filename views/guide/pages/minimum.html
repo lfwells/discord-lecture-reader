@@ -47,7 +47,7 @@ function guideTabLink(text, link)
 
             <hr />
             <h3>Exploring the Channels in the Template</h3>
-            <p>Once you have created your server, you should see a list of channels on the left-hand side of Discord. If you find a channel or category you don't want, right-click and choose Delete (for example, you may not want the Lectures, Consultation, and Tutorial categories).</p>
+            <p>Once you have created your server, you should see a list of channels on the left-hand side of Discord. If you find a channel or category you don't want, right-click and choose Delete. For example, you may not want the Lectures, Consultation, and Tutorial categories (<em>note that when deleting a category, you need to also delete each individual channel as well</em>).</p>
             <p class="centered">
                 <img src="/static/guide/templateChannels.png" /><img src="/static/guide/templateChannelsDelete.png" />
             </p>
@@ -107,7 +107,7 @@ function guideTabLink(text, link)
                     <p>Adding the Discord Bot to your server will unlock additional features, such as post analytics, polls, even an achievement system (if you want it!).</p>
                     <p>Adding the bot at this stage will also help automate some of the other steps in this user guide.</p>
                     <p class="centered">
-                        <span style="width:50%; float:left; text-align:left">
+                        <span style="width:45%; float:left; text-align:left">
                             <% if (inGuild() == false ) 
                             {
                                 %>
@@ -123,18 +123,20 @@ function guideTabLink(text, link)
                             }
                             %>
                         </span>
-                        <img src="/static/guide/addBot.png" />
+                        <img src="/static/guide/addBot.png" style="width:40%"/>
                     </p>
                         
                 </div>
             </div>
 
             <hr />
-            <h3>Set Your Display Name</h3>
+            <h3>Set Your Display Name and Role</h3>
             <p>Depending on how your created your account, your <em>Discord username</em> may be different to how you want to appear to your students. You can have a <em>server nickname</em> which is just for that server.</p>
-            <p>Right-click on your username on the right-hand side of Discord, and select <strong>Profile</strong>.</p>
+            <p>Right-click on your username on the right-hand side of Discord, and select <strong>Edit Server Profile</strong>.</p>
+            <p>This right-click menu also allows you to select roles, which give special permissions. The template comes with <strong>Unit Coordinator</strong> and <strong>Tutor</strong> roles, which you should assign.</p>
             <p class="centered">
-                <img src="/static/guide/mylo/profile.png" />
+                <img src="/static/guide/profile.png" />
+                <img src="/static/guide/role.png" />
             </p>
 
             <hr />
@@ -165,7 +167,7 @@ function guideTabLink(text, link)
 
             <hr />
             <h3>Set-Up Complete!</h3>
-            <p>You've completed the bare minimum set up for Discord for teaching, great job! Take the rest of the day off (then come back and try out some of the additional set up later in this guide).</p>
+            <p>You've completed the bare minimum set up for Discord for teaching, great job! Take the rest of the day off (then come back and try out some of the <a href="additional">additional set up</a> you can do to make a more robust online experience for students).</p>
         </div>
     </section>
 

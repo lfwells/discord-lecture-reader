@@ -111,6 +111,27 @@ function guideTabLink(text, link)
             <p class="hint">Currently, screening is just acceptance of the rules, but in the future Discord will add additional features to the screening page.</p>
             <p>Once you are done, be sure to click <strong>Enable</strong> on the <strong>Membership Screening</strong> settings page.</p>
 
+
+            <hr />
+            <h3>Create a Campus and Pronouns Selector</h3>
+            <p>Students can be given roles to categorise them. You can send notifications to groups of students using this method (e.g. by tagging @Launceston role). You can also see roles on a student's profile (e.g. maybe you can see that they have chosen their preferred pronouns, so you can communicate better with them). You can even give people with specific roles access to special channels.</p>
+            <p><em>You and other adminstrators</em> can assign roles by right-clicking a student's name, however sometimes you may want students to select their own roles. This can be done using the <code>/role_select_message</code> command:</p>
+
+            
+            <%- include("../commandInfo.html", {
+                command: "role_select_message",
+                level: "h4"
+            }) %>
+
+            <p>Here are some examples of how you can use this command -- I like to post them in the <strong>#rules</strong> channel for visibility, as this is the first channel students see.</p>
+            <p class="centered">
+                <img src="/static/guide/campus_select.png" />
+            </p>
+            <p class="centered">
+                <img src="/static/guide/pronoun_select.png" />
+            </p>
+            <p>For more information on roles, see <a href="https://support.discord.com/hc/en-us/articles/214836687-Role-Management-101">Role Management 101 (Discord Support Article)</a>.</p>
+
             <hr />
             <h3>Additional Channel Ideas</h3>
             <p>The given template has most of the channels you might need, but here are some suggestions for channels you could add:</p>

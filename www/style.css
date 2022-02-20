@@ -205,6 +205,7 @@
         button {
             color:black !important;
             font-size: small;
+            cursor: pointer;
         }
         .fa { color:black; }
 
@@ -499,6 +500,7 @@
             display: inline-block;
         
         }
+        #toc a { font-weight: normal !important;}
         #toc > div
         {
             position:sticky;

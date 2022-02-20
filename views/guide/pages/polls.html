@@ -48,6 +48,11 @@ function guideTabLink(text, link)
             <p>Enter your pre-written polls in the following format:</p>
             <p><code>Note to Self /poll "Question" "Option 1" "Option 2" "Option N"</code></p>
             <p>Press <strong>Save</strong>, and your schedule polls will appear at the top of the page, with a <strong>Post Poll</strong> button for each.</p>
+
+            
+            <%- include("../commandInfo.html", {
+                command: "checklist",
+            }) %>
         </div>
     
 <%- include('../guideFooter.html') %>
