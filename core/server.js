@@ -42,6 +42,17 @@ export function init_server()
   
   app.use(express.json());
   app.use(express.urlencoded({extended:true}));
+
+  //https://stackoverflow.com/questions/13442377/redirect-all-trailing-slashes-globally-in-express/35927027
+  app.use((req, res, next) => {
+    if (req.path.substr(-1) === '/' && req.path.length > 1) {
+      const query = req.url.slice(req.path.length)
+      const safepath = req.path.slice(0, -1).replace(/\/+/g, '/')
+      res.redirect(301, safepath + query)
+    } else {
+      next()
+    }
+  })
   
   app.engine('.html', ejs.__express);
   
