@@ -51,6 +51,11 @@ export default async function(client)
             type: 'USER',
             description: 'The user to see the awards for (leave blank for YOU).',
             required: false,
+        }, {
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Should everyone see this post? (default: true)',
+            required: false,
         }],
     };
     const awardCommand = {
@@ -95,12 +100,12 @@ export default async function(client)
     const leaderboardCommand = {
         name: 'leaderboard',
         description: 'Replies with the top 10 award earners (only allowed in off-topic channel).',
-        /*options: [{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+        options: [{
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Should everyone see this post? (default: false)',
             required: false,
-        }],*/
+        }],
     };
   
     var guilds = client.guilds.cache;
@@ -170,7 +175,7 @@ async function doFlexCommand(interaction)
     //only allow in off topic
     if (await offTopicCommandOnly(interaction)) return;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: !(interaction.options.getBoolean("public") ?? true) });
 
     var member = interaction.options.getMember("user") ?? interaction.member;
 
@@ -277,7 +282,7 @@ async function doLeaderboardCommand(interaction)
     //only allow in off topic
     if (await offTopicCommandOnly(interaction)) return;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: !(interaction.options.getBoolean("public") ?? false) });
 
     var awardsData = await getLeaderboard(interaction.guild, await getClassList(interaction.guild));
 
