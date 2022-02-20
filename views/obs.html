@@ -36,6 +36,7 @@
     .autoLink { width: 500px; }
 </style>
 <script>
+    
     $(document).ready(() =>
     {
         $(".autoLink").each((i,e) => {
@@ -45,22 +46,12 @@
         });
 
         $(".copy, .autoLink").on("click", (e) => {
-            var txt = $(e.target).parents("a").find("input")[0];
+            var txt = $(e.target).parents("a").find("input")[0].val();
             copyToClipboard(txt);
             e.stopPropagation();
             return false;
         });
     });
-
-    function copyToClipboard(txt) {
-        console.log($(txt));
-        //var $temp = $("<input>");
-        //$("body").append($temp);
-        //$temp.val(txt).select();
-        $(txt).select();
-        document.execCommand("copy");
-        //$temp.remove();
-    }
 
 </script>
 <%- include('footer.html') %>

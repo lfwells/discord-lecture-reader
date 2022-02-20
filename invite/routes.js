@@ -7,8 +7,7 @@ import { ROLES } from "../roles/roles.js";
 
 export async function inviteList(req, res) 
 {
-    console.log(req.path);
-    init_invites(req.guild);
+    await init_invites(req.guild);
     
     var appliedRolesList = [];
     var query = await req.guildDocument.collection("invites").get();
@@ -16,8 +15,18 @@ export async function inviteList(req, res)
         var d = doc.data();
         appliedRolesList[d.code] = d.role;
     });
+    var sortedInvites = Object.entries(invites[req.guild.id]);
+    sortedInvites.sort((a,b) => {
+        //console.log(a[1].createdTimestamp, b[1].createdTimestamp,a[1],b[1]);
+        if (a[1].createdTimestamp && b[1].createdTimestamp)
+        {
+            return a[1].createdTimestamp - b[1].createdTimestamp;
+        }
+        return -1;
+    });
+    console.log(sortedInvites.map(kvp => kvp[1].createdTimestamp));
     res.render('inviteList', {
-        invites: invites.get(req.guild.id),
+        invites: sortedInvites,
         rolesList: ROLES[req.guild.id].map((role) => { return {
             value: role.id,
             text: role.name
@@ -57,7 +66,7 @@ export async function generateInvite(req,res,next)
         maxUses: 0,
     });
     
-    invites.get(req.guild.id).set(newInvite.code, newInvite.uses);
+    invites[req.guild.id][newInvite.code] = { code: newInvite.code, uses: newInvite.uses, createdTimestamp: newInvite.createdTimestamp };
 
     res.redirect("back");//back to referring page
 }

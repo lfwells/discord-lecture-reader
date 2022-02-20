@@ -6,12 +6,12 @@ export default async function(client)
 {
     client.on("inviteDelete", (invite) => {
         // Delete the Invite from Cache
-        invites.get(invite.guild.id).delete(invite.code);
+        delete invites[invite.guild.id][invite.code];
       });
       
       client.on("inviteCreate", (invite) => {
         // Update cache on new invites
-        invites.get(invite.guild.id).set(invite.code, invite.uses);
+        invites[invite.guild.id][invite.code] = { code:invite.code, users:invite.uses, createdTimestamp:invite.createdTimestamp };
       });
       
     client.on('guildMemberAdd', async (member) =>

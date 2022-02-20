@@ -1,9 +1,13 @@
-export const invites = new Map();
+export const invites = {};
 
 export async function init_invites(guild)
 {
     //console.log(`init_invites ${guild.name}`);
 
+    invites[guild.id] = {};
+    
     var guildInvites = await guild.invites.fetch();
-    invites.set(guild.id, new Map(guildInvites.map((invite) => [invite.code, invite.uses])));
+    guildInvites.forEach(invite => {
+        invites[guild.id][invite.code] = { code: invite.code, users: invite.uses, createdTimestamp: invite.createdTimestamp };
+    });
 }
