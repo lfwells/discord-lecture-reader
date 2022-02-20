@@ -84,6 +84,8 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_obs"));
     router.use(guild.loadGuildProperty("feature_todos"));
     router.use(guild.loadGuildProperty("feature_dm_intro"));
+    router.use(guild.loadGuildProperty("feature_sessions"));
+    router.use(guild.loadGuildProperty("feature_experimental"));
 
 
     //TODO: this filterButtons could be expensive, I didn't realise!

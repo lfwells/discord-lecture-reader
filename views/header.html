@@ -140,6 +140,13 @@
                             <%
                         }
                         %>
+                        <% if (hasFeature("sessions"))
+                        {
+                            %>
+                            <li><a <%=currentTab("sessions")%> href="/guild/<%= guild.id %>/sessions/">Sessions</a></li>
+                            <%
+                        }
+                        %>
 
                         <% if (hasFeature("obs") && locals.lectureChannelID) { %>
                             <!--<li><a href="/guild/<%= guild.id %>/clearpoll/">Clear Current Poll</a></li>-->
@@ -148,7 +155,7 @@
                             <li><a <%=currentTab("obs")%> href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
                         <% } %>
 
-                        <% if (hasFeature("analytics") && (locals.discordUser.id == locals.config.LINDSAY_ID || locals.discordUser.id == locals.config.IAN_ID))
+                        <% if (hasFeature("analytics") && hasFeature("experimental") && (locals.discordUser.id == locals.config.LINDSAY_ID || locals.discordUser.id == locals.config.IAN_ID) )
                         {
                             %>
                             <li><a <%=currentTab("sheets")%> href="/guild/<%= guild.id %>/sheets/">Google Sheet Export</a></li>

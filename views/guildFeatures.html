@@ -7,6 +7,7 @@ function hasFeature(feature)
 %>
 
 <h2>Enable/Disable Features</h2>
+<p>You will need to refresh this page once you have enabled a feature, for the relevant tabs to appear along the top.</p>
 
 <dl>
 <dt><%- include("subViews/featureSelect.html", 
@@ -91,6 +92,12 @@ function hasFeature(feature)
                 onChangedURL: "setGuildProperty"
             }) %>
         </dd>
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "Experimental Features",
+            feature: "experimental"
+        }) %></dt>
+    </dl>
 </div>
 
     <h3>Status Channels</h3>
