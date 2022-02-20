@@ -30,8 +30,9 @@ export default async function(client)
                 options: 
                 [
                     { 
-                        name: "type", type: "STRING", description: "(ADMIN ONLY) How should the messages be copied? (default is Thread)",
+                        name: "type", type: "STRING", description: "(ADMIN ONLY) How should the messages be copied? (default is Auto)",
                         choices: [
+                            { name: "Auto (Default)", value:"auto", description: "Only posts a thread if multiple messages are flagged, else just posts the message." },
                             { name: "Thread", value:"thread", description: "Post indvidual messages in a seperate thread." },
                             { name: "Combined", value:"combined", description: "Post as a big Discord embed" },
                             { name: "Messages", value:"messages", description: "Post as individual messages here." }
@@ -47,8 +48,9 @@ export default async function(client)
                 options: 
                 [
                     { 
-                        name: "type", type: "STRING", description: "How should the messages be moved? (default is Thread)",
+                        name: "type", type: "STRING", description: "How should the messages be moved? (default is Auto)",
                         choices: [
+                            { name: "Auto (Default)", value:"auto", description: "Only posts a thread if multiple messages are flagged, else just posts the message." },
                             { name: "Thread", value:"thread", description: "Post indvidual messages in a seperate thread." },
                             { name: "Combined", value:"combined", description: "Post as a big Discord embed" },
                             { name: "Messages", value:"messages", description: "Post as individual messages here." }
@@ -118,21 +120,26 @@ async function doFlagCommand(interaction)
 {
     console.log("Flag command");
     
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();//{ ephemeral: true });
+    await interaction.deleteReply();
+
     if (await adminCommandOnly(interaction)) return;
 
+    var flaggedMessage = await interaction.channel.messages.fetch(interaction.targetId);
     var added = await addFlaggedMessage(interaction.guild, interaction.user, interaction.targetId, interaction.channel.id);
     var flagged = await getFlaggedMessageIDs(interaction.guild, interaction.user);
     if (added)
     {
-        var msg = { content: `Message flagged. You now have ${pluralize(flagged.length, "message")}.`};
-        await postFlaggedMessagesEphemeral(interaction, msg);
+        var msg = { content: `Message flagged. You now have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
+        //await postFlaggedMessagesEphemeral(interaction, msg);
+        await interaction.user.send(msg);
         //await interaction.editReply();
     }
     else
     {
-        var msg = { content: `Message was already flagged, no action taken. You have ${pluralize(flagged.length, "message")}.`};
-        await postFlaggedMessagesEphemeral(interaction, msg);
+        var msg = { content: `Message was already flagged, no action taken. You have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
+        //await postFlaggedMessagesEphemeral(interaction, msg);
+        await interaction.user.send(msg);
         //await interaction.editReply();
     }
 }
@@ -140,21 +147,26 @@ async function doUnflagCommand(interaction)
 {
     console.log("Unflag command");
     
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();//{ ephemeral: true });
+    await interaction.deleteReply();
+
     if (await adminCommandOnly(interaction)) return;
 
+    var flaggedMessage = await interaction.channel.messages.fetch(interaction.targetId);
     var found = await removeFlaggedMessage(interaction.guild, interaction.user, interaction.targetId, interaction.channel.id);
     var flagged = await getFlaggedMessageIDs(interaction.guild, interaction.user);
     if (found)
     {
-        var msg = { content: `Message un-flagged. You now have ${pluralize(flagged.length, "message")}.`};
-        await postFlaggedMessagesEphemeral(interaction, msg);
+        var msg = { content: `Message un-flagged. You now have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
+        //await postFlaggedMessagesEphemeral(interaction, msg);
+        await interaction.user.send(msg);
         //await interaction.editReply();
     }
     else
     {
-        var msg = { content: `Message was not previously flagged, no action taken. You have ${pluralize(flagged.length, "message")}.`};
-        await postFlaggedMessagesEphemeral(interaction, msg);
+        var msg = { content: `Message was not previously flagged, no action taken. You have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
+        //await postFlaggedMessagesEphemeral(interaction, msg);
+        await interaction.user.send(msg);
         //await interaction.editReply();
     }
 }
@@ -162,12 +174,17 @@ async function doUnflagCommand(interaction)
 
 async function doFlagCopyCommand(interaction, move)
 {
-    await interaction.deferReply({ ephemeral: false });
+    await interaction.deferReply({ ephemeral: true });
     if (await adminCommandOnly(interaction)) return;
 
     var flagged = await getFlaggedMessages(interaction.guild, interaction.user);
 
-    var type = (interaction.options.getString("type") ?? "thread");
+    var type = (interaction.options.getString("type") ?? "auto");
+    if (type == "auto")
+    {
+        if (flagged.length == 1) type = "message";
+        else type = "thread";
+    }
     if (type == "thread")
     {
         var postedMessage = await interaction.editReply({ content: `${move ? "Moved" : "Copied"} ${pluralize(flagged.length, "message")}.` });
@@ -192,7 +209,7 @@ async function doFlagCopyCommand(interaction, move)
                 value: message.content
             });
         });
-        await interaction.editReply({ embeds: [combinedEmbed] });
+        await interaction.followUp({ embeds: [combinedEmbed] });
     }
     else
     {
