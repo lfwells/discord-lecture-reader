@@ -29,7 +29,17 @@ function guideTabLink(text, link)
             
             <hr />
             <h3>Download the UTAS Server Template</h3>
-            <p>Open the link <a target="_blank" href="<%- include("../../subViews/templateLink.html") %>"><%- include("../../subViews/templateLink.html") %></a>.</p>
+            <p>Open the link below:</p>
+            
+            <p>
+                <div style="display:inline-block">
+                    <a href="" id="templateLink" target="_blank" class="btnAdd">Create Server From Template</span></a> 
+                </div>
+                <div style="display:inline-block; vertical-align: middle;">
+                    <%- include("../../subViews/templateLinkSelector.html") %>
+                </div>
+            </p>
+
             <p>Here you should enter the name of your server. This should be the unit code, year, and optionally the unit name. Now is also a great time add a server icon. <em>This information can be changed later.</em></p>
             <p class="centered">
                 <img src="/static/guide/template.png" />
