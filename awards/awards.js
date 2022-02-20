@@ -90,11 +90,15 @@ async function setNickname(client, member, nickname)
 }
 export function baseName(nickname)
 {
-  return nickname.replace(reg, "").trim(); 
+  return stripEmoji(nickname); 
   while ((result = reg.exec(nickname)) !== null) {
     return nickname.substr(0, result.index-1).trim();
   }
   return nickname;
+}
+export function stripEmoji(txt)
+{
+  return txt.replace(reg, "").trim();
 }
 
 export async function isAwardChannelID(fromInChannel)

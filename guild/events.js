@@ -22,7 +22,7 @@ export default async function(client)
             { merge: true }
         );
 
-        await guessConfigurationValues(guild);
+        await guessConfigurationValues(guild, true); //save = true
 
         await init_client(client);
 
@@ -50,6 +50,10 @@ export default async function(client)
         if (oldMember.user.id != client.user.id)
         {
             init_admin_users(oldMember.guild);
+        }
+        else
+        {
+            console.log("Just got kicked from a guild! "+oldMember.guild.id);
         }
     });
 

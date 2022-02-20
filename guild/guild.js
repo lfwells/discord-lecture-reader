@@ -11,6 +11,7 @@ import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
 import { isOutsideTestServer } from "../core/utils.js";
 import { init_status_channels } from "./statusChannels.js";
+import { stripEmoji } from "../awards/awards.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -18,6 +19,11 @@ const guessConfiguration = {
   rulesChannelID: { type:"channel", name:"rules" },
   lectureChannelID: { type:"channel", name:"lecture-chat" },
   awardChannelID: { type:"channel", name:"achievements" },
+  offTopicChannelID: { type:"channel", name:"off-topic" },
+  todoChannelID: { type:"channel", name:"todo-list" },
+  offTopicCategoryID: { type:"category", name:"Off Topic" },
+  adminRoleID: { type:"role", name:"Unit Coordinator" },
+  studentRoleID: { type:"role", name:"Current Student" },
 };
 
 export default async function init(client)
@@ -309,27 +315,31 @@ export async function deleteGuildProperty(guild, property)
 
 //a series of functions to auto-fill the settings of the server. Ideally will work perfectly if done on the server template
 //these functions will modify the actual server config if the guess finds something and it was null
-export async function guessConfigurationValues(guild)
+export async function guessConfigurationValues(guild, save)
 {
   console.log(`Guessing guild ${guild.name} configuration values...`);
   await Promise.all(Object.keys(guessConfiguration).map( async (property) => 
   { 
-    await guessConfigurationValue(guild, property);
+    await guessConfigurationValue(guild, property, false, save);
   }));
 }
-export async function guessConfigurationValue(guild, property, convert)
+export async function guessConfigurationValue(guild, property, convert, save)
 {
   var guessInfo = guessConfiguration[property];
   if (guessInfo.type == "channel")
   {
-    return await guessChannel(guild, property, guessInfo.name, convert);
+    return await guessChannel(guild, property, guessInfo.name, convert, save);
   }
   else if (guessInfo.type == "category")
-    return null;//TODO
+  {
+    return await guessChannel(guild, property, guessInfo.name, convert, save);
+  }
   else if (guessInfo.type == "role")
-    return null;//TODO
+  {
+    return await guessRole(guild, property, guessInfo.name, convert, save);
+  }
 }
-async function guessChannel(guild, property, guess, convert) //guess should match the template
+async function guessChannel(guild, property, guess, convert, save) //guess should match the template
 {
   console.log("guess channel",property);
   var stored = await getGuildProperty(property, guild);
@@ -341,18 +351,43 @@ async function guessChannel(guild, property, guess, convert) //guess should matc
       return stored;
   }
   
-  var guessedChannel = await guild.channels.cache.find(c => c.name === guess);
+  var guessedChannel = await guild.channels.cache.find(c => stripEmoji(c.name) === guess);
   console.log(`guess for ${property} found ${guessedChannel?.id ?? "NOTHING"}`);
 
-  if (guessedChannel)
+  if (guessedChannel && save)
   {
-    //await setGuildProperty(guild, property, guessedChannel.id);
+    await setGuildProperty(guild, property, guessedChannel.id);
   }
 
   if (convert)
     return guessedChannel;
   else
     return guessedChannel?.id;
+}
+async function guessRole(guild, property, guess, convert, save) //guess should match the template
+{
+  console.log("guess role",property);
+  var stored = await getGuildProperty(property, guild);
+  if (stored) {
+    console.log(`guess for ${property} didn't need to happen, it was already set ${stored}`);
+    if (convert)
+      return await getGuildPropertyConverted(property, guild);
+    else
+      return stored;
+  }
+  
+  var guessedRole = await guild.roles.cache.find(c => c.name === guess);
+  console.log(`guess for ${property} found ${guessedRole?.id ?? "NOTHING"}`);
+
+  if (guessedRole && save)
+  {
+    await setGuildProperty(guild, property, guessedRole.id);
+  }
+
+  if (convert)
+    return guessedRole;
+  else
+    return guessedRole?.id;
 }
 
 //TODO: this will need a refresh button or a detect that a member role has changed
