@@ -39,7 +39,7 @@ tr:hover, tr:hover button, tr:hover th {
 function award(studentDiscordID, emoji, button)
 {
     $.ajax({
-        url:"giveAward",
+        url:"awards/giveAward",
         data:{
             studentDiscordID:studentDiscordID,
             emoji:emoji,
