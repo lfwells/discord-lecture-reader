@@ -28,7 +28,7 @@ export async function postRules(req,res,next)
 
     beginStreamingRes(res);
 
-    var rulesChannel = await guessConfigurationValue(req.guild, "rulesChannelID", true); //convert = true
+    var rulesChannel = await guessConfigurationValue(req.guild, "ruleChannelID", true); //convert = true
     if (!rulesChannel)
     {
         res.write(`No #rules channel found. Cannot complete operation.`);

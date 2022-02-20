@@ -38,7 +38,7 @@ function guideTabLink(text, link)
             <p><button id="copyRules">Copy Rules Template</button> <%- include("../../subViews/longBotCommandButton.html", 
                 { 
                     text: "Get Bot to Post Rules",
-                    url: "./guide/postRules",
+                    url: "postRules",
                     data: '{ rulesText: $("#rules").val() }'
                 }) %></p>
                 
@@ -83,7 +83,7 @@ function guideTabLink(text, link)
                     <textarea id="description" style="width:65%; height:4em" placeholder="Enter a short unit description/welcome message."></textarea><%- include("../../subViews/longBotCommandButton.html", 
                     { 
                         text: "Get Bot to Configure a Basic Welcome Screen",
-                        url: "./guide/configureWelcomeScreen",
+                        url: "configureWelcomeScreen",
                         data: '{ description: $("#description").val() }'
                     }) %>
                 </p><%

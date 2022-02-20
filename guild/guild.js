@@ -16,7 +16,7 @@ import { stripEmoji } from "../awards/awards.js";
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
 const guessConfiguration = {
-  rulesChannelID: { type:"channel", name:"rules" },
+  ruleChannelID: { type:"channel", name:"rules" },
   lectureChannelID: { type:"channel", name:"lecture-chat" },
   awardChannelID: { type:"channel", name:"achievements" },
   offTopicChannelID: { type:"channel", name:"off-topic" },
@@ -171,7 +171,7 @@ export function loadGuildProperty(property, required)
     } 
     res.locals[property] = req[property];
 
-    if (property == "rulesChannelID") //special case
+    if (property == "ruleChannelID" && isCommunityGuild(req.guild)) //special case
     {
       req[channelProperty] = await req.guild.rulesChannelID;
       res.locals[channelProperty] = req[channelProperty];
@@ -254,7 +254,7 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
     return null;
     //anything else?
   }
-  if (property == "rulesChannelID") //special case
+  if (property == "ruleChannelID" && isCommunityGuild(guild)) //special case
   {
     return await guild.rulesChannel.id;
   }
@@ -294,7 +294,7 @@ export async function saveGuildProperty(property, value, req, res)
   req[property] = value;
   GUILD_CACHE[req.guild.id][property] = value;
 
-  if (property == "rulesChannelID") //special case
+  if (property == "ruleChannelID" && isCommunityGuild(req.guild)) //special case
   {
     var client = getClient();
     var channel = await client.channels.fetch(req[property]);
@@ -427,4 +427,7 @@ export async function getBotMemberForGuild(guild)
 {
   var client = getClient();
   return await guild.members.cache.get(client.user.id);
+}
+export function isCommunityGuild(guild) {
+  return guild.features?.includes('COMMUNITY');
 }
