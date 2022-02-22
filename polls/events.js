@@ -260,6 +260,7 @@ async function doPollCommandButton(i, originalInteraction)
             }
         }
 
+        var alreadyReplied = false;
         if (results[answer].indexOf(user) == -1)
         {
             results[answer].push(user); 
@@ -273,7 +274,9 @@ async function doPollCommandButton(i, originalInteraction)
             }
             else
             {
+                alreadyReplied = true;
                 await i.reply({content: "You've already voted for this option, and the poll creator made it so you cannot undo your vote.", ephemeral:true });
+                
             }
         }
         
@@ -283,7 +286,10 @@ async function doPollCommandButton(i, originalInteraction)
         await setGuildProperty(i.guild, "latestRoboLindsPoll", JSON.stringify(resultsEmbed));
         await setGuildProperty(i.guild, "latestRoboLindsPollTimestamp", i.createdTimestamp);
 
-        await i.update({ embeds: [ resultsEmbed ]});//, components: await createButtons(originalInteraction) });
+        if (alreadyReplied == false)
+        {
+            await i.update({ embeds: [ resultsEmbed ]});//, components: await createButtons(originalInteraction) });
+        }
 
         if (latestFollowUp)
         {
