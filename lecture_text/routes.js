@@ -3,6 +3,7 @@ import { send } from "../core/client.js";
 import { GUILD_CACHE } from "../guild/guild.js";
 
 import fs from "fs";
+import { sleep } from "../core/utils.js";
 var f = fs.readFileSync("./lecture_text/emoji.json");
 var emoji = JSON.parse(f);
 
@@ -102,7 +103,9 @@ export async function getLatest(req,res,next)
 {
   if (GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id].latestText)
   {
+    console.log(GUILD_CACHE[req.guild.id].latestText);
     res.json(GUILD_CACHE[req.guild.id].latestText);
+    await sleep(500);
     GUILD_CACHE[req.guild.id].latestText = null;
     return;
   }

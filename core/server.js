@@ -89,6 +89,9 @@ export function init_server()
 }
 
 export async function authHandler (req, res, next)  { 
+
+  console.log(req.path.indexOf("/poll"), req.path);
+
   if ((
     
     req.path.indexOf("obs") >= 0 ||  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
@@ -96,15 +99,15 @@ export async function authHandler (req, res, next)  {
     req.path.indexOf("/login") >= 0 || 
     req.path.indexOf("/loginComplete") >= 0 || 
     req.path.indexOf("/guide") >= 0 || 
-    req.path.indexOf("/text/") >= 0 || 
-    req.path.endsWith("/text/latest/") || 
+    req.path.indexOf("/text") >= 0 || 
+    req.path.indexOf("/text/latest") || 
     req.path.indexOf("/poll") >= 0 || 
-    req.path.indexOf("/recordProgress/") >= 0 || 
-    req.path.indexOf("/recordSectionProgress/") >= 0 || 
+    req.path.indexOf("/recordProgress") >= 0 || 
+    req.path.indexOf("/recordSectionProgress") >= 0 || 
     req.path.endsWith(".js") || 
     req.path.endsWith(".css") || 
     req.path.endsWith(".ico")|| 
-    req.path.indexOf("/static/") === 0)) {
+    req.path.indexOf("/static") === 0)) {
     //console.log("skipping auth to allow polls to work", req.path);
 
     //store some basic discord info (but in this case, don't error)
@@ -116,7 +119,9 @@ export async function authHandler (req, res, next)  {
     catch (DiscordHTTPError) { }
 
     next();
-  } else {
+  } 
+  else 
+  {
     //console.log("challenge:", req.path);
     //console.log(("auth check"), req.session);
     if (req.session == undefined || req.session.auth == undefined)

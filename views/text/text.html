@@ -11,8 +11,10 @@ $(async function()
     });
     function showText(text, style, animation, duration)
     {
+        if (!style) style = "yikes";
+
         $("body").html("");
-        $.ajax(style+"/", {
+        $.ajax("text/"+style, {
             data:{
                 text:text,
                 animation:animation,
@@ -29,7 +31,7 @@ $(async function()
     {
         try
         {
-            var data = await $.ajax("latest/");
+            var data = await $.ajax("text/latest");
             if (data && data != "" && data.text)
             {
                 console.log(data);

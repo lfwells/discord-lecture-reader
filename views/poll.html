@@ -27,7 +27,7 @@
     {
         while (true)
         {
-            var data = await $.ajax("data/");
+            var data = await $.ajax("poll/data/");
             $("#results").html(data);
             await new Promise(r => setTimeout(r, 1000));
         }
