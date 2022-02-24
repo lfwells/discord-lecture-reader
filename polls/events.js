@@ -1,10 +1,11 @@
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { getClient, send } from '../core/client.js';
-import { pluralize } from '../core/utils.js';
+import { adminCommandOnly, pluralize } from '../core/utils.js';
 
-import { GUILD_CACHE, saveGuildProperty, setGuildProperty } from "../guild/guild.js";
+import { getGuildDocument, GUILD_CACHE, saveGuildProperty, setGuildProperty } from "../guild/guild.js";
 import * as config from "../core/config.js";
 import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
+import { isAdmin } from '../roles/roles.js';
 
 export default async function(client)
 {
@@ -85,6 +86,10 @@ export default async function(client)
                     hide_results_button: true,
                     poll_emoji: "✅"
                 }, true);
+            }
+            if (interaction.commandName === "checklist_progress") 
+            {
+                await doChecklistProgressCommand(interaction);
             }
         }
         else if (interaction.isMessageComponent())// && interaction.message.interaction) 
@@ -415,4 +420,41 @@ async function resultsText(guild, interaction)
     }
 
     return resultsEmbed;
+}
+
+
+//TODO: deleted checklist items
+//TODO: see all who have completed an item (ADMIN ONLY)
+async function doChecklistProgressCommand(interaction)
+{
+    var user = interaction.options.getMember("user");
+    if (user && await adminCommandOnly(interaction)) return;
+
+    await interaction.deferReply({ ephemeral: true });
+
+    if (!user)
+    {
+        user = interaction.member;
+    }
+
+    var items = [];
+    
+    //go through all interactions in the guild document
+    var guildDocument = await getGuildDocument(interaction.guild.id);
+    var interactionsCollection = guildDocument.collection("interactions");
+    //flter by commandName == "checklist"
+    var checklistDocuments = await interactionsCollection.where("commandName", "==", "checklist").get();
+    checklistDocuments.forEach(doc => {
+        //read .results as a JSON.parse()
+        //data appears to be results[0][...]
+        var data = doc.data();
+        items[data.question] = JSON.parse(data.results)[0].findIndex(r => r == user.id) >= 0;
+      });
+
+    await interaction.editReply({ content: Object.entries(items).map(e => {
+        if (e[1])
+            return "✅ "+e[0];
+        else
+            return "🔲 "+e[0];
+    }).join("\n") });
 }
