@@ -448,7 +448,11 @@ async function doChecklistProgressCommand(interaction)
         //read .results as a JSON.parse()
         //data appears to be results[0][...]
         var data = doc.data();
-        items[data.question] = JSON.parse(data.results)[0].findIndex(r => r == user.id) >= 0;
+        if (!data.deleted)
+        {
+            var results = data.results ? JSON.parse(data.results) : [[]];
+            items[data.question] = results[0].findIndex(r => r == user.id) >= 0;
+        }
       });
 
     await interaction.editReply({ content: Object.entries(items).map(e => {

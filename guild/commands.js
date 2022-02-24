@@ -101,6 +101,16 @@ export function init_interaction_cache(client)
     
         await cacheInteraction(interaction);
     });
+
+    client.on('messageDelete', async function(message)
+    {
+        if (message.interaction)
+        {
+            var id = message.interaction.id;
+            console.log("deleted interaction", message.interaction.id);
+            await storeCachedInteractionData(message.guild, id, {deleted:true});
+        }
+    });
 }
 async function cacheInteraction(interaction)
 {
