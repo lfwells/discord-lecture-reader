@@ -174,12 +174,17 @@ async function doUnflagCommand(interaction)
 
 async function doFlagCopyCommand(interaction, move)
 {
+    var messages = await getFlaggedMessageIDs(interaction.guild, interaction.user);
+
     var type = (interaction.options.getString("type") ?? "auto");
     if (type == "auto")
     {
-        var messages = await getFlaggedMessageIDs(interaction.guild, interaction.user);
         if (messages.length == 1) type = "message";
         else type = "thread";
+    }
+    if (type == "combined" && messages.length > 25)
+    {
+        type = "thread";
     }
 
     await interaction.deferReply({ ephemeral: type != "thread" });
@@ -210,7 +215,7 @@ async function doFlagCopyCommand(interaction, move)
         await asyncForEach(flagged, async (message)  => {
             combinedEmbed.fields.push({
                 //name: `**<@${message.author.id}>** - *${dateToHuman(message.createdAt)}*`,
-                name: `<@${message.author.id}>** - *${dateToHuman(message.createdAt)}*`,
+                name: `${message.member.displayName} - ${dateToHuman(message.createdAt)}`,
                 value: message.content
             });
         });
@@ -245,7 +250,10 @@ async function postIndividualMessages(postIn, messages, ephemeral)
         if (postIn.followUp)
             await postIn.followUp(msg);
         else*/
+        if (postIn.send)
             await postIn.send(msg)
+        else 
+            await postIn.channel.send(msg);
     });
 }
 
