@@ -198,6 +198,11 @@ export default async function (client)
             type: 'STRING',
             description: 'Find out the next lecture or tutorial session',
             required: false,
+        },{
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Display this publically? (Default false)',
+            required: false,
         }],
     };
     
@@ -214,20 +219,19 @@ export default async function (client)
         // Check if it is the correct command
         if (interaction.commandName === "nextsession") 
         {
-            await interaction.deferReply();
-
-            var ofType = interaction.options.getString("type");
-
-            var msg = await sessions.getNextSessionCountdown(interaction.guild, true, ofType);//show channel name
-            await interaction.editReply({embeds: [ msg ]});
+            await doNextSessionCommand(interaction);
         }
     });
+}
 
-    //schedule a post for the next session
-    await guilds.each( async (guild) => { 
-        //if (guild.id == config.TEST_SERVER_ID)
-        {
-            await sessions.scheduleNextSessionPost(guild);
-        }
-    });
+async function doNextSessionCommand(interaction)
+{
+    var publicPost = interaction.options.getBoolean("public") ?? false;
+
+    await interaction.deferReply({ ephemeral:!publicPost });
+
+    var ofType = interaction.options.getString("type");
+
+    var msg = await sessions.getNextSessionCountdown(interaction.guild, true, ofType);//show channel name
+    await interaction.editReply({embeds: [ msg ]});
 }

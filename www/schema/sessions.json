@@ -86,7 +86,7 @@
                     "default": 0
                   },
                   "channelID": {
-                    "title": "Discord Channel",
+                    "title": "Voice Channel",
                     "description": "Leave blank if physical location",
                     "type": "string",
                     "enumSource": [
@@ -96,6 +96,22 @@
                       },
                       {
                         "source": "channels",
+                        "value": "{{item.id}}",
+                        "title": "{{item.category}} - {{item.name}}"
+                      }
+                    ]
+                  },
+                  "textChannelID": {
+                    "title": "Text Channel",
+                    "description": "Leave blank if physical location",
+                    "type": "string",
+                    "enumSource": [
+                      {
+                        "value": "",
+                        "title": "-- Select Channel --"
+                      },
+                      {
+                        "source": "textChannels",
                         "value": "{{item.id}}",
                         "title": "{{item.category}} - {{item.name}}"
                       }

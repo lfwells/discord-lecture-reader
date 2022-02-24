@@ -49,6 +49,8 @@ export async function init_sessions(guild)
     SESSIONS[guild.id] = data;
 
     discordEvents[guild.id] = await guild.scheduledEvents.fetch();
+
+    await scheduleNextSessionPost(guild);
 }
 
 export async function scheduleAllSessions(res, guild, config)
@@ -95,6 +97,9 @@ export async function scheduleAllSessions(res, guild, config)
 
         res.write(`${i+1}...`);
     }
+
+    res.write("\nCleaning Up...\n");
+    await init_sessions(guild);
     
 }
 async function scheduleAllSessionsOfType(res, guild, config, semester)
@@ -138,7 +143,7 @@ async function scheduleAllSessionsOfTypeWeeklyItem(res, guild, config, semester,
     var description = descriptionItems.length > 0 ? descriptionItems.join("\n") :  undefined;
 
     var createdSession = await scheduleSession(
-        guild, config.type, startTime, endTime, scheduleInfo.channelID, week, scheduleInfo.day, scheduleInfo.hour, scheduleInfo.minute, config.duration, description, scheduleInfo.location
+        guild, config.type, startTime, endTime, scheduleInfo.channelID, scheduleInfo.textChannelID, week, scheduleInfo.day, scheduleInfo.hour, scheduleInfo.minute, config.duration, description, scheduleInfo.location
     );
 
     res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.utcOffset(11).format("dddd, MMMM Do YYYY, h:mm:ss a")}\n`);
@@ -167,7 +172,7 @@ function dayIsDuringSemesterBreak(res, semester, dayMoment)
 
 //TODO: the below will break if you specify same types
 //this will return the database ID of the generated session row (for the purposes of deleting all the other ones upon a sync)
-async function scheduleSession(guild, type, startTime, endTime, channelID, week, day, hour, minute, durationMins, description, location)
+async function scheduleSession(guild, type, startTime, endTime, channelID, textChannelID, week, day, hour, minute, durationMins, description, location)
 {
     var collection = sessionsCollection(guild);
 
@@ -238,6 +243,7 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, week,
     };
     if (discordEventID) session.discordEventID = discordEventID;
     if (channelID) session.channelID = channelID;
+    if (textChannelID) session.textChannelID = textChannelID;
     if (description) session.description = description;
 
     var result;
@@ -362,7 +368,12 @@ export async function getNextSessionCountdown(guild, linkChannelName, ofType)
     var desc = "That's "+nextSession.startTimestamp.utcOffset(11).format("dddd, MMMM Do YYYY, h:mm a");
     if (linkChannelName)
     {
-        desc += " in <#"+channelIDArrayHandler(nextSession.channelID)+">.";
+        var textChannelInfo = "";
+        if (nextSession.textChannelID)
+        {
+            textChannelInfo = " and <#"+nextSession.textChannelID+">";
+        }
+        desc += " in <#"+channelIDArrayHandler(nextSession.channelID)+">"+textChannelInfo+".";
     }
     else
     {
@@ -396,7 +407,7 @@ export async function scheduleNextSessionPost(guild)
                 await sleep(diffInMilliseconds); 
 
                 var countdown = await getNextSessionCountdown(guild, false);
-                var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.channelID));
+                var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.textChannelID));
                 await send(channel, {embeds: [ countdown ]});
                 //await send(channel, await getNextSessionCountdown(guild, false));
             }

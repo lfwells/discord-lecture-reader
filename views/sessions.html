@@ -13,6 +13,7 @@
     // and to provide a "Restore to Default" button.
     var starting_value = <%-JSON.stringify(locals.sessions)%>;
     var channels = <%-JSON.stringify(locals.channels)%>;
+    var textChannels = <%-JSON.stringify(locals.textChannels)%>;
     
     // Initialize the editor
     var editor = new JSONEditor(document.getElementById('editor_holder'),{
@@ -145,10 +146,6 @@
       }
     });
     
-    // Hook up the Restore to Default button
-    document.getElementById('restore').addEventListener('click',function() {
-      editor.setValue(starting_value);
-    });
     
     // Hook up the validation indicator to update its 
     // status whenever the editor changes

@@ -5051,6 +5051,7 @@ JSONEditor.defaults.editors.select = JSONEditor.AbstractEditor.extend({
       vars = this.getWatchedFieldValues();
       //lfwells hacking this in here so channels array from outside always visible
       vars.channels = channels;
+      vars.textChannels = textChannels;
     
       console.log("enumSource", this.enumSource, "vars", vars);
       var select_options = [];
