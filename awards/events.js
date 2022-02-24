@@ -172,10 +172,12 @@ export default async function(client)
 
 async function doFlexCommand(interaction)
 {
-    //only allow in off topic
-    if (await offTopicCommandOnly(interaction)) return;
+    var publicPost = interaction.options.getBoolean("public") ?? true;
 
-    await interaction.deferReply({ ephemeral: !(interaction.options.getBoolean("public") ?? true) });
+    //only allow in off topic
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
+
+    await interaction.deferReply({ ephemeral: !publicPost });
 
     var member = interaction.options.getMember("user") ?? interaction.member;
 
@@ -279,10 +281,12 @@ async function doAwardCommand(interaction)
 
 async function doLeaderboardCommand(interaction)
 {
-    //only allow in off topic
-    if (await offTopicCommandOnly(interaction)) return;
+    var publicPost = interaction.options.getBoolean("public") ?? false;
 
-    await interaction.deferReply({ ephemeral: !(interaction.options.getBoolean("public") ?? false) });
+    //only allow in off topic
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
+
+    await interaction.deferReply({ ephemeral: !publicPost });
 
     var awardsData = await getLeaderboard(interaction.guild, await getClassList(interaction.guild));
 

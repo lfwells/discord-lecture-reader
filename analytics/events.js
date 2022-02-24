@@ -120,11 +120,13 @@ async function doStatsCommand(interaction)
 {
     var thisWeek = interaction.commandName === "statsweek";
 
+    var publicPost = interaction.options.getBoolean("public") ?? false;
+
     //only allow in off topic
-    if (await offTopicCommandOnly(interaction)) return;
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
 
     //this can take too long to reply, so we immediately reply
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: !publicPost });
 
     var statsEmbed = {
         title: "Top 10 Posters " +(thisWeek ? "This Week" : ""),
@@ -148,19 +150,24 @@ async function doStatsCommand(interaction)
 
 async function doStatsMeCommand(interaction)
 {
-    //only allow in off topic
-    if (await offTopicCommandOnly(interaction)) return;
-
+    var publicPost = interaction.options.getBoolean("public") ?? false;
     var member = interaction.options.getMember("user") ?? interaction.member; 
+    if (member.id === undefined)
+    {
+        member = await interaction.guild.members.fetch(member);
+    }
+    
+    //only allow in off topic
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
 
     //this can take too long to reply, so we immediately reply
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: !publicPost });
 
     var statsEmbed = {
         title: "Stats for "+(member.nickname ?? member.username),
         fields: [],
         thumbnail: { 
-            url:member.user.displayAvatarURL()
+            url:member.user?.displayAvatarURL()
         }
     };
 

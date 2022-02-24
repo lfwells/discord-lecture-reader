@@ -49,6 +49,7 @@ export function parseClientStatus(status)
 
 import { Parser } from 'json2csv';
 import ifError from 'assert';
+import { isAdmin } from '../roles/roles.js';
 export function downloadResource(filename) {
   return function(req, res, next) {
     const json2csv = new Parser({ fields:req.fields });
@@ -61,13 +62,15 @@ export function downloadResource(filename) {
 
 export async function offTopicCommandOnly(interaction)
 {
-    var offTopicChannel = await getGuildPropertyConverted("offTopicChannel", interaction.guild);
-    if (offTopicChannel && interaction.channel != offTopicChannel)
-    {
-        interaction.reply({ content: "You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", ephemeral:true });
-        return true;
-    }
-    return false;
+  if (await isAdmin(interaction.member)) return false;
+
+  var offTopicChannel = await getGuildPropertyConverted("offTopicChannel", interaction.guild);
+  if (offTopicChannel && interaction.channel != offTopicChannel)
+  {
+      interaction.reply({ content: "You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", ephemeral:true });
+      return true;
+  }
+  return false;
 }
 export async function adminCommandOnly(interaction)
 {
