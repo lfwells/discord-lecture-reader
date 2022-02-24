@@ -24,31 +24,36 @@ export default async function(client)
     // The data for our command
     const statsCommand = {
         name: 'stats',
-        description: 'Replies with the server stats (only available in off-topic channel).', //(TODO: just stats for this channel, etc)
-        options: [/*{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+        description: 'Replies with the server stats.', //(TODO: just stats for this channel, etc)
+        options: [{
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Should this be posted for all to see, or just you? (Default: false)',
             required: false,
-        }*/],
+        }],
     };
     const statsWeekCommand = {
         name: 'statsweek',
-        description: 'Replies with the server stats for just this week (only available in off-topic channel).',
-        options: [/*{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+        description: 'Replies with the server stats for just this week.',
+        options: [{
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Should this be posted for all to see, or just you? (Default: false)',
             required: false,
-        }*/],
+        }],
     };
     const statsMeCommand = {
         name: 'statsme',
-        description: 'Replies with your server stats (only available in off-topic channel).',
+        description: 'Replies with your server stats.',
         options: [{
             name: 'user',
             type: 'USER',
             description: 'The user to see the stats for (leave blank for YOU)',
+            required: false,
+        }, {
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Should this be posted for all to see, or just you? (Default: false)',
             required: false,
         }],
     };
@@ -61,6 +66,7 @@ export default async function(client)
             description: 'The text to appear on the button',
             required: false,
         }],}; 
+
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         await registerCommand(guild, statsCommand);

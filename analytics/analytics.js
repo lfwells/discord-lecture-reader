@@ -176,18 +176,17 @@ export async function getStats(guild, userPredicate, postPredicate)
         if (Object.keys(stats.members).includes(memberID) == false)
         {
             var memberObj = await guild.members.cache.get(memberID);
-            var userObj = null;
-            if (memberObj == undefined) {//continue;
-                //console.log(row);
-                userObj = await getClient().users.fetch(memberID);//getClient().users.cache.get(memberID);
-            }
 
-            stats.members[memberID] = { 
-                name: memberObj == undefined ? userObj.username : memberObj.nickname ?? memberObj.user.username,
-                posts:[]
-            };
+            if (memberObj)
+            {
+                stats.members[memberID] = { 
+                    name: memberObj.displayName,
+                    posts:[]
+                };
+            }
         }
-        stats.members[memberID].posts.push(row);
+        if (stats.members[memberID])
+            stats.members[memberID].posts.push(row);
     }
     //convert to array for sorting and just general betterness
     var statsData = {
