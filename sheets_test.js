@@ -28,7 +28,7 @@ export async function init_google()
     sheets = google.sheets({version: 'v4', auth});
     drive = google.drive('v3');
 
-    console.log("init google sheets");
+    //console.log("init google sheets");
 }
 
 export async function init_sheet_for_guild(guild)

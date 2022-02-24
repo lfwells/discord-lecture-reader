@@ -52,11 +52,21 @@ export default async function(client)
             { name: 'question', type: 'STRING', description: 'The checklist item.', required: true, },            
         ],
     };
+
+    
+    const checklistProgressCommand = {
+        name: "checklist_progress",
+        description: 'See your own progress for the checklist items. Not shown publicly.',
+        options: [
+            { name: 'user', type: 'USER', description: '(ADMIN ONLY) The user to see progress for. If left blank, shows the user\s progress.', required: false, },            
+        ],
+    };
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         await registerCommand(guild, pollCommand);
         await registerCommand(guild, checklistCommand);
+        await registerCommand(guild, checklistProgressCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 

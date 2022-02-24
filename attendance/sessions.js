@@ -50,7 +50,7 @@ export async function init_sessions(guild)
 
     discordEvents[guild.id] = await guild.scheduledEvents.fetch();
 
-    await scheduleNextSessionPost(guild);
+    scheduleNextSessionPost(guild);
 }
 
 export async function scheduleAllSessions(res, guild, config)
@@ -99,7 +99,7 @@ export async function scheduleAllSessions(res, guild, config)
     }
 
     res.write("\nCleaning Up...\n");
-    await init_sessions(guild);
+    cancelNextSessionCountdownFunction(guild);
     
 }
 async function scheduleAllSessionsOfType(res, guild, config, semester)
@@ -386,32 +386,54 @@ export async function getNextSessionCountdown(guild, linkChannelName, ofType)
     };
 }
 
+var cancelNextSessionCountdown = {};
+export function cancelNextSessionCountdownFunction(guild) { cancelNextSessionCountdown[guild.id] = true; }
 export async function scheduleNextSessionPost(guild)
 {
     var nextSession = await getNextSession(guild); //offset = remindBefore
     if (nextSession != null)
     {
-        var now = moment();
         var reminderTime = moment(nextSession.startTimestamp);
         reminderTime.subtract(remindBefore, "minutes");
 
-        var diffInMilliseconds = reminderTime.diff(now);
+        var diffInMilliseconds = reminderTime.diff(moment());
+
         if (diffInMilliseconds <= 0){
             //console.log("next session message was about to be scheduled /in the past/... not sure why heres deets:", diffInMilliseconds,  await getNextSessionCountdown(guild, false));
+            
+            await sleep(5000);
+
+            await scheduleNextSessionPost(guild);//rinse and repeat!
+
+            return;
         }
         else
         {
-            //console.log("waiting", diffInMilliseconds, "ms before next session countdown --", await getNextSessionCountdown(guild, false));
-            if (diffInMilliseconds < 10000000)
+            do
             {
-                await sleep(diffInMilliseconds); 
+                var now = moment();
+                diffInMilliseconds = reminderTime.diff(now);
+                //console.log("b"+diffInMilliseconds, cancelNextSessionCountdown[guild.id], cancelNextSessionCountdown[guild.id] === true);
+                if (cancelNextSessionCountdown[guild.id] === true) 
+                {
+                    //console.log("detected a cancel call?");
+                    cancelNextSessionCountdown[guild.id] = false;
+                    await sleep(1000);
 
-                var countdown = await getNextSessionCountdown(guild, false);
-                var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.textChannelID));
-                await send(channel, {embeds: [ countdown ]});
-                //await send(channel, await getNextSessionCountdown(guild, false));
+                    await scheduleNextSessionPost(guild);//rinse and repeat!
+
+                    return;
+                }
+
+                await sleep(1000 * 10);
             }
+            while(diffInMilliseconds > 0);
         }
+        
+        var countdown = await getNextSessionCountdown(guild, false);
+        var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.textChannelID));
+        //console.log("SEND the scheduled thing zz");
+        await send(channel, {embeds: [ countdown ]});
 
         //sleep a little, just so the next session isn't the same as this one
         await sleep(5000);
