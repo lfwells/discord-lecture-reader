@@ -120,8 +120,8 @@ async function doFlagCommand(interaction)
 {
     console.log("Flag command");
     
-    await interaction.deferReply();//{ ephemeral: true });
-    await interaction.deleteReply();
+    await interaction.deferReply({ ephemeral: true });
+    //await interaction.deleteReply();
 
     if (await adminCommandOnly(interaction)) return;
 
@@ -132,23 +132,23 @@ async function doFlagCommand(interaction)
     {
         var msg = { content: `Message flagged. You now have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
         //await postFlaggedMessagesEphemeral(interaction, msg);
-        await interaction.user.send(msg);
-        //await interaction.editReply();
+        //await interaction.user.send(msg);
+        await interaction.editReply(msg);
     }
     else
     {
         var msg = { content: `Message was already flagged, no action taken. You have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
         //await postFlaggedMessagesEphemeral(interaction, msg);
-        await interaction.user.send(msg);
-        //await interaction.editReply();
+        //await interaction.user.send(msg);
+        await interaction.editReply(msg);
     }
 }
 async function doUnflagCommand(interaction)
 {
     console.log("Unflag command");
     
-    await interaction.deferReply();//{ ephemeral: true });
-    await interaction.deleteReply();
+    await interaction.deferReply({ ephemeral: true });
+    //await interaction.deleteReply();
 
     if (await adminCommandOnly(interaction)) return;
 
@@ -159,35 +159,38 @@ async function doUnflagCommand(interaction)
     {
         var msg = { content: `Message un-flagged. You now have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
         //await postFlaggedMessagesEphemeral(interaction, msg);
-        await interaction.user.send(msg);
-        //await interaction.editReply();
+        //await interaction.user.send(msg);
+        await interaction.editReply(msg);
     }
     else
     {
         var msg = { content: `Message was not previously flagged, no action taken. You have ${pluralize(flagged.length, "flagged message")}. ${flaggedMessage.url}`};
         //await postFlaggedMessagesEphemeral(interaction, msg);
-        await interaction.user.send(msg);
-        //await interaction.editReply();
+        //await interaction.user.send(msg);
+        await interaction.editReply(msg);
     }
 }
 
 
 async function doFlagCopyCommand(interaction, move)
 {
-    await interaction.deferReply({ ephemeral: true });
+    var type = (interaction.options.getString("type") ?? "auto");
+    if (type == "auto")
+    {
+        var messages = await getFlaggedMessageIDs(interaction.guild, interaction.user);
+        if (messages.length == 1) type = "message";
+        else type = "thread";
+    }
+
+    await interaction.deferReply({ ephemeral: type != "thread" });
     if (await adminCommandOnly(interaction)) return;
 
     var flagged = await getFlaggedMessages(interaction.guild, interaction.user);
 
-    var type = (interaction.options.getString("type") ?? "auto");
-    if (type == "auto")
-    {
-        if (flagged.length == 1) type = "message";
-        else type = "thread";
-    }
+    
     if (type == "thread")
     {
-        var postedMessage = await interaction.editReply({ content: `${move ? "Moved" : "Copied"} ${pluralize(flagged.length, "message")}.` });
+        var postedMessage = await interaction.editReply({ content: `${move ? "Moving" : "Copying"} ${pluralize(flagged.length, "message")}.` });
         
         //headMessage = await interaction.channel.post({ content: "" });
         const thread = await postedMessage.startThread({//await interaction.channel.threads.create({
@@ -195,6 +198,8 @@ async function doFlagCopyCommand(interaction, move)
             reason: 'Needed a separate thread for flagged messages.',
         });
         await postIndividualMessages(thread, flagged);
+        
+        await interaction.editReply({ content: `${move ? "Moved" : "Copied"} ${pluralize(flagged.length, "message")}.` });
     }
     else if (type == "combined")
     {
@@ -213,8 +218,9 @@ async function doFlagCopyCommand(interaction, move)
     }
     else
     {
-        var postedMessage = await interaction.editReply({ content: `${move ? "Moved" : "Copied"} ${pluralize(flagged.length, "message")}.` });
+        var postedMessage = await interaction.editReply({ content: `${move ? "Moving" : "Copying"} ${pluralize(flagged.length, "message")}.` });
         await postIndividualMessages(interaction, flagged);
+        var postedMessage = await interaction.editReply({ content: `${move ? "Moved" : "Copied"} ${pluralize(flagged.length, "message")}.` });
     }
 
     if (move)
@@ -235,10 +241,10 @@ async function postIndividualMessages(postIn, messages, ephemeral)
         {
             msg.ephemeral = ephemeral ?? false;
         }
-
+/*
         if (postIn.followUp)
             await postIn.followUp(msg);
-        else
+        else*/
             await postIn.send(msg)
     });
 }
