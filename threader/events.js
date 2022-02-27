@@ -246,6 +246,8 @@ async function postIndividualMessages(postIn, messages, ephemeral)
         {
             msg.ephemeral = ephemeral ?? false;
         }
+        console.log(message.attachments);
+        msg.files = [...message.attachments.values()];
 /*
         if (postIn.followUp)
             await postIn.followUp(msg);
