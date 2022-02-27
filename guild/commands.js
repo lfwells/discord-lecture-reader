@@ -15,7 +15,7 @@ import { getGuildDocument, hasFeature } from "./guild.js";
 */
 const unregisterAllOnStartUp = false; //put back to false
 const registerAllOnStartUp = false; //put back to false
-const commandsToRegenerate = []; //put back to [] 
+const commandsToRegenerate = []; //put back to []
 const commandsToUnregister = []; //put back to []
 const applicationCommandsToRegenerate = []; //put back to []
 const applicationCommandsToUnregister = []; //put back to []
