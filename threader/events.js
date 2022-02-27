@@ -1,7 +1,7 @@
 import { getClient } from "../core/client.js";
 import { adminCommandOnly, asyncForEach, dateToHuman, pluralize } from "../core/utils.js";
 import { registerCommand } from "../guild/commands.js";
-import { getGuildDocument } from "../guild/guild.js";
+import { getGuildDocument, getGuildProperty, loadGuildProperty, setGuildProperty } from "../guild/guild.js";
 import { addFlaggedMessage, clearFlaggedMessages, deleteFlaggedDocument, getFlaggedMessageIDs, getFlaggedMessages, postFlaggedMessagesEphemeral, removeFlaggedMessage } from "./threader.js";
 
 export default async function(client)
@@ -295,11 +295,17 @@ async function doForumChannelCommand(interaction)
     await interaction.deferReply({ ephemeral: true });
 
     var channel = interaction.channel;
+
+    var forums = await getGuildProperty("forums", interaction.guild, {});
+    if (forums[channel.id])
+    {
+        return await interaction.editReply({ content: "Channel is already a forum." });
+    }
     
-    var post = {id:"Test"};/* await interaction.channel.send({
+    var post = await interaction.channel.send({
         content: "This channel is a forum-style channel. To make a post, press the `+` button to create a new thread.",
         //TODO: image
-    });*/
+    });
 
     
     await channel.permissionOverwrites.edit(interaction.guild.id, { 
@@ -311,8 +317,8 @@ async function doForumChannelCommand(interaction)
         SEND_MESSAGES: true 
     });
 
-    var guildDocument = await getGuildDocument(interaction.guild.id);
+    forums[channel.id] = { post: post.id };
+    await setGuildProperty(interaction.guild, "forums", forums);
 
-
-    await interaction.editReply({ content: `Channel is ${channel.id} and post is ${post.id}`});
+    await interaction.editReply({ content: `This channel is now a forum channel. To undo this, modify the channel permissions.`});
 }
