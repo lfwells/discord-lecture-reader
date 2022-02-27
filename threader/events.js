@@ -1,5 +1,7 @@
+import { getClient } from "../core/client.js";
 import { adminCommandOnly, asyncForEach, dateToHuman, pluralize } from "../core/utils.js";
 import { registerCommand } from "../guild/commands.js";
+import { getGuildDocument } from "../guild/guild.js";
 import { addFlaggedMessage, clearFlaggedMessages, deleteFlaggedDocument, getFlaggedMessageIDs, getFlaggedMessages, postFlaggedMessagesEphemeral, removeFlaggedMessage } from "./threader.js";
 
 export default async function(client)
@@ -294,5 +296,23 @@ async function doForumChannelCommand(interaction)
 
     var channel = interaction.channel;
     
-    await interaction.editReply({ content: `Channel is ${channel.id}`})
+    var post = {id:"Test"};/* await interaction.channel.send({
+        content: "This channel is a forum-style channel. To make a post, press the `+` button to create a new thread.",
+        //TODO: image
+    });*/
+
+    
+    await channel.permissionOverwrites.edit(interaction.guild.id, { 
+        SEND_MESSAGES: false,
+        CREATE_PUBLIC_THREADS: true,
+     });
+
+    await channel.permissionOverwrites.edit(getClient().user.id, { 
+        SEND_MESSAGES: true 
+    });
+
+    var guildDocument = await getGuildDocument(interaction.guild.id);
+
+
+    await interaction.editReply({ content: `Channel is ${channel.id} and post is ${post.id}`});
 }
