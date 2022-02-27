@@ -1,5 +1,10 @@
 import { asyncForEach } from "../core/utils.js";
-import { getGuildDocument } from "../guild/guild.js";
+import { getGuildDocument, getGuildProperty } from "../guild/guild.js";
+
+export async function getForums(guild)
+{
+    return await getGuildProperty("forums", guild, {});
+}
 
 async function getFlaggedDocument(guild, user)
 {
@@ -124,3 +129,4 @@ export async function postFlaggedMessagesEphemeral(interaction, message)
     }
     */
 }
+

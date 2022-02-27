@@ -2,7 +2,7 @@ import { getClient } from "../core/client.js";
 import { adminCommandOnly, asyncForEach, dateToHuman, pluralize } from "../core/utils.js";
 import { registerCommand } from "../guild/commands.js";
 import { getGuildDocument, getGuildProperty, loadGuildProperty, setGuildProperty } from "../guild/guild.js";
-import { addFlaggedMessage, clearFlaggedMessages, deleteFlaggedDocument, getFlaggedMessageIDs, getFlaggedMessages, postFlaggedMessagesEphemeral, removeFlaggedMessage } from "./threader.js";
+import { addFlaggedMessage, clearFlaggedMessages, deleteFlaggedDocument, getFlaggedMessageIDs, getFlaggedMessages, getForums, postFlaggedMessagesEphemeral, removeFlaggedMessage } from "./threader.js";
 
 export default async function(client)
 {    
@@ -123,6 +123,8 @@ export default async function(client)
             }
         }
     });
+
+    client.on("threadCreate", doForumListen);
 }
 
 async function doFlagCommand(interaction)
@@ -265,7 +267,7 @@ async function postIndividualMessages(postIn, messages, ephemeral)
             await postIn.send(msg)
         else 
             await postIn.channel.send(msg);
-    });
+    });innerWidth
 }
 
 
@@ -294,9 +296,11 @@ async function doForumChannelCommand(interaction)
 {
     await interaction.deferReply({ ephemeral: true });
 
+    if (await adminCommandOnly(interaction)) return;
+
     var channel = interaction.channel;
 
-    var forums = await getGuildProperty("forums", interaction.guild, {});
+    var forums = await getForums(interaction.guild);
     if (forums[channel.id])
     {
         return await interaction.editReply({ content: "Channel is already a forum." });
@@ -321,4 +325,26 @@ async function doForumChannelCommand(interaction)
     await setGuildProperty(interaction.guild, "forums", forums);
 
     await interaction.editReply({ content: `This channel is now a forum channel. To undo this, modify the channel permissions.`});
+}
+
+//this reposts the forum instructions
+async function doForumListen(thread)
+{
+    var forums = await getForums(thread.guild);
+    var forumInfo = forums[thread.parentId];
+    if (forumInfo)
+    {
+        console.log(thread.parentId, forumInfo);
+        var instructionsPost = await thread.parent.messages.fetch(forumInfo.post);
+        var post = await thread.parent.send({
+            content: instructionsPost.content
+        });
+        await instructionsPost.delete();
+
+        forums[thread.parentId].post = post.id;
+
+        //TODO: store the thread ids? meh
+
+        await setGuildProperty(thread.guild, "forums", forums);
+    }
 }
