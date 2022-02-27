@@ -8,8 +8,6 @@ export default async function(client)
 
     make the progress ephemeral work properly (needs to be DM qq)
     admin permissions bs
-
-    handle images etc
     */
     const flagCommand = {
         name: 'Flag Message',
@@ -69,12 +67,17 @@ export default async function(client)
             }
         ]
     }; 
+    const forumChannel = {
+        name: 'forum_channel',
+        description: "(ADMIN ONLY) convert the current channel into a threads-only channel (like a forum)."
+    }; 
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         await registerCommand(guild, flagCommand);
         await registerCommand(guild, unflagCommand);
         await registerCommand(guild, flaggedMessagesCommand);
+        await registerCommand(guild, forumChannel);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -111,6 +114,10 @@ export default async function(client)
                 {
                     doFlagPreviewCommand(interaction);
                 }
+            }
+            else if (interaction.commandName == "forum_channel")
+            {
+                doForumChannelCommand(interaction);
             }
         }
     });
@@ -279,4 +286,13 @@ async function doFlagPreviewCommand(interaction)
     await interaction.editReply({ content: `${pluralize(flagged.length, "flagged message")}.`});
 
     await postIndividualMessages(interaction, flagged, true); //ephemeral = true
+}
+
+async function doForumChannelCommand(interaction)
+{
+    await interaction.deferReply({ ephemeral: true });
+
+    var channel = interaction.channel;
+    
+    await interaction.editReply({ content: `Channel is ${channel.id}`})
 }
