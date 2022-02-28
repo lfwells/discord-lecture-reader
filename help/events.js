@@ -130,17 +130,28 @@ async function doDirectoryCommand(interaction)
         delete categories["NONE"];
 
         await interaction.followUp({ content: info, ephemeral: true });
-        info = "";
     }
 
     await asyncForEach(Object.entries(categories), async (kvp) => {
         var cat = kvp[0];
         var channels = kvp[1];
         var info = `***${cat}***\n`;
-        info += channels.map(displayChannel).join("\n");
         
-        await interaction.followUp({ content: info, ephemeral: true });
-        info = "";
+        //need to split it up into chunks if too big, so can't do it this elegant way.
+        //info += channels.map(displayChannel).join("\n");
+        await asyncForEach(channels.map(displayChannel), async (c) => 
+        {
+            if ((info + c + "\n").length > 1900)
+            {
+                await interaction.followUp({ content: info, ephemeral: true });
+                info = "";
+            }
+            info += c+"\n";
+        });
+        if (info.length > 0)
+        {
+            await interaction.followUp({ content: info, ephemeral: true });
+        }
     });
 
 }
