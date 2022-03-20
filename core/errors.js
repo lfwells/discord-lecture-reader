@@ -5,6 +5,8 @@ import { getGuildProperty } from '../guild/guild.js';
 export function initErrorHandler(client) {
 
     process.on('uncaughtException', async function(err) {
+        try 
+        {
         //console.error('!!! Caught exception: ', err);
         var str = JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700);
         if (str.toLocaleLowerCase().indexOf("quota") > 0)
@@ -12,8 +14,6 @@ export function initErrorHandler(client) {
             
         str = str.replaceAll("\\n", "\n");
 
-        try 
-        {
             var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
             if(errorChannel)
             {
@@ -23,6 +23,8 @@ export function initErrorHandler(client) {
         process.nextTick(function() { process.exit(1) })
     });
     process.on('unhandledRejection', async function(err) {
+        
+        try {
         //console.error('!!! Unhandled rejection: ',err); 
         var str = JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700);
         if (str.toLocaleLowerCase().indexOf("quota") > 0)
@@ -30,14 +32,12 @@ export function initErrorHandler(client) {
     
         str = str.replaceAll("\\n", "\n");
 
-        try 
-        {
             var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
             if(errorChannel)
             {
                 await send(errorChannel, "<@"+config.LINDSAY_ID+"> Rejection on server "+(await getGuildNameFromError(err))+"```"+str+"```", true);//TODO: indicate server that caused the problem
             }
-        } catch (e) { console.error(e)}
+        } catch (e) { console.error('!!! Unhandled rejection: ',err); console.error(e)}
     
     });
 }

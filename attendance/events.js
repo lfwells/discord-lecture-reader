@@ -46,7 +46,8 @@ export default async function (client)
                 {
                     console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
                     var cachedRow = ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id);
-                    cachedRow.left = d.getTime();
+                    if (cachedRow)
+                        cachedRow.left = d.getTime();
                     console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
                 }
 

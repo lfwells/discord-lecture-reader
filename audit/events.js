@@ -9,6 +9,7 @@ async function logAudit(guild, data)
 export default async function(client)
 {
     client.on('messageUpdate', async (message, newMessage) => {
+        console.log('messageUpdate');
         // Ignore direct messages
         if (!message.guild) return;
 
@@ -40,6 +41,7 @@ console.log(newMessage.content);
     
         // Update the output with a bit more information
         // Also run a check to make sure that the log returned was for the same author's message
+console.log(target);
         if (target.id === message.author.id) {
             toLog.editedBy = executor.id;
             console.log(`A message by ${message.author.tag} was edited by ${executor.tag}.`);
