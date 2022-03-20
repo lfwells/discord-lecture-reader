@@ -51,7 +51,9 @@ export async function hasRoleID(member, roleID)
 {
     if (member.roles == null) return false;
     //return await member.roles.has(role);
-    return member.roles.cache.find(r => r.id == roleID);    
+    member.roles.cache.each(r => console.log(r.name+"_"+r.id));
+    console.log("roleID", roleID);
+    return member.roles.cache.has(roleID)    
 }
 
 export async function botRoleHigherThanMemberRole(member)
@@ -69,6 +71,7 @@ export async function isAdmin(member)
     if (member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) return true;
     
     var adminRoleID = await getGuildProperty("adminRoleID", member.guild, undefined, true);
+    
     if (adminRoleID)
         return await hasRoleID(member, adminRoleID);
     else 

@@ -115,6 +115,7 @@ async function doTodoCommand(interaction, reactMessage, reactedBy)
     var user = reactMessage ? reactMessage.member.user : interaction.user;
     if (await isAdmin(member) == false)
     {
+        console.log("got a todo from a non admin person");
         if (reactMessage) return; //don't let non-admins do the emoji-react version, they will stumble on it
 
         var post = await user.send({ embeds:[message], content:"New TODO: "+originalMessage.url });
@@ -122,7 +123,7 @@ async function doTodoCommand(interaction, reactMessage, reactedBy)
     }
     else
     {
-
+        console.log("member is admin apparently", member.id, "reactmessage == ", (reactMessage != undefined));
         var todoChannel = await getGuildPropertyConverted("todoChannelID", interaction ? interaction.guild : reactMessage.guild);
         if (todoChannel)
         {
