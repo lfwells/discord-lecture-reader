@@ -317,7 +317,7 @@ async function doPollCommandButton(i, originalInteraction)
         {
             await seeResults();
 
-            await i.update({ embeds: [ await resultsText(i.guild, originalInteraction) ], components: await createButtons(originalInteraction,i.channel) });
+            await i.update({ embeds: [ await resultsText(i.guild, originalInteraction) ], components: await createButtons(i,i.channel) });
         }
         else
         {
@@ -330,6 +330,8 @@ async function doPollCommandButton(i, originalInteraction)
 
 async function createButtons(interaction, channel)
 {
+    console.log("createButtons", interaction.guild.id);
+    return;
     var cache = await getCachedInteraction(interaction.guild, interaction.id);
     var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) :undefined;
     var options = JSON.parse(cache.pollOptions);
