@@ -8,6 +8,6 @@ export async function init_invites(guild)
     
     var guildInvites = await guild.invites.fetch();
     guildInvites.forEach(invite => {
-        invites[guild.id][invite.code] = { code: invite.code, users: invite.uses, createdTimestamp: invite.createdTimestamp };
+        invites[guild.id][invite.code] = { code: invite.code, uses: invite.uses, createdTimestamp: invite.createdTimestamp };
     });
 }

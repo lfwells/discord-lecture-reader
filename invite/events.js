@@ -11,7 +11,7 @@ export default async function(client)
       
       client.on("inviteCreate", (invite) => {
         // Update cache on new invites
-        invites[invite.guild.id][invite.code] = { code:invite.code, users:invite.uses, createdTimestamp:invite.createdTimestamp };
+        invites[invite.guild.id][invite.code] = { code:invite.code, uses:invite.uses, createdTimestamp:invite.createdTimestamp };
       });
       
     client.on('guildMemberAdd', async (member) =>
@@ -35,11 +35,12 @@ export default async function(client)
         member.guild.invites.fetch().then(async (newInvites) => {
             // This is the *existing* invites for the guild.
             const oldInvites = invites[member.guild.id];
+            
             // Look through the invites, find the one for which the uses went up.
-            const invite = newInvites.find(i => i.uses > oldInvites[i.code]);
+            const invite = newInvites.find(i => i.uses > oldInvites[i.code].uses);
             if (invite)
             {
-                //console.log(invite); 
+                console.log(invite); 
                 // This is just to simplify the message being sent below (inviter doesn't have a tag property)
                 const inviter = client.users.cache.get(invite.inviter.id); //TODO: this line doesnt work!
                 // Get the log channel (change to your liking)
@@ -72,6 +73,10 @@ export default async function(client)
                         member.roles.add(role); //current student, but TODO other roles
                     }
                 }*/
+            }
+            else
+            {
+                console.log("invite not found");
             }
             init_invites(member.guild);
         
