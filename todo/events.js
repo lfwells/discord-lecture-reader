@@ -110,36 +110,36 @@ async function doTodoCommand(interaction, reactMessage, reactedBy)
         ephemeralComponents = [ row ];
     }
 
+    var files = [...originalMessage.attachments.values()];
+
     //only allow if user is admin
     var member = reactMessage ? reactMessage.member : interaction.member;
     var user = reactMessage ? reactMessage.member.user : interaction.user;
     if (await isAdmin(member) == false)
     {
-        console.log("got a todo from a non admin person");
         if (reactMessage) return; //don't let non-admins do the emoji-react version, they will stumble on it
 
-        var post = await user.send({ embeds:[message], content:"New TODO: "+originalMessage.url });
+        var post = await user.send({ embeds:[message], content:"New TODO: "+originalMessage.url, files });
         if (interaction) interaction.editReply({ content:"TODO sent as a DM "+post.url, components: ephemeralComponents});
     }
     else
     {
-        console.log("member is admin apparently", member.id, "reactmessage == ", (reactMessage != undefined));
         var todoChannel = await getGuildPropertyConverted("todoChannelID", interaction ? interaction.guild : reactMessage.guild);
         if (todoChannel)
         {
-            var post = await todoChannel.send({ embeds:[message], content:"New TODO:"+originalMessage.url });   
+            var post = await todoChannel.send({ embeds:[message], content:"New TODO:"+originalMessage.url, files });   
             if (interaction) interaction.editReply({ content:"TODO sent to <#"+todoChannel.id+"> "+post.url, components: ephemeralComponents});
         }
         else
         {
             if (await isAdmin(interaction.member))
             {
-                var post = await interaction.user.send({ embeds:[message], content:"New TODO (note: you can get these messages in a todo channel if you configure it): "+originalMessage.url });
+                var post = await interaction.user.send({ embeds:[message], content:"New TODO (note: you can get these messages in a todo channel if you configure it): "+originalMessage.url, files });
                 if (interaction) interaction.editReply({ content:"TODO sent as a DM "+post.url, components: ephemeralComponents});
             }
             else
             {
-                var post = await interaction.user.send({ embeds:[message] });
+                var post = await interaction.user.send({ embeds:[message], files });
                 if (interaction) interaction.editReply({ content:"TODO sent as a DM "+post.url, components: ephemeralComponents});
             }
         }
