@@ -10,14 +10,12 @@ import { registerCommand } from '../guild/commands.js';
 
 export default async function(client)
 {
-    client.on('interactionCreate', async (msg) => 
+    client.on('messageCreate', async(msg) =>
     {
-        if (msg.isCommand() || msg.guild == undefined) return;
-
         if (await isAwardChannelID(msg.channel))
         {
             //detect update to awards (add)
-            console.log("message added in off topics list");
+            console.log("message added in achievements channel");
             handleAwardNicknames(client, msg.channel);
         }
     });
@@ -27,7 +25,7 @@ export default async function(client)
         if (await isAwardChannelID(msg.channel))
         {
             //detect update to awards (edit)
-            console.log("message update in off topics list");
+            console.log("message update in achievements channel");
             handleAwardNicknames(client, msg.channel);
         }
     });
@@ -37,7 +35,7 @@ export default async function(client)
         if (await isAwardChannelID(msg.channel))
         {
             //detect update to awards (delete)
-            console.log("message delete in off topics list");
+            console.log("message delete in achievements channel");
             handleAwardNicknames(client, msg.channel);
         }
     });
