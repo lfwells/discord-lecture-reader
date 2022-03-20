@@ -90,9 +90,7 @@ export function init_server()
 
 export async function authHandler (req, res, next)  { 
 
-  console.log(req.path.indexOf("/poll"), req.path);
-
-  if ((
+  if (req.path != "/" && (
     
     req.path.indexOf("obs") >= 0 ||  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
 
@@ -116,7 +114,8 @@ export async function authHandler (req, res, next)  {
       req.discordUser = await oauth.getUser(req.session.auth.access_token);
       res.locals.discordUser = req.discordUser;
     }
-    catch (DiscordHTTPError) { }
+    catch (DiscordHTTPError) { 
+      console.log("caught discord http error for path", req.path);}
 
     next();
   } 
@@ -137,6 +136,7 @@ export async function authHandler (req, res, next)  {
         res.locals.discordUser = req.discordUser;
       }
       catch (DiscordHTTPError) {
+        console.log("caught discord http error");
         return loginPage(req,res);
       }
       //console.log(req.discordUser);
