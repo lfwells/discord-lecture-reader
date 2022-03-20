@@ -114,8 +114,7 @@ export async function authHandler (req, res, next)  {
       req.discordUser = await oauth.getUser(req.session.auth.access_token);
       res.locals.discordUser = req.discordUser;
     }
-    catch (DiscordHTTPError) { 
-      console.log("caught discord http error for path", req.path);}
+    catch (DiscordHTTPError) { }
 
     next();
   } 
