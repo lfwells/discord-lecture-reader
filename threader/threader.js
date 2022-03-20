@@ -34,10 +34,14 @@ export async function getFlaggedMessages(guild, user)
     var messagesPopulated = [];
     await asyncForEach(messages, async (messageChannelPair) => 
     { 
-        var channel = await guild.channels.fetch(messageChannelPair.channel);
-        var message = await channel.messages.fetch(messageChannelPair.message);
-        console.log(message.content);
-        messagesPopulated.push(message);
+        try
+        {
+            var channel = await guild.channels.fetch(messageChannelPair.channel);
+            var message = await channel.messages.fetch(messageChannelPair.message);
+            console.log(message.content);
+            messagesPopulated.push(message);
+        }
+        catch (DiscordAPIError) { console.log("missing a deleted message when move/copy flagged"); }
     });
     return messagesPopulated;
 }
