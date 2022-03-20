@@ -267,7 +267,7 @@ async function postIndividualMessages(postIn, messages, ephemeral)
             await postIn.send(msg)
         else 
             await postIn.channel.send(msg);
-    });innerWidth
+    });
 }
 
 
