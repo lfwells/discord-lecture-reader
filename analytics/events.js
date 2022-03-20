@@ -223,8 +223,12 @@ async function doButtonCommandButton(i, originalInteraction)
         if (config.LINDSAYS_SERVERS.indexOf(i.guild.id) >= 0)
         {
             if (originalInteraction.clicks == 5) extra = ", oh boy, here we go.";
+            if (originalInteraction.clicks == 10) extra = ", clicky clicky! That feels nice!";
+            if (originalInteraction.clicks == 11) extra = ", (ew)";
             if (originalInteraction.clicks == 69) extra = ", nice.";
             if (originalInteraction.clicks == 420) extra = ", go to bed, kiddos.";
+            if (originalInteraction.clicks == 666) extra = ", now you've done it!";
+            if (originalInteraction.clicks == 777) extra = ", cha-ching!";
         }
 
         await i.update({ content: pluralize(originalInteraction.clicks, "click") + extra });
