@@ -330,8 +330,6 @@ async function doPollCommandButton(i, originalInteraction)
 
 async function createButtons(interaction, channel)
 {
-    console.log("createButtons", interaction.guild.id);
-    return;
     var cache = await getCachedInteraction(interaction.guild, interaction.id);
     var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) :undefined;
     var options = JSON.parse(cache.pollOptions);
