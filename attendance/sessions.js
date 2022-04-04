@@ -146,7 +146,7 @@ async function scheduleAllSessionsOfTypeWeeklyItem(res, guild, config, semester,
         guild, config.type, startTime, endTime, scheduleInfo.channelID, scheduleInfo.textChannelID, week, scheduleInfo.day, scheduleInfo.hour, scheduleInfo.minute, config.duration, description, scheduleInfo.location
     );
 
-    res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.utcOffset(11).format("dddd, MMMM Do YYYY, h:mm:ss a")}\n`);
+    res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n`);
     return createdSession;
 }
 function getSemesterWeekStart(res, semester, week, day)
@@ -200,8 +200,8 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, textC
     var discordEvent;
     var discordEventArgs = {
         name:name,
-        scheduledStartTime:startTime.utcOffset(0).toISOString(),
-        scheduledEndTime:endTime != null ? endTime.utcOffset(0).toISOString() : null,
+        scheduledStartTime:moment(startTime).utcOffset(0).toISOString(),
+        scheduledEndTime:endTime != null ? moment(endTime).utcOffset(0).toISOString() : null,
         description: description,
         reason: "GENERATED",
         privacyLevel: "GUILD_ONLY"
@@ -365,7 +365,7 @@ export async function getNextSessionCountdown(guild, linkChannelName, ofType)
     text += nextSession.startTimestamp.fromNow();
     //text += " (that's "+nextSession.startTimestamp.calendar()+").";
     
-    var desc = "That's "+nextSession.startTimestamp.utcOffset(11).format("dddd, MMMM Do YYYY, h:mm a");
+    var desc = "That's "+nextSession.startTimestamp.format("dddd, MMMM Do YYYY, h:mm a");
     if (linkChannelName)
     {
         var textChannelInfo = "";
