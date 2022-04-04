@@ -47,6 +47,7 @@ export default async function(client)
     });
 
     client.on('messageReactionAdd', async (reaction, user) => {
+        console.log("messageReactionAdd", reaction);
         // When a reaction is received, check if the structure is partial
         if (reaction.partial) {
             // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
@@ -60,7 +61,7 @@ export default async function(client)
         }
     
         var todoEmoji = await getGuildProperty("todoEmoji", reaction.message.guild, "");
-        //console.log("reaction.emoji.name", reaction.emoji.name, todoEmoji, todoEmoji == reaction.emoji.name);
+        console.log("reaction.emoji.name", reaction.emoji.name, todoEmoji, todoEmoji == reaction.emoji.name);
         if (todoEmoji == reaction.emoji.name)
         {
             doTodoCommand(null, reaction.message, user);   
