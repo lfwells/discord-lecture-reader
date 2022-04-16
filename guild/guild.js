@@ -12,6 +12,7 @@ import { unregisterAllCommandsIfNecessary } from "./commands.js";
 import { isOutsideTestServer } from "../core/utils.js";
 import { init_status_channels } from "./statusChannels.js";
 import { stripEmoji } from "../awards/awards.js";
+import { init_presence_scrape } from "../analytics/presence.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -53,7 +54,8 @@ export default async function init(client)
     await init_roles(guild);
     await init_sessions(guild);
     await init_sheet_for_guild(guild);
-    init_status_channels(guild);
+    init_status_channels(guild); //not awaiting, so that it can happen in background
+    init_presence_scrape(guild); //not awaiting, so that it can happen in background
 
     console.log("Initialised Guild",guild.name, guild.id);
   })

@@ -2,7 +2,8 @@ export const __port = 8080;
 
 export const enableSendMessagesAndReplies = true; //mute robo lindsay here
 
-export const UPDATE_STATUS_CHANNELS_EVERY_MS = 60 * 1000;
+export const UPDATE_STATUS_CHANNELS_EVERY_MS = 60 * 1000; //1 min (but is rate limited, will likely be slwoer)
+export const UPDATE_PRESENCE_EVERY_MS = 5 * 60 * 1000; //5 mins
 
 export const LINDSAY_ID = "318204205435322368";
 export const IAN_ID = "368235194714554369";
