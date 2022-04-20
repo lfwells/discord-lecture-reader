@@ -30,6 +30,11 @@ export default async function(client)
             type: 'BOOLEAN',
             description: 'Should this be posted for all to see, or just you? (Default: false)',
             required: false,
+        },{
+            name: 'this_channel',
+            type: 'BOOLEAN',
+            description: 'Should the returned stats be for the current channel only? (Default: false)',
+            required: false,
         }],
     };
     const statsWeekCommand = {
@@ -39,6 +44,11 @@ export default async function(client)
             name: 'public',
             type: 'BOOLEAN',
             description: 'Should this be posted for all to see, or just you? (Default: false)',
+            required: false,
+        },{
+            name: 'this_channel',
+            type: 'BOOLEAN',
+            description: 'Should the returned stats be for the current channel only? (Default: false)',
             required: false,
         }],
     };
@@ -54,6 +64,11 @@ export default async function(client)
             name: 'public',
             type: 'BOOLEAN',
             description: 'Should this be posted for all to see, or just you? (Default: false)',
+            required: false,
+        },{
+            name: 'this_channel',
+            type: 'BOOLEAN',
+            description: 'Should the returned stats be for the current channel only? (Default: false)',
             required: false,
         }],
     };
@@ -122,6 +137,8 @@ async function doStatsCommand(interaction)
 
     var publicPost = interaction.options.getBoolean("public") ?? false;
 
+    var channelFilter = (interaction.options.getBoolean("this_channel") ?? false) ? (m => m.channel == interaction.channel.id) : null;
+
     //only allow in off topic
     if (publicPost && await offTopicCommandOnly(interaction)) return;
 
@@ -136,7 +153,7 @@ async function doStatsCommand(interaction)
         }
     };
 
-    var stats = await (thisWeek ? getStatsWeek(interaction.guild) : getStats(interaction.guild));
+    var stats = await (thisWeek ? getStatsWeek(interaction.guild, null, channelFilter) : getStats(interaction.guild, null, channelFilter));
     for (var i = 0; i < Math.min(stats.members.length, 10); i++)
     {
         statsEmbed.fields.push({
@@ -147,12 +164,17 @@ async function doStatsCommand(interaction)
     statsEmbed.description = pluralize(stats.total, "Total Post");
     if (thisWeek) statsEmbed.description += "This Week";
 
+    if (channelFilter != null) statsEmbed.title = `#${interaction.channel.name} Channel ${statsEmbed.title}`;
+
     await interaction.editReply({embeds: [ statsEmbed ]});
 }
 
 async function doStatsMeCommand(interaction)
 {
     var publicPost = interaction.options.getBoolean("public") ?? false;
+    
+    var channelFilter = (interaction.options.getBoolean("this_channel") ?? false) ? (m => m.channel == interaction.channel.id) : null;
+
     var member = interaction.options.getMember("user") ?? interaction.member; 
     if (member.id === undefined)
     {
@@ -173,7 +195,7 @@ async function doStatsMeCommand(interaction)
         }
     };
 
-    var stats = await getStats(interaction.guild);
+    var stats = await getStats(interaction.guild, null, channelFilter);
     var posts = [];
     var memberStats = stats.members.find(m => m.memberID == member.id);
     if (memberStats)
@@ -185,6 +207,7 @@ async function doStatsMeCommand(interaction)
         value:posts.length > 100 ? "'Thats'a lotta posts!'" : "Them's rookie numbers!"
     });
 
+    if (channelFilter != null) statsEmbed.title = `#${interaction.channel.name} Channel ${statsEmbed.title}`;
 
     await interaction.editReply({embeds: [ statsEmbed ] });
 }
