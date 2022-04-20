@@ -63,7 +63,7 @@ export async function botRoleHigherThanMemberRole(member)
     var us = await getBotMemberForGuild(member.guild);
     var ourHighestRole = us.roles.highest;
     var theirHighestRole = member.roles.highest;
-    return ourHighestRole.position >= theirHighestRole.position;
+    return ourHighestRole.position > theirHighestRole.position;
 }
 
 export async function isAdmin(member)

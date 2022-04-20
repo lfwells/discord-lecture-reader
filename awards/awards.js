@@ -52,7 +52,7 @@ export async function handleAwardNicknames(client, offtopiclistschannel)
     //console.log("awards", awards);
     if (member)
     {
-      console.log("member", baseName(member.nickname ?? member.user.username));
+      //console.log("member", baseName(member.nickname ?? member.user.username));
       //setNickname(member, baseName(member.nickname ?? member.user.username)+" "+awards.join(""))
       //this way may look dumb, but we dont want to split the last emoji in two 
       var newNickname = baseName(member.nickname ?? member.user.username);
@@ -77,7 +77,7 @@ export async function handleAwardNicknames(client, offtopiclistschannel)
 async function setNickname(client, member, nickname)
 {
   //console.log(nickname.length); 
-  console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
+  //console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
 
   //we can only set the nickname if the role is lower than us
   if (await botRoleHigherThanMemberRole(member))
