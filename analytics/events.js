@@ -143,8 +143,10 @@ async function doStatsCommand(interaction)
             name:stats.members[i].name,
             value:pluralize(stats.members[i].posts.length, "Post")
         });
-    }
-    
+    };
+    statsEmbed.description = pluralize(stats.total, "Total Post");
+    if (thisWeek) statsEmbed.description += "This Week";
+
     await interaction.editReply({embeds: [ statsEmbed ]});
 }
 

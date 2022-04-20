@@ -107,7 +107,7 @@ export async function getPostsData(guild, userPredicate, postPredicate)
     //}));
     ANALYTICS_CACHE[guild.id] = rawStatsData;
 
-    return getPostsData(guild, userPredicate, postPredicate); //this looks like infinite recursion, but isn't, this call will use the cache, and apply predicate
+    return await getPostsData(guild, userPredicate, postPredicate); //this looks like infinite recursion, but isn't, this call will use the cache, and apply predicate
     //return rawStatsData;
 }
 async function analyticsParseMessage(d, guild)
@@ -211,6 +211,8 @@ export async function getStats(guild, userPredicate, postPredicate)
     statsData.rawStatsData = rawStatsData;
 
     statsData.membersByID = stats.members;
+
+    statsData.total = rawStatsData.length;
 
     return statsData;
 }

@@ -117,7 +117,7 @@ export function pluralize(number, textNotPlural, textPlural)
 {
   if (number == 1)
   {
-    return number +" "+textNotPlural;
+    return number.toLocaleString() +" "+textNotPlural;
   }
   else 
   {
@@ -125,7 +125,7 @@ export function pluralize(number, textNotPlural, textPlural)
     {
       textPlural = textNotPlural+"s";
     }
-    return number + " " + textPlural;
+    return number.toLocaleString() + " " + textPlural;
   }
 }
 

@@ -1,30 +1,31 @@
 import { deleteGuildProperty, getGuildPropertyConverted, hasFeature, saveGuildProperty, setGuildProperty } from "./guild.js";
 import { Permissions } from "discord.js";
 import * as Config from "../core/config.js";
-import { sleep } from "../core/utils.js";
+import { pluralize, sleep } from "../core/utils.js";
 import { getNextSession } from "../attendance/sessions.js";
-import { ANALYTICS_CACHE, getPostsData } from "../analytics/analytics.js";
+import { getPostsData } from "../analytics/analytics.js";
 
 //this is very rate limited, can't do much
 export async function init_status_channels(guild)
 {
 	try
 	{
-		await init_status_channel(guild, "onlineMembers", "showOnlineMemberCount", async (guild) => {
+		init_status_channel(guild, "postCount", "showPostCount", async (guild) => {
+			var posts = await getPostsData(guild);
+			var postCount = posts.length ?? 0;
+			return `📨  ${pluralize(postCount, "Post")}`; 
+		});
+		init_status_channel(guild, "onlineMembers", "showOnlineMemberCount", async (guild) => {
 			var fetchedMembers = await guild.members.fetch();
 			var onlineCount = fetchedMembers.filter(member => member.presence && member.presence.status === 'online').size;
 			return `💻  ${onlineCount} Online`; 
 		});
-		await init_status_channel(guild, "memberCount", "showMemberCount", async (guild) => {
+		init_status_channel(guild, "memberCount", "showMemberCount", async (guild) => {
 			var fetchedMembers = await guild.members.fetch();
 			var onlineCount = fetchedMembers.size;
 			return `👪  ${onlineCount} Members`; 
 		});
-		await init_status_channel(guild, "postCount", "showPostCount", async (guild) => {
-			var postCount = await getPostsData(guid);
-			return `👪  ${postCount} Posts`; 
-		});
-		await init_status_channel(guild, "nextSession", "showNextSession", async (guild) => {
+		init_status_channel(guild, "nextSession", "showNextSession", async (guild) => {
 			var nextSession = await getNextSession(guild, "Lecture");
 			if (nextSession)
 				//return `📅 Next Lecture ${nextSession.startTimestamp.format("Do h:mm a")}`; 
@@ -33,9 +34,6 @@ export async function init_status_channels(guild)
 				return `📅  No More Lectures :(`; 
 		});
 	} catch (e) {}
-	
-	await sleep(Config.UPDATE_STATUS_CHANNELS_EVERY_MS);
-	await init_status_channels(guild);
 }
 async function init_status_channel(guild, name, feature, f)
 {
@@ -76,6 +74,9 @@ async function init_status_channel(guild, name, feature, f)
 			}
 		} catch (e) {}
 	}
+	
+	await sleep(Config.UPDATE_STATUS_CHANNELS_EVERY_MS);
+	await init_status_channel(guild, name, feature, f);
 }
 function getPermissions(guild)
 {

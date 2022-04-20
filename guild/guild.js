@@ -9,10 +9,11 @@ import { oauth } from '../core/login.js';
 import { init_sheet_for_guild } from '../sheets_test.js';
 import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
-import { isOutsideTestServer } from "../core/utils.js";
+import { asyncForEach, isOutsideTestServer } from "../core/utils.js";
 import { init_status_channels } from "./statusChannels.js";
 import { stripEmoji } from "../awards/awards.js";
 import { init_presence_scrape } from "../analytics/presence.js";
+import { getPostsData } from "../analytics/analytics.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -112,6 +113,12 @@ export async function getAdminGuilds(client, req)
       }
       return false;
     }) >= 0);
+
+    await asyncForEach(result, async function(guild)  
+    {
+      guild.totalPosts = (await getPostsData(guild)).length;
+      console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
+    });
 
     return result;
   }
