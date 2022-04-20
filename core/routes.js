@@ -86,6 +86,10 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_dm_intro"));
     router.use(guild.loadGuildProperty("feature_sessions"));
     router.use(guild.loadGuildProperty("feature_experimental"));
+    router.use(guild.loadGuildProperty("feature_showOnlineMemberCount"));
+    router.use(guild.loadGuildProperty("feature_showMemberCount"));
+    router.use(guild.loadGuildProperty("feature_showPostCount"));
+    router.use(guild.loadGuildProperty("feature_showNextSession"));
 
 
     //TODO: this filterButtons could be expensive, I didn't realise!

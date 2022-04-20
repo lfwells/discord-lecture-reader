@@ -3,6 +3,7 @@ import { Permissions } from "discord.js";
 import * as Config from "../core/config.js";
 import { sleep } from "../core/utils.js";
 import { getNextSession } from "../attendance/sessions.js";
+import { ANALYTICS_CACHE, getPostsData } from "../analytics/analytics.js";
 
 //this is very rate limited, can't do much
 export async function init_status_channels(guild)
@@ -18,6 +19,10 @@ export async function init_status_channels(guild)
 			var fetchedMembers = await guild.members.fetch();
 			var onlineCount = fetchedMembers.size;
 			return `👪  ${onlineCount} Members`; 
+		});
+		await init_status_channel(guild, "postCount", "showPostCount", async (guild) => {
+			var postCount = await getPostsData(guid);
+			return `👪  ${postCount} Posts`; 
 		});
 		await init_status_channel(guild, "nextSession", "showNextSession", async (guild) => {
 			var nextSession = await getNextSession(guild, "Lecture");

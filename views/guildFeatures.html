@@ -109,11 +109,17 @@ function hasFeature(feature)
     }) %></dt>
         
     <dt><%- include("subViews/featureSelect.html", 
-    { 
-        label: "Show Enrolled Member Count",
-        feature: "showMemberCount"
-    }) %></dt>
+        { 
+            label: "Show Enrolled Member Count",
+            feature: "showMemberCount"
+        }) %></dt>
         
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "Show Total Post Count",
+            feature: "showPostCount"
+        }) %></dt>
+                
     <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "Show Next Lecture Session",

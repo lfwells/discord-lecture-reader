@@ -92,6 +92,14 @@ function guideTabLink(text, link)
                     feature: "showMemberCount",
                     className:"botFunction"
                 }) %>
+                </p> 
+                <p>
+                <%- include("../../subViews/featureSelect.html", 
+                { 
+                    label: "Show Total Post Count",
+                    feature: "showPostCount",
+                    className:"botFunction"
+                }) %>
                 </p>   
                 <%
             }%>
