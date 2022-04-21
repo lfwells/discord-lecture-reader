@@ -40,7 +40,13 @@ async function init_status_channel(guild, name, feature, f)
 	var key = "status_"+name;
 	if (await hasFeature(guild, feature, false))
 	{
-		var text = await f(guild);
+		var text = "";
+		try {
+			text = await f(guild);
+		} catch (e) {
+			
+		}
+		
 
 		var channelID = await getGuildPropertyConverted(key, guild);
 		var channel = channelID != null ? await guild.channels.cache.find(c => c.id == channelID) : null; 
