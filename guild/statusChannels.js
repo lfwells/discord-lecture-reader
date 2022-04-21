@@ -44,7 +44,9 @@ async function init_status_channel(guild, name, feature, f)
 		try {
 			text = await f(guild);
 		} catch (e) {
-			
+			await sleep(Config.UPDATE_STATUS_CHANNELS_EVERY_MS);
+			await init_status_channel(guild, name, feature, f);
+			return;
 		}
 		
 
