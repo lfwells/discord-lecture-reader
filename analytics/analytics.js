@@ -6,7 +6,8 @@ import { getSessions } from "../attendance/old_sessions.js";
 import { db, guildsCollection } from "../core/database.js";
 import { getClient } from "../core/client.js";
 import fakeData from "./fakeData.js";
-import { asyncFilter } from "../core/utils.js";
+import { asyncFilter, asyncForEach } from "../core/utils.js";
+import { getClassList } from "../core/classList.js";
 
 export var ANALYTICS_CACHE = {}; //because querying the db for all messages on demand is bad (cannot cache on node js firebase it seems)s
 
@@ -563,4 +564,67 @@ export async function loadAttendanceSession(attendanceData, guild, includeNoSess
     return sessions;
 }
 
-//TODO: consultation attendance counts?
+
+export async function getStudentStreak(guild, memberID)
+{
+    var activeDays = await getStudentTotalActiveDays(guild, memberID);
+
+    var bestStreak = 0;
+    var currentStreak = 1;
+    var totalActiveDays = 0;
+    var prevItem = -1;
+    var ordered = [...activeDays].sort();
+    for (let index = 0; index < ordered.length; index++) {
+        const element = ordered[index];
+        if (element - prevItem == 86400000) //milliseconds in one day
+        {
+            currentStreak++;
+            bestStreak = Math.max(bestStreak, currentStreak);
+        }
+        else 
+        {
+            currentStreak = 1;
+        }
+        prevItem = element;
+        totalActiveDays++;
+    }
+    return {
+        bestStreak,
+        currentStreak,
+        totalActiveDays,
+    };
+        
+}
+export async function getTopBestStreak(guild)
+{
+    var streaks = await getAllStreaks(guild);
+    streaks = streaks.sort((a,b) => b.bestStreak - a.bestStreak);
+    return streaks;
+}
+export async function getTopCurrentStreak(guild)
+{
+    var streaks = await getAllStreaks(guild);
+    streaks = streaks.sort((a,b) => b.currentStreak - a.currentStreak);
+    return streaks;
+}
+export async function getTopActiveDays(guild)
+{
+    var streaks = await getAllStreaks(guild);
+    streaks = streaks.sort((a,b) => b.totalActiveDays - a.totalActiveDays);
+    return streaks;
+}
+async function getAllStreaks(guild)
+{
+    var classList = await getClassList(guild, false);
+    await asyncForEach(classList, async function(student) {
+        student.streak = await getStudentStreak(guild, student.discordID);
+        student.streak.name = student.discordName;
+    });
+    return classList.map(e => e.streak);
+}
+export async function getStudentTotalActiveDays(guild, memberID)
+{
+    var statsData = await getStats(guild);
+    var studentData = statsData.membersByID[memberID];
+    return studentData == null ? new Set() : new Set(studentData.posts.map(p => moment(p.timestamp).startOf('day').valueOf()));
+}

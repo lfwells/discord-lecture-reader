@@ -1,6 +1,6 @@
 import * as config from '../core/config.js';
 import { getGuildDocument, hasFeature } from '../guild/guild.js';
-import { createFirebaseRecordFrom, getStats, getStatsWeek } from './analytics.js';
+import { createFirebaseRecordFrom, getStats, getStatsWeek, getStudentStreak, getTopActiveDays, getTopBestStreak, getTopCurrentStreak } from './analytics.js';
 import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
@@ -72,6 +72,87 @@ export default async function(client)
             required: false,
         }],
     };
+    const streakCommand = {
+        name: 'post_streak',
+        description: "See info about yours (or others) best and current daily posting streaks.",
+        options: [  
+            {
+                name: "best", type:"SUB_COMMAND", description: "Best daily post streak",
+                options: 
+                [
+                    {
+                        name: "other", type: "USER", description: "Optionally see the best post streak of another user"
+                    }, {
+                        name: 'public',
+                        type: 'BOOLEAN',
+                        description: 'Should this be posted for all to see, or just you? (Default: false)',
+                        required: false,
+                    }
+                ]
+            },
+            {
+                name: "current", type:"SUB_COMMAND", description: "Current daily post streak",
+                options: 
+                [
+                    {
+                        name: "other", type: "USER", description: "Optionally see the best post streak of another user"
+                    }, {
+                        name: 'public',
+                        type: 'BOOLEAN',
+                        description: 'Should this be posted for all to see, or just you? (Default: false)',
+                        required: false,
+                    }
+                ]
+            },
+            {
+                name: "server_best", type:"SUB_COMMAND", description: "See who has the best daily post streak on the server",
+                options: [{
+                    name: 'public',
+                    type: 'BOOLEAN',
+                    description: 'Should this be posted for all to see, or just you? (Default: false)',
+                    required: false,
+                }]
+            },
+            {
+                name: "server_current", type:"SUB_COMMAND", description: "See who has the best daily post streak on the server",
+                options: [{
+                    name: 'public',
+                    type: 'BOOLEAN',
+                    description: 'Should this be posted for all to see, or just you? (Default: false)',
+                    required: false,
+                }]
+            }
+        ]
+    };
+    const activeDaysCommand = {
+        name: 'active_days',
+        description: "See info about yours (or others) total number of active days.",
+        options: [  
+            {
+                name: "me", type:"SUB_COMMAND", description: "See your (or someone else's) total number of active days.",
+                options: 
+                [
+                    {
+                        name: "other", type: "USER", description: "Optionally see the best post streak of another user"
+                    }, {
+                        name: 'public',
+                        type: 'BOOLEAN',
+                        description: 'Should this be posted for all to see, or just you? (Default: false)',
+                        required: false,
+                    }
+                ]
+            },
+            {
+                name: "server_best", type:"SUB_COMMAND", description: "See who has the highest number of active days on the server",
+                options: [{
+                    name: 'public',
+                    type: 'BOOLEAN',
+                    description: 'Should this be posted for all to see, or just you? (Default: false)',
+                    required: false,
+                }]
+            },
+        ]
+    };
     const buttonCommand = {
         name: 'useless_button',
         description: 'Literally just a counter button everyone can press. Why? I DON\'T KNOW!',
@@ -87,6 +168,8 @@ export default async function(client)
         await registerCommand(guild, statsCommand);
         await registerCommand(guild, statsWeekCommand); 
         await registerCommand(guild, statsMeCommand); 
+        await registerCommand(guild, streakCommand); 
+        await registerCommand(guild, activeDaysCommand);
         await registerCommand(guild, buttonCommand);
     });
 
@@ -117,6 +200,54 @@ export default async function(client)
             else if (interaction.commandName === "statsme") 
             {
                 doStatsMeCommand(interaction);            
+            }
+            else if (interaction.commandName == "post_streak")
+            {
+                var subCommand = interaction.options.getSubcommand();
+                if (subCommand === "best")
+                {
+                    doPostStreakCommand(interaction, {
+                        best:true,
+                        server:false
+                    });
+                }
+                else if (subCommand === "current")
+                {
+                    doPostStreakCommand(interaction, {
+                        best:false,
+                        server:false
+                    });
+                }
+                else if (subCommand === "server_best")
+                {
+                    doPostStreakCommand(interaction, {
+                        best:true,
+                        server:true
+                    });
+                }
+                else if (subCommand === "server_current")
+                {
+                    doPostStreakCommand(interaction, {
+                        best:false,
+                        server:true
+                    });
+                }
+            }
+            else if (interaction.commandName == "active_days")
+            {
+                var subCommand = interaction.options.getSubcommand();
+                if (subCommand === "me")
+                {
+                    doActiveDaysCommand(interaction, {
+                        server:false
+                    });
+                }
+                else if (subCommand === "server_best")
+                {
+                    doActiveDaysCommand(interaction, {
+                        server:true
+                    });
+                }
             }
         }
         // If the interaction isn't a slash command, return
@@ -234,6 +365,117 @@ async function doButtonCommand(interaction)
     const rows = [ row ]
 
     await interaction.editReply({content: pluralize(clicks, "click"), components: rows});
+}
+
+async function doPostStreakCommand(interaction, options)
+{
+    var publicPost = interaction.options.getBoolean("public") ?? false;
+    
+    var member = interaction.options.getMember("user") ?? interaction.member; 
+    if (member.id === undefined)
+    {
+        member = await interaction.guild.members.fetch(member);
+    }
+
+    //only allow in off topic
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
+    
+    //this can take too long to reply, so we immediately reply
+    await interaction.deferReply({ ephemeral: !publicPost });
+
+    var statsEmbed = {
+        title: "Post Streak",
+        fields: [],
+        thumbnail: { 
+            url:member.user?.displayAvatarURL()
+        }
+    };
+
+    if (options.best) 
+        statsEmbed.title = `Best ${statsEmbed.title}`;
+    else
+        statsEmbed.title = `Current ${statsEmbed.title}`;
+
+    if (options.server) 
+        statsEmbed.title = `Server Top 10 ${statsEmbed.title}`;
+    else
+        statsEmbed.title = `${statsEmbed.title} for ${(member.nickname ?? member.username)}`;
+
+    if (options.server == false)
+    {
+        var streak = await getStudentStreak(interaction.guild, member.id);
+        console.log({streak});
+        statsEmbed.fields.push({
+            name:pluralize(options.best ? streak.bestStreak : streak.currentStreak, "Active Day")+" in a row!",
+            value:`Their total active days is ${streak.totalActiveDays}`
+        });
+    }
+    else
+    {
+        var streaks = options.best ? await getTopBestStreak(interaction.guild) : await getTopCurrentStreak(interaction.guild);
+        for (var i = 0; i < Math.min(streaks.length, 10); i++)
+        {
+            statsEmbed.fields.push({
+                name:streaks[i].name,
+                value:pluralize(options.best ? streaks[i].bestStreak : streaks[i].currentStreak, "Active Day")+ " in a row"
+            });
+        };
+    }
+
+    await interaction.editReply({embeds: [ statsEmbed ] });
+}
+
+async function doActiveDaysCommand(interaction, options)
+{
+    var publicPost = interaction.options.getBoolean("public") ?? false;
+    
+    var member = interaction.options.getMember("user") ?? interaction.member; 
+    if (member.id === undefined)
+    {
+        member = await interaction.guild.members.fetch(member);
+    }
+
+    //only allow in off topic
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
+    
+    //this can take too long to reply, so we immediately reply
+    await interaction.deferReply({ ephemeral: !publicPost });
+
+    var statsEmbed = {
+        title: "Active Days",
+        fields: [],
+        thumbnail: { 
+            url:member.user?.displayAvatarURL()
+        }
+    };
+
+    if (options.server) 
+        statsEmbed.title = `Server Top 10 ${statsEmbed.title}`;
+    else
+        statsEmbed.title = `${statsEmbed.title} for ${(member.nickname ?? member.username)}`;
+
+    if (options.server == false)
+    {
+        var streak = await getStudentStreak(interaction.guild, member.id);
+        console.log({streak});
+        statsEmbed.fields.push({
+            name:pluralize(streak.totalActiveDays, "Active Day"),
+            value:`That is ${streak.totalActiveDays} more than 0!`
+        });
+    }
+    else
+    {
+        var streaks = await getTopActiveDays(interaction.guild);
+        for (var i = 0; i < Math.min(streaks.length, 10); i++)
+        {
+            statsEmbed.fields.push({
+                name:streaks[i].name,
+                value:pluralize(streaks[i].totalActiveDays, "Active Day")
+            });
+        };
+    }
+
+    await interaction.editReply({embeds: [ statsEmbed ] });
 }
 
 async function doButtonCommandButton(i, originalInteraction)
