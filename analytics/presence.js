@@ -43,8 +43,9 @@ export async function loadPresenceData(guild)
     {
         var d = doc.data();
         d.id = doc.id;
-        d.timestamp = moment(doc.id);
+        d.timestamp = moment.unix(doc.id / 1000);
         data.push(d);
     });
+    console.log(data);
     return data;
 }

@@ -6,6 +6,7 @@ import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } f
 import { asyncForEach } from "../core/utils.js";
 import { getStats, getStatsWeek, predicateExcludeAdmin, loadHistoricalData, getPostsData, loadTimeSeries, loadPostsPerDay, loadPostsPerHour, loadPostsPerSession, loadAttendanceSession } from "./analytics.js";
 import fakeData from "./fakeData.js";
+import { loadPresenceData } from "./presence.js";
 
 
 export async function getStatsData(req,res,next)
@@ -103,7 +104,7 @@ export async function timeGraph(req, res, next)
             return await loadAttendanceSession(await attendanceData(), req.guild, true, await getUserFilterPredicate(req));
         },
         "Online Presence Per Day": async function() {
-            return await loadOnlinePerDay(req.guild);
+            return (await loadPresenceData(req.guild)).map(function  (e) { return { date: e.timestamp, value: e.count }; });
         }
     };
     console.log("time graph page", req.body); 
