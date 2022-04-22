@@ -33,3 +33,18 @@ async function getOnlineMembers(guild)
     var fetchedMembers = await guild.members.fetch();
     return fetchedMembers.filter(member => member.presence && member.presence.status === 'online');
 }
+
+export async function loadPresenceData(guild)
+{
+    var guildDocument = await getGuildDocument(guild.id);
+    var results = await guildDocument.collection("presence").get();
+    var data = [];
+    results.forEach(doc =>
+    {
+        var d = doc.data();
+        d.id = doc.id;
+        d.timestamp = moment(doc.id);
+        data.push(d);
+    });
+    return data;
+}

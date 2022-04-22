@@ -1,14 +1,17 @@
 <%- include('header.html') %>
 
+<form method="post">
+    <div><input type="submit" value="Generate More Graphs" /></div>
+</form>
+
 <%- locals.classlistFilters(true) %>
 
-<p><%=locals.postData.length%> Total Posts</p>
-
-<% for (var graph in graphs)
+<% for (var graph of graphs)
 {
+    console.log(graph.title);
     %>
-    <h2><%=graph%> <%- include("subViews/download_csv.html", { data:graphs[graph], filename:graph }) %></h2>
-    <%- include("subViews/barplot.html", {data:graphs[graph]}) %>
+    <h2><%=graph.title%> <%- include("subViews/download_csv.html", { data:graph.data, filename:graph.title }) %></h2>
+    <%- include("subViews/barplot.html", {data:graph.data}) %>
     <%
 }
 %>

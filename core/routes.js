@@ -142,9 +142,8 @@ function guildRouter()
     router.get("/analytics/obs/week", analytics_routes.getStatsDataWeekOBS, analytics_routes.obsStatsWeek); 
 
     router.get("/analytics/history", analytics_routes.getHistoricalData); 
-    router.get("/analytics/timeGraph", 
-        guild.loadGuildProperty("adminRoleID"),
-        analytics_routes.timeGraph); 
+    router.get("/analytics/timeGraph", guild.loadGuildProperty("adminRoleID"), analytics_routes.timeGraph); 
+    router.post("/analytics/timeGraph", guild.loadGuildProperty("adminRoleID"), analytics_routes.timeGraph); 
 
     //progress
     router.get("/progress/", loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress);

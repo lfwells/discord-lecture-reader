@@ -1,0 +1,17 @@
+<%- include('header.html') %>
+
+<form method="post">
+    <% 
+    for (var graph in graphSelections)
+    {
+        %>
+        <div style="margin:1em"><label style="padding:1em"><input type="checkbox" name="<%=graph%>" /> <%=graph%></label></div>
+        <%
+    }
+    %>
+    <div style="margin:1em">
+        <input type="submit" value="Generate Graphs" />
+    </div>
+</form>
+
+<%- include('footer.html') %>
