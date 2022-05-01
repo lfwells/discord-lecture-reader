@@ -6,11 +6,13 @@ export default async function(client)
 {
     client.on("inviteDelete", (invite) => {
         // Delete the Invite from Cache
+        if (invites[invite.guild.id] == undefined) invites[invite.guild.id] = [];
         delete invites[invite.guild.id][invite.code];
       });
       
       client.on("inviteCreate", (invite) => {
         // Update cache on new invites
+        if (invites[invite.guild.id] == undefined) invites[invite.guild.id] = [];
         invites[invite.guild.id][invite.code] = { code:invite.code, uses:invite.uses, createdTimestamp:invite.createdTimestamp };
       });
       
