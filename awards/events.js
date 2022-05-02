@@ -3,7 +3,7 @@ import * as config from '../core/config.js';
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward, getAwardListFullData, getLeaderboard } from "./awards.js";
-import { pluralize, offTopicCommandOnly } from '../core/utils.js';
+import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../core/classList.js';
 import { hasFeature } from '../guild/guild.js';
 import { registerCommand } from '../guild/commands.js';
