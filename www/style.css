@@ -320,6 +320,8 @@
             max-width:250px;
             padding-left:4ex !important;
             padding-right:4ex !important;
+
+            color: white !important;
         }
         .btn span:first-child {
             font-size:48pt; display:inline-block; vertical-align: middle;
@@ -333,7 +335,7 @@
             display:inline-block;
             margin-left:2ex;
         }
-        .btn.outline {
+        .btn.outline, .btn.outlined {
             background-color: transparent;
         }
 
@@ -362,7 +364,7 @@
             display:inline-block;
             margin-left:2ex;
         }
-        .btnAdd.outline {
+        .btnAdd.outline, .btnAdd.outlined {
             background-color: transparent;
         }
 

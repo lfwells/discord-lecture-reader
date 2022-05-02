@@ -68,7 +68,9 @@ export async function botRoleHigherThanMemberRole(member)
 
 export async function isAdmin(member)
 {
-    if (member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) return true;
+    if (member != null && member.permissions != null && member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) return true;
+
+    if (member == null || member.guild == null) return false;
     
     var adminRoleID = await getGuildProperty("adminRoleID", member.guild, undefined, true);
     

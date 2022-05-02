@@ -78,6 +78,30 @@ export async function init_sheet_for_guild(guild)
     }
 }
 
+export async function addSheetAccess(req,res, next)
+{
+    var spreadsheetId = res.locals.googleSheetID;
+
+    var email = req.query.email;
+
+    var permission = 
+    {
+        'type': 'user',
+        'role': 'writer',
+        'emailAddress': email
+    };
+
+    var result = await drive.permissions.create({
+        resource: permission,
+        fileId: spreadsheetId,
+        fields: 'id',
+    });
+
+    res.json({
+        success: "Added permission to "+email,
+        result
+    });
+}
 
 export async function sheetsIndex(req,res,next)
 {
@@ -185,26 +209,18 @@ async function write_attendance(req, res)
     });*/
     
     row.push("Student");
-    res.locals.weeks.forEach(function(week)
+    res.locals.weeks.forEach(function(session)
     { 
-        
-        week.sessions.forEach(function(session)
-        {
-            row.push(session.name +" - "+ session.time.format("ddd Do HH:mm"));
+            row.push("Week "+session.week +" "+session.type+" - "+ session.startTime.format("ddd Do HH:mm"));
             sessionsCount++;
-        });
     });
     sheetData.push(row); row = [];
 
-    var weekSummary = [];
-    res.locals.weeks.forEach(function(week, weekIndex)
+    var sessionSummary = [];
+    var weeks = Object.values(res.locals.weeks);
+    weeks.forEach(function(session)
     { 
-        var sessionSummary = [];
-        week.sessions.forEach(function(session)
-        {
-            sessionSummary.push(0);
-        });
-        weekSummary.push(sessionSummary);
+        sessionSummary.push(0);
     });
 
     var i = 0;
@@ -216,18 +232,15 @@ async function write_attendance(req, res)
         row.push(student.discordName);
         
         var studentSessionCount = 0;
-        res.locals.weeks.forEach(function(week, weekIndex)
-        { 
-            week.sessions.forEach(function(session, sessionIndex)
+        weeks.forEach(function(session, sessionIndex)
+        {
+            var sessionData = res.locals.checkAttendance(student, session, true); //plainText = true
+            if (sessionData.indexOf("x") != -1)
             {
-                var sessionData = res.locals.checkAttendance(student, session, true); //plainText = true
-                if (sessionData.indexOf("x") != -1)
-                {
-                    weekSummary[weekIndex][sessionIndex]++;
-                    studentSessionCount++; 
-                }
-                row.push(sessionData);
-            });
+                sessionSummary[sessionIndex]++;
+                studentSessionCount++; 
+            }
+            row.push(sessionData);
         });
         row.push(Math.round(((studentSessionCount / sessionsCount)*100)*10)/10);
         row.push(studentSessionCount);
@@ -237,12 +250,9 @@ async function write_attendance(req, res)
     res.write("\n");
 
     row.push("TOTAL:");
-    weekSummary.forEach(function(sessionSummary)
-    { 
-        sessionSummary.forEach(function(sessionCount)
-        {
-            row.push(sessionCount);
-        });
+    sessionSummary.forEach(function(sessionCount)
+    {
+        row.push(sessionCount);
     });
     sheetData.push(row); row = [];
 
