@@ -6,6 +6,11 @@ export default async function(client)
     const muteAllCommand = {
         name: 'mute_all',
         description: '(ADMIN ONLY) Mutes all people in the same voice channel that you are in.',
+        options: [{
+            name: "force",
+            description: "Server mute people, even if they are self-muted (default is false)",
+            type: "BOOLEAN"
+        }]
     }; 
     const unmuteAllCommand = {
         name: 'unmute_all',
@@ -40,6 +45,8 @@ async function doMuteAllCommand(interaction)
 {
     if (await adminCommandOnly(interaction)) return;
 
+    var force = interaction.options.getBoolean("force") ?? false;
+
     
     await interaction.deferReply({ephemeral:true});
 
@@ -52,7 +59,7 @@ async function doMuteAllCommand(interaction)
     }
     for (let m of channel.members) {
         var member = m[1];
-        if (member.voice.selfMute == false)
+        if (member.voice.selfMute == false || force)
         {
             member.voice.setMute(true);
             count++;
