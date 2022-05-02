@@ -14,6 +14,7 @@ import * as poll_routes from '../polls/routes.js';
 import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 import * as invite_routes from "../invite/routes.js";
 import * as guide_routes from "../guide/routes.js";
+import * as cloner_routes from "../cloner/routes.js";
 import { Router } from "express";
 import * as sheet_routes from "../sheets_test.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
@@ -108,6 +109,9 @@ function guildRouter()
     router.get("/", guild_routes.guildHome);
     router.post("/", guild_routes.guildHomePost, guild_routes.guildHome);
                     
+    router.get("/clone", guild_routes.loadGuildList, cloner_routes.clone_select);
+    router.post("/clone", cloner_routes.clone);
+
     router.get("/obs/", basic_render("obs")); 
 
     router.get("/features/", guild_routes.guildFeatures); 

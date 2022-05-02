@@ -1,0 +1,34 @@
+<%- include('header.html') %>
+
+<h2>Confirm Copy Settings</h2>
+<p>Select which settings you would like to copy into your server.</p>
+
+<form method="post">
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Setting</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+        <%
+        Object.keys(originalGuild).forEach(function(key)
+        { 
+            %>
+            <tr>
+                <td><input type="checkbox" name="<%=key%>" value="1" /></td>
+                <th><%=key%></th>
+                <td><%=originalGuild[key]%></td>
+            </tr>
+            <% 
+        });
+        %>
+        </tbody>
+    </table>
+    <div><input class="btn" type="submit" name="confirm" value="Copy Settings"/></div>
+
+</form>
+
+<%- include('footer.html') %>

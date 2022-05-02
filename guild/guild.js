@@ -114,12 +114,14 @@ export async function getAdminGuilds(client, req)
       return false;
     }) >= 0);
 
-    await asyncForEach(result, async function(guild)  
+    if (req.path.indexOf("clone") == -1)
     {
-      guild.totalPosts = (await getPostsData(guild)).length;
-      console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
-    });
-
+      await asyncForEach(result, async function(guild)  
+      {
+        guild.totalPosts = (await getPostsData(guild)).length;
+        console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
+      });
+    }
     return result;
   }
   return [];
