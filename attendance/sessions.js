@@ -52,6 +52,7 @@ export async function init_sessions(guild)
         //session.weekStart = getSemesterWeekStart(null, session.semester ?? "sem1_2022", session.week, session.day);
         //session.startTime = moment(session.weekStart).add(session.hour, "hour").add(session.minute, "minute");
         session.startTime = moment(session.startTime._seconds*1000);
+        session.startTimestamp = session.startTime;
         session.endTime = moment(session.startTime).add(session.duration == null || session.duration == 0 ? 60 : session.duration, "minute");
         session.earlyStartTimestamp = moment(session.startTime).subtract(earlyTime, "minutes");
         session.weekStart = moment(session.startTime).startOf("isoWeek")
@@ -314,7 +315,7 @@ export async function getNextSession(guild, ofType)
     sessions.forEach(session => {
         if (found == false) //haven't found yet (PS: this function relies on sorted sessions, which is /fine/)
         {
-            var start = session.startTimestamp;
+            var start = session.startTime;
             if (start.isAfter(now))
             {
                 found = true;
@@ -329,9 +330,6 @@ function getAllSessionsInOrder(guild, ofType)
     var sessions = SESSIONS[guild.id];
     if (sessions == null) return [];
     
-    sessions.forEach(session => {
-        session.startTimestamp = session.startTime ? moment(session.startTime._seconds*1000) : null;
-    });
     sessions = sessions.filter(e => e.startTime != null);
     if (ofType != null)
     {

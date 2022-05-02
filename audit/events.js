@@ -21,7 +21,7 @@ export default async function(client)
             newContent: newMessage.content,
             dump: JSON.stringify(message)
         }; 
-console.log(newMessage.content);
+//console.log(newMessage.content);
         const fetchedLogs = await message.guild.fetchAuditLogs({
             limit: 1,
             type: 'MESSAGE_EDIT',
@@ -41,7 +41,7 @@ console.log(newMessage.content);
     
         // Update the output with a bit more information
         // Also run a check to make sure that the log returned was for the same author's message
-console.log(target);
+//console.log(target);
         if (target.id === message.author.id) {
             toLog.editedBy = executor.id;
             console.log(`A message by ${message.author.tag} was edited by ${executor.tag}.`);
