@@ -1,7 +1,6 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { deleteAllScheduledEvents, didAttendSession, postWasForSession, scheduleAllSessions } from "./sessions.js";
-import { getSessions } from "../attendance/old_sessions.js";
+import { getSessions, deleteAllScheduledEvents, didAttendSession, postWasForSession, scheduleAllSessions } from "./sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 import { getPostsData } from "../analytics/analytics.js";

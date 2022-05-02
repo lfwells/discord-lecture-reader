@@ -1,11 +1,11 @@
 import { google } from "googleapis";
 import { GoogleAuth } from "google-auth-library";
-import { getGuildProperty, GUILD_CACHE, loadGuildProperty, setGuildProperty } from "./guild/guild.js";
-import { getAttendanceData } from "./attendance/routes.js";
-import { getStats } from "./analytics/analytics.js";
-import { getAwardListFullData } from "./awards/awards.js";
+import { getGuildProperty, GUILD_CACHE, loadGuildProperty, setGuildProperty } from "../guild/guild.js";
+import { getAttendanceData } from "../attendance/routes.js";
+import { getStats } from "../analytics/analytics.js";
+import { getAwardListFullData } from "../awards/awards.js";
 import moment from "moment";
-import { beginStreamingRes } from "./core/server.js";
+import { beginStreamingRes } from "../core/server.js";
 
 var sheets;
 var drive;
@@ -79,7 +79,7 @@ export async function init_sheet_for_guild(guild)
 }
 
 
-export async function sheets_test(req,res,next)
+export async function sheetsIndex(req,res,next)
 {
     /*
     var spreadsheetId = res.locals.googleSheetID;

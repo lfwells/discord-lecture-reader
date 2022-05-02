@@ -1,6 +1,6 @@
 import moment from "moment";
 //TODO: an interface for defining sessions and names? for now just auto-gen
-export async function getSessions(guild)
+export async function getSessionsOld(guild)
 {
     var weeks = [];
 

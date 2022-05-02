@@ -2,7 +2,7 @@ import moment from "moment";
 import { getGuildDocument, getGuildProperty, getGuildPropertyConverted, GUILD_CACHE } from "../guild/guild.js";
 import * as Config from "../core/config.js";
 import { didAttendSession, postWasForSession } from "../attendance/sessions.js";
-import { getSessions } from "../attendance/old_sessions.js";
+import { getSessionsOld } from "../attendance/old_sessions.js";
 import { db, guildsCollection } from "../core/database.js";
 import { getClient } from "../core/client.js";
 import fakeData from "./fakeData.js";
@@ -393,9 +393,9 @@ export async function loadPostsPerHour(rawStatsData)
     return hours;
 }
 
-async function getSessionsFlatArray(guild)
+async function getSessionsOldFlatArray(guild)
 {
-    var sessions = (await getSessions(guild)).flatMap(s => {
+    var sessions = (await getSessionsOld(guild)).flatMap(s => {
         s.sessions.forEach(s2 => {
             s2.x = s.name+" "+s2.name
             s2.messages = [];
@@ -416,7 +416,7 @@ async function getSessionsFlatArray(guild)
 }
 export async function loadPostsPerSession(rawStatsData, guild, includeNoSession, predicate)
 {
-    var sessions = await getSessionsFlatArray(guild);
+    var sessions = await getSessionsOldFlatArray(guild);
     var outOfSessionPosts = [];
     var inOfSessionPosts = [];
 
@@ -491,7 +491,7 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
 
 export async function loadAttendanceSession(attendanceData, guild, includeNoSession, predicate)
 {
-    var sessions = await getSessionsFlatArray(guild);
+    var sessions = await getSessionsOldFlatArray(guild);
     var outOfSessionAttendance = [];
     var inOfSessionAttendance = [];
     for (var r in attendanceData)

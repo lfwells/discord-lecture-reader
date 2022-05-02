@@ -51,8 +51,8 @@ export async function hasRoleID(member, roleID)
 {
     if (member.roles == null) return false;
     //return await member.roles.has(role);
-    member.roles.cache.each(r => console.log(r.name+"_"+r.id));
-    console.log("roleID", roleID);
+    //member.roles.cache.each(r => console.log(r.name+"_"+r.id));
+    //console.log("roleID", roleID);
     return member.roles.cache.has(roleID)    
 }
 

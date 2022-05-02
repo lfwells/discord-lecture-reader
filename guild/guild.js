@@ -6,7 +6,7 @@ import { init_roles } from '../roles/roles.js';
 
 import { getClient } from "../core/client.js";
 import { oauth } from '../core/login.js';
-import { init_sheet_for_guild } from '../sheets_test.js';
+import { init_sheet_for_guild } from '../analytics/sheets.js';
 import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
 import { asyncForEach, isOutsideTestServer } from "../core/utils.js";

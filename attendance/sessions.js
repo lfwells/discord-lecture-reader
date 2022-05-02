@@ -19,6 +19,12 @@ export const SEMESTERS = {  //breaks are inclusive (so first day of break, and t
     //asp1_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
     //asp2_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
 }
+
+export async function getSessions(guild)
+{
+    return getAllSessionsInOrder(guild);
+}
+
 export async function deleteAllScheduledEvents(res, guild)
 {
     var allEvents = await guild.scheduledEvents.fetch();
@@ -43,9 +49,18 @@ export async function init_sessions(guild)
     {
         var session = doc.data();
         session.id = doc.id;
+        //session.weekStart = getSemesterWeekStart(null, session.semester ?? "sem1_2022", session.week, session.day);
+        //session.startTime = moment(session.weekStart).add(session.hour, "hour").add(session.minute, "minute");
+        session.startTime = moment(session.startTime._seconds*1000);
+        session.endTime = moment(session.startTime).add(session.duration == null || session.duration == 0 ? 60 : session.duration, "minute");
+        session.earlyStartTimestamp = moment(session.startTime).subtract(earlyTime, "minutes");
+        session.weekStart = moment(session.startTime).startOf("isoWeek")
+        //console.log(session);
         data.push(session); 
         
     });
+
+    data.sort((a,b) => a.week - b.week);
     SESSIONS[guild.id] = data;
 
     discordEvents[guild.id] = await guild.scheduledEvents.fetch();
@@ -99,12 +114,16 @@ export async function scheduleAllSessions(res, guild, config)
     }
 
     res.write("\nCleaning Up...\n");
+
+    SESSIONS[guild.id] = createdSessions;
+
     cancelNextSessionCountdownFunction(guild);
     
 }
 async function scheduleAllSessionsOfType(res, guild, config, semester)
 {
     console.log("scheduleAllSessionsOfType", config.type);
+    config.semester = semester;
     var createdSessions = [];
     for (var i = 0; i < config.weeks.length; i++)
     {
@@ -181,7 +200,7 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, textC
     if (existingSession) console.log("found existing session", existingSession.id);
 
     //check if event is in the past
-    if (startTime.isBefore(moment()))
+    /*if (startTime.isBefore(moment()))
     {
         if (existingSession)
         {
@@ -193,7 +212,7 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, textC
             console.log("session in the past, skipping");
         }
         return null;
-    }
+    }*/
 
     var name = `${type} (Week ${week})`
 
@@ -217,22 +236,25 @@ async function scheduleSession(guild, type, startTime, endTime, channelID, textC
         discordEventArgs.entityType = "EXTERNAL";
     }
 
-    try
+    if (!startTime.isBefore(moment()))
     {
-        if (existingSession && existingSession.discordEventID && existingSession.discordEventID.length > 5) //need to update the existing discord event, so we don't lose "interested" people
+        try
         {
-            try
+            if (existingSession && existingSession.discordEventID && existingSession.discordEventID.length > 5) //need to update the existing discord event, so we don't lose "interested" people
             {
-                discordEvent = await guild.scheduledEvents.edit(existingSession.discordEventID, discordEventArgs);
-            } catch {
-                discordEvent = await guild.scheduledEvents.create(discordEventArgs);    
+                try
+                {
+                    discordEvent = await guild.scheduledEvents.edit(existingSession.discordEventID, discordEventArgs);
+                } catch {
+                    discordEvent = await guild.scheduledEvents.create(discordEventArgs);    
+                }
             }
-        }
-        else //new, make it
-        {
-            discordEvent = await guild.scheduledEvents.create(discordEventArgs);
-        }
-    } catch (e) { console.log(e); }
+            else //new, make it
+            {
+                discordEvent = await guild.scheduledEvents.create(discordEventArgs);
+            }
+        } catch (e) { console.log(e); }
+    }
     
     var discordEventID = discordEvent ? discordEvent.id : null;
 
@@ -458,10 +480,11 @@ export function didAttendSession(instance, session)
 {
     var time = moment(instance.joined);
     var leftTime = moment(instance.left);
-    return time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp);
+    
+    return time.isBetween(session.earlyStartTimestamp, session.endTime) || leftTime.isBetween(session.earlyStartTimestamp, session.endTime);
 }
 export function postWasForSession(instance, session)
 {
     var time = moment(instance.timestamp);
-    return time.isBetween(session.earlyStartTimestamp, session.endTimestamp);
+    return time.isBetween(session.earlyStartTimestamp, session.endTime);
 }

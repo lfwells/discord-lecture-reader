@@ -44,5 +44,5 @@ import { init_server } from "./core/server.js";
 init_server();
 
 //google sheets
-import { init_google } from './sheets_test.js';
+import { init_google } from './analytics/sheets.js';
 init_google();

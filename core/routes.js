@@ -16,7 +16,7 @@ import * as invite_routes from "../invite/routes.js";
 import * as guide_routes from "../guide/routes.js";
 import * as cloner_routes from "../cloner/routes.js";
 import { Router } from "express";
-import * as sheet_routes from "../sheets_test.js";
+import * as sheet_routes from "../analytics/sheets.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
 import { renderEJS } from "./server.js";
 
@@ -183,7 +183,7 @@ function guildRouter()
     router.get("/invites/generate", invite_routes.generateInvite, invite_routes.inviteList);
 
     //sheets
-    router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheets_test); 
+    router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheetsIndex); 
     router.get("/sheets/update", loadClassListWithRemoved, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
         
     //scheduled_events
