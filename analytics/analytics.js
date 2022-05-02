@@ -332,14 +332,18 @@ export async function loadTimeSeries(rawStatsData, weekly)
     }
 
     //fill in holes in graph with zeros
-    for (var m = moment(startDomain); m.isBefore(endDomain); m.add(1, 'days')) {
-        var idx = days.findIndex(d => m.isSame(d.date));
+    for (var m = moment(startDomain); m.isBefore(endDomain); m.add(1, 'days')) 
+    {
+        var m2 = moment(m);
+        if (weekly)
+            m2 = moment(m).startOf('week'); 
+        var idx = days.findIndex(d => m2.isSame(d.date));
         if (idx == -1)
         {
             //console.log("added missing day "+m.format());
-            days.push({ date: moment(m), value: 0 }); 
+            days.push({ date: moment(m2), value: 0 }); 
         }
-        idx = days.findIndex(d => m.isSame(d.date));
+        idx = days.findIndex(d => m2.isSame(d.date));
     }
 
     days = days.sort((a,b) => a.date - b.date);
