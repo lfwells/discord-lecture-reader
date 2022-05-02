@@ -43,28 +43,27 @@ async function init_status_channel(guild, name, feature, f)
 		var text = "";
 		try {
 			text = await f(guild);
+		
+			var channelID = await getGuildPropertyConverted(key, guild);
+			var channel = channelID != null ? await guild.channels.cache.find(c => c.id == channelID) : null; 
+			if (channel == null)
+			{
+				//create the channel
+				channel = await guild.channels.create(text, {
+					type: 'GUILD_VOICE',
+					permissionOverwrites: getPermissions(guild)
+				});
+				await setGuildProperty(guild, key, channel.id);
+			}
+			else
+			{
+				//await channel.permissionOverwrites.set(getPermissions(guild));
+				await channel.setName(text);
+			}
 		} catch (e) {
 			await sleep(Config.UPDATE_STATUS_CHANNELS_EVERY_MS);
 			await init_status_channel(guild, name, feature, f);
 			return;
-		}
-		
-
-		var channelID = await getGuildPropertyConverted(key, guild);
-		var channel = channelID != null ? await guild.channels.cache.find(c => c.id == channelID) : null; 
-		if (channel == null)
-		{
-			//create the channel
-			channel = await guild.channels.create(text, {
-				type: 'GUILD_VOICE',
-				permissionOverwrites: getPermissions(guild)
-			});
-			await setGuildProperty(guild, key, channel.id);
-		}
-		else
-		{
-			//await channel.permissionOverwrites.set(getPermissions(guild));
-			await channel.setName(text);
 		}
 	}
 	else
