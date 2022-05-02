@@ -75,7 +75,7 @@ export default async function(client)
         {
             if (message.author.id != client.user.id)
             {
-                message.reply("I am just a robot, message sent here *are not seen by staff*. If you have a question for a staff member, please contact them directly.")
+                message.reply("I am just a robot, messages sent here *are not seen by staff*. If you have a question for a staff member, please contact them directly.")
             }
         }
     });
