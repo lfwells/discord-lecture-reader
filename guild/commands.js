@@ -22,7 +22,9 @@ const applicationCommandsToUnregister = []; //put back to []
 
 export const newGuilds = []; //managed by the guildCreate event, to make sure new servers get commands registered when the bot is added 
 
-const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "Un-flag Message", "flagged", "checklist", "forum_channel"];
+const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "Un-flag Message", "flagged", "checklist", "forum_channel",
+                                "mute_all", "unmute_all"
+];
 
 export const allCommandData = {}
 export const adminCommandData = {}

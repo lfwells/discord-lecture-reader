@@ -213,6 +213,8 @@ async function doFlexCommand(interaction)
 }
 async function doAwardCommand(interaction)
 {
+    if (await adminCommandOnly(interaction)) return;
+
     var member = interaction.options.getMember("user");
     member = await interaction.guild.members.fetch(member);
 
@@ -222,7 +224,7 @@ async function doAwardCommand(interaction)
 
     await interaction.deferReply();
 
-    if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
+    //if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
     {
         
         var awardChannel = await getAwardChannel(interaction.guild);
@@ -272,13 +274,13 @@ async function doAwardCommand(interaction)
         }
     
     }
-    else
+    /*else
     {
         interaction.user.send("You don't have permission to `/award` achievements. You can suggest an award to your UC though!");
         //interaction.editReply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
         
         await interaction.deleteReply();
-    }
+    }*/
 }
 
 async function doLeaderboardCommand(interaction)
