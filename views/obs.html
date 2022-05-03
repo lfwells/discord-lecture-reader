@@ -1,10 +1,16 @@
 <%- include('header.html') %>
+<%
+function hasFeature(feature)
+{
+    return locals["feature_"+feature];
+}
+%>
 
 <h2>OBS Pages</h2>
 <p>Use these links as URLs for Browser Sources in OBS.</p>
 <nav>
     <ul>
-        <% if (locals.lectureChannel) { %>
+        <% if (locals.lectureChannelID) { %>
             <li>
                 <div class="autoLink" data-link="../<%=guild.id%>/poll">Poll Widget
                     <br />
@@ -13,16 +19,28 @@
             </li>
         <% } %>
 
+        <% if (locals.lectureChannelID) { %>
         <li>
             <div class="autoLink" data-link="../<%=guild.id%>/text">Lecture Popup Text Widget
                 <br />
                 <input class="copy" /> <button class="copy">Copy</button>
             </div>
         </li>
+        <% } %>
         
-        <% if (locals.awardChannel) { %>
+        <% if (locals.lectureChannelID && hasFeature("achievements")) { %>
             <li>
                 <div class="autoLink" data-link="../<%=guild.id%>/analytics/obs">Top Posters and Award Leaderboard Widget
+                    <br />
+                    <input class=" copy" /> <button class="copy">Copy</button>
+                </div>
+            
+            </li>
+        <% } %>
+
+        <% if (locals.lectureChannelID && hasFeature("sessions")) { %>
+            <li>
+                <div class="autoLink" data-link="../<%=guild.id%>/sessions/obs">Next Session Name
                     <br />
                     <input class=" copy" /> <button class="copy">Copy</button>
                 </div>

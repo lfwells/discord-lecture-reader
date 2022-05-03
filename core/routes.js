@@ -192,6 +192,8 @@ function guildRouter()
     router.get("/sessions", attendance_routes.sessionPage);
     router.post("/sessions", attendance_routes.sessionPagePost);
     router.get("/sessions/deleteAll", attendance_routes.deleteAllEvents);
+    router.get("/sessions/obs", attendance_routes.nextSessionOBS);
+
     return router;
 }
 

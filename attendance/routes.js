@@ -1,6 +1,6 @@
 //NB all 2021 Sem 2 data before 8:37 on Monday 19 July 2021 was recorded with UTC 0 on the server
 import { filter, paginate } from "../core/pagination.js"; 
-import { getSessions, deleteAllScheduledEvents, didAttendSession, postWasForSession, scheduleAllSessions } from "./sessions.js";
+import { getSessions, deleteAllScheduledEvents, didAttendSession, postWasForSession, scheduleAllSessions, getNextSession } from "./sessions.js";
 import { invlerp } from "../core/utils.js";
 import moment from "moment";
 import { getPostsData } from "../analytics/analytics.js";
@@ -598,4 +598,12 @@ export async function displayProgressTimeline(req, res, next)
 {
     res.render("progress_timeline"); //TODO use middleware properly here instead zz
     next()
+}
+
+
+export async function nextSessionOBS(req,res,next)
+{
+    var ofType = req.query.ofType ?? "Lecture";
+    var session = await getNextSession(req.guild, ofType);
+    res.render("next_session_obs", { session });
 }
