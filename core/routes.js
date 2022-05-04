@@ -196,7 +196,8 @@ function guildRouter()
     router.get("/sessions/obs", attendance_routes.nextSessionOBS);
 
     //pptx
-    router.get("/pptx/test", pptx_routes.test_parse_pptx); 
+    router.get("/pptx", pptx_routes.parse_pptx_page); 
+    router.post("/pptx", pptx_routes.parse_pptx_page); 
 
     return router;
 }

@@ -1,6 +1,54 @@
 import PPTX2Json from 'pptx2json';
+import { getClient } from '../core/client.js';
+import { asyncForEach, pluralize } from '../core/utils.js';
 
-export async function test_parse_pptx(req, res, next)
+export async function parse_pptx_page(req,res,next)
+{
+    if (!req.files)
+    {
+        if (req.body.post)
+        {
+            //step 3
+            var filename = req.body.filename;
+            var links = req.body.links;
+            var client = getClient();
+            var channel = await client.channels.fetch(req.body.channelToPostIn);
+            
+            if (req.body.asThread)
+            {
+                channel = await channel.threads.create({
+                    name: `Links from ${filename}`,
+                    reason: 'Needed a separate thread for lecture links',
+                });
+            }
+
+            await channel.send({ content: `Here are ${pluralize(links.length, "Link")} from the slides \`${filename}\`:` });
+            await asyncForEach(links, async function(link) {
+                await channel.send({ content: link });
+            });
+
+            console.log(`Posted ${pluralize(links.length, "Link")}`);
+
+            res.render("pptx",  { success: `Posted ${pluralize(links.length, "Link")}` });
+        }
+        else
+        {
+            //step 1
+            res.render("pptx");
+        }
+    }
+    else
+    {
+        //step 2
+        var tempFilePath = req.files.pptxFile.tempFilePath;
+        var links = await parsePPTX(tempFilePath);
+        var filename = req.files.pptxFile.name;
+
+        res.render("pptx",  { links, tempFilePath, filename });
+    }
+}
+
+async function parsePPTX(file)
 {
     const pptx2json = new PPTX2Json();
 
@@ -16,9 +64,7 @@ export async function test_parse_pptx(req, res, next)
         && e.indexOf("pollRoboLinds") == -1, 
         function(e, slide) { if (slide != undefined) links.push(slide+" -- "+e); });
 
-    //res.json(links);
-    res.write(links.join("\n"));
-    res.end();
+    return links;
 }
 
 
@@ -28,6 +74,8 @@ function traverseSlides(jsonObj, predicate, doWithThingsThatPassPredicate, slide
         Object.entries(jsonObj).forEach(([key, value]) => {
             if (key.indexOf("ppt/slides/slide") >= 0)
             {
+                key = key.replace("ppt/slides/slide", "Slide ");
+                key = key.replace(".xml", "");
                 // key is either an array index or object key
                 traverseSlides(value, predicate, doWithThingsThatPassPredicate, key);
             }

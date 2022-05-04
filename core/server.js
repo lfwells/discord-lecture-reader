@@ -12,6 +12,8 @@ import { loginPage, oauth } from './login.js';
 
 import cors from "cors"; 
 
+import fileUpload from "express-fileupload";
+
 import cookieParser from 'cookie-parser';
 import sessions from "express-session";
 
@@ -42,6 +44,12 @@ export function init_server()
   
   app.use(express.json());
   app.use(express.urlencoded({extended:true}));
+
+  //allow file uploads
+  app.use(fileUpload({
+    useTempFiles : true,
+    tempFileDir : '/tmp/'
+  }));
 
   //https://stackoverflow.com/questions/13442377/redirect-all-trailing-slashes-globally-in-express/35927027
   app.use((req, res, next) => {

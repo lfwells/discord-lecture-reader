@@ -322,6 +322,8 @@
             padding-right:4ex !important;
 
             color: white !important;
+
+            cursor: pointer;
         }
         .btn span:first-child {
             font-size:48pt; display:inline-block; vertical-align: middle;
@@ -351,6 +353,8 @@
             max-width:250px;
             padding-left:4ex !important;
             padding-right:4ex !important;
+
+            cursor: pointer;
         }
         .btnAdd span:first-child {
             font-size:48pt; display:inline-block; vertical-align: middle;

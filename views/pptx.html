@@ -1,0 +1,77 @@
+<%- include('header.html') %>
+
+<h2>Extract PPTX Links</h2>
+<p>Using this tool, you can extract links from your slides and post them to a channel on Discord.</p>
+
+<% if (typeof(locals.success) !== "undefined")
+{
+    %>
+    <p><%=locals.success%></p>
+    <p><a href="/guild/<%=locals.guild.id%>/pptx">Upload Another File</a></p>
+    <%
+}
+else
+{
+    %>
+
+    <h3>Step 1: Upload PPTX File</h3>
+    <% if (typeof(locals.links) === "undefined")
+    {
+        //TODO: make this prettier
+        %>
+        <form method="post" enctype='multipart/form-data'>
+        
+            <div><input type="file" name="pptxFile" /></div>
+                
+            <div><input class="btn" type="submit" value="Upload"/></div>
+        
+        </form>
+        <%
+    }
+    %>
+
+
+    <h3>Step 2: Review Links and Post</h3>
+    <% if (typeof(locals.links) !== "undefined")
+    {
+        %>
+        <form method="post">
+            <p><%=locals.links.length%> links found in <%=locals.filename%>:</p>
+            <ul>
+            <% 
+            var i = 0;
+            for (var link of locals.links)
+            {
+                %>
+                <input type="hidden" name="links[<%=i%>]" value="<%=link%>"/>
+                <li><%=link%></li>
+                <%
+                i++;
+            }
+            %>
+            </ul>
+
+            <p><%- include("subViews/channelSelect.html", 
+                { 
+                    label: "Channel to Post In:",
+                    selectDefaultText:"-- Select Channel--",
+                    id: "channelToPostIn",
+                    value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
+                    type: "GUILD_TEXT",
+                    help: "Links will be posted one-by-one"
+                }) %></p>
+
+            <p>
+                <label><input type="checkbox" name="asThread" checked /> Post as Thread?</label>
+            </p>
+                
+            <input type="hidden" name="filename" value="<%=locals.filename%>" />
+            <div><input class="btn" type="submit" name="post" value="Post Links"/></div>
+
+        </form>
+        <%
+    }
+}
+%>
+
+<%- include('footer.html') %>
