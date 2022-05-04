@@ -19,6 +19,7 @@ import { Router } from "express";
 import * as sheet_routes from "../analytics/sheets.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
 import { renderEJS } from "./server.js";
+import * as pptx_routes from "../pptx_parse/pptx.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
@@ -193,6 +194,9 @@ function guildRouter()
     router.post("/sessions", attendance_routes.sessionPagePost);
     router.get("/sessions/deleteAll", attendance_routes.deleteAllEvents);
     router.get("/sessions/obs", attendance_routes.nextSessionOBS);
+
+    //pptx
+    router.get("/pptx/test", pptx_routes.test_parse_pptx); 
 
     return router;
 }
