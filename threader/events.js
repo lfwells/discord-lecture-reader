@@ -246,13 +246,16 @@ async function doFlagCopyCommand(interaction, move)
     await clearFlaggedMessages(interaction.guild, interaction.user);
     
 }
-async function postIndividualMessages(postIn, messages, ephemeral)
+export async function postIndividualMessages(postIn, messages, ephemeral)
 {
     await asyncForEach(messages, async (message) => 
     {
         var msg = {
             content: `**<@${message.author.id}>** - *${dateToHuman(message.createdAt)}*\n> ${message.content}`,
         };
+
+        msg.content = msg.content.substring(0, 2000);
+
         if (ephemeral)
         {
             msg.ephemeral = ephemeral ?? false;

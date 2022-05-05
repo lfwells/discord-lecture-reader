@@ -1,0 +1,29 @@
+<%- include('header.html') %>
+
+<h2>Clone a Channel from <%=locals.sourceGuild.name%></h2>
+<p>You can copy all messages from a channel in a Discord Server that you are an admin of which have the UTAS Bot added to them.</p>
+
+<form method="post" action="/guild/<%=guild.id%>/clone_channel_confirm">
+    
+    <p><%- include("subViews/channelSelect.html", 
+        { 
+            label: "Original Channel:",
+            selectDefaultText:"-- Select Channel--",
+            id: "sourceChannelID",
+            type: "GUILD_TEXT",
+            overrideGuild: locals.sourceGuild,
+        }) %></p>
+    <p><%- include("subViews/channelSelect.html", 
+        { 
+            label: "Destination Channel:",
+            selectDefaultText:"-- Select Channel--",
+            id: "destinationChannelID",
+            type: "GUILD_TEXT",
+        }) %></p>
+
+    <input type="hidden" name="sourceGuild" value="<%=sourceGuild.id%>" />
+    <div><input class="btn" type="submit" name="confirm" value="Clone Channel"/></div>
+
+</form>
+
+<%- include('footer.html') %>

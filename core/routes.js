@@ -199,6 +199,12 @@ function guildRouter()
     router.get("/pptx", pptx_routes.parse_pptx_page); 
     router.post("/pptx", pptx_routes.parse_pptx_page); 
 
+    //clone channel    
+    router.get("/clone_channel", guild_routes.loadGuildList, cloner_routes.clone_channel_select);
+    router.post("/clone_channel", cloner_routes.clone_channel);
+    router.post("/clone_channel_confirm", cloner_routes.clone_channel);
+
+
     return router;
 }
 

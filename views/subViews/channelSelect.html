@@ -6,7 +6,9 @@ function uuid() {
   });
 }
 
-var id = locals.id ?? uuid(); %>
+var id = locals.id ?? uuid(); 
+if (typeof(overrideGuild) !== "undefined") guild = overrideGuild;
+%>
 
 <label
     id="<%=id%>"
@@ -24,7 +26,7 @@ var id = locals.id ?? uuid(); %>
             if (typeof type !== 'undefined' && channel.type != type) return;
 
             %><option value="<%= channel.id %>"
-                <% if (value && channel.id == value) { %>selected<% } %>>
+                <% if (typeof(value) !== "undefined" && channel.id == value) { %>selected<% } %>>
                 <%= channel.name %>
             </option><%
         }

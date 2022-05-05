@@ -119,10 +119,13 @@ async function doSnapCommand(interaction)
         .sort((a, b) => a.sort - b.sort)
         .map(({ value }) => value);
 
-    for (var i = 0; i < shuffled.length / 2; i++)
-    {
-        content += shuffled[i].discordName + "\n";
-    }
+
+    var n = shuffled.length / 2;
+    let chosen = shuffled
+        .slice(0, n)
+        .sort((a, b) => a.discordName.localeCompare(b.discordName));
+
+    content += chosen.map(e => e.discordName).join("\n");
 
     content = content.substr(0, 2000);
     
