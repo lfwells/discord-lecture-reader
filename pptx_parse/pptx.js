@@ -6,30 +6,45 @@ export async function parse_pptx_page(req,res,next)
 {
     if (!req.files)
     {
+        var postIndividualLink = Object.keys(req.body).find(v => v.startsWith("postIndividualLink"));
         if (req.body.post)
         {
             //step 3
             var filename = req.body.filename;
             var links = req.body.links;
             var client = getClient();
-            var channel = await client.channels.fetch(req.body.channelToPostIn);
+            var channelToPostIn = await client.channels.fetch(req.body.channelToPostIn);
+            var originalChannelToPostIn = channelToPostIn;
             
             if (req.body.asThread)
             {
-                channel = await channel.threads.create({
+                channelToPostIn = await channelToPostIn.threads.create({
                     name: `Links from ${filename}`,
                     reason: 'Needed a separate thread for lecture links',
                 });
             }
 
-            await channel.send({ content: `Here are ${pluralize(links.length, "Link")} from the slides \`${filename}\`:` });
+            await channelToPostIn.send({ content: `Here are ${pluralize(links.length, "Link")} from the slides \`${filename}\`:` });
             await asyncForEach(links, async function(link) {
-                await channel.send({ content: link });
+                await channelToPostIn.send({ content: link });
             });
 
-            console.log(`Posted ${pluralize(links.length, "Link")}`);
+            res.render("pptx",  { success: `Posted ${pluralize(links.length, "Link")} to #${originalChannelToPostIn.name}` });
+        }
+        else if (postIndividualLink)
+        {
+            var filename = req.body.filename;
+            var links = req.body.links;
+            var client = getClient();
+            var channelToPostIn = await client.channels.fetch(req.body.channelToPostIn);
 
-            res.render("pptx",  { success: `Posted ${pluralize(links.length, "Link")}` });
+            postIndividualLink = postIndividualLink.replace("postIndividualLink", "");
+            var link = links[postIndividualLink];
+
+            await channelToPostIn.send({ content: link });
+            
+
+            res.render("pptx", { successSingle: `Posted Link to #${channelToPostIn.name}`, filename, links, channelToPostIn, postIndividualLink});
         }
         else
         {
@@ -52,7 +67,7 @@ async function parsePPTX(file)
 {
     const pptx2json = new PPTX2Json();
 
-    const json = await pptx2json.toJson("/home/ubuntu/discord/pptx_parse/test.pptx");
+    const json = await pptx2json.toJson(file);
 
     var links = [];
 

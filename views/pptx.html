@@ -12,20 +12,32 @@
 }
 else
 {
+    if (typeof(locals.successSingle) !== "undefined")
+    {
+        %>
+        <p><%=locals.successSingle%></p>
+        <%
+    }
     %>
 
     <h3>Step 1: Upload PPTX File</h3>
     <% if (typeof(locals.links) === "undefined")
     {
-        //TODO: make this prettier
+        //TODO: make this prettier /make it so you can post individual links
         %>
         <form method="post" enctype='multipart/form-data'>
         
-            <div><input type="file" name="pptxFile" /></div>
+            <div><input type="file" name="pptxFile" style="width:500px" /></div>
                 
             <div><input class="btn" type="submit" value="Upload"/></div>
         
         </form>
+        <%
+    }
+    else
+    {
+        %>
+        <p>File: <strong><%=locals.filename%></strong></p>
         <%
     }
     %>
@@ -36,15 +48,16 @@ else
     {
         %>
         <form method="post">
-            <p><%=locals.links.length%> links found in <%=locals.filename%>:</p>
+            <p><%=locals.links.length%> links found:</p>
             <ul>
             <% 
             var i = 0;
             for (var link of locals.links)
             {
+                var justPosted = typeof(locals.postIndividualLink) !== "undefined" && locals.postIndividualLink == i;
                 %>
                 <input type="hidden" name="links[<%=i%>]" value="<%=link%>"/>
-                <li><%=link%></li>
+                <li><input type="submit" name="postIndividualLink<%=i%>" value="<%=justPosted ? "Posted" : "Post Link"%>" /> <%=link%></li>
                 <%
                 i++;
             }
@@ -56,7 +69,7 @@ else
                     label: "Channel to Post In:",
                     selectDefaultText:"-- Select Channel--",
                     id: "channelToPostIn",
-                    value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
+                    value: locals.channelToPostIn ? locals.channelToPostIn.id : (locals.lectureChannel ? locals.lectureChannel.id : undefined),
                     type: "GUILD_TEXT",
                     help: "Links will be posted one-by-one"
                 }) %></p>
