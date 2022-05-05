@@ -1,3 +1,4 @@
+import { getClassList } from '../core/classList.js';
 import { adminCommandOnly, pluralize } from '../core/utils.js';
 import { registerCommand } from '../guild/commands.js';
 
@@ -16,11 +17,16 @@ export default async function(client)
         name: 'unmute_all',
         description: '(ADMIN ONLY) Unmutes all people in the same voice channel that you are in who were previously muted.',
     }; 
+    const snapCommand = {
+        name: 'snap',
+        description: 'Kicks and Bans half of the people from the server at random, like Thanos!',
+    }; 
 
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         await registerCommand(guild, muteAllCommand);
         await registerCommand(guild, unmuteAllCommand);
+        await registerCommand(guild, snapCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -35,6 +41,10 @@ export default async function(client)
             else if (interaction.commandName === "unmute_all") 
             {
                 await doUnMuteAllCommand(interaction);            
+            }
+            else if (interaction.commandName === "snap") 
+            {
+                await doSnapCommand(interaction);            
             }
             
         }
@@ -93,4 +103,28 @@ async function doUnMuteAllCommand(interaction)
     }
             
     await interaction.editReply({ content: `Unmuted ${pluralize(count,"Member")}` });
+}
+
+
+async function doSnapCommand(interaction)
+{
+    console.log("doSnapCommand");
+    await interaction.deferReply({ephemeral: false});
+
+    var content = "Okay not really but, here's who would have been kicked:\n";
+    var classList = await getClassList(interaction.guild);
+    
+    let shuffled = classList
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+
+    for (var i = 0; i < shuffled.length / 2; i++)
+    {
+        content += shuffled[i].discordName + "\n";
+    }
+
+    content = content.substr(0, 2000);
+    
+    await interaction.editReply({ content });
 }
