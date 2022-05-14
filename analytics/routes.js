@@ -1,11 +1,7 @@
-import moment from "moment";
 import { getAttendanceData } from "../attendance/routes.js";
-import { postWasForSession } from "../attendance/sessions.js";
-import { getUserFilterPredicate, getPostsFilterPredicate } from "../core/classList.js";
-import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } from "../core/config.js";
+import { getUserFilterPredicate, getPostsFilterPredicate } from "../classList/classList.js";
 import { asyncForEach } from "../core/utils.js";
 import { getStats, getStatsWeek, predicateExcludeAdmin, loadHistoricalData, getPostsData, loadTimeSeries, loadPostsPerDay, loadPostsPerHour, loadPostsPerSession, loadAttendanceSession } from "./analytics.js";
-import fakeData from "./fakeData.js";
 import { loadPresenceData } from "./presence.js";
 
 

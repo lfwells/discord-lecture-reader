@@ -1,4 +1,4 @@
-import { getClassList } from '../core/classList.js';
+import { getClassList } from '../classList/classList.js';
 import { adminCommandOnly, pluralize } from '../core/utils.js';
 import { registerCommand } from '../guild/commands.js';
 

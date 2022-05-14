@@ -1,10 +1,10 @@
 import { getGuildProperty, getGuildPropertyConverted, GUILD_CACHE } from "../guild/guild.js";
-import * as config from "./config.js";
+import * as config from "../core/config.js";
 import { renderFile } from "ejs";
 import { getStats } from "../analytics/analytics.js";
-import { getClient } from "./client.js";
-import { hasRole, hasRoleID, isAdmin } from "../roles/roles.js";
-import { asyncFilter } from "./utils.js";
+import { getClient } from "../core/client.js";
+import { hasRoleID, isAdmin } from "../roles/roles.js";
+import { asyncFilter } from "../core/utils.js";
 
 
 export function loadClassList(req,res,next)
@@ -274,3 +274,4 @@ async function filterPostPredicate(post, req, offTopicCategory)
 
     return true;
 }
+

@@ -1,0 +1,33 @@
+<%- include('header.html') %>
+
+<h2>Class List</h2>
+<p>See all students, and sync with your MyLO Classlist</p>
+
+%>
+<table id="classList">
+    <tbody>
+        <%
+        console.log(locals.classList);
+        locals.classList.forEach(function(student)
+        { 
+        %>
+        <tr>
+            <td>
+                <img src="" />
+            </td>
+            <td>
+                <a href="/guild/<%= guild.id %>/classList/student/<%=student.discordID%>"><%= student.discordName %></a>
+            </td>
+            <td>
+                <%=student.stats?.posts?.length ?? 0%>
+            </td>
+        </tr>
+        <% 
+        });
+        %>
+    </tbody>
+</table>
+  
+
+
+<%- include('footer.html') %>
