@@ -25,3 +25,18 @@ export async function populateStatsFor(classList, guild, stats)
         console.log(student.stats);
     }
 }
+
+import fetch, { Headers } from 'node-fetch';
+export async function myloTest(req,res,next)
+{
+    const token = await fetch('https://mylo.utas.edu.au/d2l/lp/auth/oauth2/token', {
+        method: 'post',
+        body: 'scope=*:*:*',
+        credentials: 'include',
+        headers: new Headers({
+          'Content-Type': 'application/x-www-form-urlencoded',
+          //'X-Csrf-Token': window.localStorage['XSRF.Token'],
+        }),
+      });
+      res.json({token});
+}

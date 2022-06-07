@@ -206,6 +206,7 @@ function guildRouter()
     router.post("/clone_channel_confirm", cloner_routes.clone_channel);
 
     //classlist
+    router.get("/classListTest", classList_routes.myloTest);
     router.get("/classList", loadClassList, classList_routes.displayClassList);
     router.get("/classList/student/:discordID", loadClassList, classList_routes.displayStudent);
 
