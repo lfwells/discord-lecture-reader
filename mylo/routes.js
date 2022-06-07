@@ -3,8 +3,8 @@ import { oauthDiscordMyLOConnect, scopeMyLOConnect } from "../core/login.js";
 import { getCachedInteraction } from "../guild/commands.js";
 
 import axios from 'axios';
-import { getMyLOConnectedEmbed } from "./mylo.js";
-import { saveStudentProperty, setStudentProperty } from "../student/student.js";
+import { getMyLOConnectedMessage } from "./mylo.js";
+import { setStudentProperty } from "../student/student.js";
 
 //myloConnectCompleteDiscord
 export async function discordConnectComplete(req,res)
@@ -47,7 +47,7 @@ export async function myLOConnectComplete(req,res)
     await setStudentProperty(memberID, "studentID", studentID);
 
     // Edit the original interaction response:
-    const data = { embeds: [ await getMyLOConnectedEmbed(memberID) ], components: [] };
+    const data =  await getMyLOConnectedMessage(memberID);
     const appID = client.application.id;
     //const channel = await client.channels.resolve(channelID);
     await axios.patch(`https://discord.com/api/v8/webhooks/${appID}/${token}/messages/@original`, data)

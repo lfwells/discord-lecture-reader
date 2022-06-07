@@ -7,6 +7,7 @@ export var STUDENT_CACHE = {}; //because querying the db every min is bad (canno
 
 export default async function init(client)
 {
+  /*
   var guilds = client.guilds.cache;
   //store them in the db
   await Promise.all(guilds.map( async (guild) => 
@@ -14,12 +15,15 @@ export default async function init(client)
     await asyncForEach(Array.from(guild.members.cache.entries()), async function(kvp) {
       var studentDiscordID = kvp[0];
       var studentDiscordData = kvp[1];
-      
-      STUDENT_CACHE[studentDiscordID] = studentDiscordData;
 
     });
   })
-  );;
+  );;*/
+
+  var allStudentsData = await studentsCollection.get();
+  allStudentsData.forEach(d => {
+    STUDENT_CACHE[d.id] = d.data();
+  });
   console.log(`Done awaiting all students - total ${getStudentCount()}`); 
 }
 
@@ -104,6 +108,9 @@ export async function saveStudentProperty(property, value, req, res)
   toSave[property] = value;
   await req.studentDocument.set(toSave, { merge: true });
   req[property] = value;
+
+  if (STUDENT_CACHE[req.studentDiscordID] == null)
+    STUDENT_CACHE[req.studentDiscordID] = {};
   STUDENT_CACHE[req.studentDiscordID][property] = value;
 
   await loadStudentProperty(property, false)(req, res, () => {});
@@ -115,7 +122,8 @@ export async function deleteStudentProperty(studentDiscordID, property)
   var toUpdate = {};
   toUpdate[property] = admin.firestore.FieldValue.delete();
   await studentDocument.set(toUpdate, { merge: true });
-  delete STUDENT_CACHE[studentDiscordID][property];
+  if (STUDENT_CACHE[studentDiscordID])
+    delete STUDENT_CACHE[studentDiscordID][property];
 }
 
 
@@ -130,4 +138,13 @@ async function getFakeReq(studentDiscordID)
 }
 
 //TODO: has ethics
-//TODO: has mylo integration etc?
+export function isStudentMyLOConnected(studentDiscordID)
+{
+  var student = getStudent(studentDiscordID);
+  console.log({
+    what: "is connected?",
+    student
+
+  });
+  return (student != null && student.studentID != null);
+}

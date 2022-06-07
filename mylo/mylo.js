@@ -1,4 +1,6 @@
-import { getStudent } from "../student/student.js";
+import { getStudent, isStudentMyLOConnected } from "../student/student.js";
+import { MessageActionRow, MessageButton } from 'discord.js';
+import { oauthDiscordMyLOConnect, scopeMyLOConnect } from '../core/login.js';
 /*
 TODO: 
 - bot application commands need a cache, and need to basically handle guild == null
@@ -10,15 +12,15 @@ TODO:
 
 */
 
-export async function getMyLOConnectedEmbedForInteraction(interaction)
+export async function getMyLOConnectedMessageForInteraction(interaction)
 {
     var studentDiscordID = interaction.member.id;
-    return await getMyLOConnectedEmbed(studentDiscordID);
+    return await getMyLOConnectedMessage(studentDiscordID, interaction);
 }
-export async function getMyLOConnectedEmbed(studentDiscordID)
+export async function getMyLOConnectedMessage(studentDiscordID, interaction)
 {
     var student = getStudent(studentDiscordID);
-    if (student)
+    if (isStudentMyLOConnected(studentDiscordID))
     {
         var connectedEmbed = {
             title: "MyLO Account Connected",
@@ -26,15 +28,41 @@ export async function getMyLOConnectedEmbed(studentDiscordID)
                 { name: "Student ID", value:student.studentID }
             ],
         };
-        return connectedEmbed;
+        return { embeds: [ connectedEmbed], components:[] };
     }
     else
     {
-        var notConnectedEmbed = {
-            title: "MyLO Account Not Connected",
-            description: "We've sent you a DM with a link to connect your account.",
-            fields: [],
-        };
-        return notConnectedEmbed;
+        if (interaction == null)
+        {
+            var notConnectedEmbed = {
+                title: "MyLO Account Not Connected",
+                description: "Run `/mylo connect` to Connect Your Account",
+                fields: [],
+            };
+            
+            return { embeds: [ notConnectedEmbed ], components:[]};
+        }
+
+        const discordOauth = oauthDiscordMyLOConnect.generateAuthUrl({
+            scope: scopeMyLOConnect, 
+            //TODO: encode?
+            state: JSON.stringify({ 
+                guildID:interaction.guild?.id, 
+                interactionID:interaction.id,
+            }), 
+        });
+
+        const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    //.setCustomId('primary')
+                    .setLabel('Connect Discord account to MyLO Account')
+                    .setStyle('LINK')
+                    .setURL(discordOauth)
+                    .setEmoji('🔗')
+            );
+
+        const rows = [ row ];
+        return { embeds:[], components: rows };
     }
 }

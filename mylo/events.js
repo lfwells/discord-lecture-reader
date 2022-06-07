@@ -1,8 +1,7 @@
 import * as config from '../core/config.js';
-import { MessageActionRow, MessageButton } from 'discord.js';
 import { getCachedInteraction, registerCommand,registerApplicationCommand, storeCachedInteractionData } from '../guild/commands.js';
 
-import { oauthDiscordMyLOConnect, scopeMyLOConnect } from '../core/login.js';
+import { getMyLOConnectedMessageForInteraction } from './mylo.js';
 
 export default async function(client)
 {    
@@ -65,29 +64,7 @@ async function doMyLOConnectCommand(interaction)
     
     await interaction.deferReply({ ephemeral: interaction.guild != null });
 
-    const discordOauth = oauthDiscordMyLOConnect.generateAuthUrl({
-        scope: scopeMyLOConnect, 
-        //TODO: encode?
-        state: JSON.stringify({ 
-            guildID:interaction.guild?.id, 
-            interactionID:interaction.id,
-        }), 
-    });
-
-
-    const row = new MessageActionRow()
-    .addComponents(
-        new MessageButton()
-            //.setCustomId('primary')
-            .setLabel('Connect Discord account to MyLO Account')
-            .setStyle('LINK')
-            .setURL(discordOauth)
-            .setEmoji('🔗')
-    );
-
-    const rows = [ row ]
-
-    await interaction.editReply({ components: rows });
+    await interaction.editReply(await getMyLOConnectedMessageForInteraction(interaction));
 }
 
 async function doMyLOConnectCommandButton(i, originalInteraction)
