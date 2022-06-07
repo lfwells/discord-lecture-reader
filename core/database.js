@@ -11,6 +11,7 @@ admin.initializeApp({
 
 export const db = admin.firestore(); 
 export const guildsCollection = db.collection("guilds");
+export const studentsCollection = db.collection("students");
 export async function init_db(){}
 export async function transfer(){}
 
