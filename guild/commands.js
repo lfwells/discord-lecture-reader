@@ -23,7 +23,9 @@ const applicationCommandsToUnregister = []; //put back to []
 export const newGuilds = []; //managed by the guildCreate event, to make sure new servers get commands registered when the bot is added 
 
 const adminOnlyCommands = ["award", "todo", "Mark TODO", "role_select_message", "Flag Message", "Un-flag Message", "flagged", "checklist", "forum_channel",
-                                "mute_all", "unmute_all"
+                                "mute_all", "unmute_all",
+
+                                "mylo" //TODOMYLO: remove when its ready for people
 ];
 
 export const allCommandData = {}
@@ -129,6 +131,9 @@ async function cacheInteraction(interaction)
     var data = {
         id: interaction.id,
         commandName: interaction.commandName,
+        memberID: interaction.member.id,
+        channelID: interaction.channel.id,
+        token:interaction.token,
         options: options //this is SUPER limited...
     };
     console.log(data);
@@ -166,6 +171,7 @@ export async function getCachedInteraction(guild, interactionID)
     return interaction;
 }
 
+//TODO: this maybe should always store a token?
 export async function storeCachedInteractionData(guild, interactionID, data)
 {
     var interactionDocument = await getCachedInteractionDocument(guild, interactionID);

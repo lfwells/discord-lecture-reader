@@ -104,6 +104,7 @@ export async function authHandler (req, res, next)  {
 
     req.path.indexOf("/login") >= 0 || 
     req.path.indexOf("/loginComplete") >= 0 || 
+    req.path.indexOf("/myloConnectComplete") >= 0 || 
     req.path.indexOf("/guide") >= 0 || 
     req.path.indexOf("/text") >= 0 || 
     req.path.indexOf("/text/latest") || 

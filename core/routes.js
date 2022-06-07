@@ -5,6 +5,7 @@ import { filterButtons, loadClassList, loadClassListWithRemoved } from "../class
 import * as commands from "../guild/commands.js";
 
 import * as login_routes from '../core/login.js';
+import * as mylo_routes from '../mylo/routes.js';
 import * as guild_routes from '../guild/routes.js';
 import * as award_routes from '../awards/routes.js';
 import * as analytics_routes from '../analytics/routes.js';
@@ -53,9 +54,13 @@ function defaultRouter()
 
     //login
     router.get("/login", login_routes.loginPage);
-    router.get("/loginComplete", login_routes.loginComplete); 
+    router.get("/loginComplete", login_routes.loginComplete)
 
     router.get("/logout", login_routes.logout);
+
+    //mylo
+    router.get("/myloConnectCompleteDiscord", mylo_routes.discordConnectComplete); 
+    router.get("/myloConnectComplete", mylo_routes.myLOConnectComplete); 
 
     return router;
 }

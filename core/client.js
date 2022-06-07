@@ -62,6 +62,7 @@ import init_role_events from '../roles/events.js';
 import init_help_events from '../help/events.js';
 import init_threader_events from "../threader/events.js";
 import init_voice_events from "../voice/events.js";
+import init_mylo_events from "../mylo/events.js";
 import { init_application_commands, init_interaction_cache } from '../guild/commands.js';
 import { getStudentCount } from '../student/student.js';
 
@@ -93,5 +94,6 @@ export async function init_client(client)
     console.log("Init Help Events...");         await init_help_events(client);
     console.log("Init Threader Events...");     await init_threader_events(client);
     console.log("Init Voice Events...");        await init_voice_events(client);
+    console.log("Init MyLO Events...");         await init_mylo_events(client);
     console.log("End init_client.");
 }

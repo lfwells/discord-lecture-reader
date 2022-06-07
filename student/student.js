@@ -27,7 +27,10 @@ export function getStudentCount()
 {
   return Object.entries(STUDENT_CACHE).length
 }
-
+export function getStudent(studentDiscordID)
+{
+  return STUDENT_CACHE[studentDiscordID];
+}
 export async function getStudentDocument(studentDiscordID)
 {
   return await studentsCollection.doc(studentDiscordID);
@@ -69,7 +72,7 @@ export function loadStudentProperty(property, required)
 //non-route version (but still spoofing route version)
 export async function getStudentProperty(property, studentDiscordID, defaultValue, required)
 {
-  var req = await getFakeReq(guild);
+  var req = await getFakeReq(studentDiscordID);
   var res = {locals:{}, end:(a)=>{}};
   await loadStudentProperty(property, required)(req, res, () => {});
   if (defaultValue != undefined && (res.error || res.locals[property] == undefined))
@@ -99,7 +102,7 @@ export async function saveStudentProperty(property, value, req, res)
   if (value == "false") value = false;
   var toSave = {};
   toSave[property] = value;
-  await req.studentDocument.update(toSave);
+  await req.studentDocument.set(toSave, { merge: true });
   req[property] = value;
   STUDENT_CACHE[req.studentDiscordID][property] = value;
 
@@ -111,7 +114,7 @@ export async function deleteStudentProperty(studentDiscordID, property)
   var studentDocument = await getStudentDocument(studentDiscordID);
   var toUpdate = {};
   toUpdate[property] = admin.firestore.FieldValue.delete();
-  await studentDocument.update(toUpdate);
+  await studentDocument.set(toUpdate, { merge: true });
   delete STUDENT_CACHE[studentDiscordID][property];
 }
 
