@@ -42,8 +42,6 @@ export default async function(client)
         // If the interaction isn't a slash command, return
         else if (interaction.isMessageComponent() && interaction.message.interaction)
         {
-            console.log(interaction.message.interaction.commandName);
-            console.log(interaction.message.interaction.options.getSubcommand());
             if (interaction.message.interaction.commandName === "mylo") 
             {
                 var subCommand = interaction.options.getSubcommand();
