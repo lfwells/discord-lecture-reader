@@ -12,36 +12,62 @@ TODO:
 
 */
 
-export async function getMyLOConnectedMessageForInteraction(interaction)
+export async function getMyLOConnectedMessageForInteraction(interaction, withEmbedTitle)
 {
     var studentDiscordID = interaction.member.id;
-    return await getMyLOConnectedMessage(studentDiscordID, interaction);
+    return await getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle);
 }
-export async function getMyLOConnectedMessage(studentDiscordID, interaction)
+export async function getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle)
 {
     var student = getStudent(studentDiscordID);
     if (isStudentMyLOConnected(studentDiscordID))
     {
         var connectedEmbed = {
-            title: "MyLO Account Connected",
+            title: "Discord Account Connected to MyLO",
             fields: [
                 { name: "Student ID", value:student.studentID }
             ],
         };
-        return { embeds: [ connectedEmbed], components:[] };
+        if (interaction == null)
+        {
+            return { embeds: [ connectedEmbed ], components: []  };
+        }
+        else
+        {
+        
+            const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    //.setCustomId('primary')
+                    .setLabel('Disconnect Account')
+                    .setStyle('LINK')
+                    .setURL(`https://131.217.172.176/myloDisconnect/${interaction.id}/${interaction.guild.id}`)
+                    .setEmoji('❌')
+            );
+
+            const rows = [ row ];
+            return { embeds: [ connectedEmbed ], components: rows  };
+        }
     }
     else
     {
         if (interaction == null)
         {
             var notConnectedEmbed = {
-                title: "MyLO Account Not Connected",
-                description: "Run `/mylo connect` to Connect Your Account",
+                title: withEmbedTitle ?? "Discord Account Not Connected to MyLO",
+                description: "Connecting your Discord account will allow you run Discord Bot commands that read from your MyLO profile.\n\nNote that the bot will store an authentication token and *nothing else* about you.\n\nRun `/mylo connect` to Connect Your Account",
                 fields: [],
             };
             
             return { embeds: [ notConnectedEmbed ], components:[]};
         }
+
+        
+        var notConnectedWithButtonEmbed = {
+            title: withEmbedTitle ?? "Discord Account Not Connected to MyLO",
+            description: "Connecting your Discord account will allow you run Discord Bot commands that read from your MyLO profile.\n\nNote that the bot will store an authentication token and *nothing else* about you.",
+            fields: [],
+        };
 
         const discordOauth = oauthDiscordMyLOConnect.generateAuthUrl({
             scope: scopeMyLOConnect, 
@@ -56,13 +82,13 @@ export async function getMyLOConnectedMessage(studentDiscordID, interaction)
             .addComponents(
                 new MessageButton()
                     //.setCustomId('primary')
-                    .setLabel('Connect Discord account to MyLO Account')
+                    .setLabel('Connect Discord Account to MyLO Account')
                     .setStyle('LINK')
                     .setURL(discordOauth)
                     .setEmoji('🔗')
             );
 
         const rows = [ row ];
-        return { embeds:[], components: rows };
+        return { embeds:[ notConnectedWithButtonEmbed ], components: rows };
     }
 }

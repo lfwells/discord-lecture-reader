@@ -146,5 +146,5 @@ export function isStudentMyLOConnected(studentDiscordID)
     student
 
   });
-  return (student != null && student.studentID != null);
+  return (student != null && student.studentID != null && student.studentID != '');
 }

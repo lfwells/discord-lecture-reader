@@ -4,7 +4,7 @@ import { getCachedInteraction } from "../guild/commands.js";
 
 import axios from 'axios';
 import { getMyLOConnectedMessage } from "./mylo.js";
-import { setStudentProperty } from "../student/student.js";
+import { deleteStudentProperty, getStudentProperty, setStudentProperty } from "../student/student.js";
 
 //myloConnectCompleteDiscord
 export async function discordConnectComplete(req,res)
@@ -56,4 +56,45 @@ export async function myLOConnectComplete(req,res)
         studentID
     });
 
+}
+
+
+//myloDisconnect
+export async function myLODisconnect(req,res)
+{
+    var guildID = req.params.guildID;
+    var interactionID = req.params.interactionID;
+
+    //get required info about the original interaction
+    var client = getClient();
+    var guild = client.guilds.resolve(guildID);
+    var cachedInteraction = await getCachedInteraction(guild, interactionID);
+    //var channelID = cachedInteraction.channelID;
+    var token = cachedInteraction.token;
+    var memberID = cachedInteraction.memberID;
+
+    var studentID = await getStudentProperty("studentID", memberID, null);
+    console.log({studentID});
+    if (studentID != null)
+    {
+        
+        //save the data about the student (example)
+        await deleteStudentProperty(memberID, "studentID", studentID);
+
+        // Edit the original interaction response:
+        const data =  await getMyLOConnectedMessage(memberID);
+        const appID = client.application.id;
+        //const channel = await client.channels.resolve(channelID);
+        await axios.patch(`https://discord.com/api/v8/webhooks/${appID}/${token}/messages/@original`, data)
+
+        res.render("mylo/myloDisconnectComplete", {
+            studentID
+        });
+    }
+    else
+    {
+        res.render("mylo/myloError", {
+            error: "That Discord account is not linked to MyLO."
+        });
+    }
 }

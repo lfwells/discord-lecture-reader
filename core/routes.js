@@ -60,7 +60,8 @@ function defaultRouter()
 
     //mylo
     router.get("/myloConnectCompleteDiscord", mylo_routes.discordConnectComplete); 
-    router.get("/myloConnectComplete", mylo_routes.myLOConnectComplete); 
+    router.get("/myloConnectComplete", mylo_routes.myLOConnectComplete);  
+    router.get("/myloDisconnect/:interactionID/:guildID", mylo_routes.myLODisconnect); 
 
     return router;
 }
