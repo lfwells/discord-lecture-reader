@@ -4,10 +4,9 @@ import { oauthDiscordMyLOConnect, scopeMyLOConnect } from '../core/login.js';
 /*
 TODO: 
 - bot application commands need a cache, and need to basically handle guild == null
-- add a Disconnect button to the connected embed
 - /mylo disconnect
 - do a sample /mylo grades command 
-- /mylo status (shows connected or not)
+- /mylo status (shows connected or not) meh, connect does that now
 - proactive bot sending dm on joining server if student not connected (and not notified before)
 
 */
