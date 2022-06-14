@@ -21,6 +21,7 @@ import ejs from 'ejs';
 import path from 'path';
 
 import FileStore from 'session-file-store';
+import { log } from 'console';
 
 export function init_server()
 {

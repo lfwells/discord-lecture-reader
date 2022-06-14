@@ -33,7 +33,6 @@ export async function myLOConnectComplete(req,res)
 
     //retrieve the discord interation that was used to trigger this button in the first place
     var state = JSON.parse(req.query.state);
-    console.log({state});
 
     //get required info about the original interaction
     var client = getClient();
@@ -42,6 +41,8 @@ export async function myLOConnectComplete(req,res)
     //var channelID = cachedInteraction.channelID;
     var token = cachedInteraction.token;
     var memberID = cachedInteraction.memberID;
+
+    console.log({state, studentID, memberID});
     
     //save the data about the student (example)
     await setStudentProperty(memberID, "studentID", studentID);
@@ -65,11 +66,12 @@ export async function myLODisconnect(req,res)
     var guildID = req.params.guildID;
     var interactionID = req.params.interactionID;
 
+    console.log({guildID});
+
     //get required info about the original interaction
     var client = getClient();
-    var guild = client.guilds.resolve(guildID);
+    var guild = guildID == "dm" ? null : client.guilds.resolve(guildID);
     var cachedInteraction = await getCachedInteraction(guild, interactionID);
-    //var channelID = cachedInteraction.channelID;
     var token = cachedInteraction.token;
     var memberID = cachedInteraction.memberID;
 

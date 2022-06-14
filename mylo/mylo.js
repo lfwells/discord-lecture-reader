@@ -13,7 +13,7 @@ TODO:
 
 export async function getMyLOConnectedMessageForInteraction(interaction, withEmbedTitle)
 {
-    var studentDiscordID = interaction.member.id;
+    var studentDiscordID = interaction.member?.id ?? interaction.user.id;
     return await getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle);
 }
 export async function getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle)
@@ -40,7 +40,7 @@ export async function getMyLOConnectedMessage(studentDiscordID, interaction, wit
                     //.setCustomId('primary')
                     .setLabel('Disconnect Account')
                     .setStyle('LINK')
-                    .setURL(`https://131.217.172.176/myloDisconnect/${interaction.id}/${interaction.guild.id}`)
+                    .setURL(`http://131.217.172.176/myloDisconnect/${interaction.id}/${interaction.guild?.id ?? "dm"}`)
                     .setEmoji('❌')
             );
 

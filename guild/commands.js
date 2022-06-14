@@ -1,3 +1,5 @@
+import moment from "moment";
+import { applicationInteractionsCollection, db } from "../core/database.js";
 import { getGuildDocument, hasFeature } from "./guild.js";
 
 /*
@@ -101,7 +103,7 @@ export function init_interaction_cache(client)
     client.on('interactionCreate', async function(interaction) 
     {
         // If the interaction isn't a slash command, return
-        if ((!interaction.isCommand() && !interaction.isContextMenu()) || interaction.guild == undefined) return;
+        if ((!interaction.isCommand() && !interaction.isContextMenu())) return;
     
         await cacheInteraction(interaction);
     });
@@ -131,25 +133,33 @@ async function cacheInteraction(interaction)
     var data = {
         id: interaction.id,
         commandName: interaction.commandName,
-        memberID: interaction.member.id,
-        channelID: interaction.channel.id,
+        subCommand: interaction.options?.getSubcommand() ?? null,
+        memberID: interaction.member?.id ?? interaction.user?.id ?? null,
+        channelID: interaction.channel?.id ?? null,
         token:interaction.token,
+        timestamp: moment().utc(),
         options: options //this is SUPER limited...
     };
-    console.log(data);
 
-    var guildDocument = await getGuildDocument(interaction.guild.id);
-    await guildDocument.collection("interactions").doc(interaction.id).update(data, {merge:true});
+    await storeCachedInteractionData(interaction.guild, interaction.id, data);
+    //var guildDocument = await getGuildDocument(interaction.guild.id);
+    //await guildDocument.collection("interactions").doc(interaction.id).update(data, {merge:true});
 }
 async function getCachedInteractionDocument(guild, interactionID)
 {
-    var guildDocument = await getGuildDocument(guild.id);
-    return await guildDocument.collection("interactions").doc(interactionID);
-    
+    if (guild != null)
+    {
+        var guildDocument = await getGuildDocument(guild.id);
+        return await guildDocument.collection("interactions").doc(interactionID);
+    }
+    else
+    {
+        return await applicationInteractionsCollection.doc(interactionID);
+    }
 }
 export async function getCachedInteraction(guild, interactionID)
 {
-    console.log(guild.id, interactionID);
+    //console.log(guild.id, interactionID);
     var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
     var interactionSnapshot = await interactionDocument.get();
     var interaction = interactionSnapshot.data();
@@ -171,11 +181,10 @@ export async function getCachedInteraction(guild, interactionID)
     return interaction;
 }
 
-//TODO: this maybe should always store a token?
 export async function storeCachedInteractionData(guild, interactionID, data)
 {
     var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
-    await interactionDocument.update(data, {merge: true});
+    await interactionDocument.set(data, {merge: true});
     
     return await getCachedInteraction(guild, interactionID);
 }
