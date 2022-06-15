@@ -81,7 +81,7 @@ export async function myLODisconnect(req,res)
     {
         
         //save the data about the student (example)
-        await deleteStudentProperty(memberID, "studentID", studentID);
+        await deleteStudentProperty(memberID, "studentID");
 
         // Edit the original interaction response:
         const data =  await getMyLOConnectedMessage(memberID);

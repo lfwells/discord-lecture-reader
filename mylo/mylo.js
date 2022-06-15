@@ -3,26 +3,41 @@ import { MessageActionRow, MessageButton } from 'discord.js';
 import { oauthDiscordMyLOConnect, scopeMyLOConnect } from '../core/login.js';
 /*
 TODO: 
-- bot application commands need a cache, and need to basically handle guild == null
 - /mylo disconnect
-- do a sample /mylo grades command 
 - /mylo status (shows connected or not) meh, connect does that now
 - proactive bot sending dm on joining server if student not connected (and not notified before)
 
 */
+export async function checkMyLOAccessAndReply(interaction, allowDM)
+{
+    //also check this isn't being run as a bot command
+    if (interaction.guild == null && !allowDM)
+    {
+        interaction.editReply({ content: "You should run this command in the server of a unit." });
+        return true;
+    }
 
-export async function getMyLOConnectedMessageForInteraction(interaction, withEmbedTitle)
+    var studentDiscordID = interaction.member?.id ?? interaction.user.id;
+    if (isStudentMyLOConnected(studentDiscordID))
+    {
+        return false;
+    }
+    await interaction.editReply(await getMyLOConnectedMessageForInteraction(interaction, "You need to link your Discord Account to your MyLO Account to run this command"));
+    return true;
+}
+
+export async function getMyLOConnectedMessageForInteraction(interaction, withEmbedTitle, withEmbedTitleForAlreadyConnected, withButtonText)
 {
     var studentDiscordID = interaction.member?.id ?? interaction.user.id;
-    return await getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle);
+    return await getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle, withEmbedTitleForAlreadyConnected, withButtonText);
 }
-export async function getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle)
+export async function getMyLOConnectedMessage(studentDiscordID, interaction, withEmbedTitle, withEmbedTitleForAlreadyConnected, withButtonText)
 {
     var student = getStudent(studentDiscordID);
     if (isStudentMyLOConnected(studentDiscordID))
     {
         var connectedEmbed = {
-            title: "Discord Account Connected to MyLO",
+            title: withEmbedTitleForAlreadyConnected ?? "Discord Account Connected to MyLO",
             fields: [
                 { name: "Student ID", value:student.studentID }
             ],
@@ -37,8 +52,7 @@ export async function getMyLOConnectedMessage(studentDiscordID, interaction, wit
             const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
-                    //.setCustomId('primary')
-                    .setLabel('Disconnect Account')
+                    .setLabel(withButtonText ?? 'Disconnect Account')
                     .setStyle('LINK')
                     .setURL(`http://131.217.172.176/myloDisconnect/${interaction.id}/${interaction.guild?.id ?? "dm"}`)
                     .setEmoji('❌')
