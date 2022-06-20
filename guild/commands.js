@@ -133,7 +133,7 @@ async function cacheInteraction(interaction)
     var data = {
         id: interaction.id,
         commandName: interaction.commandName,
-        subCommand: interaction.options?.getSubcommand() ?? null,
+        subCommand: interaction.options?.getSubcommand(false) ?? null,
         memberID: interaction.member?.id ?? interaction.user?.id ?? null,
         channelID: interaction.channel?.id ?? null,
         token:interaction.token,
