@@ -21,6 +21,7 @@ import ejs from 'ejs';
 import path from 'path';
 
 import FileStore from 'session-file-store';
+import { log } from 'console';
 
 export function init_server()
 {
@@ -96,14 +97,16 @@ export function init_server()
   init_routes(app);
 }
 
-export async function authHandler (req, res, next)  { 
-
+export async function authHandler (req, res, next)  
+{ 
   if (req.path != "/" && (
     
     req.path.indexOf("obs") >= 0 ||  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
 
     req.path.indexOf("/login") >= 0 || 
     req.path.indexOf("/loginComplete") >= 0 || 
+    req.path.indexOf("/myloConnectComplete") >= 0 || 
+    req.path.indexOf("/myloDisconnect") >= 0 || 
     req.path.indexOf("/guide") >= 0 || 
     req.path.indexOf("/text") >= 0 || 
     req.path.indexOf("/text/latest") || 

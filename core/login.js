@@ -1,15 +1,11 @@
 import crypto from 'crypto';
 import DiscordOauth2 from "discord-oauth2";
 import { guildList } from '../guild/routes.js';
+import { oauth } from '../_oathDiscord.js';
 import { authHandler } from './server.js';
 
 const scope = ["identify", "guilds", "email"];
-
-export const oauth = new DiscordOauth2({
-	clientId: "811958340967071745",
-	clientSecret: "GrW0O4FZ9VKiNCrK-fAoXS2T0Mb41Oos",
-	redirectUri: "http://131.217.172.176/loginComplete", 
-});
+export const scopeMyLOConnect = ["identify", "guilds"];
 
 export async function loginPage(req,res)
 {

@@ -4,10 +4,9 @@ import * as Config from "../core/config.js";
 import { didAttendSession, postWasForSession } from "../attendance/sessions.js";
 import { getSessionsOld } from "../attendance/old_sessions.js";
 import { db, guildsCollection } from "../core/database.js";
-import { getClient } from "../core/client.js";
 import fakeData from "./fakeData.js";
 import { asyncFilter, asyncForEach } from "../core/utils.js";
-import { getClassList } from "../core/classList.js";
+import { getClassList } from "../classList/classList.js";
 
 export var ANALYTICS_CACHE = {}; //because querying the db for all messages on demand is bad (cannot cache on node js firebase it seems)s
 
@@ -71,6 +70,7 @@ export async function getPostsData(guild, userPredicate, postPredicate)
         return filtered;
     }
 
+    console.log(`getPostsData called with no cache for ${guild.id}, this little manauevr will cost us 10 years`);
     var collection = "analytics";
     if (
         guild.id == "801006169496748063" || //kit305 2021

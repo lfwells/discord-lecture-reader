@@ -28,16 +28,7 @@ In the root directory, you will need a `users.js` file with the users and passwo
 
 ## Usage
 
-use pm2 start process.json
-
 `sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080`
-
-```
-screen -S <process description>	start a session
-Ctrl+A Ctrl+D				detach from a session
-screen -ls				list sessions
-screen -r <process description>	        reattach a session
-```
 
 ```
 npm install pm2 -g

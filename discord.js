@@ -3,6 +3,7 @@ import { getClient, init_client } from './core/client.js';
 
 //import things need to initialize discord
 import init_guilds from "./guild/guild.js";
+import init_students from "./student/student.js";
 
 
 import { init_db } from './core/database.js';
@@ -16,6 +17,7 @@ client.on('ready', async () =>
 	console.log(`Logged in as ${client.user.tag}!`);
 
 	//save all the guilds etc to db
+	await init_students(client);
 	await init_guilds(client);
 
 	await init_client(client);

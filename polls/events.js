@@ -105,6 +105,8 @@ export default async function(client)
 }
 export async function doPollCommand(interaction, scheduledOptions, checklist)
 {
+    await interaction.deferReply();
+
     var pollAuthor = interaction.user?.id ?? scheduledOptions.authorID;
     
     var question = scheduledOptions ? scheduledOptions.question : interaction.options.getString("question", true);
@@ -169,7 +171,7 @@ export async function doPollCommand(interaction, scheduledOptions, checklist)
     }
     else
     {
-        await interaction.reply({embeds: [ resultsEmbed ], components: await createButtons(interaction, interaction.channel)});
+        await interaction.editReply({embeds: [ resultsEmbed ], components: await createButtons(interaction, interaction.channel)});
     }
 }
 async function doPollCommandButton(i, originalInteraction) 
@@ -269,7 +271,11 @@ async function doPollCommandButton(i, originalInteraction)
                 {
                     //console.log("voted before, cancel out");
                     //await i.update({ embeds: [ await resultsText(originalInteraction) ]});//, components: await createButtons(originalInteraction) });
-                    await i.reply({content: "You've already voted for something else, and the poll creator made it so you can only vote for one thing.", ephemeral:true });
+                    //todo this should just switch but whatever
+                    if (allow_undo)
+                        await i.reply({content: "You've already voted for something else, and the poll creator made it so you can only vote for one thing. Deselect the thing you have already voted before voting again.", ephemeral:true });
+                    else
+                        await i.reply({content: "You've already voted for something else, and the poll creator made it so you can only vote for one thing.", ephemeral:true });
                     return;
                 }
             }

@@ -1,10 +1,11 @@
 import { downloadResource, removeQuestionMark } from "./utils.js";
 
 import * as guild from "../guild/guild.js";
-import { filterButtons, loadClassList, loadClassListWithRemoved } from "../core/classList.js";
+import { filterButtons, loadClassList, loadClassListWithRemoved } from "../classList/classList.js";
 import * as commands from "../guild/commands.js";
 
 import * as login_routes from '../core/login.js';
+import * as mylo_routes from '../mylo/routes.js';
 import * as guild_routes from '../guild/routes.js';
 import * as award_routes from '../awards/routes.js';
 import * as analytics_routes from '../analytics/routes.js';
@@ -15,6 +16,7 @@ import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 import * as invite_routes from "../invite/routes.js";
 import * as guide_routes from "../guide/routes.js";
 import * as cloner_routes from "../cloner/routes.js";
+import * as classList_routes from "../classList/routes.js";
 import { Router } from "express";
 import * as sheet_routes from "../analytics/sheets.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
@@ -52,9 +54,14 @@ function defaultRouter()
 
     //login
     router.get("/login", login_routes.loginPage);
-    router.get("/loginComplete", login_routes.loginComplete); 
+    router.get("/loginComplete", login_routes.loginComplete)
 
     router.get("/logout", login_routes.logout);
+
+    //mylo
+    router.get("/myloConnectCompleteDiscord", mylo_routes.discordConnectComplete); 
+    router.get("/myloConnectComplete", mylo_routes.myLOConnectComplete);  
+    router.get("/myloDisconnect/:interactionID/:guildID", mylo_routes.myLODisconnect); 
 
     return router;
 }
@@ -203,6 +210,11 @@ function guildRouter()
     router.get("/clone_channel", guild_routes.loadGuildList, cloner_routes.clone_channel_select);
     router.post("/clone_channel", cloner_routes.clone_channel);
     router.post("/clone_channel_confirm", cloner_routes.clone_channel);
+
+    //classlist
+    router.get("/classListTest", classList_routes.myloTest);
+    router.get("/classList", loadClassList, classList_routes.displayClassList);
+    router.get("/classList/student/:discordID", loadClassList, classList_routes.displayStudent);
 
 
     return router;

@@ -5,7 +5,7 @@ import { init_invites } from "../invite/invite.js";
 import { init_roles } from '../roles/roles.js';
 
 import { getClient } from "../core/client.js";
-import { oauth } from '../core/login.js';
+import { oauth } from '../_oathDiscord.js';
 import { init_sheet_for_guild } from '../analytics/sheets.js';
 import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";

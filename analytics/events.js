@@ -182,13 +182,20 @@ export default async function(client)
             {
                 await doButtonCommand(interaction);            
             }
-            else if (await hasFeature(interaction.guild, "analytics") == false)
+            
+            if (interaction.commandName === "stats" || 
+                interaction.commandName === "statsweek" ||
+                interaction.commandName == "post_streak" ||
+                interaction.commandName == "active_days")
             {
-                interaction.reply({
-                    content: "Post stats not enabled on this server",
-                    ephemeral: true
-                });
-                return;
+                if (await hasFeature(interaction.guild, "analytics") == false)
+                {
+                    interaction.reply({
+                        content: "Post stats not enabled on this server",
+                        ephemeral: true
+                    });
+                    return;
+                }
             }
         
             // Check if it is the correct command

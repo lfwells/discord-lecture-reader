@@ -98,6 +98,7 @@
             
                     <ul>
                         <li><a <%=currentTab("")%> href="/guild/<%= guild.id %>/">Configure Server</a></li>
+                        <li><a <%=currentTab("classList")%> href="/guild/<%= guild.id %>/classList/">Class List</a></li>
                         <li><a <%=currentTab("features")%> href="/guild/<%= guild.id %>/features/">Features</a></li>
 
                         <% if (hasFeature("attendance"))
