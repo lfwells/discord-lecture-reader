@@ -105,7 +105,8 @@ export default async function(client)
 }
 export async function doPollCommand(interaction, scheduledOptions, checklist)
 {
-    await interaction.deferReply();
+    if (interaction.deferReply)
+        await interaction.deferReply();
 
     var pollAuthor = interaction.user?.id ?? scheduledOptions.authorID;
     
