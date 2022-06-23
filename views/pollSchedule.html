@@ -4,16 +4,24 @@
 
 <!--<p><a href="../clearpoll/">Clear Current Poll</a></p>-->
 
-<ul>
-    <% polls.forEach((poll) => { %>
-        <li><%= poll.note %>
-            <ul style="list-style:none">
-                <li><%= poll.poll %></li>
-                <li><button onclick="poll('pollRoboLinds/<%= encodeURIComponent(poll.poll).replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23") %>')">POST POLL</a></li>
-            </ul>
-        </li>
-    <% }) %>
-</ul>
+    <%
+    Object.entries(polls).forEach((kvp) => {
+        var page = kvp[0];
+        var thisPagePolls = kvp[1];
+        %>    
+        <h3><%=page%></h3>
+        <ul>
+            <% thisPagePolls.forEach((poll) => { %>
+                <li><%= poll.note %>
+                    <ul style="list-style:none">
+                        <li><%= poll.poll %></li>
+                        <li><button onclick="poll('pollRoboLinds/<%= encodeURIComponent(poll.poll).replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23") %>')">POST POLL</a></li>
+                    </ul>
+                </li>
+            <% }) %>
+        </ul>
+        <% 
+    }) %>
 
 <form method="post">
     <p>Format is new line per poll, everything before first &quot; is a note. E.g.</p>
@@ -21,8 +29,14 @@
 Slide 1 /poll "Homework/Pracs I've already done:" "Watched the Intro to Unity lecture" "Set up itch.io and shared it on the #itch-io channel" "Installed Unity 2020.2.3f1" "Finished Prac 1" "Finished and shown Exercise 1" "Started Prac 2" "Finished Prac 2" "Finished and shown Exercise 2" "More Pracs/Exercises than that"
     </pre>
     <textarea name="polls" style="width:100%; height:500px">
-<% polls.forEach((poll) => { %><%= poll.note %> <%= poll.poll %>
+<% Object.entries(polls).forEach((kvp) => {
+    var page = kvp[0];
+    var thisPagePolls = kvp[1];%>    
+!-- <%=page%>
+<% thisPagePolls.forEach((poll) => { %><%= poll.note %> <%= poll.poll %>
     
+<% }) %>
+
 <% }) %>
     </textarea>
     <p><input type="submit" value="Save" /></p>
