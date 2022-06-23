@@ -1,6 +1,7 @@
 import { getStudent, isStudentMyLOConnected } from "../student/student.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { oauthDiscordMyLOConnect, scopeMyLOConnect } from '../core/login.js';
+import { scopeMyLOConnect } from '../core/login.js';
+import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 /*
 TODO: 
 - /mylo disconnect

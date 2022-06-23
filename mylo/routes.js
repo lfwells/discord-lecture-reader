@@ -1,5 +1,6 @@
 import { getClient } from "../core/client.js";
-import { oauthDiscordMyLOConnect, scopeMyLOConnect } from "../core/login.js";
+import { scopeMyLOConnect } from "../core/login.js";
+import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getCachedInteraction } from "../guild/commands.js";
 
 import axios from 'axios';
