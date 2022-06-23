@@ -4,22 +4,42 @@
 
 <!--<p><a href="../clearpoll/">Clear Current Poll</a></p>-->
 
+<div>
+    <label>
+        Select Page: 
+        <select id="selectScheduledPollPage">
+            <%
+            Object.entries(polls).forEach((kvp) => {
+                var page = kvp[0];
+                var id = page.replace(/[^a-z0-9]/gi,'');
+                %>
+                <option value="page_<%=id%>"><%=page%></option>
+                <%
+            });
+            %>
+        </select>
+    </label>
+</div>
+
     <%
     Object.entries(polls).forEach((kvp) => {
         var page = kvp[0];
+        var id = page.replace(/[^a-z0-9]/gi,'');
         var thisPagePolls = kvp[1];
         %>    
-        <h3><%=page%></h3>
-        <ul>
-            <% thisPagePolls.forEach((poll) => { %>
-                <li><%= poll.note %>
-                    <ul style="list-style:none">
-                        <li><%= poll.poll %></li>
-                        <li><button onclick="poll('pollRoboLinds/<%= encodeURIComponent(poll.poll).replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23") %>')">POST POLL</a></li>
-                    </ul>
-                </li>
-            <% }) %>
-        </ul>
+        <div id="page_<%=id%>" class="scheduledPollPage">
+            <h3><%=page%></h3>
+            <ul>
+                <% thisPagePolls.forEach((poll) => { %>
+                    <li><%= poll.note %>
+                        <ul style="list-style:none">
+                            <li><%= poll.poll %></li>
+                            <li><button onclick="poll('pollRoboLinds/<%= encodeURIComponent(poll.poll).replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23") %>')">POST POLL</a></li>
+                        </ul>
+                    </li>
+                <% }) %>
+            </ul>
+        </div>
         <% 
     }) %>
 
@@ -31,8 +51,8 @@ Slide 1 /poll "Homework/Pracs I've already done:" "Watched the Intro to Unity le
     <textarea name="polls" style="width:100%; height:500px">
 <% Object.entries(polls).forEach((kvp) => {
     var page = kvp[0];
-    var thisPagePolls = kvp[1];%>    
-!-- <%=page%>
+    var thisPagePolls = kvp[1];%>!-- <%=page%>
+
 <% thisPagePolls.forEach((poll) => { %><%= poll.note %> <%= poll.poll %>
     
 <% }) %>
@@ -47,11 +67,20 @@ Slide 1 /poll "Homework/Pracs I've already done:" "Watched the Intro to Unity le
     {
         $.ajax(poll);
     }
+
+    function selectScheduledPollPage()
+    {
+        var id = $("#selectScheduledPollPage").val();
+        $(".scheduledPollPage").hide();
+        $("#"+id).show();
+    }
 $(function()
 {
     $(".post").on("click", function() {
         $(this).text("Posted");
     });
+    $("#selectScheduledPollPage").on("change", selectScheduledPollPage);
+    selectScheduledPollPage();
 });
 </script>
 
