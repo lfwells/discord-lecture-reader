@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import DiscordOauth2 from "discord-oauth2";
 import { guildList } from '../guild/routes.js';
 import { oauth } from '../_oathDiscord.js';
 import { authHandler } from './server.js';

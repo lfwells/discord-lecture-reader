@@ -8,7 +8,7 @@ export const app = express();
 
 //import basicAuth from 'express-basic-auth';
 //import users from "../users.js";
-import { loginPage, oauth } from './login.js';
+import { loginPage } from './login.js';
 
 import cors from "cors"; 
 
@@ -22,6 +22,7 @@ import path from 'path';
 
 import FileStore from 'session-file-store';
 import { log } from 'console';
+import { oauth } from '../_oathDiscord.js';
 
 export function init_server()
 {
