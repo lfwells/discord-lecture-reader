@@ -128,7 +128,7 @@ export default async function (client)
                 toLog.screenShares = 0;
                 toLog.videoShares = 0;
 
-                var id = d.getTime()+"_"+member.displayName;
+                var id = d.getTime()+"_"+member.id;
                 var attendanceRowReference = attendanceCollection.doc(id);
                 attendanceRowReference.set(toLog);
                 attendanceRow = await attendanceRowReference.get();
