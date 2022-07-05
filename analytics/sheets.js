@@ -11,6 +11,8 @@ var sheets;
 var drive;
 export async function init_google()
 {
+    return; //turning this off for the moment
+
     // If modifying these scopes, delete token.json.
     const SCOPES = [
         'https://spreadsheets.google.com/feeds',
@@ -33,6 +35,8 @@ export async function init_google()
 
 export async function init_sheet_for_guild(guild)
 {
+    return; //turning this off for now
+    
     var currentSpreadsheetId = await getGuildProperty("googleSheetID", guild, null);
     if (currentSpreadsheetId == null)
     {
