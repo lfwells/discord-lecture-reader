@@ -151,6 +151,7 @@ export async function getProgressDataOld(req,res,next)
 
 export async function recordSectionProgress(req, res, next) 
 {
+    console.log("recordSectionProgress", req.query);
     if (req.query.studentID)
     {
         //console.log("stud id", req.query.studentID);
@@ -159,6 +160,7 @@ export async function recordSectionProgress(req, res, next)
 
         await req.guildDocument.collection("section_progress").add(req.query);
         res.json({"success": true});
+        console.log({success:true});
         next()
         return;
     }
@@ -169,6 +171,10 @@ export async function recordSectionProgress(req, res, next)
    
 export async function getSectionProgress(req,res,next)
 {
+    if (req.query.post) //ugly workaround for unity C# web requests
+    {
+        return recordSectionProgress(req,res,next);
+    }
     if (req.query.studentID)
     {
         //console.log("stud id", req.query.studentID);

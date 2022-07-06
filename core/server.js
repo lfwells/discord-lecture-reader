@@ -8,7 +8,8 @@ export const app = express();
 
 //import basicAuth from 'express-basic-auth';
 //import users from "../users.js";
-import { loginPage, oauth } from './login.js';
+import { loginPage } from './login.js';
+import { oauth } from '../_oathDiscord.js';
 
 import cors from "cors"; 
 
@@ -99,6 +100,7 @@ export function init_server()
 
 export async function authHandler (req, res, next)  
 { 
+  //console.log("auth handler", req.path);
   if (req.path != "/" && (
     
     req.path.indexOf("obs") >= 0 ||  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
@@ -127,6 +129,7 @@ export async function authHandler (req, res, next)
     }
     catch (DiscordHTTPError) { }
 
+    //console.log("auth handler next", req.path);
     next();
   } 
   else 

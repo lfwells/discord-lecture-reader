@@ -186,11 +186,14 @@ async function doFlexCommand(interaction)
 
     var flexEmbed = {
         title: (member.nickname ?? member.username)+" has "+pluralize(awards.length, "award"),
-        thumbnail: { 
-            url:member.user.displayAvatarURL()
-        },
         fields:[]
     };
+    if (member.user)
+    {
+        flexEmbed.thumbnail = { 
+            url:member.user.displayAvatarURL()
+        };
+    }
 
     if (awards.length == 0)
     {
