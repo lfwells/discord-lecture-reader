@@ -2,6 +2,10 @@
 
 <h2>Scheduled Polls</h2>
 
+<p>
+    <button id="clearPoll">Clear OBS Poll</button> <span id="clearPollComplete"></span>
+</p>
+
 <!--<p><a href="../clearpoll/">Clear Current Poll</a></p>-->
 
 <div>
@@ -81,6 +85,18 @@ $(function()
     });
     $("#selectScheduledPollPage").on("change", selectScheduledPollPage);
     selectScheduledPollPage();
+
+    $("#clearPoll").on("click", function() {
+        $.ajax({
+            url: "clearPoll",
+            complete:function () {
+                $("#clearPollComplete").text("Cleared.");
+                setTimeout(function() {
+                    $("#clearPollComplete").text("");
+                }, 2000);
+            }
+        });
+    });
 });
 </script>
 
