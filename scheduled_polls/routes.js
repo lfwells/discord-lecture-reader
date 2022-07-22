@@ -18,7 +18,7 @@ export async function load(req,res,next) {
 export async function getPollSchedule(req,res,next) 
 {
   res.render("pollSchedule", {
-    pages: req.polls
+    polls: req.polls
   });
 }
 

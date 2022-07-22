@@ -149,9 +149,9 @@
                         }
                         %>
 
+                        <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
                         <% if (hasFeature("obs") && locals.lectureChannelID) { %>
                             <!--<li><a href="/guild/<%= guild.id %>/clearpoll/">Clear Current Poll</a></li>-->
-                            <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
                             <li><a <%=currentTab("text")%> href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
                             <li><a <%=currentTab("obs")%> href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
                         <% } %>
