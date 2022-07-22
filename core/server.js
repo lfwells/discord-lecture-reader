@@ -3,6 +3,7 @@ import init_routes from './routes.js';
 
 //create a server to listen to requests
 import express  from 'express';
+import expressWebSocket from "express-ws";
 
 export const app = express();
 
@@ -23,6 +24,8 @@ import path from 'path';
 
 import FileStore from 'session-file-store';
 import { log } from 'console';
+import { createRouter } from 'discord-chat-preview';
+import { getClient } from './client.js';
 
 export function init_server()
 {
@@ -41,9 +44,14 @@ export function init_server()
       resave: false 
   }));
 
+  //Lake's chat preview package (TODO: authenticate)
+  expressWebSocket(app);    // << Make sure you have WS support on your express
+  app.use("/chat", createRouter(getClient()));
+  
+
   app.use(authHandler);
   /*app.use())*/
-  
+
   app.use(express.json());
   app.use(express.urlencoded({extended:true}));
 

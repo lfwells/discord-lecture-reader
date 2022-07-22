@@ -8,6 +8,11 @@ import init_students from "./student/student.js";
 
 import { init_db } from './core/database.js';
 
+
+import { initErrorHandler } from './core/errors.js';
+import { init_server } from "./core/server.js";
+import { init_google } from './analytics/sheets.js';
+
 //listen for when discord is logged in
 const client = getClient();
 client.on('ready', async () => 
@@ -22,6 +27,16 @@ client.on('ready', async () =>
 
 	await init_client(client);
 
+
+	//register for errors to be posted to test server
+	initErrorHandler(client);
+
+	//web server
+	init_server();
+
+	//google sheets
+	init_google();
+
 	console.log('\u0007');
 	console.log("---------\nREADY\n---------"); 
 });
@@ -29,22 +44,9 @@ client.on('ready', async () =>
 //login with discord auth token
 import token from './core/token.js';  
 console.log("Logging in to Discord...");  
-client.login(token).catch(reason => {
+await client.login(token).catch(reason => {
 
     console.log("Login failed: " + reason);
     console.log("Token used: " + token);
 
 }); 
-
-//register for errors to be posted to test server
-import { initErrorHandler } from './core/errors.js';
-initErrorHandler(client);
-
-
-//web server
-import { init_server } from "./core/server.js";
-init_server();
-
-//google sheets
-import { init_google } from './analytics/sheets.js';
-init_google();

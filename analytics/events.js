@@ -10,6 +10,7 @@ export default async function(client)
 {
     client.on('messageCreate', async (msg) =>  
     {
+        console.log("analytics messageCreate");
         if (msg.inGuild() == false) return;
 
         if (await hasFeature(msg.guild, "analytics") == false) return;
