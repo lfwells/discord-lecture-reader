@@ -18,6 +18,9 @@ export default async function(client)
 
         var guildDocument = await getGuildDocument(msg.guild.id);
         await guildDocument.collection("analytics").add(await createFirebaseRecordFrom(msg));
+
+        
+        await setGuildProperty(msg.guild, "totalPosts", (msg.guild.totalPosts ?? 0) + 1);
     });
 
     

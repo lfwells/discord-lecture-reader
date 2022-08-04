@@ -116,11 +116,18 @@ export async function getAdminGuilds(client, req)
 
     if (req.path.indexOf("clone") == -1)
     {
-      await asyncForEach(result, async function(guild)  
-      {
-        guild.totalPosts = (await getPostsData(guild)).length;
-        console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
-      });
+      //a once-off cache totalPost count
+        await asyncForEach(result, async function(guild)  
+        {
+          await getGuildProperty("totalPosts", guild, "totalPosts");
+          if (!guild.totalPosts)
+          {
+            console.log("NO DB CACHE for totalPosts for guild", guild.name, "fetching once-off");
+            guild.totalPosts = (await getPostsData(guild)).length;
+            console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
+            await setGuildProperty(guild, "totalPosts", guild.totalPosts);
+          }
+        });
     }
     return result;
   }

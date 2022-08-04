@@ -75,6 +75,8 @@ function guildRouter()
     //middleware check that this is one of "our" servers 
     router.use(guild.checkGuildAdmin);
 
+    router.use(guild.loadGuildProperty("totalPosts"));
+
     router.use(guild.loadGuildProperty("botName"));
     router.use(guild.loadGuildProperty("adminRoleID"));
     router.use(guild.loadGuildProperty("studentRoleID"));
@@ -212,8 +214,8 @@ function guildRouter()
     router.post("/clone_channel_confirm", cloner_routes.clone_channel);
 
     //classlist
-    router.get("/classListTest", classList_routes.myloTest);
     router.get("/classList", loadClassList, classList_routes.displayClassList);
+    router.post("/classList", loadClassList, classList_routes.uploadMyLOCSV, classList_routes.displayClassList); 
     router.get("/classList/student/:discordID", loadClassList, classList_routes.displayStudent);
 
 
