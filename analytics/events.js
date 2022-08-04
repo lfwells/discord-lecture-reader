@@ -5,7 +5,7 @@ import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
-import { setGuildProperty } from '../guild/routes.js';
+import { setGuildProperty } from '../guild/guild.js';
 
 export default async function(client)
 {
