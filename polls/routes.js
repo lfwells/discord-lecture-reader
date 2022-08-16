@@ -1,6 +1,6 @@
-import { MessageActionRow, MessageButton } from "discord.js";
+import moment from "moment";
 import { loadAllMessagesForChannel } from "../analytics/analytics.js";
-import { getClient, send } from "../core/client.js";
+import { send } from "../core/client.js";
 import * as config from "../core/config.js";
 import { redirectToWhereWeCameFrom } from "../core/utils.js";
 
@@ -302,9 +302,16 @@ export async function pollHistory(req,res,next)
   var roboLindsayMessages = messages.filter(m => m.author.id == config.ROBO_LINDSAY_ID); 
   await Promise.all(roboLindsayMessages.map( async (post) => 
   {
-    if (post.interaction && post.interaction.commandName == config.POLL_COMMAND)
+    //if (post.interaction && post.interaction.commandName == config.POLL_COMMAND)
+    if (post.embeds && post.embeds.length > 0)
     {
-      polls.push(await readRoboLindsayPoll(post.embeds[0]));
+      try 
+      {
+        var p = await readRoboLindsayPoll(post.embeds[0]);
+        p.timestamp = moment(post.createdTimestamp);
+        polls.push(p);
+      }
+      catch (e) { console.error(e); }
     }
   }));
 
