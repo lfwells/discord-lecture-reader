@@ -14,7 +14,8 @@ function hasFeature(feature)
     { 
         label: "Achievements",
         feature: "achievements",
-        onChanged: '$("#achievementsFeature").toggle(value)'
+        onChanged: '$("#achievementsFeature").toggle(value)',
+        featureHasTab: true
     }) %>
 </dt>
 
@@ -34,11 +35,13 @@ function hasFeature(feature)
     { 
         label: "Attendance Tracking",
         feature: "attendance",
+        featureHasTab: true
     }) %></dt>
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "Scheduled Sessions",
         feature: "sessions",
+        featureHasTab: true
     }) %></dt>
 <dt><%- include("subViews/featureSelect.html", 
     { 
@@ -48,12 +51,14 @@ function hasFeature(feature)
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "Open Broadcaster Studio Integration",
-        feature: "obs"
+        feature: "obs",
+        featureHasTab: true
     }) %></dt>
 <dt><%- include("subViews/featureSelect.html", 
     { 
         label: "Custom Invites",
-        feature: "invites"
+        feature: "invites",
+        featureHasTab: true
     }) %></dt>
 </dl>
 <dt><%- include("subViews/featureSelect.html", 

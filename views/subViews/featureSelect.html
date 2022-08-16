@@ -41,7 +41,9 @@ var id = locals.id ?? uuid(); %>
                 contentType: 'application/json',
                 success: (data) => {
                     $(label).html(previousHtml);
-                    $(label).append('<span class="saved">Saved.</span>');
+                    $(label).append('<span class="saved">Saved. </span>');
+                    if (value) //TODO: this should just update the header
+                        $(label).append('<span class="saved"><%-typeof featureHasTab !== 'undefined' ? " (Refresh this page to see the tab for this feature)" : "" %>.</span>');
                     $(label).find("input").prop("checked", value);
                     label.find("input").on("change", changed);
 
