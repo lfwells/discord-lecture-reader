@@ -1,11 +1,14 @@
 //import { populateStatsFor } from "./classList.js";
+import e from "express";
 import { getStats } from "../analytics/analytics.js";
+import { parseCSV } from "./classList.js";
 
 export async function displayClassList(req,res,next) 
 {
     await populateStatsFor(req.classList, req.guild);
     res.render("classList", {
-        classList: req.classList
+        classList: req.classList,
+        unengagedClassList: req.unengagedClassList ?? null //list of people on mylo but not on discord. TODO: list of UNLINKED discord accs
     });
 }
 
@@ -22,21 +25,20 @@ export async function populateStatsFor(classList, guild, stats)
     for (var student of classList)
     {
         student.stats = stats.membersByID[student.discordID];
-        console.log(student.stats);
+        //console.log(student.stats);
     }
 }
 
-import fetch, { Headers } from 'node-fetch';
-export async function myloTest(req,res,next)
+export async function uploadMyLOCSV(req,res,next)
 {
-    const token = await fetch('https://mylo.utas.edu.au/d2l/lp/auth/oauth2/token', {
-        method: 'post',
-        body: 'scope=*:*:*',
-        credentials: 'include',
-        headers: new Headers({
-          'Content-Type': 'application/x-www-form-urlencoded',
-          //'X-Csrf-Token': window.localStorage['XSRF.Token'],
-        }),
-      });
-      res.json({token});
+  if (!req.files)
+  {
+    res.send("No file uploaded");
+  }
+  else
+  {
+    req.unengagedClassList = await parseCSV(req, req.files.csv);
+    console.log(req.unengagedClassList);;
+    next();
+  }
 }
