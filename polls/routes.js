@@ -75,7 +75,9 @@ export async function load(req,res,next)
       return;
     }
 
-    var pollInfo = await readRoboLindsayPoll(latestRoboLindsPoll);
+    var p = latestRoboLindsPoll;
+    p = JSON.parse(p);
+    var pollInfo = await readRoboLindsayPoll(p);
     req.results = pollInfo.results;
     req.mostVotes = pollInfo.mostVotes;
     req.question = pollInfo.question;
