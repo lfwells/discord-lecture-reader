@@ -6,6 +6,7 @@ import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 import { setGuildProperty } from '../guild/guild.js';
+import { setGuildContextForInteraction } from '../core/errors.js';
 
 export default async function(client)
 {
@@ -180,6 +181,8 @@ export default async function(client)
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         // If the interaction isn't a slash command, return
         if (interaction.isCommand() && interaction.guild)
         {

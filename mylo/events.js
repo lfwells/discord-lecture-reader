@@ -3,6 +3,7 @@ import { deleteStudentProperty, isStudentMyLOConnected } from '../student/studen
 
 import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction } from './mylo.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
+import { setGuildContextForInteraction } from '../core/errors.js';
 
 export default async function(client)
 {    
@@ -31,6 +32,8 @@ export default async function(client)
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         //only allow lindsay accounts
         //if (interaction.member.id != '318204205435322368' && interaction.member.id != '201865409207468032') return;
 

@@ -6,6 +6,7 @@ import { getGuildDocument, GUILD_CACHE, saveGuildProperty, setGuildProperty } fr
 import * as config from "../core/config.js";
 import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 import { isAdmin } from '../roles/roles.js';
+import { setGuildContextForInteraction } from '../core/errors.js';
 
 export default async function(client)
 {
@@ -72,6 +73,8 @@ export default async function(client)
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         if (interaction.isCommand() && interaction.guild)
         {
             if (interaction.commandName === config.POLL_COMMAND) 

@@ -2,6 +2,18 @@ import * as config from './config.js';
 import { send } from "./client.js";
 import { getGuildProperty } from '../guild/guild.js';
 
+
+//hopefully this will work, for error tracking each guilde
+var GUILD_CONTEXT_FOR_ERROR_LOG;
+export function setGuildContextForRoute(req)
+{
+    GUILD_CONTEXT_FOR_ERROR_LOG = req.guild;
+}
+export function setGuildContextForInteraction(interaction)
+{
+    GUILD_CONTEXT_FOR_ERROR_LOG = interaction.guild;
+}
+
 export function initErrorHandler(client) {
 
     process.on('uncaughtException', async function(err) {
@@ -55,6 +67,10 @@ async function getEmbedFromError(error)
 
 async function getGuildNameFromError(error)
 {
+    if (GUILD_CONTEXT_FOR_ERROR_LOG)
+    {
+        return GUILD_CONTEXT_FOR_ERROR_LOG.name + " (maybe, lol)";
+    }
     try
     {
         var path = error.path;

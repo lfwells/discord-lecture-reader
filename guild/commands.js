@@ -1,5 +1,6 @@
 import moment from "moment";
 import { applicationInteractionsCollection, db } from "../core/database.js";
+import { setGuildContextForInteraction } from "../core/errors.js";
 import { getGuildDocument, hasFeature } from "./guild.js";
 
 /*
@@ -102,6 +103,8 @@ export function init_interaction_cache(client)
 {
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         // If the interaction isn't a slash command, return
         if ((!interaction.isCommand() && !interaction.isContextMenu())) return;
     

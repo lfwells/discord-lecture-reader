@@ -6,6 +6,7 @@ import * as sessions from "./sessions.js";
 import { ATTENDANCE_CACHE } from "./routes.js";
 import { hasFeature } from "../guild/guild.js";
 import { registerCommand } from "../guild/commands.js";
+import { setGuildContextForInteraction } from "../core/errors.js";
 
 //attendance (TODO: if you start the bot after people are already in there its not smort enough to track they are there (But could do), and I realise a better data structure would be <name,room,started,left>, but I don't have a database or anything like that)
 export default async function (client)
@@ -220,6 +221,8 @@ export default async function (client)
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand() || interaction.guild == undefined) return;
     

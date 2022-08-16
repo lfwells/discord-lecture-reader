@@ -15,6 +15,8 @@ import { stripEmoji } from "../awards/awards.js";
 import { init_presence_scrape } from "../analytics/presence.js";
 import { getPostsData } from "../analytics/analytics.js";
 
+import { setGuildContextForRoute } from "../core/errors.js";
+
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
 const guessConfiguration = {
@@ -86,6 +88,7 @@ export function load() {
     else
     {
       res.locals.guild = req.guild;
+      setGuildContextForRoute(req);
       next();
     }
   }

@@ -1,4 +1,5 @@
 import { getClassList } from '../classList/classList.js';
+import { setGuildContextForInteraction } from '../core/errors.js';
 import { adminCommandOnly, pluralize } from '../core/utils.js';
 import { registerCommand } from '../guild/commands.js';
 
@@ -31,6 +32,8 @@ export default async function(client)
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         // If the interaction isn't a slash command, return
         if (interaction.isCommand() && interaction.guild)
         {

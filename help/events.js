@@ -1,3 +1,4 @@
+import { setGuildContextForInteraction } from '../core/errors.js';
 import { asyncFilter, asyncForEach } from '../core/utils.js';
 import { adminCommandData, allCommandData, commandEnabledForGuild, registerApplicationCommand, registerCommand } from '../guild/commands.js';
 import { getGuildProperty } from '../guild/guild.js';
@@ -22,6 +23,8 @@ export default async function(client)
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         // If the interaction isn't a slash command, return
         if (!interaction.isApplicationCommand()) return;
 

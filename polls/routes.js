@@ -141,9 +141,7 @@ async function readSimplePoll(post)
   return req;
 }
 async function readRoboLindsayPoll(post)
-{
-  post = JSON.parse(post);
-  
+{  
   var req = {};
   var question = post.title;
   //display question

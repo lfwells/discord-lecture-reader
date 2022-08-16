@@ -2,6 +2,7 @@ import { adminCommandOnly } from "../core/utils.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { assignRole, botRoleHigherThanMemberRole, getRoleByName, getRoleByNameOrCreate, hasRole, unAssignRole } from "./roles.js";
 import { getCachedInteraction, registerCommand } from "../guild/commands.js";
+import { setGuildContextForInteraction } from "../core/errors.js";
 
 //TODO: make this persistent
 
@@ -77,6 +78,8 @@ export default async function (client)
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         if (interaction.isCommand() && interaction.guild) 
         {
         

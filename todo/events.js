@@ -2,6 +2,7 @@ import { getCachedInteraction, registerCommand } from "../guild/commands.js";
 import { getGuildProperty, getGuildPropertyConverted, hasFeature } from "../guild/guild.js";
 import { isAdmin } from "../roles/roles.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
+import { setGuildContextForInteraction } from "../core/errors.js";
 
 export default async function(client)
 {    
@@ -23,6 +24,8 @@ export default async function(client)
 
     client.on('interactionCreate', async function(interaction) 
     {    
+        setGuildContextForInteraction(interaction);
+        
         if (interaction.isContextMenu())
         {
             if (interaction.commandName === "Mark TODO") 
