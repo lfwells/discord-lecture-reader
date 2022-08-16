@@ -42,14 +42,7 @@ export default async function (client)
                 var attendanceRowReference = attendanceCollection.doc(attendanceRow.id);
                 await attendanceRowReference.update("left", d.getTime());
                 //also update the cache
-                if (ATTENDANCE_CACHE[guild.id])
-                {
-                    console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
-                    var cachedRow = ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id);
-                    if (cachedRow)
-                        cachedRow.left = d.getTime();
-                    console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
-                }
+                updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.left = d.getTime(); });
 
                 console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`);
             }
@@ -79,6 +72,8 @@ export default async function (client)
                     var attendanceRow = attendanceQuery.docs.slice(-1)[0];//last item in array (should be latests)
                     var attendanceRowReference = attendanceCollection.doc(attendanceRow.id);
                     await attendanceRowReference.update("left", d.getTime());
+                    //also update the cache
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.left = d.getTime(); });
                     
                     console.log(`${member.displayName} (${oldMember.id}) has left the channel (for swap channel)`);
                 }
@@ -132,6 +127,13 @@ export default async function (client)
                 var attendanceRowReference = attendanceCollection.doc(id);
                 attendanceRowReference.set(toLog);
                 attendanceRow = await attendanceRowReference.get();
+                //also update the cache
+                if (ATTENDANCE_CACHE[guild.id])
+                {
+                    toLog.id = attendanceRowReference.id;
+                    ATTENDANCE_CACHE[guild.id].push(toLog);
+                    console.log(ATTENDANCE_CACHE[guild.id].length);
+                }
             }
 
             if (newMember.selfDeaf != oldMember.selfDeaf)
@@ -143,6 +145,7 @@ export default async function (client)
                     var deafens = Number.parseInt(await attendanceRow.get("deafens") ?? 0)+1;
                     console.log("deafens",deafens);
                     await attendanceRowReference.update("deafens", deafens);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.deafens = deafens; });
                 }
             }
             if (newMember.selfMute != oldMember.selfMute || (noChange && newMember.selfMute == false)) //second case is when they join server unmuted 
@@ -154,6 +157,7 @@ export default async function (client)
                     var unmutes = Number.parseInt(await attendanceRow.get("unmutes") ?? 0)+1;
                     console.log("unmutes",unmutes);
                     await attendanceRowReference.update("unmutes", unmutes);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.unmutes = unmutes; });
                 }
             }
             if (newMember.selfVideo != oldMember.selfVideo)
@@ -165,6 +169,7 @@ export default async function (client)
                     var videoShares = Number.parseInt(await attendanceRow.get("videoShares") ?? 0)+1;
                     console.log("videoShares",videoShares);
                     await attendanceRowReference.update("videoShares", videoShares);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.videoShares = videoShares; });
                 }
             }
             if (newMember.streaming != oldMember.streaming)
@@ -176,6 +181,7 @@ export default async function (client)
                     var screenShares = Number.parseInt(await attendanceRow.get("screenShares") ?? 0)+1;
                     console.log("screenShares",screenShares);
                     await attendanceRowReference.update("screenShares", screenShares);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.screenShares = screenShares; });
                 }
             }
             if (newMember.serverMute != oldMember.serverMute)
@@ -223,6 +229,18 @@ export default async function (client)
             await doNextSessionCommand(interaction);
         }
     });
+}
+
+function updateCachedAttendanceData(guild, attendanceRowID, action) //where action is a function that takes the found cached row and does something
+{
+    if (ATTENDANCE_CACHE[guild.id])
+    {
+        console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRowID));
+        var cachedRow = ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRowID);
+        if (cachedRow)
+            action(cachedRow);
+        console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRowID));
+    }
 }
 
 async function doNextSessionCommand(interaction)
