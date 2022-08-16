@@ -1,4 +1,4 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Awards" }) %>
 <style>
 .pageResult {
   width:2px;
@@ -63,8 +63,6 @@ function award(studentDiscordID, emoji, button)
     
 }
 </script>
-
-<h2>Awards</h2>
 
 <%- locals.classlistFilters() %>
 

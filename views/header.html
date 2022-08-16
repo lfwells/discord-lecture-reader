@@ -1,6 +1,21 @@
 <html>
     <head>
-        <title>UTAS Discord Bot</title>
+        <% if ( typeof title != 'undefined' )
+        {
+            if (locals.guild && locals.discordUser)
+            {
+                %><title><%=title%> - <%= guild.name %> - UTAS Discord Bot</title><%
+            }
+            else
+            {
+                %><title><%=title%> - UTAS Discord Bot</title><%
+            }
+        }
+        else
+        {
+            %><title>UTAS Discord Bot</title><%
+        }
+        %>
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/pure-min.css" integrity="sha384-LTIDeidl25h2dPxrB2Ekgc9c7sEC3CWGM6HeFmuDNUjX76Ert4Z4IY714dhZHPLd" crossorigin="anonymous /">
         <link rel="stylesheet" href="/static/style.css">
         <style type="text/css">
@@ -128,8 +143,8 @@
                         
                         <% if (hasFeature("achievements") && locals.awardChannelID)
                         {
-                            %><li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Achievements</a></li>
-                            <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Achievements Leaderboard</a></li><%
+                            %><li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Award</a></li>
+                            <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Award Leaderboard</a></li><%
                         }
                         %>
                        
@@ -233,6 +248,9 @@ if ( (typeof showTitle == 'undefined' || showTitle))
 { 
     %>
     <main>
-    <%
+        <% if ( typeof title != 'undefined' )
+        {
+            %><h2><%=title%></h2><%
+        }
 }
 %>

@@ -1,4 +1,4 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Stats" }) %>
 <style>
 main { width: 100% !important; max-width: 100% !important; }
 </style>
@@ -13,7 +13,7 @@ main { width: 100% !important; max-width: 100% !important; }
 {
     console.log(graph.title);
     %>
-    <h2><%=graph.title%> <%- include("subViews/download_csv.html", { data:graph.data, filename:graph.title }) %></h2>
+    <h3><%=graph.title%> <%- include("subViews/download_csv.html", { data:graph.data, filename:graph.title }) %></h3>
     <%- include("subViews/barplot.html", {data:graph.data}) %>
     <%
 }

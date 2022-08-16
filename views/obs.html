@@ -1,4 +1,4 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "OBS Browser Sources" }) %>
 <%
 function hasFeature(feature)
 {
@@ -6,10 +6,18 @@ function hasFeature(feature)
 }
 %>
 
-<h2>OBS Pages</h2>
 <p>Use these links as URLs for Browser Sources in OBS.</p>
 <nav>
     <ul>
+        <% if (locals.lectureChannelID) { %>
+            <li>
+                <div class="autoLink" data-link="../../chat/<%=locals.lectureChannelID%>">Lecture Chat Widget (Made By Lake Hopkins, see <a href="https://github.com/Lachee/discord-chat-preview">https://github.com/Lachee/discord-chat-preview</a>)
+                    <br />
+                    <input class="copy" /> <button class="copy">Copy</button>
+                </div>
+            </li>
+        <% } %>
+
         <% if (locals.lectureChannelID) { %>
             <li>
                 <div class="autoLink" data-link="../<%=guild.id%>/poll">Poll Widget

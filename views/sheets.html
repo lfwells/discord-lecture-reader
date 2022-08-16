@@ -1,4 +1,4 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Google Sheets Export" }) %>
 <style>
 th, td {
     text-transform: capitalize;
@@ -12,7 +12,6 @@ th, td {
     vertical-align: top;
 }
 </style>
-<h2>Google Sheet Export</h2>
 
 <p>
     <a target="_blank" class="btn" href="https://docs.google.com/spreadsheets/d/<%=locals.googleSheetID%>/edit#gid=0">Open Google Sheet</a> 

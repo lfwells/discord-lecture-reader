@@ -1,6 +1,5 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Clone a Channel from "+locals.sourceGuild.name }) %>
 
-<h2>Clone a Channel from <%=locals.sourceGuild.name%></h2>
 <p>You can copy all messages from a channel in a Discord Server that you are an admin of which have the UTAS Bot added to them.</p>
 
 <form method="post" action="/guild/<%=guild.id%>/clone_channel_confirm">

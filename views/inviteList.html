@@ -1,6 +1,5 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Invites" }) %>
 
-<h2>Invites</h2>
 <p>Associate a role with an invite. Users who use that invite will automatically be assigned that role.</p>
 <table>
   <% invites.forEach(function(kvp, key){
