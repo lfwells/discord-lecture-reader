@@ -94,6 +94,9 @@ export default async function(client)
             { 
                 name: "question", type: "STRING", description: "What do you want to ask?", required:true,
             },
+            { 
+                name: "anonymous", type: "BOOLEAN", description: "Ask your question 'anonymously' -- NOTE THAT STAFF CAN STILL SEE WHO POSTED", required:false,
+            },
         ]
     }; 
     
@@ -388,6 +391,7 @@ async function doQuestionCommand(interaction)
     await interaction.deferReply({ephemeral:true});
 
     var question = interaction.options.getString("question");
+    var anonymous = interaction.options.getBoolean("anonymous") ?? false;
     var thread = await interaction.channel.threads.create({
         name: "Question - "+question,
         reason: 'Question asked by student',
@@ -397,7 +401,7 @@ async function doQuestionCommand(interaction)
         embeds: [
             { 
                 title: "Question: "+question,
-                description: "Asked by <@"+interaction.user.id+">"
+                description: anonymous ? "Question Asked Anonymously" : "Asked by <@"+interaction.user.id+">"
             },
         ]
     });
