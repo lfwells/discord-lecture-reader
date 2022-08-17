@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { GoogleAuth } from "google-auth-library";
-import { getGuildProperty, GUILD_CACHE, loadGuildProperty, setGuildProperty } from "../guild/guild.js";
+import { getGuildDocument, getGuildProperty, GUILD_CACHE, loadGuildProperty, setGuildProperty } from "../guild/guild.js";
 import { getAttendanceData } from "../attendance/routes.js";
 import { getStats } from "../analytics/analytics.js";
 import { getAwardListFullData } from "../awards/awards.js";
@@ -11,7 +11,8 @@ var sheets;
 var drive;
 export async function init_google()
 {
-    return; //turning this off for the moment
+    //return; //turning this off for now
+    console.log("Init google sheets");
 
     // If modifying these scopes, delete token.json.
     const SCOPES = [
@@ -30,12 +31,12 @@ export async function init_google()
     sheets = google.sheets({version: 'v4', auth});
     drive = google.drive('v3');
 
-    //console.log("init google sheets");
+    console.log("Done init google sheets");
 }
 
 export async function init_sheet_for_guild(guild)
 {
-    return; //turning this off for now
+    //return; //turning this off for now
     
     var currentSpreadsheetId = await getGuildProperty("googleSheetID", guild, null);
     if (currentSpreadsheetId == null)
@@ -142,6 +143,13 @@ export async function update_sheet_contents(req,res,next)
         await sleep(1000);
     }*/
 
+    //RAW outputs
+    res.write("Writing Raw Attendance Sheet...\n");
+    await write_sheet(spreadsheetId, "raw_attendance", await write_firebase_collection(req, res, "attendance"));
+    res.write("DONE Writing Raw Attendance Sheet...\n\n");
+    
+    return res.end();
+
     
     res.write("Loading Attendance Data...");
     await getAttendanceData(req,res);
@@ -197,6 +205,11 @@ async function write_sheet(spreadsheetId, sheet, values)
         valueInputOption:'USER_ENTERED', resource:{values}
     });
     return writeResult;
+}
+async function write_firebase_collection(req, res, collection)
+{
+    var guildDocument = req.guildDocument;
+    res.write(guildDocument.id);
 }
 async function write_attendance(req, res)
 {

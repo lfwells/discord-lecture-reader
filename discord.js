@@ -21,6 +21,9 @@ client.on('ready', async () =>
 
 	console.log(`Logged in as ${client.user.tag}!`);
 
+	//google sheets
+	await init_google();
+
 	//save all the guilds etc to db
 	await init_students(client);
 	await init_guilds(client);
@@ -33,9 +36,6 @@ client.on('ready', async () =>
 
 	//web server
 	init_server();
-
-	//google sheets
-	init_google();
 
 	console.log('\u0007');
 	console.log("---------\nREADY\n---------"); 
