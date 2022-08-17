@@ -1,5 +1,6 @@
 import { init_invites, invites } from "./invite.js";
 import { ROLES } from "../roles/roles.js";
+import { guessConfigurationValue } from "../guild/guild.js";
 
 
 //import { getClient } from "../core/client.js";
@@ -58,7 +59,12 @@ export async function assignRole(req, res)
 
 export async function generateInvite(req,res,next)
 {
-    var channel = req.guild.channels.cache.find(x => x.name === "rules"); //TODO select channel
+    var channel = await guessConfigurationValue(req.guild, "ruleChannelID", true); //convert = true
+    if (!channel)
+    {
+        res.write(`No #rules channel found. Cannot complete operation.`);
+    }
+    //var channel = req.guild.channels.cache.find(x => x.name === "rules"); //TODO select channel
     console.log(channel.name);
     var newInvite = await channel.createInvite({
         unique:true,
