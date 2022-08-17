@@ -74,6 +74,28 @@ export default async function(client)
         name: 'forum_channel',
         description: "(ADMIN ONLY) convert the current channel into a threads-only channel (like a forum)."
     }; 
+
+    //TODO: consider making these go to the dedicated assig questions channel?
+    const questionCommand = {
+        name: 'question',
+        description: "Ask a question. Starts a new thread for you.",
+        options: 
+        [
+            { 
+                name: "question", type: "STRING", description: "What do you want to ask?", required:true,
+            },
+        ]
+    }; 
+    const questionCommand2 = {
+        name: 'q',
+        description: "Ask a question. Starts a new thread for you. (Alias for /question)",
+        options: 
+        [
+            { 
+                name: "question", type: "STRING", description: "What do you want to ask?", required:true,
+            },
+        ]
+    }; 
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
@@ -81,6 +103,8 @@ export default async function(client)
         await registerCommand(guild, unflagCommand);
         await registerCommand(guild, flaggedMessagesCommand);
         await registerCommand(guild, forumChannel);
+        await registerCommand(guild, questionCommand);
+        await registerCommand(guild, questionCommand2);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -123,6 +147,10 @@ export default async function(client)
             else if (interaction.commandName == "forum_channel")
             {
                 doForumChannelCommand(interaction);
+            }
+            else if (interaction.commandName == "question" || interaction.commandName == "q")
+            {
+                doQuestionCommand(interaction);
             }
         }
     });
@@ -353,4 +381,26 @@ async function doForumListen(thread)
 
         await setGuildProperty(thread.guild, "forums", forums);
     }
+}
+
+async function doQuestionCommand(interaction)
+{
+    await interaction.deferReply({ephemeral:true});
+
+    var question = interaction.options.getString("question");
+    var thread = await interaction.channel.threads.create({
+        name: "Question - "+question,
+        reason: 'Question asked by student',
+    });
+
+    await thread.send({
+        embeds: [
+            { 
+                title: "Question: "+question,
+                description: "Asked by <@"+interaction.user.id+">"
+            },
+        ]
+    });
+
+    await interaction.editReply({content: "Your question has been posted. Staff will get back to you in the thread that has been created. "});
 }
