@@ -266,13 +266,13 @@ async function write_firebase_collection(req, res, collection, sort, sortOrder)
                 try
                 {
                     var cell = data[column];
-                    if (typeof(cell) != "string" && typeof(cell) != "number" && typeof(cell) != "bool") 
+                    if (cell && typeof(cell) != "string" && typeof(cell) != "number" && typeof(cell) != "bool") 
                     {
                         var json = JSON.stringify(cell);
                         
-                        if (json && json.indexOf && json.indexOf("_seconds"))
+                        if (json && json.indexOf && json.indexOf("_seconds") && cell._seconds)
                         {
-                            cell = json._seconds;
+                            cell = cell._seconds;
                         }
                         else
                         {
