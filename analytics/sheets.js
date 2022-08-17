@@ -154,7 +154,7 @@ export async function update_sheet_contents(req,res,next)
     res.write("DONE Writing Raw Attendance Sheet...\n\n");
     
     res.write(opProgress()+"Writing Raw Messages Sheet...\n");
-    await write_sheet(spreadsheetId, "raw_messages", await write_firebase_collection(req, res, "analytics", "timestamp"));
+    await write_sheet(spreadsheetId, "raw_messages", await write_firebase_collection(req, res, "analytics"));
     res.write("DONE Writing Raw Messages Sheet...\n\n");
     
     res.write(opProgress()+"Writing Raw Audit Log Sheet...\n");
