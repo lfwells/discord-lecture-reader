@@ -408,6 +408,11 @@ async function doButtonCommand(interaction)
 }
 async function doHuzzahCommand(interaction)
 {
+    if ((await hasFeature(interaction.guild, "analytics")) == false)
+    {
+        return await interaction.reply({content: "Messages aren't tracked on this server, so cannot count words.", ephemeral: true});
+    }
+
     await interaction.deferReply();
 
     var words = [];
