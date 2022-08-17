@@ -175,7 +175,12 @@ export default async function(client)
         options: [{
             name: 'today',
             type: 'BOOLEAN',
-            description: 'Optionally, count for today only',
+            description: 'Optionally, count for today only (default = false)',
+            required: false,
+        },{
+            name: 'this_channel',
+            type: 'BOOLEAN',
+            description: 'Optionally, count for this channel only (default = false)',
             required: false,
         },{
             name: 'custom_search',
@@ -423,26 +428,28 @@ async function doHuzzahCommand(interaction)
 
 
     var todayOnly = interaction.options.getBoolean("today") ?? false;
+    var thisChannel = interaction.options.getBoolean("this_channel") ?? false;
 
     var posts = await getPostsData(interaction.guild, null, function (msg) {
         var sameChannel = msg.channel == interaction.channel.id;
-        var containsHuzzah = false; 
+        var containsSearch = false; 
         words.forEach(search => {
         if (msg.content && msg.content.toLowerCase().indexOf(search) >= 0)
         {
-            containsHuzzah |= true;
+            containsSearch |= true;
         }
         });
         
         var isToday = msg.timestamp && moment(msg.timestamp).isSame(new Date(), 'day');
-        return sameChannel && containsHuzzah && (!todayOnly || isToday);
+        return (!thisChannel || sameChannel) && containsSearch && (!todayOnly || isToday);
     });
     
     var count = posts.length;
     var today = todayOnly ? " today" : "";
+    var inThisChannel = thisChannel ? " in this channel" : " in this server";
     await interaction.editReply({ embeds: [
         { title: word == "HUZZAH" ? "Huzzah Counter" : "Word Counter",
-        description:"'"+word+"' has been said "+pluralize(count, "time")+" in this channel"+today+"." }
+        description:"'"+word+"' has been said "+pluralize(count, "time")+inThisChannel+today+"." }
     ]});
 }
 
