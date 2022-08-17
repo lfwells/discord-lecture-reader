@@ -6,6 +6,7 @@ import { getStats } from "../analytics/analytics.js";
 import { getAwardListFullData } from "../awards/awards.js";
 import moment from "moment";
 import { beginStreamingRes } from "../core/server.js";
+import { pluralize } from "../core/utils.js";
 
 var sheets;
 var drive;
@@ -137,6 +138,10 @@ export async function update_sheet_contents(req,res,next)
 
     var spreadsheetId = res.locals.googleSheetID;
 
+    var opCount = 11;
+    var currentOp = 1;
+    function opProgress(current) { return "("+(currentOp++)+"/"+opCount+") -- "; }
+
     /*
     for (let index = 0; index < 10; index++) {
         res.write(""+index);
@@ -144,36 +149,55 @@ export async function update_sheet_contents(req,res,next)
     }*/
 
     //RAW outputs
-    res.write("Writing Raw Attendance Sheet...\n");
+    res.write(opProgress()+"Writing Raw Attendance Sheet...\n");
     await write_sheet(spreadsheetId, "raw_attendance", await write_firebase_collection(req, res, "attendance"));
     res.write("DONE Writing Raw Attendance Sheet...\n\n");
     
-    return res.end();
-
+    res.write(opProgress()+"Writing Raw Messages Sheet...\n");
+    await write_sheet(spreadsheetId, "raw_messages", await write_firebase_collection(req, res, "analytics", "timestamp"));
+    res.write("DONE Writing Raw Messages Sheet...\n\n");
     
-    res.write("Loading Attendance Data...");
+    res.write(opProgress()+"Writing Raw Audit Log Sheet...\n");
+    await write_sheet(spreadsheetId, "raw_audit", await write_firebase_collection(req, res, "audit"));
+    res.write("DONE Writing Raw Audit Log Sheet...\n\n");
+    
+    res.write(opProgress()+"Writing Raw Interaction Log Sheet...\n");
+    await write_sheet(spreadsheetId, "raw_interactions", await write_firebase_collection(req, res, "interactions", "timestamp"));
+    res.write("DONE Writing Raw Interaction Log Sheet...\n\n");
+    
+    res.write(opProgress()+"Writing Raw Online Presence Log Sheet...\n");
+    await write_sheet(spreadsheetId, "raw_presence", await write_firebase_collection(req, res, "presence"));
+    res.write("DONE Writing Online Presence Log Sheet...\n\n");
+
+    res.write(opProgress()+"Writing Session Info Sheet...\n");
+    await write_sheet(spreadsheetId, "sessions", await write_firebase_collection(req, res, "sessions"));
+    res.write("DONE Writing Session Info Sheet...\n\n");
+    
+    res.write(opProgress()+"Loading Attendance Data...");
     await getAttendanceData(req,res);
     res.write(" DONE\n");
 
-    res.write("Loading Post Data...");
+    res.write(opProgress()+"Loading Post Data...");
     var statsData = await getStats(req.guild);
     res.write(" DONE\n");
 
-    res.write("Loading Award Data...");
+    res.write(opProgress()+"Loading Award Data...");
     await getAwardListFullData(req.guild, res.locals.classList);
     res.write(" DONE\n");
 
     res.write("\n");
 
     //class list
-    res.write("Writing Class Summary Sheet...\n");
+    res.write(opProgress()+"Writing Class Summary Sheet...\n");
     await write_sheet(spreadsheetId, "class_summary", await write_class_summary(req, res, statsData));
     res.write("DONE Class Summary Sheet...\n\n");
 
     //attendance
-    res.write("Writing Attendance Sheet...\n");
+    res.write(opProgress()+"Writing Attendance Sheet...\n");
     await write_sheet(spreadsheetId, "attendance", await write_attendance(req, res));
     res.write("DONE Writing Attendance Sheet...\n\n");
+
+    res.write("--------------------\nGoogle Sheet Updated!\n--------------------");
 
     res.end();
 }
@@ -206,10 +230,76 @@ async function write_sheet(spreadsheetId, sheet, values)
     });
     return writeResult;
 }
-async function write_firebase_collection(req, res, collection)
+async function write_firebase_collection(req, res, collection, sort, sortOrder)
 {
     var guildDocument = req.guildDocument;
-    res.write(guildDocument.id);
+    var collection = guildDocument.collection(collection);
+    if (sort)
+        collection = collection.orderBy(sort, sortOrder ?? "desc");
+    var snapshot = await collection.get();
+    var rowCount = snapshot.size;
+    res.write("\t"+pluralize(rowCount, "Row")+" Fetched...\n");
+
+    var sheetData = [];
+
+    var headers = null;
+    var nextProgressReport = 0.1;
+    var i = 0;
+    snapshot.forEach(doc => {
+        var data = doc.data();
+        
+        if (headers == null)
+        {
+            headers = ["id", ...Object.keys(data)];
+            sheetData.push(headers);
+        }
+
+        var row = [];
+        headers.forEach(column => {
+            if (column == "id")
+            {
+                row.push(doc.id);
+            }
+            else
+            {
+                try
+                {
+                    var cell = data[column];
+                    if (typeof(cell) != "string" && typeof(cell) != "number" && typeof(cell) != "bool") 
+                    {
+                        var json = JSON.stringify(cell);
+                        
+                        if (json && json.indexOf && json.indexOf("_seconds"))
+                        {
+                            cell = json._seconds;
+                        }
+                        else
+                        {
+                            cell = json;
+                        }
+                    }
+                    row.push(cell);
+                }
+                catch (e)
+                {
+                    res.write(JSON.stringify(e, Object.getOwnPropertyNames(e))+"\n");
+                }
+            }
+        });
+
+        var progress = i/rowCount;
+        if (progress > nextProgressReport)
+        {
+            res.write((nextProgressReport * 100).toFixed(1) + "%... ");
+            nextProgressReport += 0.1;
+        }
+        i++;
+        
+        sheetData.push(row);
+    });
+
+    res.write("100.0%.\n");
+    return sheetData;
 }
 async function write_attendance(req, res)
 {
