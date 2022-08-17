@@ -197,7 +197,7 @@ export async function update_sheet_contents(req,res,next)
     await write_sheet(spreadsheetId, "attendance", await write_attendance(req, res));
     res.write("DONE Writing Attendance Sheet...\n\n");
 
-    res.write("--------------------\nGoogle Sheet Updated!\n--------------------");
+    res.write("---------------------\nGoogle Sheet Updated!\n---------------------");
 
     res.end();
 }
@@ -245,6 +245,7 @@ async function write_firebase_collection(req, res, collection, sort, sortOrder)
     var headers = null;
     var nextProgressReport = 0.1;
     var i = 0;
+    res.write("\t0.0%...");
     snapshot.forEach(doc => {
         var data = doc.data();
         
