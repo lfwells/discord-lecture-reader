@@ -1,6 +1,7 @@
+import moment from "moment";
 import * as config from '../core/config.js';
 import { getGuildDocument, hasFeature } from '../guild/guild.js';
-import { createFirebaseRecordFrom, getStats, getStatsWeek, getStudentStreak, getTopActiveDays, getTopBestStreak, getTopCurrentStreak } from './analytics.js';
+import { createFirebaseRecordFrom, getPostsData, getStats, getStatsWeek, getStudentStreak, getTopActiveDays, getTopBestStreak, getTopCurrentStreak } from './analytics.js';
 import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
@@ -168,6 +169,20 @@ export default async function(client)
             description: 'The text to appear on the button',
             required: false,
         }],}; 
+    const huzzahCommand = {
+        name: 'huzzah_count',
+        description: 'Counts how many times Huzzah has been said',
+        options: [{
+            name: 'today',
+            type: 'BOOLEAN',
+            description: 'Optionally, count for today only',
+            required: false,
+        },{
+            name: 'custom_search',
+            type: 'STRING',
+            description: 'Optionally, search for something other than HUZZAH',
+            required: false,
+        }],}; 
 
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
@@ -177,6 +192,7 @@ export default async function(client)
         await registerCommand(guild, streakCommand); 
         await registerCommand(guild, activeDaysCommand);
         await registerCommand(guild, buttonCommand);
+        await registerCommand(guild, huzzahCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -189,6 +205,10 @@ export default async function(client)
             if (interaction.commandName === "useless_button") 
             {
                 await doButtonCommand(interaction);            
+            }
+            if (interaction.commandName === "huzzah_count") 
+            {
+                await doHuzzahCommand(interaction);            
             }
             
             if (interaction.commandName === "stats" || 
@@ -380,6 +400,50 @@ async function doButtonCommand(interaction)
     const rows = [ row ]
 
     await interaction.editReply({content: pluralize(clicks, "click"), components: rows});
+}
+async function doHuzzahCommand(interaction)
+{
+    await interaction.deferReply();
+
+    var words = [];
+    var word = interaction.options.getString("custom_search") ?? "HUZZAH";
+    if (word == "HUZZAH")
+    {
+        words = [
+            "huzzah",
+            "huzah",
+            "H U Z Z A H",
+            "hazzah"
+        ];
+    }
+    else
+    {
+        words = [word];
+    }
+
+
+    var todayOnly = interaction.options.getBoolean("today") ?? false;
+
+    var posts = await getPostsData(interaction.guild, null, function (msg) {
+        var sameChannel = msg.channel == interaction.channel.id;
+        var containsHuzzah = false; 
+        words.forEach(search => {
+        if (msg.content && msg.content.toLowerCase().indexOf(search) >= 0)
+        {
+            containsHuzzah |= true;
+        }
+        });
+        
+        var isToday = msg.timestamp && moment(msg.timestamp).isSame(new Date(), 'day');
+        return sameChannel && containsHuzzah && (!todayOnly || isToday);
+    });
+    
+    var count = posts.length;
+    var today = todayOnly ? " today" : "";
+    await interaction.editReply({ embeds: [
+        { title: word == "HUZZAH" ? "Huzzah Counter" : "Word Counter",
+        description:"'"+word+"' has been said "+pluralize(count, "time")+" in this channel"+today+"." }
+    ]});
 }
 
 async function doPostStreakCommand(interaction, options)
