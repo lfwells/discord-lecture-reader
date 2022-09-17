@@ -218,6 +218,10 @@ function guildRouter()
     router.post("/classList", loadClassList, classList_routes.uploadMyLOCSV, classList_routes.displayClassList); 
     router.get("/classList/student/:discordID", loadClassList, classList_routes.displayStudent);
 
+    //groups
+    router.get("/classList/groups", loadClassList, classList_routes.displayGroups);
+    router.post("/classList/groups", loadClassList, classList_routes.uploadMyLOGroupsCSV, classList_routes.displayGroups); 
+
 
     return router;
 }

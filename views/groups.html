@@ -1,0 +1,25 @@
+<%- include('header.html', { title: "Groups" }) %>
+
+<p>Upload a Gradebook CSV from MyLO to list group allocations. Roles and group-channels can then be generated.</p>
+<p>(This can be automated when MyLO Integration is enabled)</p>
+<form method="post" enctype='multipart/form-data'>
+
+    <div><input type="file" name="csv" style="width:500px" /></div>
+        
+    <div><input class="btn" type="submit" value="Upload"/></div>
+
+</form>
+
+<%
+if (locals.groups != undefined)
+{
+    %>
+    <p>
+        <%=Object.values(locals.groups).length%> groups
+    </p>
+    <%
+} 
+%>
+
+
+<%- include('footer.html') %>

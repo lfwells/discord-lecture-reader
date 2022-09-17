@@ -2,6 +2,7 @@
 import e from "express";
 import { getStats } from "../analytics/analytics.js";
 import { parseCSV } from "./classList.js";
+import { parseMyLOGroupsCSV } from "./groups.js";
 
 export async function displayClassList(req,res,next) 
 {
@@ -39,6 +40,28 @@ export async function uploadMyLOCSV(req,res,next)
   {
     req.unengagedClassList = await parseCSV(req, req.files.csv);
     console.log(req.unengagedClassList);;
+    next();
+  }
+}
+
+export async function displayGroups(req,res,next) 
+{
+    //await populateStatsFor(req.classList, req.guild);
+    res.render("groups", {
+      groups: req.groups,
+    });
+}
+
+export async function uploadMyLOGroupsCSV(req,res,next)
+{
+  if (!req.files)
+  {
+    res.send("No file uploaded");
+  }
+  else
+  {
+    req.groups = await parseMyLOGroupsCSV(req, req.files.csv);
+    
     next();
   }
 }
