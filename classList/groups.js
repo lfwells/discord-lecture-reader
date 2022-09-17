@@ -48,7 +48,7 @@ export async function parseMyLOGroupsCSV(req, fileUpload)
                 
                 //add them to the group (create it if not exists)
                 if (!groups[groupName]) groups[groupName] = [];
-                groups[groupName].push(myLOStudent);
+                groups[groupName].push(myLOStudent["Username"]);
             } 
 
             categories[groupCategory] = groups;

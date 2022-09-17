@@ -135,8 +135,14 @@ export async function asyncFilter (arr, predicate) {
 
 	return arr.filter((_v, index) => results[index]);
 }
-export async function asyncForEach(arr, f) { //TODO: use this places
+export async function asyncForEach(arr, f) { 
   return await Promise.all(arr.map(await f));
+}
+export async function asyncForEachInSequence(arr, f) { 
+  for (var item of arr)
+  {
+    await f(item);
+  }
 }
 
 export function dateToHuman(d)

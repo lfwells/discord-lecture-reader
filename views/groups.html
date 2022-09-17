@@ -24,36 +24,43 @@ if (locals.groupCategories != undefined)
         if (category == null || Object.keys(category).length == 0) return;
         %>
         <h3><%=categoryName%></h3>
-        <p><button onclick="generateGroups('<%=categoryName%>')">Generate Groups</button><button onclick="generateGroupsAndChannels('<%=categoryName%>')">Generate Group Channels</button></p>
-        <table>
-            <!--<thead>
-                <tr>
-                    <th>Group</th>
-                    <th>Members</th>
-                </tr>
-            </thead>-->
-            <tbody>
-                <%
-                var groupNames = Object.keys(category);
-                groupNames.sort(function(a, b) {
-                    return a.localeCompare(b, undefined, {
-                      numeric: true,
-                      sensitivity: 'base'
-                    });
-                  });
-                groupNames.forEach(groupName => 
-                {
-                    var members = category[groupName];
-                    %>
+        <form target="_blank" action="/guild/<%= guild.id %>/classList/groups/create" method="post">
+            <p>
+                <input type="submit" name="generateGroups" value="Generate Groups" />
+                <input type="submit" name="generateGroupsAndChannels" value="Generate Groups with Channels" />
+            </p>
+            <input type="hidden" name="category" value="<%=categoryName%>" />
+            <input type="hidden" name="groupInfo" value="<%=JSON.stringify(category)%>" />
+            <table>
+                <!--<thead>
                     <tr>
-                        <td valign="top"><%=groupName%></td>
-                        <td><%=members.length%> Members</td>
+                        <th>Group</th>
+                        <th>Members</th>
                     </tr>
+                </thead>-->
+                <tbody>
                     <%
-                });
-                %>
-            </tbody>
-        </table>
+                    var groupNames = Object.keys(category);
+                    groupNames.sort(function(a, b) {
+                        return a.localeCompare(b, undefined, {
+                        numeric: true,
+                        sensitivity: 'base'
+                        });
+                    });
+                    groupNames.forEach(groupName => 
+                    {
+                        var members = category[groupName];
+                        %>
+                        <tr>
+                            <td valign="top"><%=groupName%></td>
+                            <td><%=members.length%> Members</td>
+                        </tr>
+                        <%
+                    });
+                    %>
+                </tbody>
+            </table>
+        </form>
         <%
     });
 } 
@@ -61,14 +68,3 @@ if (locals.groupCategories != undefined)
 
 
 <%- include('footer.html') %>
-
-<script>
-    function generateGroups(categoryName)
-    {
-        alert(categoryName);
-    }
-    function generateGroupsAndChannels(categoryName)
-    {
-        
-    }
-</script>

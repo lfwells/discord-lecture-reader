@@ -221,6 +221,7 @@ function guildRouter()
     //groups
     router.get("/classList/groups", loadClassList, classList_routes.displayGroups);
     router.post("/classList/groups", loadClassList, classList_routes.uploadMyLOGroupsCSV, classList_routes.displayGroups); 
+    router.post("/classList/groups/create", loadClassList, classList_routes.createGroup); 
 
 
     return router;
