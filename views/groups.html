@@ -28,9 +28,16 @@ if (locals.groupCategories != undefined)
             <p>
                 <input type="submit" name="generateGroups" value="Generate Groups" />
                 <input type="submit" name="generateGroupsAndChannels" value="Generate Groups with Channels" />
+                <%- include("subViews/channelCategorySelect.html", 
+                { 
+                    label: "In Category:",
+                    selectDefaultText:"-- Select Category--", 
+                    id: "createChannelsInCategory"
+                }) %>
             </p>
             <input type="hidden" name="category" value="<%=categoryName%>" />
             <input type="hidden" name="groupInfo" value="<%=JSON.stringify(category)%>" />
+
             <table>
                 <!--<thead>
                     <tr>
@@ -68,3 +75,7 @@ if (locals.groupCategories != undefined)
 
 
 <%- include('footer.html') %>
+
+<style>
+    label span { min-width: auto !important; }
+</style>

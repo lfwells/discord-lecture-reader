@@ -3,6 +3,10 @@ import fs from "fs";
 import getStream from "get-stream";
 import { parse } from "csv-parse";
 
+//TODO extra options:
+//- private/public channels created
+//- custom names of group/category
+//- prepend category to the group name
 //extra assumption: anything after a " (" in a group name is to be ignored
 export async function parseMyLOGroupsCSV(req, fileUpload)
 {

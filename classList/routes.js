@@ -95,6 +95,42 @@ export async function createGroup(req,res,next)
       res.write(`\tAdded ${pluralize(foundMembers, "Member")} (${pluralize(notFoundMembers, "Member")} not found)\n`);
     else
       res.write(`\tAdded ${pluralize(foundMembers, "Member")}\n`);
+
+    //optionally, create the channels too
+    if (req.body.generateGroupsAndChannels && req.body.createChannelsInCategory)
+    {
+      var category = await req.guild.channels.fetch(req.body.createChannelsInCategory);
+
+      //first check for the channel already in the category
+      var convertedName = groupName.toLowerCase().replace(" ", "-");
+      var existingChannel = await req.guild.channels.cache.find(c => c.name === convertedName);
+      if (existingChannel && existingChannel.parentId == req.body.createChannelsInCategory)
+      {
+        res.write(`\tDid not create private channel in ${category.name}, it already exists...\n`);
+      }
+      else
+      {
+        res.write(`\tCreating private channel for group in ${category.name}...`);
+
+        await req.guild.channels.create(convertedName, {
+          type: "text", 
+          parent: category,
+          permissionOverwrites: [
+            {
+              id: req.guild.roles.everyone, //To make it be seen by a certain role, user an ID instead
+              deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'] //Deny permissions
+            },
+            
+            {
+              id: role.id, //To make it be seen by a certain role, user an ID instead
+              allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'], //Allow permissions
+            }
+          ],
+        });
+        
+        res.write(`Done.\n`);
+      }
+    }
     
     res.write(`\n`);
   });

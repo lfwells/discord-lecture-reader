@@ -10,7 +10,7 @@
         categoryChannels.forEach(cat => { %>
             
                     <option value="<%= cat.id %>"
-                        <% if (value && cat.id == value) { %>selected<% } %>>
+                        <% if (typeof value !== 'undefined' && cat.id == value) { %>selected<% } %>>
                         <%= cat.name %>
                     </option>
 
