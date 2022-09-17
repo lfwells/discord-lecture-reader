@@ -6,6 +6,7 @@ import { parse } from "csv-parse";
 //Note: this approach assumes that group numbers are unique across different group categories
 //however, I have added the uniqueGroups param here -- if this func is called with this true, then I prepend category
 //I haven't hooked this up to the web interface as a checkbox though, waiting for someone to have the usecase for it
+//extra assumption: anything after a " (" in a group name is to be ignored
 export async function parseMyLOGroupsCSV(req, fileUpload, uniqueGroups)
 {
     var groups = {};
@@ -14,7 +15,7 @@ export async function parseMyLOGroupsCSV(req, fileUpload, uniqueGroups)
     //first line is headers, but importantly, thats our group categories
     var headers = content.shift();
     var groupCategories = headers.filter((v,i,a) => {
-        return ["OrgDefinedId","Username","Last Name","First Name", "Email"].indexOf(v) == -1 && v.indexOf("<") == -1;
+        return ["OrgDefinedId","Username","Last Name","First Name", "Email", "End-of-Line Indicator"].indexOf(v) == -1 && v.indexOf("<") == -1;
     });
 
     content = content.map(function (row) {
@@ -30,12 +31,14 @@ export async function parseMyLOGroupsCSV(req, fileUpload, uniqueGroups)
     });
 
     content.forEach(myLOStudent => {
-        console.log("---", myLOStudent["First Name"]);
         groupCategories.forEach(groupCategory => 
         {
             var groupName = myLOStudent[groupCategory];
             if (groupName && groupName.length > 0)
             {
+                var bracketsIndex = groupName.indexOf(" (");
+                if (bracketsIndex > 0)
+                    groupName = groupName.substring(0, bracketsIndex);
                 if (uniqueGroups) groupName = groupCategory+" "+groupName;
                 
                 //add them to the group (create it if not exists)
@@ -45,7 +48,6 @@ export async function parseMyLOGroupsCSV(req, fileUpload, uniqueGroups)
         });
     });
 
-    console.log(groups);
     return groups;
 
 }

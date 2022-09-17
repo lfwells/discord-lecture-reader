@@ -15,8 +15,37 @@ if (locals.groups != undefined)
 {
     %>
     <p>
-        <%=Object.values(locals.groups).length%> groups
+        <%=Object.values(locals.groups).length%> groups.
     </p>
+    <table>
+        <thead>
+            <tr>
+                <th>Group</th>
+                <th>Members</th>
+            </tr>
+        </thead>
+        <tbody>
+            <%
+            var groupNames = Object.keys(locals.groups);
+            groupNames.sort(function(a, b) {
+                return a.localeCompare(b, undefined, {
+                  numeric: true,
+                  sensitivity: 'base'
+                });
+              });
+            groupNames.forEach(groupName => 
+            {
+                var members = locals.groups[groupName];
+                %>
+                <tr>
+                    <td valign="top"><%=groupName%></td>
+                    <td><%=members.length%> Members</td>
+                </tr>
+                <%
+            });
+            %>
+        </tbody>
+    </table>
     <%
 } 
 %>
