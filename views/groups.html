@@ -11,44 +11,64 @@
 </form>
 
 <%
-if (locals.groups != undefined)
+if (locals.groupCategories != undefined)
 {
     %>
     <p>
-        <%=Object.values(locals.groups).length%> groups.
+        <%=Object.keys(locals.groupCategories).length%> group categories detected.
     </p>
-    <table>
-        <thead>
-            <tr>
-                <th>Group</th>
-                <th>Members</th>
-            </tr>
-        </thead>
-        <tbody>
-            <%
-            var groupNames = Object.keys(locals.groups);
-            groupNames.sort(function(a, b) {
-                return a.localeCompare(b, undefined, {
-                  numeric: true,
-                  sensitivity: 'base'
-                });
-              });
-            groupNames.forEach(groupName => 
-            {
-                var members = locals.groups[groupName];
-                %>
-                <tr>
-                    <td valign="top"><%=groupName%></td>
-                    <td><%=members.length%> Members</td>
-                </tr>
-                <%
-            });
-            %>
-        </tbody>
-    </table>
     <%
+    Object.keys(locals.groupCategories).forEach(categoryName => 
+    {
+        var category = locals.groupCategories[categoryName];
+        if (category == null || Object.keys(category).length == 0) return;
+        %>
+        <h3><%=categoryName%></h3>
+        <p><button onclick="generateGroups('<%=categoryName%>')">Generate Groups</button><button onclick="generateGroupsAndChannels('<%=categoryName%>')">Generate Group Channels</button></p>
+        <table>
+            <!--<thead>
+                <tr>
+                    <th>Group</th>
+                    <th>Members</th>
+                </tr>
+            </thead>-->
+            <tbody>
+                <%
+                var groupNames = Object.keys(category);
+                groupNames.sort(function(a, b) {
+                    return a.localeCompare(b, undefined, {
+                      numeric: true,
+                      sensitivity: 'base'
+                    });
+                  });
+                groupNames.forEach(groupName => 
+                {
+                    var members = category[groupName];
+                    %>
+                    <tr>
+                        <td valign="top"><%=groupName%></td>
+                        <td><%=members.length%> Members</td>
+                    </tr>
+                    <%
+                });
+                %>
+            </tbody>
+        </table>
+        <%
+    });
 } 
 %>
 
 
 <%- include('footer.html') %>
+
+<script>
+    function generateGroups(categoryName)
+    {
+        alert(categoryName);
+    }
+    function generateGroupsAndChannels(categoryName)
+    {
+        
+    }
+</script>

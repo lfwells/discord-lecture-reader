@@ -48,7 +48,7 @@ export async function displayGroups(req,res,next)
 {
     //await populateStatsFor(req.classList, req.guild);
     res.render("groups", {
-      groups: req.groups,
+      groupCategories: req.groupCategories,
     });
 }
 
@@ -60,7 +60,7 @@ export async function uploadMyLOGroupsCSV(req,res,next)
   }
   else
   {
-    req.groups = await parseMyLOGroupsCSV(req, req.files.csv);
+    req.groupCategories = await parseMyLOGroupsCSV(req, req.files.csv);
     
     next();
   }
