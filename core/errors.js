@@ -19,12 +19,14 @@ export function initErrorHandler(client) {
     process.on('uncaughtException', async function(err) {
         try 
         {
-        //console.error('!!! Caught exception: ', err);
-        var str = JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700);
-        if (str.toLocaleLowerCase().indexOf("quota") > 0)
-            return; 
-            
-        str = str.replaceAll("\\n", "\n");
+            //console.error('!!! Caught exception: ', err);
+            var str = JSON.stringify(err, Object.getOwnPropertyNames(err)).substr(0,1700);
+            if (str.toLocaleLowerCase().indexOf("quota") > 0)
+                return; 
+                
+            str = str.replaceAll("\\n", "\n");
+
+            if (str.indexOf("WebSocket was closed") > 0) return;
 
             var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
             if(errorChannel)
@@ -54,22 +56,11 @@ export function initErrorHandler(client) {
     });
 }
 
-async function getEmbedFromError(error)
-{
-    var statsEmbed = {
-        title: "Stats for "+(member.nickname ?? member.username),
-        fields: [],
-        thumbnail: { 
-            url:member.user.displayAvatarURL()
-        }
-    };
-}
-
 async function getGuildNameFromError(error)
 {
     if (GUILD_CONTEXT_FOR_ERROR_LOG)
     {
-        return GUILD_CONTEXT_FOR_ERROR_LOG.name + " (maybe, lol)";
+        return GUILD_CONTEXT_FOR_ERROR_LOG.name;
     }
     try
     {
