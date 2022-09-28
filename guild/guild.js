@@ -279,7 +279,7 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
   }
   if (property == "ruleChannelID" && isCommunityGuild(guild)) //special case
   {
-    return await guild.rulesChannel.id;
+    return await guild.rulesChannel;
   }
   if (property.endsWith("ChannelID"))
   {

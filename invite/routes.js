@@ -62,7 +62,10 @@ export async function generateInvite(req,res,next)
     var channel = await guessConfigurationValue(req.guild, "ruleChannelID", true); //convert = true
     if (!channel)
     {
+        console.log("No #rules channel found. Cannot complete operation.");
         res.write(`No #rules channel found. Cannot complete operation.`);
+        res.redirect("back");//back to referring page
+        return;
     }
     //var channel = req.guild.channels.cache.find(x => x.name === "rules"); //TODO select channel
     console.log(channel.name);
