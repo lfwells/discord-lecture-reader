@@ -12,12 +12,10 @@ export const SESSIONS = new Map();
 const discordEvents = new Map();
 
 export const SEMESTERS = {  //breaks are inclusive (so first day of break, and the last day of break -- NOT the first day back after break)
-    //sem1_2021:{ start: moment() },
-    //sem2_2021:{ start: moment() },
     sem1_2022:{ start: moment("2022-02-21"), breakStart: moment("2022-04-14"), breakEnd: moment("2022-04-20") },
     sem2_2022:{ start: moment("2022-07-11"), breakStart: moment("2022-08-29"), breakEnd: moment("2022-09-04") },
-    //asp1_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
-    //asp2_2022:{ start: moment().set({ 'year': 2022, 'month': 2, 'day': 21 }), breakStart: moment().set({ 'year': 2022, 'month': 4, 'day': 14 }), breakEnd: moment().set({ 'year': 2022, 'month': 4, 'day': 20 }) },
+    sem1_2023:{ start: moment("2023-02-20"), breakStart: moment("2023-04-06"), breakEnd: moment("2023-04-12") },
+    sem2_2023:{ start: moment("2023-07-10"), breakStart: moment("2023-08-28"), breakEnd: moment("2023-09-03") },
 }
 
 export async function getSessions(guild)
@@ -495,22 +493,26 @@ export async function getCurrentWeek(guild)
     var sortedSemesters = Object.values(SEMESTERS);
     sortedSemesters = sortedSemesters.sort((a,b) => b.start - a.start);
     for (var semester of sortedSemesters) {
-        if (now.isBetween(semester.breakStart, semester.breakEnd))
+        if (now.isBetween(semester.breakStart, semester.breakEnd, undefined, "[]"))
         {
             return "Semester Break";
         }
         else 
         {
-            var weeksAfter = now.diff(semester.start, 'week') - 1;
-            if (now.isAfter(semester.breakStart))
+            var daysAfter = now.diff(semester.start, 'day');
+            if (daysAfter >= 0)
             {
-                weeksAfter++;
-            }
-            if (weeksAfter >= 0 && weeksAfter <= 15)
-            {
-                return `Week ${weeksAfter}`;
+                var daysAfterBreak = Math.max(0, Math.min(7, now.diff(semester.breakStart, 'day')));
+                
+                var weeksAfter = Math.floor((daysAfter - daysAfterBreak) / 7) + 1;
+                console.log({ daysAfter, daysAfterBreak, calc:(daysAfter - daysAfterBreak), weeksAfter});
+
+                if (weeksAfter >= 0 && weeksAfter <= 15)
+                {
+                    return `Week ${weeksAfter}`;
+                }
             }
         }
     }
-    return "Semester Over";
+    return "Outside Semester";
 }
