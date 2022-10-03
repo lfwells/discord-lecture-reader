@@ -2,7 +2,7 @@ import { deleteGuildProperty, getGuildPropertyConverted, hasFeature, saveGuildPr
 import { Permissions } from "discord.js";
 import * as Config from "../core/config.js";
 import { pluralize, sleep } from "../core/utils.js";
-import { getNextSession } from "../attendance/sessions.js";
+import { getCurrentWeek, getNextSession } from "../attendance/sessions.js";
 import { getPostsData } from "../analytics/analytics.js";
 
 //this is very rate limited, can't do much
@@ -32,6 +32,11 @@ export async function init_status_channels(guild)
 				return `📅  Lecture ${nextSession.startTimestamp.fromNow()}`; 
 			else
 				return `📅  No More Lectures :(`; 
+		});
+		init_status_channel(guild, "currentWeek", "showCurrentWeek", async (guild) => {
+			var weekNumber = await getCurrentWeek(guild);
+			console.log({weekNumber});
+			return `📅  ${weekNumber}`; 
 		});
 	} catch (e) {}
 }

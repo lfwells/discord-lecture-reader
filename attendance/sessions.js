@@ -486,3 +486,31 @@ export function postWasForSession(instance, session)
     var time = moment(instance.timestamp);
     return time.isBetween(session.earlyStartTimestamp, session.endTime);
 }
+
+
+export async function getCurrentWeek(guild)
+{
+    var now = moment();
+    //get sorted list of semesters
+    var sortedSemesters = Object.values(SEMESTERS);
+    sortedSemesters = sortedSemesters.sort((a,b) => b.start - a.start);
+    for (var semester of sortedSemesters) {
+        if (now.isBetween(semester.breakStart, semester.breakEnd))
+        {
+            return "Semester Break";
+        }
+        else 
+        {
+            var weeksAfter = now.diff(semester.start, 'week') - 1;
+            if (now.isAfter(semester.breakStart))
+            {
+                weeksAfter++;
+            }
+            if (weeksAfter >= 0 && weeksAfter <= 15)
+            {
+                return `Week ${weeksAfter}`;
+            }
+        }
+    }
+    return "Semester Over";
+}

@@ -125,9 +125,15 @@ function hasFeature(feature)
         }) %></dt>
                 
     <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "Show Next Lecture Session",
+            feature: "showNextSession"
+        }) %></dt>
+
+    <dt><%- include("subViews/featureSelect.html", 
     { 
-        label: "Show Next Lecture Session",
-        feature: "showNextSession"
+        label: "Show Current Week",
+        feature: "showCurrentWeek"
     }) %></dt>
         
 
