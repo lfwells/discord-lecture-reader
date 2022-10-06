@@ -1,6 +1,6 @@
 import { adminCommandOnly } from "../core/utils.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { assignRole, botRoleHigherThanMemberRole, getRoleByName, getRoleByNameOrCreate, hasRole, unAssignRole } from "./roles.js";
+import { assignRole, botRoleHigherThanMemberRole, getRoleByName, getRoleByNameOrCreate, hasRole, init_roles, unAssignRole } from "./roles.js";
 import { getCachedInteraction, registerCommand } from "../guild/commands.js";
 import { setGuildContextForInteraction } from "../core/errors.js";
 
@@ -96,6 +96,20 @@ export default async function (client)
                 await doRoleSelectCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
             }
         }
+    });
+
+    //refresh cache of roles if new role made
+    client.on('roleCreate', async function(role) {
+        console.log("change to roles detected (create), initing roles again");
+        await init_roles(role.guild);
+    });
+    client.on('roleDelete', async function(role) {
+        console.log("change to roles detected (delete), initing roles again");
+        await init_roles(role.guild);
+    });
+    client.on('roleUpdate', async function(oldRole, newRole) {
+        console.log("change to roles detected (update), initing roles again");
+        await init_roles(oldRole.guild);
     });
 
 }
