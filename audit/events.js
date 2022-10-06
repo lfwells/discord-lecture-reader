@@ -39,15 +39,20 @@ export default async function(client)
         // Also grab the target of this action to double-check things
         const { executor, target } = deletionLog;
     
-        // Update the output with a bit more information
-        // Also run a check to make sure that the log returned was for the same author's message
-//console.log(target);
-        if (target.id === message.author.id) {
-            toLog.editedBy = executor.id;
-            console.log(`A message by ${message.author.tag} was edited by ${executor.tag}.`);
-        } else {
-            console.log(`A message by ${message.author.tag} was edited, but we don't know by who.`);
+        try
+        {
+            // Update the output with a bit more information
+            // Also run a check to make sure that the log returned was for the same author's message
+    //console.log(target);
+            if (target.id === message.author.id) {
+                toLog.editedBy = executor.id;
+                console.log(`A message by ${message.author.tag} was edited by ${executor.tag}.`);
+            } else {
+                console.log(`A message by ${message.author.tag} was edited, but we don't know by who.`);
+            }
         }
+        catch (TypeError) { console.log("caught a type error during an audit event", {target}, {author: message.author});}
+
         await logAudit(message.guild, toLog);
     });
 
