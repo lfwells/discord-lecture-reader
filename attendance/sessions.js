@@ -505,7 +505,7 @@ export async function getCurrentWeek(guild)
                 var daysAfterBreak = Math.max(0, Math.min(7, now.diff(semester.breakStart, 'day')));
                 
                 var weeksAfter = Math.floor((daysAfter - daysAfterBreak) / 7) + 1;
-                console.log({ daysAfter, daysAfterBreak, calc:(daysAfter - daysAfterBreak), weeksAfter});
+                //console.log({ daysAfter, daysAfterBreak, calc:(daysAfter - daysAfterBreak), weeksAfter});
 
                 if (weeksAfter >= 0 && weeksAfter <= 15)
                 {

@@ -35,7 +35,6 @@ export async function init_status_channels(guild)
 		});
 		init_status_channel(guild, "currentWeek", "showCurrentWeek", async (guild) => {
 			var weekNumber = await getCurrentWeek(guild);
-			console.log({weekNumber});
 			return `📅  ${weekNumber}`; 
 		});
 	} catch (e) {}
