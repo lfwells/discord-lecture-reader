@@ -166,6 +166,7 @@ export async function getCachedInteraction(guild, interactionID)
     var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
     var interactionSnapshot = await interactionDocument.get();
     var interaction = interactionSnapshot.data();
+    if (!interaction) return null;
     //add helpers for the options getters
     if (interaction.options)
     {
