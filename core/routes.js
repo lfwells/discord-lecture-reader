@@ -194,10 +194,12 @@ function guildRouter()
     router.get("/invites/generate", invite_routes.generateInvite, invite_routes.inviteList);
 
     //sheets
+    /*
     router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheetsIndex); 
     router.get("/sheets/update", loadClassListWithRemoved, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
     router.get("/sheets/addSheetAccess", guild.loadGuildProperty("googleSheetID"), sheet_routes.addSheetAccess); 
-        
+      */
+       
     //scheduled_events
     router.get("/schedule_test", schedule_test);
     router.get("/sessions", attendance_routes.sessionPage);
