@@ -174,7 +174,7 @@ async function doFlexCommand(interaction)
     var publicPost = interaction.options.getBoolean("public") ?? true;
 
     //only allow in off topic
-    //if (publicPost && await offTopicCommandOnly(interaction)) return;
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
 
     await interaction.deferReply({ ephemeral: !publicPost });
 

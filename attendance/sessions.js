@@ -16,7 +16,6 @@ export const SEMESTERS = {  //breaks are inclusive (so first day of break, and t
     sem2_2022:{ start: moment("2022-07-11"), breakStart: moment("2022-08-29"), breakEnd: moment("2022-09-04") },
     sem1_2023:{ start: moment("2023-02-20"), breakStart: moment("2023-04-06"), breakEnd: moment("2023-04-12") },
     sem2_2023:{ start: moment("2023-07-10"), breakStart: moment("2023-08-28"), breakEnd: moment("2023-09-03") },
-    sem2_2023:{ start: moment("2023-07-10"), breakStart: moment("2023-08-28"), breakEnd: moment("2023-09-03") },
 }
 
 export async function getSessions(guild)
