@@ -1,10 +1,10 @@
-import { MessageActionRow, MessageButton } from "discord.js";
+import moment from "moment";
 import { loadAllMessagesForChannel } from "../analytics/analytics.js";
-import { getClient, send } from "../core/client.js";
+import { send } from "../core/client.js";
 import * as config from "../core/config.js";
 import { redirectToWhereWeCameFrom } from "../core/utils.js";
 
-import { GUILD_CACHE } from "../guild/guild.js";
+import { getGuildProperty, GUILD_CACHE } from "../guild/guild.js";
 import { doPollCommand } from "./events.js";
 var previousRequest;
 
@@ -24,8 +24,8 @@ export async function load(req,res,next)
   var latestSimplePoll = simplePollMessages.first();
   var latestSimplePollTimestamp = latestSimplePoll ? latestSimplePoll.createdTimestamp : 0;
 
-  var latestRoboLindsPoll = GUILD_CACHE[req.guild.id].latestRoboLindsPoll;
-  var latestRoboLindsPollTimestamp = GUILD_CACHE[req.guild.id].latestRoboLindsPollTimestamp;
+  var latestRoboLindsPoll = await getGuildProperty("latestRoboLindsPoll", req.guild, null);//GUILD_CACHE[req.guild.id].latestRoboLindsPoll;
+  var latestRoboLindsPollTimestamp = await getGuildProperty("latestRoboLindsPollTimestamp", req.guild, null);//GUILD_CACHE[req.guild.id].latestRoboLindsPollTimestamp;
   if (latestRoboLindsPoll && latestSimplePoll)
   {
     if (latestRoboLindsPollTimestamp > latestSimplePollTimestamp)
@@ -75,7 +75,9 @@ export async function load(req,res,next)
       return;
     }
 
-    var pollInfo = await readRoboLindsayPoll(latestRoboLindsPoll);
+    var p = latestRoboLindsPoll;
+    p = JSON.parse(p);
+    var pollInfo = await readRoboLindsayPoll(p);
     req.results = pollInfo.results;
     req.mostVotes = pollInfo.mostVotes;
     req.question = pollInfo.question;
@@ -141,7 +143,7 @@ async function readSimplePoll(post)
   return req;
 }
 async function readRoboLindsayPoll(post)
-{
+{  
   var req = {};
   var question = post.title;
   //display question
@@ -228,6 +230,7 @@ export async function postPollRoboLinds(req, res)
   var pollText = req.params.pollText;
 
   pollText = pollText.replace("/poll ", "");
+  pollText = pollText.replace("%2Fpoll ", "");
   
   //turn it into a simple poll command
   console.log("post poll",pollText);
@@ -258,13 +261,15 @@ export async function postPollRoboLinds(req, res)
 
   //send the message on discord
   
-  var post = await send(req.lectureChannel, "poll");
+  var post = await send(req.lectureChannel, {embeds:[{title:"Loading..."}]});
   await doPollCommand(post, {
     question: myArray[0],
     options: myArray.slice(1),
-    multi_vote: true,
+    multi_vote: true, //TODO: get ALL of these from the json
     allow_undo: true,
-    poll_emoji: "█"
+    poll_emoji: "█",
+    restrict_see_results_button: false,
+    authorID: req.query.authorID ?? "" //TODO: get this from the logged in discordID
   });
   
   //show web page
@@ -299,9 +304,16 @@ export async function pollHistory(req,res,next)
   var roboLindsayMessages = messages.filter(m => m.author.id == config.ROBO_LINDSAY_ID); 
   await Promise.all(roboLindsayMessages.map( async (post) => 
   {
-    if (post.interaction && post.interaction.commandName == config.POLL_COMMAND)
+    //if (post.interaction && post.interaction.commandName == config.POLL_COMMAND)
+    if (post.embeds && post.embeds.length > 0)
     {
-      polls.push(await readRoboLindsayPoll(post.embeds[0]));
+      try 
+      {
+        var p = await readRoboLindsayPoll(post.embeds[0]);
+        p.timestamp = moment(post.createdTimestamp);
+        polls.push(p);
+      }
+      catch (e) { console.error(e); }
     }
   }));
 

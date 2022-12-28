@@ -10,6 +10,7 @@ export default async function(client)
 {
     client.on('messageCreate', async (msg) =>  
     {
+        if (msg.inGuild() == false) return;
         if (isOutsideTestServer(msg.channel.guild)) return;
         
         if ([config.SIMPLE_POLL_BOT_ID, config.LINDSAY_ID, client.user.id].indexOf(msg.author.id) == -1)

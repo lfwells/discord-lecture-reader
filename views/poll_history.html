@@ -1,4 +1,4 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Poll History" }) %>
 
 <style>
     .question { font-size:16pt; }
@@ -15,8 +15,35 @@
 <%
     locals.polls.forEach(poll =>
     {
-        %><%- include("pollTable.html", poll);%>
-        <%- include("subViews/download_csv.html", { data:poll.results, filename:poll.question }) ; %><%
+        var save = "/poll \"";
+        save += poll.question.replace("Poll: ", "");
+        save += "\" ";
+
+        save += poll.results.map(function(e) { return '"'+e.answer+'"'; }).join(" ");
+
+        var command = "/poll question: ";
+        command += poll.question.replace("Poll: ", "");
+        command += poll.results.map(function(e, i) { return 'option_'+(i+1)+': '+e.answer; }).join(" ");
+        poll.command = command;
+
+
+        %><%- include("pollTableHistory.html", poll);%>
+        <p>
+            <%- include("subViews/download_csv.html", { data:poll.results, filename:poll.question }) ; %> 
+            Save: <input type="text" style="width:500px" value="<%=save%>" /> <button class="copy">Copy</button>
+        </p>
+
+        <hr />
+        
+        <%
     });
 %>
+<script>
+    $(".copy").on("click", (e) => {
+        var txt = $(e.target).parent().find("input").first().text();
+        copyToClipboard(txt);
+        e.stopPropagation();
+        return false;
+    });
+</script>
 <%- include('footer.html') %>

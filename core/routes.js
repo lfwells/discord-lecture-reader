@@ -1,9 +1,11 @@
 import { downloadResource, removeQuestionMark } from "./utils.js";
 
 import * as guild from "../guild/guild.js";
-import { filterButtons, loadClassList, loadClassListWithRemoved } from "../core/classList.js";
+import { filterButtons, loadClassList, loadClassListWithRemoved } from "../classList/classList.js";
+import * as commands from "../guild/commands.js";
 
 import * as login_routes from '../core/login.js';
+import * as mylo_routes from '../mylo/routes.js';
 import * as guild_routes from '../guild/routes.js';
 import * as award_routes from '../awards/routes.js';
 import * as analytics_routes from '../analytics/routes.js';
@@ -12,19 +14,27 @@ import * as lecture_text_routes from '../lecture_text/routes.js';
 import * as poll_routes from '../polls/routes.js';
 import * as scheduled_poll_routes from '../scheduled_polls/routes.js';
 import * as invite_routes from "../invite/routes.js";
+import * as guide_routes from "../guide/routes.js";
+import * as cloner_routes from "../cloner/routes.js";
+import * as classList_routes from "../classList/routes.js";
 import { Router } from "express";
-import * as sheet_routes from "../sheets_test.js";
+import * as sheet_routes from "../analytics/sheets.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
+import { renderEJS } from "./server.js";
+import * as pptx_routes from "../pptx_parse/pptx.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
 {
-    app.use(defaultRouter());
     app.use(function(req, res, next){
         res.path = req.path;
         res.locals.path = req.path;
         next();
     });
+    
+    app.use(commands.loadCommands);
+
+    app.use(defaultRouter());
     app.use("/guild/:guildID", guildRouter());
 }
 
@@ -33,13 +43,25 @@ function defaultRouter()
     var router = Router({ mergeParams: true });
 
     //home page (select guild)
-    router.get("/", guild_routes.guildList);
+    router.get("/", guild_routes.loadGuildList, guild_routes.guildList);
+    router.get("/createFromTemplate", renderEJS("createFromTemplate"));
+    router.get("/serverAdded", guild_routes.serverAddedRedirect);
+    router.get("/serverAddedInGuide", guild_routes.serverAddedInGuideRedirect);
+
+    router.get("/guide", guild_routes.loadGuildList, guide_routes.guide); 
+    router.get("/guide/:page", guild_routes.loadGuildList, guide_routes.guidePage); 
+    router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
 
     //login
     router.get("/login", login_routes.loginPage);
-    router.get("/loginComplete", login_routes.loginComplete); 
+    router.get("/loginComplete", login_routes.loginComplete)
 
     router.get("/logout", login_routes.logout);
+
+    //mylo
+    router.get("/myloConnectCompleteDiscord", mylo_routes.discordConnectComplete); 
+    router.get("/myloConnectComplete", mylo_routes.myLOConnectComplete);  
+    router.get("/myloDisconnect/:interactionID/:guildID", mylo_routes.myLODisconnect); 
 
     return router;
 }
@@ -53,12 +75,17 @@ function guildRouter()
     //middleware check that this is one of "our" servers 
     router.use(guild.checkGuildAdmin);
 
+    router.use(guild.loadGuildProperty("totalPosts"));
+
+    router.use(guild.loadGuildProperty("botName"));
     router.use(guild.loadGuildProperty("adminRoleID"));
     router.use(guild.loadGuildProperty("studentRoleID"));
+    router.use(guild.loadGuildProperty("ruleChannelID"));
     router.use(guild.loadGuildProperty("lectureChannelID"));
     router.use(guild.loadGuildProperty("awardChannelID"));
     router.use(guild.loadGuildProperty("offTopicChannelID"));
     router.use(guild.loadGuildProperty("todoChannelID"));
+    router.use(guild.loadGuildProperty("todoEmoji"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
@@ -66,17 +93,41 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_analytics"));
     router.use(guild.loadGuildProperty("feature_invites"));
     router.use(guild.loadGuildProperty("feature_obs"));
+    router.use(guild.loadGuildProperty("feature_todos"));
+    router.use(guild.loadGuildProperty("feature_dm_intro"));
+    router.use(guild.loadGuildProperty("feature_sessions"));
+    router.use(guild.loadGuildProperty("feature_experimental"));
+    router.use(guild.loadGuildProperty("feature_showOnlineMemberCount"));
+    router.use(guild.loadGuildProperty("feature_showMemberCount"));
+    router.use(guild.loadGuildProperty("feature_showPostCount"));
+    router.use(guild.loadGuildProperty("feature_showNextSession"));
+    router.use(guild.loadGuildProperty("feature_showCurrentWeek"));
 
+
+    //TODO: this filterButtons could be expensive, I didn't realise!
     router.use(filterButtons);
 
-    //guild home page (dashboard)
-    router.get("/", 
+    router.get("/serverAdded", guild_routes.serverAdded);
+    router.get("/guide", guide_routes.guide); 
+    router.get("/guide/:page", guide_routes.guidePage); 
+    router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
+    router.post("/guide/postRules", guide_routes.postRules); 
+    router.post("/guide/configureWelcomeScreen", guide_routes.configureWelcomeScreen);
+    router.post("/guide/postAwards", guide_routes.postAwards); 
 
-    guild_routes.guildHome);
+
+    //guild home page (dashboard)
+    router.get("/", guild_routes.guildHome);
+    router.post("/", guild_routes.guildHomePost, guild_routes.guildHome);
                     
+    router.get("/clone", guild_routes.loadGuildList, cloner_routes.clone_select);
+    router.post("/clone", cloner_routes.clone);
+
     router.get("/obs/", basic_render("obs")); 
 
     router.get("/features/", guild_routes.guildFeatures); 
+    router.post("/setFeature/", guild_routes.setFeature); 
+    router.post("/setGuildProperty/", guild_routes.setGuildProperty); 
 
     //awards
     router.get("/namesTest/", award_routes.namesTest); 
@@ -106,9 +157,8 @@ function guildRouter()
     router.get("/analytics/obs/week", analytics_routes.getStatsDataWeekOBS, analytics_routes.obsStatsWeek); 
 
     router.get("/analytics/history", analytics_routes.getHistoricalData); 
-    router.get("/analytics/timeGraph", 
-        guild.loadGuildProperty("adminRoleID"),
-        analytics_routes.timeGraph); 
+    router.get("/analytics/timeGraph", guild.loadGuildProperty("adminRoleID"), analytics_routes.timeGraph); 
+    router.post("/analytics/timeGraph", guild.loadGuildProperty("adminRoleID"), analytics_routes.timeGraph); 
 
     //progress
     router.get("/progress/", loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress);
@@ -144,11 +194,37 @@ function guildRouter()
     router.get("/invites/generate", invite_routes.generateInvite, invite_routes.inviteList);
 
     //sheets
-    router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheets_test); 
+    router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheetsIndex); 
     router.get("/sheets/update", loadClassListWithRemoved, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
+    router.get("/sheets/addSheetAccess", guild.loadGuildProperty("googleSheetID"), sheet_routes.addSheetAccess); 
         
     //scheduled_events
     router.get("/schedule_test", schedule_test);
+    router.get("/sessions", attendance_routes.sessionPage);
+    router.post("/sessions", attendance_routes.sessionPagePost);
+    router.get("/sessions/deleteAll", attendance_routes.deleteAllEvents);
+    router.get("/sessions/obs", attendance_routes.nextSessionOBS);
+
+    //pptx
+    router.get("/pptx", pptx_routes.parse_pptx_page); 
+    router.post("/pptx", pptx_routes.parse_pptx_page); 
+
+    //clone channel    
+    router.get("/clone_channel", guild_routes.loadGuildList, cloner_routes.clone_channel_select);
+    router.post("/clone_channel", cloner_routes.clone_channel);
+    router.post("/clone_channel_confirm", cloner_routes.clone_channel);
+
+    //classlist
+    router.get("/classList", loadClassList, classList_routes.displayClassList);
+    router.post("/classList", loadClassList, classList_routes.uploadMyLOCSV, classList_routes.displayClassList); 
+    router.get("/classList/student/:discordID", loadClassList, classList_routes.displayStudent);
+
+    //groups
+    router.get("/classList/groups", loadClassList, classList_routes.displayGroups);
+    router.post("/classList/groups", loadClassList, classList_routes.uploadMyLOGroupsCSV, classList_routes.displayGroups); 
+    router.post("/classList/groups/create", loadClassList, classList_routes.createGroup); 
+
+
     return router;
 }
 

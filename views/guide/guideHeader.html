@@ -1,0 +1,75 @@
+<%- include('../header.html', { title: "User Guide" }) %>
+<% 
+//have to include these in each file sadly
+function inGuild()
+{
+    return !(typeof(locals.guild) === 'undefined');
+}
+function getGuilds()
+{
+    if (typeof(guilds) === 'undefined') return [];
+    return guilds.map(g => g.id);
+}
+function hasGuilds()
+{    
+    return getGuilds().length > 0;
+}
+function guideTabLink(text, link)
+{
+    return include("guideTabLink.html", {
+        text, link
+    });
+}
+
+var baseLink = locals.baseLink;
+%>
+<div id="toc">
+    <div>
+        <ul>
+            <li><a href="<%=baseLink%>">User Guide</a>
+            <ul>
+                <li><a href="<%=baseLink%>/minimum">Minimum-Effort Server Set Up (~5 minutes)</a></li>
+                <li><a href="<%=baseLink%>/additional">Additional Server Set Up Steps (~15 minutes)</a></li>
+                <li><a href="<%=baseLink%>/bot">Configuring the Bot and Basic Features (~10 mins)</a></li>
+                <li><a href="<%=baseLink%>/polls">Feature: Polls</a></li>
+                <li><a href="<%=baseLink%>/analytics">Feature: Post and Attendance Tracking</a></li>
+                <li><a href="<%=baseLink%>/achievements">Feature: Achievement System</a></li>
+                <li><a href="<%=baseLink%>/sessions">Feature: Scheduled Sessions</a></li>
+                <li><a href="<%=baseLink%>/obs">Feature: Open Broadcaster Studio Integration</a></li>
+            </ul>
+        </ul>
+        <hr />
+        <ul id="generate"></ul>
+    </div>
+</div>
+
+<content>
+    <h1>User Guide</h1>
+    
+    <% if (inGuild()) 
+    { 
+        %><p class="hint">Because you already have the Bot in your server, some steps of this guide can be automated for you!</p><%
+    } 
+    else
+    { 
+        if (hasGuilds())
+        {
+            %><p class="hint">It looks like you already have a server with the bot in it. 
+                <% if (getGuilds().length > 1) 
+                {
+                    %><br />You can automate some of steps below by visiting the user guide after clicking your server in the <a href="/">Unit List</a><%
+                }
+                else
+                {
+                    %>You can automate some of steps below. <br /><a class="botFunction" href="/guild/<%=getGuilds()[0]%>/guide">Enable Automated Steps</a><%
+                }
+                %>
+            </p><%
+        }
+        else
+        {
+            %><p class="hint">If you connect the Bot to your server early on, you can automate some steps below!</p><%
+        }
+    } %>
+
+    <section id="minimum">

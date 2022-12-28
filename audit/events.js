@@ -9,6 +9,7 @@ async function logAudit(guild, data)
 export default async function(client)
 {
     client.on('messageUpdate', async (message, newMessage) => {
+        console.log('messageUpdate');
         // Ignore direct messages
         if (!message.guild) return;
 
@@ -20,7 +21,7 @@ export default async function(client)
             newContent: newMessage.content,
             dump: JSON.stringify(message)
         }; 
-console.log(newMessage.content);
+//console.log(newMessage.content);
         const fetchedLogs = await message.guild.fetchAuditLogs({
             limit: 1,
             type: 'MESSAGE_EDIT',
@@ -38,14 +39,20 @@ console.log(newMessage.content);
         // Also grab the target of this action to double-check things
         const { executor, target } = deletionLog;
     
-        // Update the output with a bit more information
-        // Also run a check to make sure that the log returned was for the same author's message
-        if (target.id === message.author.id) {
-            toLog.editedBy = executor.id;
-            console.log(`A message by ${message.author.tag} was edited by ${executor.tag}.`);
-        } else {
-            console.log(`A message by ${message.author.tag} was edited, but we don't know by who.`);
+        try
+        {
+            // Update the output with a bit more information
+            // Also run a check to make sure that the log returned was for the same author's message
+    //console.log(target);
+            if (target.id === message.author.id) {
+                toLog.editedBy = executor.id;
+                console.log(`A message by ${message.author.tag} was edited by ${executor.tag}.`);
+            } else {
+                console.log(`A message by ${message.author.tag} was edited, but we don't know by who.`);
+            }
         }
+        catch (TypeError) { console.log("caught a type error during an audit event", {target}, {author: message.author});}
+
         await logAudit(message.guild, toLog);
     });
 

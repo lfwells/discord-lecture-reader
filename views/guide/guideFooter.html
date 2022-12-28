@@ -1,0 +1,74 @@
+
+    </section>
+</content>
+
+<script>
+$(document).ready(function () {
+    $("#toc #generate").toc({
+        content:"content",
+        headings:"h2,h3"
+    });
+/*
+    $("section > a").each(function() {
+        //$(this).attr("href", "#"+$(this).parent().attr("id"));
+        $(this).attr("href", "#");
+        $(this).on("click", function(e)
+        {
+            var content = $(this).parent().find("> div");
+            content.toggle();
+            return false;
+        });
+    });
+    $("section:target div").show();
+
+    
+    $(".optional > a").each(function() {
+        $(this).attr("href", "#");
+        $(this).on("click", function(e)
+        {
+            var content = $(this).next();
+            content.toggle();
+            return false;
+        });
+    });
+*/
+    if (document.location.href.indexOf("#serverAdded") > 0)
+    {
+        $("#minimum > div, #serverAdded > div").show();
+        setTimeout(function() {
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#serverAdded").offset().top
+            }, 100);
+            setTimeout(function() {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $("#serverAdded").offset().top
+                }, 100);
+            }, 750);
+        }, 750);
+    }
+
+    $("#copyRules").on("click", function()
+    {
+        CopyHTMLToClipboard("rules");
+        $(this).text("Copied to Clipboard!");
+    });
+});
+
+function CopyHTMLToClipboard(id) {    
+    var box = document.getElementById(id);     
+    box.select();
+    box.setSelectionRange(0,99999);
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        // navigator clipboard api method'
+        navigator.clipboard.writeText(box.value);
+    } else {
+        // text area method
+        document.execCommand('copy');
+    }
+    
+
+}  
+</script>
+
+<%- include('../footer.html') %>

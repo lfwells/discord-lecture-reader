@@ -1,22 +1,20 @@
-import e from 'express';
-import * as config from '../core/config.js';
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardEmoji, getAwardName, getAwardList, giveAward, getAwardListFullData, getLeaderboard } from "./awards.js";
-import { pluralize, offTopicOnly } from '../core/utils.js';
-import { getClassList } from '../core/classList.js';
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard } from "./awards.js";
+import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
+import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
+import { registerCommand } from '../guild/commands.js';
+import { setGuildContextForInteraction } from "../core/errors.js";
 
 export default async function(client)
 {
-    client.on('interactionCreate', async (msg) => 
+    client.on('messageCreate', async(msg) =>
     {
-        if (msg.isCommand()) return;
-
         if (await isAwardChannelID(msg.channel))
         {
             //detect update to awards (add)
-            console.log("message added in off topics list");
+            console.log("message added in achievements channel");
             handleAwardNicknames(client, msg.channel);
         }
     });
@@ -26,7 +24,7 @@ export default async function(client)
         if (await isAwardChannelID(msg.channel))
         {
             //detect update to awards (edit)
-            console.log("message update in off topics list");
+            console.log("message update in achievements channel");
             handleAwardNicknames(client, msg.channel);
         }
     });
@@ -36,7 +34,7 @@ export default async function(client)
         if (await isAwardChannelID(msg.channel))
         {
             //detect update to awards (delete)
-            console.log("message delete in off topics list");
+            console.log("message delete in achievements channel");
             handleAwardNicknames(client, msg.channel);
         }
     });
@@ -44,18 +42,23 @@ export default async function(client)
     // The data for our command
     const flexCommand = {
         name: 'flex',
-        description: 'Replies with your earned awards!',
+        description: 'Replies with your earned awards (only allowed in off-topic channel).',
         options: [{
             name: 'user',
             type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU). Only allowed in off topic channel.',
+            description: 'The user to see the awards for (leave blank for YOU).',
+            required: false,
+        }, {
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Should everyone see this post? (default: true)',
             required: false,
         }],
     };
     const awardCommand = {
         name: 'award', 
-        description: 'Gives an award to a user',
-        defaultPermission: true,
+        description: 'Gives an award to a user (admin only)',
+        //defaultPermission: true,
         /*permissions: [
             {
                 id: ,
@@ -85,33 +88,27 @@ export default async function(client)
             required: false,
         }],
     }; 
-    
+    /*
     const awardNewCommand = {
         name: 'awardnew', 
         description: 'old, and I don\'t know how to delete this lol',
         defaultPermission: false,
-    };
+    };*/
     const leaderboardCommand = {
         name: 'leaderboard',
-        description: 'Replies with the top 10 award earners (only allowed in off topic channel).',
-        /*options: [{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+        description: 'Replies with the top 10 award earners (only allowed in off-topic channel).',
+        options: [{
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Should everyone see this post? (default: false)',
             required: false,
-        }],*/
+        }],
     };
   
     var guilds = client.guilds.cache;
 
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-        //TODO: this doesnt work!
-        for (const command in commands)
-        {
-            console.log(guild.name+"delete "+await command.delete());
-        }
-
+        
         var awardCommand2 = JSON.parse(JSON.stringify(awardCommand));
         /* TODO: this still doesnt work!
         var admin = (await getAdminRole(guild));
@@ -125,25 +122,30 @@ export default async function(client)
                 }
             ];
         }*/
-
-        /*console.log(guild.name+"add "+*/await guild.commands.create(flexCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(awardCommand2);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(awardNewCommand);//); 
-        /*console.log(guild.name+"add "+*/await guild.commands.create(leaderboardCommand);//); 
+            
+        await registerCommand(guild, flexCommand);
+        await registerCommand(guild, awardCommand2);
+        //await registerCommand(guild, awardNewCommand); 
+        await registerCommand(guild, leaderboardCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || interaction.guild == undefined) return;
 
-        if (await hasFeature(interaction.guild, "achievements") == false)
+        if (["flex", "award", "leaderboard"].indexOf(interaction.commandName) >= 0)
         {
-            interaction.reply({
-                content: "Achievement System not enabled on this server",
-                ephemeral: true
-            });
-            return;
+            if (await hasFeature(interaction.guild, "achievements") == false)
+            {
+                interaction.reply({
+                    content: "Achievement System not enabled on this server",
+                    ephemeral: true
+                });
+                return;
+            }
         }
 
             
@@ -169,10 +171,12 @@ export default async function(client)
 
 async function doFlexCommand(interaction)
 {
-    //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    var publicPost = interaction.options.getBoolean("public") ?? true;
 
-    await interaction.deferReply();
+    //only allow in off topic
+    //if (publicPost && await offTopicCommandOnly(interaction)) return;
+
+    await interaction.deferReply({ ephemeral: !publicPost });
 
     var member = interaction.options.getMember("user") ?? interaction.member;
 
@@ -185,11 +189,14 @@ async function doFlexCommand(interaction)
 
     var flexEmbed = {
         title: (member.nickname ?? member.username)+" has "+pluralize(awards.length, "award"),
-        thumbnail: { 
-            url:member.user.displayAvatarURL()
-        },
         fields:[]
     };
+    if (member.user)
+    {
+        flexEmbed.thumbnail = { 
+            url:member.user.displayAvatarURL()
+        };
+    }
 
     if (awards.length == 0)
     {
@@ -210,20 +217,24 @@ async function doFlexCommand(interaction)
 }
 async function doAwardCommand(interaction)
 {
+    if (await adminCommandOnly(interaction)) return;
+
     var member = interaction.options.getMember("user");
+    member = await interaction.guild.members.fetch(member);
+
     var emoji = interaction.options.getString("award");//interaction.options[1].value;
     var award_text = interaction.options.getString("title");//interaction.options[2].value;
     var description = interaction.options.getString("description");
 
     await interaction.deferReply();
 
-    if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
+    //if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
     {
         
         var awardChannel = await getAwardChannel(interaction.guild);
 
         var award = await getAwardByEmoji(interaction.guild, emoji);
-        console.log("award", member.id, award, emoji);
+        //console.log("award", member.id, award, emoji);
         if (award)
         {
             var achievementEmbed = await giveAward(interaction.guild, award, member); 
@@ -260,22 +271,30 @@ async function doAwardCommand(interaction)
             else
             {
                 interaction.user.send("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)");
+                //interaction.editReply("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)", {ephemeral:true});
+
+                await interaction.deleteReply();
             }
         }
     
     }
-    else
+    /*else
     {
-        interaction.editReply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
-    }
+        interaction.user.send("You don't have permission to `/award` achievements. You can suggest an award to your UC though!");
+        //interaction.editReply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
+        
+        await interaction.deleteReply();
+    }*/
 }
 
 async function doLeaderboardCommand(interaction)
 {
-    //only allow in off topic
-    if (await offTopicOnly(interaction)) return;
+    var publicPost = interaction.options.getBoolean("public") ?? false;
 
-    await interaction.deferReply();
+    //only allow in off topic
+    if (publicPost && await offTopicCommandOnly(interaction)) return;
+
+    await interaction.deferReply({ ephemeral: !publicPost });
 
     var awardsData = await getLeaderboard(interaction.guild, await getClassList(interaction.guild));
 

@@ -4,6 +4,7 @@ import { guildsCollection } from "../core/database.js";
 import { showText } from "../lecture_text/routes.js";
 import { pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
+import { botRoleHigherThanMemberRole } from '../roles/roles.js';
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
@@ -51,7 +52,7 @@ export async function handleAwardNicknames(client, offtopiclistschannel)
     //console.log("awards", awards);
     if (member)
     {
-      console.log("member", baseName(member.nickname ?? member.user.username));
+      //console.log("member", baseName(member.nickname ?? member.user.username));
       //setNickname(member, baseName(member.nickname ?? member.user.username)+" "+awards.join(""))
       //this way may look dumb, but we dont want to split the last emoji in two 
       var newNickname = baseName(member.nickname ?? member.user.username);
@@ -76,12 +77,10 @@ export async function handleAwardNicknames(client, offtopiclistschannel)
 async function setNickname(client, member, nickname)
 {
   //console.log(nickname.length); 
-  console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
+  //console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
+
   //we can only set the nickname if the role is lower than us
-  var us = await member.guild.members.cache.get(client.user.id);
-  var ourHighestRole = us.roles.highest;
-  var theirHighestRole = member.roles.highest;
-  if (ourHighestRole.position >= theirHighestRole.position)
+  if (await botRoleHigherThanMemberRole(member))
   {
     if (!config.getTestMode())
     {
@@ -91,16 +90,21 @@ async function setNickname(client, member, nickname)
 }
 export function baseName(nickname)
 {
-  return nickname.replace(reg, "").trim(); 
+  return stripEmoji(nickname); 
   while ((result = reg.exec(nickname)) !== null) {
     return nickname.substr(0, result.index-1).trim();
   }
   return nickname;
 }
+export function stripEmoji(txt)
+{
+  return txt.replace(reg, "").trim();
+}
 
 export async function isAwardChannelID(fromInChannel)
 {
     var channel = await fromInChannel.fetch();
+    if (channel.guild == undefined) return false;
     var awardChannelID = await getAwardChannelID(channel.guild.id);
     return channel.id == awardChannelID;
 }
@@ -126,7 +130,7 @@ export async function getAwardList(guild, member) //optionally get award list fo
   {
     var emoji = getAwardEmoji(award);
     //check that they have the award
-    if (!member || award.mentions.users.has(member.user.id))
+    if (!member || award.mentions.members.has(member.id))
     {
       awards[emoji] = getAwardName(award);
     }

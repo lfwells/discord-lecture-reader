@@ -82,7 +82,7 @@
     textarea {
         font-family: 'Courier New', Courier, monospace;
     }
-    select, option, optgroup { color:#2C2F33;}
+    select, option, optgroup { background-color:#2C2F33 !important; color:white !important; font-style: normal !important;}
 
     a { text-decoration: none; }
     a:hover {text-decoration: underline;}
@@ -147,9 +147,11 @@
     }
 
     .discordUser {
-        position: fixed;
-        right:1em;
-        top:1em;
+        float: right;
+        margin-top: -64px;
+    }
+    .discordUser.loginButton {
+        margin-top: -32px;
     }
     .discordUser img
     {
@@ -201,9 +203,11 @@
 
 
         button {
-            color:black;
+            color:black !important;
             font-size: small;
+            cursor: pointer;
         }
+        .fa { color:black; }
 
         #guilds,
         nav ul
@@ -226,8 +230,7 @@
             cursor:pointer;
             background-color: rgba(176, 196, 222, 0.582);/*lightstellblue with alpha*/
         }
-        #guilds li span,
-        nav ul li span
+        #guilds li span.serverInfo
         {
             font-size: smaller;
         }
@@ -258,6 +261,13 @@
         { 
             padding: 2em;
             padding-top:0.5em;
+            margin-top:-1em !important;
+            background-color: rgba(0,0,0,0.1);
+            min-height: 80vh;
+        }
+        main, header > *, footer
+        {
+            max-width:1000px; margin:0 auto;
         }
 
         footer {
@@ -282,15 +292,288 @@
             padding:1em;
         }
 
-        label > span {
+        a, .bold { font-weight: bold; }
+
+        label > span:first-child {
             display:inline-block;
             min-width:200px
+        }
+        label .help {
+            margin-left:205px;
+            margin-top:8px;
+            font-size:smaller;
+            opacity: 0.5;
         }
         .filter label > span {
             display:inline !important;
             min-width:initial !important;
         }
 
-        .btnAdd {
+        .btn {
+            display:inline-block !important;
+            margin:2ex;
+            padding:2ex !important;
+            background-color: #7289DA;
+            
+            border-radius: 8px;
+            border: 4px solid #7289DA;
+            max-width:250px;
+            padding-left:4ex !important;
+            padding-right:4ex !important;
+
+            color: white !important;
+
+            cursor: pointer;
+        }
+        .btn span:first-child {
             font-size:48pt; display:inline-block; vertical-align: middle;
+            margin-right:8px;
+            
+        }
+        .btn span:nth-child(2) {
+            vertical-align: middle;
+        }
+        .btn + span { 
+            display:inline-block;
+            margin-left:2ex;
+        }
+        .btn.outline, .btn.outlined {
+            background-color: transparent;
+        }
+
+
+        .btnAdd {
+            display:inline-block !important;
+            margin:2ex;
+            padding:2ex !important;
+            background-color: #7289DA;
+            
+            border-radius: 8px;
+            border: 4px solid #7289DA;
+            max-width:250px;
+            padding-left:4ex !important;
+            padding-right:4ex !important;
+
+            cursor: pointer;
+        }
+        .btnAdd span:first-child {
+            font-size:48pt; display:inline-block; vertical-align: middle;
+            margin-right:8px;
+            
+        }
+        .btnAdd span:nth-child(2) {
+            vertical-align: middle;
+        }
+        .btnAdd + span { 
+            display:inline-block;
+            margin-left:2ex;
+        }
+        .btnAdd.outline, .btnAdd.outlined {
+            background-color: transparent;
+        }
+
+        .panel { margin-left:4ex; }
+        .form-control input, .form-control select {
+            width:250px;
+        }
+        .form-control textarea + p, 
+        .form-control select + p,
+        td .form-control input + p 
+        { 
+            margin-top:0px !important; 
+        }
+
+        *[data-schemapath*=".descriptions"] label { display: none; }
+        *[data-schemapath*="day"] select + .panel { font-size:0; height:16px; }
+        *[data-schemapath*="day"] label { display:none !important; }
+
+        h1 img 
+        {
+            width:64px;
+            height:64px;
+            border-radius: 32px;
+            vertical-align: middle;
+        }
+        h1 div {
+            vertical-align: middle;
+            display:inline-block;
+        }
+        h1 img[src=""]
+        {
+            display: none;
+        }
+        #guilds li img
+        {
+            width:48px;
+            height:48px;
+            border-radius: 24px;
+            display:inline-block;
+            vertical-align: middle;
+        }
+        #guilds img[src=""]  {
+            background-color:black;
+            margin:0.5em;
+            padding:0;
+            text-indent: -10000px;
+        }
+        #guilds li img + a
+        {
+            display:inline-block;
+            vertical-align: middle;
+        }
+
+        input, select, textarea {
+            padding:0.5em;
+            border-radius: 8px;
+        }
+
+        section p {
+            line-height:1.5em;
+        }
+
+        section:target {
+            background-color: rgba(255,255,255,0.3);
+        }
+        section > a, .optional > a {
+            display:block;
+            padding: 1em;
+        }
+        .optional > a { margin:-1em; }
+        /*section > a {
+            padding: 1em;
+        }
+        section > a:hover
+        {
+            background-color: rgba(255,255,255,0.3);
+        }*/
+        section > a:hover, .optional > a:hover { text-decoration: none; }
+        section > div,
+        .optional a + *
+        {
+            /*display:none;*/
+            margin-left:24px;
+        }
+        section:target > div
+        {
+            display:block;
+        }
+        section .description
+        {
+            margin-top: -1em;
+            font-weight: normal;
+        }
+        section img 
+        {
+            padding: 0em;
+            margin: 1em;
+            vertical-align: top;
+            border:1px solid #aaa;
+            border-radius: 8px;
+        }
+        section li{
+            padding:0.5em;
+        }
+        .centered
+        {
+            text-align: center;
+        }
+        
+        .centered > *
+        { 
+            vertical-align: top;
+        }
+        .centered > img
+        {
+            max-width: 100%;
+        }
+
+        section textarea
+        {
+            width:100%;
+        }
+
+        .hint {
+            border: 2px solid #7289DA;
+            border-radius:8px;
+            padding: 1em;
+        }
+
+        p.botFunction, .guideTabLink, label.botFunction
+        {
+            color: #7289DA;
+            font-weight: bold;
+        }
+        .guideTabLink:hover
+        {
+            background-color: white;
+        }
+        button.botFunction, a.botFunction
+        {
+            background-color: #7289DA;
+            font-weight: bold;
+            color:white !important;
+            padding:0.5em;
+        }
+        a.botFunction
+        {
+            margin:1em;
+            display:inline-block;
+        }
+
+        #toc
+        {
+            position: sticky;
+            top: 0;
+            margin-right: 24px;
+            background-color: rgba(0,0,0,0.1);
+            padding: 16px;
+            padding-top:32px;
+            margin-top: -8px;
+            margin-left: -32px;
+            width: 250px;
+            min-height: 110vh;
+            display: inline-block;
+        
+        }
+        #toc a { font-weight: normal !important;}
+        #toc > div
+        {
+            position:sticky;
+            top:32px;
+        }
+        #toc > div > ul{
+            max-height: 95vh;
+            overflow-y: scroll;
+        }
+        #toc > div > ul {
+            margin-top:-24px;
+        }
+        #toc ul li {
+            list-style: none;
+            margin-left:-4ex;
+            margin-top:0.5em;
+        }
+        #toc > div > ul > li {
+            margin-top:1em;
+        }
+        #toc * {
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;  /* Firefox */
+        }
+        #toc *::-webkit-scrollbar { 
+            display: none;  /* Safari and Chrome */
+        }
+        #toc hr { margin-bottom:2em}
+
+        content
+        {
+            width: 720px;
+
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .saved {
+            color: #7289DA;
+            font-weight: bold;
         }

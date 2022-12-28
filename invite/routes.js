@@ -1,6 +1,6 @@
-import { getClient } from "../core/client.js";
 import { init_invites, invites } from "./invite.js";
-import { roles } from "./roles.js";
+import { ROLES } from "../roles/roles.js";
+import { guessConfigurationValue } from "../guild/guild.js";
 
 
 //import { getClient } from "../core/client.js";
@@ -8,8 +8,7 @@ import { roles } from "./roles.js";
 
 export async function inviteList(req, res) 
 {
-    console.log(req.path);
-    init_invites(getClient());
+    await init_invites(req.guild);
     
     var appliedRolesList = [];
     var query = await req.guildDocument.collection("invites").get();
@@ -17,9 +16,19 @@ export async function inviteList(req, res)
         var d = doc.data();
         appliedRolesList[d.code] = d.role;
     });
+    var sortedInvites = Object.entries(invites[req.guild.id]);
+    sortedInvites.sort((a,b) => {
+        //console.log(a[1].createdTimestamp, b[1].createdTimestamp,a[1],b[1]);
+        if (a[1].createdTimestamp && b[1].createdTimestamp)
+        {
+            return a[1].createdTimestamp - b[1].createdTimestamp;
+        }
+        return -1;
+    });
+    console.log(sortedInvites.map(kvp => kvp[1].createdTimestamp));
     res.render('inviteList', {
-        invites: invites.get(req.guild.id),
-        rolesList: roles[req.guild.id].map((role) => { return {
+        invites: sortedInvites,
+        rolesList: ROLES[req.guild.id].map((role) => { return {
             value: role.id,
             text: role.name
         }}),
@@ -50,7 +59,15 @@ export async function assignRole(req, res)
 
 export async function generateInvite(req,res,next)
 {
-    var channel = req.guild.channels.cache.find(x => x.name === "rules"); //TODO select channel
+    var channel = await guessConfigurationValue(req.guild, "ruleChannelID", true); //convert = true
+    if (!channel)
+    {
+        console.log("No #rules channel found. Cannot complete operation.");
+        res.write(`No #rules channel found. Cannot complete operation.`);
+        res.redirect("back");//back to referring page
+        return;
+    }
+    //var channel = req.guild.channels.cache.find(x => x.name === "rules"); //TODO select channel
     console.log(channel.name);
     var newInvite = await channel.createInvite({
         unique:true,
@@ -58,7 +75,7 @@ export async function generateInvite(req,res,next)
         maxUses: 0,
     });
     
-    invites.get(req.guild.id).set(newInvite.code, newInvite.uses);
+    invites[req.guild.id][newInvite.code] = { code: newInvite.code, uses: newInvite.uses, createdTimestamp: newInvite.createdTimestamp };
 
     res.redirect("back");//back to referring page
 }

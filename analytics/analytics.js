@@ -1,11 +1,12 @@
 import moment from "moment";
 import { getGuildDocument, getGuildProperty, getGuildPropertyConverted, GUILD_CACHE } from "../guild/guild.js";
 import * as Config from "../core/config.js";
-import { didAttendSession, getSessions, postWasForSession } from "../attendance/sessions.js";
+import { didAttendSession, postWasForSession } from "../attendance/sessions.js";
+import { getSessionsOld } from "../attendance/old_sessions.js";
 import { db, guildsCollection } from "../core/database.js";
-import { getClient } from "../core/client.js";
 import fakeData from "./fakeData.js";
-import { asyncFilter } from "../core/utils.js";
+import { asyncFilter, asyncForEach } from "../core/utils.js";
+import { getClassList } from "../classList/classList.js";
 
 export var ANALYTICS_CACHE = {}; //because querying the db for all messages on demand is bad (cannot cache on node js firebase it seems)s
 
@@ -69,6 +70,7 @@ export async function getPostsData(guild, userPredicate, postPredicate)
         return filtered;
     }
 
+    console.log(`getPostsData called with no cache for ${guild.id}, this little manauevr will cost us 10 years`);
     var collection = "analytics";
     if (
         guild.id == "801006169496748063" || //kit305 2021
@@ -106,7 +108,7 @@ export async function getPostsData(guild, userPredicate, postPredicate)
     //}));
     ANALYTICS_CACHE[guild.id] = rawStatsData;
 
-    return getPostsData(guild, userPredicate, postPredicate); //this looks like infinite recursion, but isn't, this call will use the cache, and apply predicate
+    return await getPostsData(guild, userPredicate, postPredicate); //this looks like infinite recursion, but isn't, this call will use the cache, and apply predicate
     //return rawStatsData;
 }
 async function analyticsParseMessage(d, guild)
@@ -175,18 +177,17 @@ export async function getStats(guild, userPredicate, postPredicate)
         if (Object.keys(stats.members).includes(memberID) == false)
         {
             var memberObj = await guild.members.cache.get(memberID);
-            var userObj = null;
-            if (memberObj == undefined) {//continue;
-                //console.log(row);
-                userObj = await getClient().users.fetch(memberID);//getClient().users.cache.get(memberID);
-            }
 
-            stats.members[memberID] = { 
-                name: memberObj == undefined ? userObj.username : memberObj.nickname ?? memberObj.user.username,
-                posts:[]
-            };
+            if (memberObj)
+            {
+                stats.members[memberID] = { 
+                    name: memberObj.displayName,
+                    posts:[]
+                };
+            }
         }
-        stats.members[memberID].posts.push(row);
+        if (stats.members[memberID])
+            stats.members[memberID].posts.push(row);
     }
     //convert to array for sorting and just general betterness
     var statsData = {
@@ -211,6 +212,8 @@ export async function getStats(guild, userPredicate, postPredicate)
     statsData.rawStatsData = rawStatsData;
 
     statsData.membersByID = stats.members;
+
+    statsData.total = rawStatsData.length;
 
     return statsData;
 }
@@ -329,14 +332,18 @@ export async function loadTimeSeries(rawStatsData, weekly)
     }
 
     //fill in holes in graph with zeros
-    for (var m = moment(startDomain); m.isBefore(endDomain); m.add(1, 'days')) {
-        var idx = days.findIndex(d => m.isSame(d.date));
+    for (var m = moment(startDomain); m.isBefore(endDomain); m.add(1, 'days')) 
+    {
+        var m2 = moment(m);
+        if (weekly)
+            m2 = moment(m).startOf('week'); 
+        var idx = days.findIndex(d => m2.isSame(d.date));
         if (idx == -1)
         {
             //console.log("added missing day "+m.format());
-            days.push({ date: moment(m), value: 0 }); 
+            days.push({ date: moment(m2), value: 0 }); 
         }
-        idx = days.findIndex(d => m.isSame(d.date));
+        idx = days.findIndex(d => m2.isSame(d.date));
     }
 
     days = days.sort((a,b) => a.date - b.date);
@@ -390,9 +397,9 @@ export async function loadPostsPerHour(rawStatsData)
     return hours;
 }
 
-async function getSessionsFlatArray(guild)
+async function getSessionsOldFlatArray(guild)
 {
-    var sessions = (await getSessions(guild)).flatMap(s => {
+    var sessions = (await getSessionsOld(guild)).flatMap(s => {
         s.sessions.forEach(s2 => {
             s2.x = s.name+" "+s2.name
             s2.messages = [];
@@ -413,7 +420,7 @@ async function getSessionsFlatArray(guild)
 }
 export async function loadPostsPerSession(rawStatsData, guild, includeNoSession, predicate)
 {
-    var sessions = await getSessionsFlatArray(guild);
+    var sessions = await getSessionsOldFlatArray(guild);
     var outOfSessionPosts = [];
     var inOfSessionPosts = [];
 
@@ -488,7 +495,7 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
 
 export async function loadAttendanceSession(attendanceData, guild, includeNoSession, predicate)
 {
-    var sessions = await getSessionsFlatArray(guild);
+    var sessions = await getSessionsOldFlatArray(guild);
     var outOfSessionAttendance = [];
     var inOfSessionAttendance = [];
     for (var r in attendanceData)
@@ -561,4 +568,67 @@ export async function loadAttendanceSession(attendanceData, guild, includeNoSess
     return sessions;
 }
 
-//TODO: consultation attendance counts?
+
+export async function getStudentStreak(guild, memberID)
+{
+    var activeDays = await getStudentTotalActiveDays(guild, memberID);
+
+    var bestStreak = 0;
+    var currentStreak = 1;
+    var totalActiveDays = 0;
+    var prevItem = -1;
+    var ordered = [...activeDays].sort();
+    for (let index = 0; index < ordered.length; index++) {
+        const element = ordered[index];
+        if (element - prevItem == 86400000) //milliseconds in one day
+        {
+            currentStreak++;
+            bestStreak = Math.max(bestStreak, currentStreak);
+        }
+        else 
+        {
+            currentStreak = 1;
+        }
+        prevItem = element;
+        totalActiveDays++;
+    }
+    return {
+        bestStreak,
+        currentStreak,
+        totalActiveDays,
+    };
+        
+}
+export async function getTopBestStreak(guild)
+{
+    var streaks = await getAllStreaks(guild);
+    streaks = streaks.sort((a,b) => b.bestStreak - a.bestStreak);
+    return streaks;
+}
+export async function getTopCurrentStreak(guild)
+{
+    var streaks = await getAllStreaks(guild);
+    streaks = streaks.sort((a,b) => b.currentStreak - a.currentStreak);
+    return streaks;
+}
+export async function getTopActiveDays(guild)
+{
+    var streaks = await getAllStreaks(guild);
+    streaks = streaks.sort((a,b) => b.totalActiveDays - a.totalActiveDays);
+    return streaks;
+}
+async function getAllStreaks(guild)
+{
+    var classList = await getClassList(guild, false);
+    await asyncForEach(classList, async function(student) {
+        student.streak = await getStudentStreak(guild, student.discordID);
+        student.streak.name = student.discordName;
+    });
+    return classList.map(e => e.streak);
+}
+export async function getStudentTotalActiveDays(guild, memberID)
+{
+    var statsData = await getStats(guild);
+    var studentData = statsData.membersByID[memberID];
+    return studentData == null ? new Set() : new Set(studentData.posts.map(p => moment(p.timestamp).startOf('day').valueOf()));
+}

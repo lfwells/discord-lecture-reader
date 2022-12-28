@@ -1,6 +1,8 @@
 import * as config from '../core/config.js';
 import { getGuildPropertyConverted } from '../guild/guild.js';
+import { Permissions } from "discord.js";
 
+import moment from "moment";
 
 export const clamp = (a, min = 0, max = 1) => Math.min(max, Math.max(min, a));
 export const invlerp = (x, y, a) => clamp((a - x) / (y - x));
@@ -47,6 +49,7 @@ export function parseClientStatus(status)
 
 import { Parser } from 'json2csv';
 import ifError from 'assert';
+import { isAdmin } from '../roles/roles.js';
 export function downloadResource(filename) {
   return function(req, res, next) {
     const json2csv = new Parser({ fields:req.fields });
@@ -57,12 +60,26 @@ export function downloadResource(filename) {
   }
 }
 
-export async function offTopicOnly(interaction)
+export async function offTopicCommandOnly(interaction)
 {
-    var offTopicChannel = await getGuildPropertyConverted("offTopicChannel", interaction.guild);
-    if (offTopicChannel && interaction.channel != offTopicChannel)
+  if (await isAdmin(interaction.member)) return false;
+
+  var offTopicChannel = await getGuildPropertyConverted("offTopicChannel", interaction.guild);
+  if (offTopicChannel && interaction.channel != offTopicChannel)
+  {
+      interaction.reply({ content: "You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", ephemeral:true });
+      return true;
+  }
+  return false;
+}
+export async function adminCommandOnly(interaction)
+{
+    if (interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) == false)
     {
-        interaction.reply({ content: "You can only `/"+interaction.commandName+"` in <#"+offTopicChannel.id+">", ephemeral:true });
+        interaction.reply({ 
+            content:"Only admins can run `/"+interaction.commandName+"`, sorry.",
+            ephemeral:true
+        });
         return true;
     }
     return false;
@@ -73,7 +90,7 @@ export async function offTopicOnly(interaction)
 //use this handie little tool to allow question marks in poll urls
 export function removeQuestionMark(req, res, next)
 {
-  console.log("index of q", req.originalUrl.indexOf("?"));
+  console.log("index of q", req.originalUrl.indexOf("?"), req.originalUrl);
   if (req.originalUrl.indexOf("?") > 0)
   {
     res.redirect(req.originalUrl.replace("?", "%3F"));
@@ -100,7 +117,7 @@ export function pluralize(number, textNotPlural, textPlural)
 {
   if (number == 1)
   {
-    return number +" "+textNotPlural;
+    return number.toLocaleString() +" "+textNotPlural;
   }
   else 
   {
@@ -108,7 +125,7 @@ export function pluralize(number, textNotPlural, textPlural)
     {
       textPlural = textNotPlural+"s";
     }
-    return number + " " + textPlural;
+    return number.toLocaleString() + " " + textPlural;
   }
 }
 
@@ -117,4 +134,18 @@ export async function asyncFilter (arr, predicate) {
 	const results = await Promise.all(arr.map(predicate));
 
 	return arr.filter((_v, index) => results[index]);
+}
+export async function asyncForEach(arr, f) { 
+  return await Promise.all(arr.map(await f));
+}
+export async function asyncForEachInSequence(arr, f) { 
+  for (var item of arr)
+  {
+    await f(item);
+  }
+}
+
+export function dateToHuman(d)
+{
+  return moment(d).format("dddd, MMMM Do YYYY, h:mm:ss a");
 }

@@ -1,29 +1,42 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Unit List" }) %>
 
-<h2>Unit List</h2>
-<p>Discord Servers that you are an admin of will appear here.</p>
-<!--
-<p><% if (testMode) { %>
-    Test Mode ON. <a href="/testMode/false">Turn OFF</a>
-<% } else { %>
-    Test Mode OFF. <a href="/testMode/true">Turn ON</a>
-<% } %> (Test mode limits the bot to only respond and post on the test server)</p>
--->
+<p>Discord Servers that you are an admin of and you have added the Discord Bot to will appear here.</p>
 
-<ul id="guilds">
-  <li>
-    <a href="https://discord.com/api/oauth2/authorize?client_id=811958340967071745&permissions=8&redirect_uri=http%3A%2F%2F131.217.172.176%2F&response_type=code&scope=messages.read%20bot%20applications.commands%20guilds%20guilds.join%20connections"><span class="btnAdd">+</span> <span style="vertical-align: middle;">Add Your Server</span></a>
-  </li>
-  <% guilds.forEach(function(guild){ %>
-    <li>
-      <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>"><%= guild.name %><br />
-      <span>
-        <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
-        <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%></span>
-      </a>
-    </li>
-  <% }) %>
+  <% if (guilds.size == 0)
+  {
+    %>
+    <p>You haven't added the Bot to any servers yet. Let's get started!</p>
+    <%- include("subViews/addServerLink.html") %>
+    <%
+  }
+  else
+  {
+    %>
+    <ul id="guilds">
+      <li>
+        <%- include("subViews/addServerLink.html") %>
+      </li>
+      <%
+      guilds.forEach(function(guild)
+      { 
+        %>
+        <li>
+          <img src="<%=guild.iconURL()%>" />
+          <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>"><%= guild.name %><br />
+          <span class="serverInfo">
+            <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
+            <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%> - 
+            <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
+          </span>
+          </a>
+        </li>
+        <% 
+      });
+      %>
+    </ul><%
+  }
+  %>
   
-</ul>
+
 
 <%- include('footer.html') %>

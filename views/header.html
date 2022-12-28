@@ -1,6 +1,21 @@
 <html>
     <head>
-        <title>Robo Lindsay Mk II</title>
+        <% if ( typeof title != 'undefined' )
+        {
+            if (locals.guild && locals.discordUser)
+            {
+                %><title><%=title%> - <%= guild.name %> - UTAS Discord Bot</title><%
+            }
+            else
+            {
+                %><title><%=title%> - UTAS Discord Bot</title><%
+            }
+        }
+        else
+        {
+            %><title>UTAS Discord Bot</title><%
+        }
+        %>
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/pure-min.css" integrity="sha384-LTIDeidl25h2dPxrB2Ekgc9c7sEC3CWGM6HeFmuDNUjX76Ert4Z4IY714dhZHPLd" crossorigin="anonymous /">
         <link rel="stylesheet" href="/static/style.css">
         <style type="text/css">
@@ -9,6 +24,21 @@
             }
         </style>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+        <!-- Font Awesome icons (Bootstrap, Foundation, and jQueryUI also supported) -->
+        <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+
+        <script src="/static/dist/jsoneditor.js"></script>
+        <script src="/static/dist/jquery.toc.min.js"></script>
+    
+        <script>
+        // Set the default CSS theme and icon library globally
+        JSONEditor.defaults.theme = 'foundation5';
+        JSONEditor.defaults.iconlib = 'fontawesome4';
+        </script>
+        
     </head>
     <body>
         <% 
@@ -17,23 +47,13 @@
             %>
             <header>
             <% 
-            if (locals.discordUser)
+            if (locals.guild && locals.discordUser)
             {
                 %>
-                <div class="discordUser">
-                    <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
-                    <div>
-                        <%=locals.discordUser.username%><br />
-                        <a href="/logout" class="logout">Logout</a>
-                    </div>
-                </div>
-                <%
-            }
-            
-            if (locals.guild)
-            {
-                %>
-                <h1><a href="/guild/<%= guild.id %>/"><%= guild.name %></a> <a href="/" style="font-size:small">Change Server</a></h1>
+                <h1>
+                    <img src="<%=guild.iconURL()%>" />
+                    <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
+                </h1>
                 <% 
                 
                 
@@ -67,14 +87,47 @@
                 %>
                 
                 <nav>
+                            
+                    <% if (locals.discordUser)
+                    {
+                        %>
+                        <div class="discordUser">
+                            <% if (locals.discordUser.avatar) { %>
+                                <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                            <% }%>
+                            <div>
+                                <%=locals.discordUser.username%><br />
+                                <a href="/logout" class="logout">Logout</a>
+                            </div>
+                        </div>
+                        <%
+                    }
+                    else if ((locals.path ?? "").indexOf("/guide") >= 0)
+                    {
+                        %>
+                        <div class="discordUser loginButton" style="top:4em">
+                            <a href="/login" class="login">Login</a>
+                        </div>
+                        <%
+                    } %>
+            
                     <ul>
                         <li><a <%=currentTab("")%> href="/guild/<%= guild.id %>/">Configure Server</a></li>
+                        <li><a <%=currentTab("classList")%> href="/guild/<%= guild.id %>/classList/">Class List</a></li>
                         <li><a <%=currentTab("features")%> href="/guild/<%= guild.id %>/features/">Features</a></li>
 
                         <% if (hasFeature("attendance"))
                         {
                             %>
                             <li><a <%=currentTab("attendance")%> href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
+                            <%
+                        }
+                        %>
+
+                        <% if (hasFeature("sessions"))
+                        {
+                            %>
+                            <li><a <%=currentTab("sessions")%> href="/guild/<%= guild.id %>/sessions/">Sessions</a></li>
                             <%
                         }
                         %>
@@ -90,8 +143,8 @@
                         
                         <% if (hasFeature("achievements") && locals.awardChannelID)
                         {
-                            %><li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Achievements</a></li>
-                            <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Achievements Leaderboard</a></li><%
+                            %><li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Award</a></li>
+                            <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Award Leaderboard</a></li><%
                         }
                         %>
                        
@@ -103,23 +156,31 @@
                             <%
                         }
                         %>
+                        <% if (hasFeature("sessions"))
+                        {
+                            %>
+                            <li><a <%=currentTab("sessions")%> href="/guild/<%= guild.id %>/sessions/">Sessions</a></li>
+                            <%
+                        }
+                        %>
 
+                        <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
                         <% if (hasFeature("obs") && locals.lectureChannelID) { %>
                             <!--<li><a href="/guild/<%= guild.id %>/clearpoll/">Clear Current Poll</a></li>-->
-                            <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
                             <li><a <%=currentTab("text")%> href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
                             <li><a <%=currentTab("obs")%> href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
                         <% } %>
 
-                        <% if (hasFeature("analytics") && (locals.discordUser.id == locals.config.LINDSAY_ID || locals.discordUser.id == locals.config.IAN_ID))
+                        <% if (hasFeature("analytics") && hasFeature("experimental") && (locals.discordUser.id == locals.config.LINDSAY_ID || locals.discordUser.id == locals.config.IAN_ID) )
                         {
                             %>
                             <li><a <%=currentTab("sheets")%> href="/guild/<%= guild.id %>/sheets/">Google Sheet Export</a></li>
                             <%
                         }
                         %>
+                        <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/pptx">PPTX Reader</a></li>
 
-                        <li><a <%=currentTab("help")%> href="/help">User Guide</a></li>
+                        <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
 
                     </ul>
                 </nav>
@@ -127,9 +188,54 @@
             } 
             else
             {
+                function currentTab(checkFor)
+                {
+                    var path = locals.path ?? "";
+                    var isCurrent = false;
+                    if (path.length == 0 && checkFor == "")
+                    {
+                        isCurrent = true;
+                    } 
+                    else if (checkFor != "" && (path.endsWith(checkFor) || path.endsWith(checkFor+"/")))
+                    {
+                        isCurrent = true;
+                    }
+                    return isCurrent ? ' class=current ' : "";
+                }
                 %>
-                <h1>UTAS Lecture Bot</h1>
-                <p>&nbsp;</p>
+                <h1><a href="/">UTAS Discord Bot</a></h1>
+                
+                <nav>
+
+                    <% if (locals.discordUser)
+                    {
+                        %>
+                        <div class="discordUser">
+                            <% if (locals.discordUser.avatar) { %>
+                                <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                            <% }%>
+                            <div>
+                                <%=locals.discordUser.username%><br />
+                                <a href="/logout" class="logout">Logout</a>
+                            </div>
+                        </div>
+                        <%
+                    }
+                    else if ((locals.path ?? "").indexOf("/guide") >= 0)
+                    {
+                        %>
+                        <div class="discordUser loginButton" style="top:4em">
+                            <a href="/login" class="login">Login</a>
+                        </div>
+                        <%
+                    } %>
+
+                    <ul>
+                        <li><a <%=currentTab("")%> href="/"><%=locals.discordUser ? "Unit List" : "Home" %></a></li>
+                        <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
+
+                    </ul>
+                </nav>
                 <%
             }
             %>
@@ -137,6 +243,14 @@
             </header>
             <%
         }
-        %>
-
+        
+if ( (typeof showTitle == 'undefined' || showTitle)) 
+{ 
+    %>
     <main>
+        <% if ( typeof title != 'undefined' )
+        {
+            %><h2><%=title%></h2><%
+        }
+}
+%>

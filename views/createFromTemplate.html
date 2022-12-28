@@ -1,0 +1,23 @@
+<%- include('header.html', { title: "Create Server With Template" }) %>
+
+<p>To save you the hassle of creating all the channels, roles, and permissions for a server yourself, a server template has been created that you can use to create your own server. </p>  
+<p>You should open the server template link in a new window. Once you've created the server, you can add the Bot to the server.</p>
+
+<p>
+    <div style="display:inline-block">
+        <a href="" id="templateLink" target="_blank" class="btnAdd"><span>1.</span><span>Copy the Server Template</span></a> 
+    </div>
+    <div style="display:inline-block; vertical-align: middle;">
+        <%- include("subViews/templateLinkSelector.html") %>
+    </div>
+</p>
+
+<p>You can find more information about what's included in the template, and how to tailor it to your needs in the <a href="guide" target="_blank">User Guide</a>.</p>
+
+<p>Once you have created your server, click the link below to add the Bot. You will need to select your server from the dropdown list.</p>
+<p>
+    <a href="<%- include("subViews/authLink.html") %>" class="btnAdd"><span>2.</span><span>Add Bot to Your Server</span></a>
+</p>
+<p>You'll be redirected back to this site after adding your server.</p>
+
+<%- include('footer.html') %>

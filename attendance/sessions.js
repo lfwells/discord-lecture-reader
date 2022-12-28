@@ -1,339 +1,373 @@
 import * as config from "../core/config.js";
 import moment from "moment";
-import { sleep } from "../core/utils.js";
+import { pluralize, sleep } from "../core/utils.js";
 import { send } from "../core/client.js";
+import { guildsCollection, momentToTimestamp } from "../core/database.js";
+import admin from "firebase-admin"; 
 
 var earlyTime = 15;//minutes
 var remindBefore = 15;//minutes //todo: override per-session?
 
-//TODO: an interface for defining sessions and names? for now just auto-gen
+export const SESSIONS = new Map();
+const discordEvents = new Map();
+
+export const SEMESTERS = {  //breaks are inclusive (so first day of break, and the last day of break -- NOT the first day back after break)
+    sem1_2022:{ start: moment("2022-02-21"), breakStart: moment("2022-04-14"), breakEnd: moment("2022-04-20") },
+    sem2_2022:{ start: moment("2022-07-11"), breakStart: moment("2022-08-29"), breakEnd: moment("2022-09-04") },
+    sem1_2023:{ start: moment("2023-02-20"), breakStart: moment("2023-04-06"), breakEnd: moment("2023-04-12") },
+    sem2_2023:{ start: moment("2023-07-10"), breakStart: moment("2023-08-28"), breakEnd: moment("2023-09-03") },
+    sem2_2023:{ start: moment("2023-07-10"), breakStart: moment("2023-08-28"), breakEnd: moment("2023-09-03") },
+}
+
 export async function getSessions(guild)
 {
-    var weeks = [];
+    return getAllSessionsInOrder(guild);
+}
 
-    if (!guild)
+export async function deleteAllScheduledEvents(res, guild)
+{
+    var allEvents = await guild.scheduledEvents.fetch();
+    res.write(`Deleting ${pluralize(allEvents.size, "Event")}...\n`);
+    await Promise.all(allEvents.map( async (v) => 
+    { 
+        //res.write(`Deleting event ${v.name}...\n`);
+        await guild.scheduledEvents.delete(v);
+        res.write(`Deleted event ${v.name}.\n`);
+    })
+    );;
+}
+export async function init_sessions(guild)
+{
+    //for testing
+    //await deleteAllScheduledEvents(guild);
+
+    var collection = sessionsCollection(guild);
+    var querySnapshot = await collection.get(); 
+    var data = [];
+    querySnapshot.forEach(doc =>
     {
-        console.log("getSessions() got no guild?");
-        return weeks;
-    }
-
-    var semesterStart = moment("2021-07-11"); //start of the week of SUNDAY 11 July 2021 //TODO: configured
-    var weekStart = semesterStart;
-    if (guild.id == config.KIT109_S2_2021_SERVER)
-    {
-        for (var w = 1; w <= 13; w++)
-        {
-            var week = {
-                name: "Week "+w,
-                weekStart: weekStart,
-                sessions: [] 
-            };
-
-            if (w > 1) //no pracs in week 1
-            {
-                var sessionTime = moment(weekStart);
-                sessionTime.day(2); //Tuesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Practical",
-                    week: w,
-                    time:sessionTime,
-                    duration:2,
-                    channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
-                        "866939311597027358", "851553123340255253", //queue and game-feedback
-                        "851553124073209876", "851553124073209877", "851553124073209878", "879599703656890408", "879599731108610108", "879599755783729193"],  //breakouts
-                    voiceChannelID:[
-                        "851553124073209879",
-                        "851553124073209880",
-                        "851553124073209881",
-                        "851553124073209882",
-                        "879599578184290324",
-                        "879599619959578635",
-                        "879599657611837490"
-                    ]
-                });
-            }
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(3); //Wednesday
-            sessionTime.hour(12);
-            week.sessions.push({
-                name:"Lecture",
-                week: w,
-                time:sessionTime,
-                duration:2,
-                channelID: "851553123746578474",
-                voiceChannelID: "851553123746578475"
-            });
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(w == 12 ? 5 : 4); //Thursday (Friday in week 12)
-            sessionTime.hour(9);
-            week.sessions.push({
-                name:"Tutorial",
-                week: w,
-                time:sessionTime,
-                duration:4,
-                channelID:["851553123746578481",  //tutorial-chat (as first in array, notifications will be here)
-                        "866939311597027358", "851553123340255253", //queue and game-feedback
-                        "851553124073209876", "851553124073209877", "851553124073209878", "879599703656890408", "879599731108610108", "879599755783729193"],  //breakouts
-                voiceChannelID:[
-                    "851553124073209879",
-                    "851553124073209880",
-                    "851553124073209881",
-                    "851553124073209882",
-                    "879599578184290324",
-                    "879599619959578635",
-                    "879599657611837490"
-                ]
-            });
+        var session = doc.data();
+        session.id = doc.id;
+        //session.weekStart = getSemesterWeekStart(null, session.semester ?? "sem1_2022", session.week, session.day);
+        //session.startTime = moment(session.weekStart).add(session.hour, "hour").add(session.minute, "minute");
+        session.startTime = moment(session.startTime._seconds*1000);
+        session.startTimestamp = session.startTime;
+        session.endTime = moment(session.startTime).add(session.duration == null || session.duration == 0 ? 60 : session.duration, "minute");
+        session.earlyStartTimestamp = moment(session.startTime).subtract(earlyTime, "minutes");
+        session.weekStart = moment(session.startTime).startOf("isoWeek")
+        //console.log(session);
+        data.push(session); 
         
-
-            week.colspan = week.sessions.length;
-            weeks.push(week);
-
-            //add on one week
-            weekStart = moment(weekStart);
-            weekStart.add(7, 'days');
-            //semester break, add on another
-            if (w == 7)
-                weekStart.add(7, 'days');
-        }
-
-        //week 14 garb
-        var week = {
-            name: "SWOTVAC",
-            weekStart: weekStart,
-            sessions: [] 
-        };
-        var sessionTime = moment(weekStart);
-        sessionTime.day(3); //Wednesday
-        sessionTime.hour(12);
-        week.sessions.push({
-            name:"Exam Game Demo",
-            week: w,
-            time:sessionTime,
-            duration:2,
-            channelID: "851553123746578474",
-            voiceChannelID: "851553123746578475"
-        });
-
-        week.colspan = week.sessions.length;
-        weeks.push(week);
-    
-    }
-    else if (guild.id == config.KIT207_S2_2021_SERVER)
-    {
-        for (var w = 1; w <= 13; w++)
-        {
-            var week = {
-                name: "Week "+w,
-                weekStart: weekStart,
-                sessions: [] 
-            };
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(2); //Tuesday
-            sessionTime.hour(13);
-            week.sessions.push({
-                name:"Lecture",
-                week: w,
-                time:sessionTime,
-                duration:2,
-                channelID:"861231510005743656",
-                voiceChannelID: ["860360631450075139", "869445948399562792"]
-            });
-
-            if (w > 1) //no pracs in week 1
-            {
-                var sessionTime = moment(weekStart);
-                sessionTime.day(2); //Tuesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Practical",
-                    week: w,
-                    time:sessionTime,
-                    duration:2,
-                    channelID:"861231530751164426",
-                    voiceChannelID: ["860360631450075139", "869445948399562792"]
-                });
-            }
-
-
-            week.colspan = week.sessions.length;
-            weeks.push(week);
-
-            //add on one week
-            weekStart = moment(weekStart);
-            weekStart.add(7, 'days');
-            //semester break, add on another
-            if (w == 7)
-                weekStart.add(7, 'days');
-        }
-    }
-    else if (guild.id == config.KIT308_S2_2021_SERVER)
-    {
-        for (var w = 1; w <= 13; w++)
-        {
-            var week = {
-                name: "Week "+w,
-                weekStart: weekStart,
-                sessions: [] 
-            };
-
-            if (w > 1) //no pracs in week 1
-            {
-                var sessionTime = moment(weekStart);
-                sessionTime.day(3); //Wednesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Tutorial",
-                    week: w,
-                    time:sessionTime,
-                    duration:2,
-                    channelID:"861228239229157426" ,
-                    voiceChannelID: "860323794060312600"
-                });
-
-                var sessionTime = moment(weekStart);
-                sessionTime.day(4); //Thursday
-                sessionTime.hour(14);
-                week.sessions.push({
-                    name:"Workshop",
-                    week: w,
-                    time:sessionTime,
-                    duration:2,
-                    channelID:"861228239229157426" ,
-                    voiceChannelID: "860323794060312600"
-                });
-            }
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(1); //Monday
-            sessionTime.hour(13);
-            week.sessions.push({
-                name:"Lecture",
-                week: w,
-                time:sessionTime,
-                duration:2,
-                channelID:"861228214835347496",
-                voiceChannelID: "860323794060312600"
-            });
-        
-            if (w == 1) //only week 1... grr lol
-            {
-            
-                var sessionTime = moment(weekStart);
-                sessionTime.day(3); //Wednesday
-                sessionTime.hour(15);
-                week.sessions.push({
-                    name:"Lecture",
-                    week: w,
-                    time:sessionTime,
-                    duration:2,
-                    channelID:"861228214835347496",
-                    voiceChannelID: "860323794060312600"
-                });
-            }
-
-            week.colspan = week.sessions.length;
-            weeks.push(week);
-
-            //add on one week
-            weekStart = moment(weekStart);
-            weekStart.add(7, 'days');
-            //semester break, add on another
-            if (w == 7)
-                weekStart.add(7, 'days');
-        }
-    }
-    else if (guild.id == config.TEST_SERVER_ID)
-    {
-        for (var w = 1; w <= 13; w++)
-        {
-            var week = {
-                name: "Week "+w,
-                weekStart: weekStart,
-                sessions: [] 
-            };
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(6); //Wednesday
-            sessionTime.hour(8);
-            sessionTime.minute(28+15);
-            week.sessions.push({
-                name:"Lecture",
-                week: w,
-                time:sessionTime,
-                duration:2,
-                channelID: "813152606359650322"
-            });
-
-            var sessionTime = moment(weekStart);
-            sessionTime.day(4); //Thursday
-            sessionTime.hour(9);
-            week.sessions.push({
-                name:"Tutorial",
-                week: w,
-                time:sessionTime,
-                duration:4,
-                channelID:"813152606544855088"
-            });
-
-            week.colspan = week.sessions.length;
-            weeks.push(week);
-
-            //add on one week
-            weekStart = moment(weekStart);
-            weekStart.add(7, 'days');
-            //semester break, add on another
-            if (w == 7)
-                weekStart.add(7, 'days');
-        }
-    }
-
-    //cache some maths (TODO: Sort too?)
-    weeks.forEach(week => {
-        week.sessions.forEach(session => {
-            var time = moment(session.time);
-            var start = moment(time);
-            var end = moment(time);
-            session.startTimestamp = moment(start);
-            session.earlyStartTimestamp = start.subtract(earlyTime, "minutes");
-            session.endTimestamp = end.add(session.duration, "hours");
-        });
-
-        week.sessions.sort((a,b) => a.time - b.time);
     });
 
-    return weeks;
+    data.sort((a,b) => a.week - b.week);
+    SESSIONS[guild.id] = data;
+
+    discordEvents[guild.id] = await guild.scheduledEvents.fetch();
+
+    scheduleNextSessionPost(guild);
 }
-export async function getNextSession(guild)
+
+export async function scheduleAllSessions(res, guild, config)
 {
-    var weeks = await getSessions(guild);
+    var expectedCount = 0;
+    for (var i = 0; i < config.types.length; i++)
+    {
+        expectedCount += config.types[i].weeks.length * config.types[i].sessionsPerWeek.length;
+    }
+    res.write(`Scheduling ${pluralize(expectedCount, "Event")}. This may take some time (Discord takes a break every 5 events)...\n`);
+
+    if (expectedCount > 100)
+    {
+        res.write("\nNOTICE: You have scheduled a large number of events.\n");
+        res.write("        The maximum number events you can schedule on Discord is 100.\n");
+        res.write("        You will need to return to this tool again after some events\n");
+        res.write("        have passed to schedule future events.\n\n");
+    }
+
+    var createdSessions = []; //use this array to work out what rows were created (/updated), and delete the rest
+    for (var i = 0; i < config.types.length; i++)
+    {
+        var sessionsForThisType = await scheduleAllSessionsOfType(res, guild, config.types[i], SEMESTERS[config.semester]);
+        createdSessions.push(...sessionsForThisType);
+    }
+
+    //now delete any previously scheduled sessions now in this list
+    var createdIDs = createdSessions.map(e => e.id);
+    console.log("Created Sessions", createdIDs);
+    var allIDs = SESSIONS[guild.id].map(e => e.id);
+    console.log("All Sessions", allIDs.length);
+
+    var sessionIDsToDelete = allIDs.filter(v => createdIDs.indexOf(v) == -1);
+    console.log("Sessions to Delete", sessionIDsToDelete.length);
+
+
+    res.write(`\nDeleting ${pluralize(sessionIDsToDelete.length, "No Longer Used Event")}... \n`);
+
+    for (var i = 0; i < sessionIDsToDelete.length; i++)
+    {
+        var session = SESSIONS[guild.id].find(e => e.id == sessionIDsToDelete[i]);
+        console.log(session);
+        if (session) await deleteScheduledSession(guild, session);
+
+        res.write(`${i+1}...`);
+    }
+
+    res.write("\nCleaning Up...\n");
+
+    SESSIONS[guild.id] = createdSessions;
+
+    cancelNextSessionCountdownFunction(guild);
+    
+}
+async function scheduleAllSessionsOfType(res, guild, config, semester)
+{
+    console.log("scheduleAllSessionsOfType", config.type);
+    config.semester = semester;
+    var createdSessions = [];
+    for (var i = 0; i < config.weeks.length; i++)
+    {
+        var week = config.weeks[i];
+        for (var j = 0; j < config.sessionsPerWeek.length; j++)
+        {
+            var scheduleInfo = config.sessionsPerWeek[j];
+            var createdSession = await scheduleAllSessionsOfTypeWeeklyItem(
+                res, guild, config, semester, week, scheduleInfo, i
+            );
+            if (createdSession != null)
+                createdSessions.push(createdSession);
+        }
+    }
+    return createdSessions;
+}
+async function scheduleAllSessionsOfTypeWeeklyItem(res, guild, config, semester, week, scheduleInfo, i)
+{
+    var weekStart = getSemesterWeekStart(res, semester, week, scheduleInfo.day);
+    var startTime = moment(weekStart).add(scheduleInfo.hour, "hour").add(scheduleInfo.minute, "minute");
+    var endTime = moment(startTime).add(config.duration == null || config.duration == 0 ? 60 : config.duration, "minute");
+
+    var descriptionItems = [];
+    if (config.description)
+    {
+        descriptionItems.push(config.description);
+    }
+    if (config.descriptions && i < config.descriptions.length)
+    {
+        descriptionItems.push(config.descriptions[i]);
+    }
+    /*if (scheduleInfo.location)
+    {
+        descriptionItems.push(scheduleInfo.location);
+    }*/
+    var description = descriptionItems.length > 0 ? descriptionItems.join("\n") :  undefined;
+
+    var createdSession = await scheduleSession(
+        guild, config.type, startTime, endTime, scheduleInfo.channelID, scheduleInfo.textChannelID, week, scheduleInfo.day, scheduleInfo.hour, scheduleInfo.minute, config.duration, description, scheduleInfo.location
+    );
+
+    res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n`);
+    return createdSession;
+}
+function getSemesterWeekStart(res, semester, week, day)
+{
+    var start = moment(semester.start);
+    start = start.add(day-1, 'day');
+    for (var i = 0; i < week-1; i++)
+    {
+        start = start.add(1, "week");
+        
+        if (dayIsDuringSemesterBreak(res, semester, start))
+            start = start.add(1, "week");
+    }
+    return start;
+}
+function dayIsDuringSemesterBreak(res, semester, dayMoment)
+{   
+    //var log = `----\nChecking\n\t${dayMoment.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n\t${semester.breakStart.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n\t${semester.breakEnd.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n${dayMoment.isBetween(semester.breakStart, semester.breakEnd, 'day', '[]')}\n\n`;
+    //console.log(log);
+    //res.write(log);
+    return dayMoment.isBetween(semester.breakStart, semester.breakEnd, 'day', '[]');
+}
+
+//TODO: the below will break if you specify same types
+//this will return the database ID of the generated session row (for the purposes of deleting all the other ones upon a sync)
+async function scheduleSession(guild, type, startTime, endTime, channelID, textChannelID, week, day, hour, minute, durationMins, description, location)
+{
+    var collection = sessionsCollection(guild);
+
+    //check existing session, edit that instead (including reschedule)
+    var existingSession = SESSIONS[guild.id].find(e => e.type == type && e.week == week);
+    if (existingSession) console.log("found existing session", existingSession.id);
+
+    //check if event is in the past
+    /*if (startTime.isBefore(moment()))
+    {
+        if (existingSession)
+        {
+            console.log("session in the past, deleting");
+            await deleteScheduledSession(guild, existingSession);
+        }
+        else
+        {
+            console.log("session in the past, skipping");
+        }
+        return null;
+    }*/
+
+    var name = `${type} (Week ${week})`
+
+    var discordEvent;
+    var discordEventArgs = {
+        name:name,
+        scheduledStartTime:moment(startTime).utcOffset(0).toISOString(),
+        scheduledEndTime:endTime != null ? moment(endTime).utcOffset(0).toISOString() : null,
+        description: description,
+        reason: "GENERATED",
+        privacyLevel: "GUILD_ONLY"
+    }
+    if (channelID)
+    {
+        discordEventArgs.entityType = "VOICE";
+        discordEventArgs.channel = channelID;
+    }
+    else
+    {
+        discordEventArgs.entityMetadata = { location: location && location != "" ? location : "TBA" };
+        discordEventArgs.entityType = "EXTERNAL";
+    }
+
+    if (!startTime.isBefore(moment()))
+    {
+        try
+        {
+            if (existingSession && existingSession.discordEventID && existingSession.discordEventID.length > 5) //need to update the existing discord event, so we don't lose "interested" people
+            {
+                try
+                {
+                    discordEvent = await guild.scheduledEvents.edit(existingSession.discordEventID, discordEventArgs);
+                } catch {
+                    discordEvent = await guild.scheduledEvents.create(discordEventArgs);    
+                }
+            }
+            else //new, make it
+            {
+                discordEvent = await guild.scheduledEvents.create(discordEventArgs);
+            }
+        } catch (e) { console.log(e); }
+    }
+    
+    var discordEventID = discordEvent ? discordEvent.id : null;
+
+    var session = {
+        type, week, day, hour, minute, durationMins, 
+        startTime: momentToTimestamp(startTime),
+        endTime: endTime ? momentToTimestamp(endTime) : null
+    };
+    if (discordEventID) session.discordEventID = discordEventID;
+    if (channelID) session.channelID = channelID;
+    if (textChannelID) session.textChannelID = textChannelID;
+    if (description) session.description = description;
+
+    var result;
+    if (existingSession) //update details of existing one
+    {
+        result = await collection.doc(existingSession.id).update(session);
+        result.id = existingSession.id;
+    }
+    else //its new, make it
+    {
+        result = await collection.add(session); 
+    }
+    return result;
+}
+async function deleteScheduledSession(guild, session)
+{
+    var collection = sessionsCollection(guild);
+    await collection.doc(session.id).delete();
+
+    //var event = guild.scheduledEvents.
+    var event = session.discordEventID;
+    if (event && discordEventExists(guild, event))
+    {
+        try
+        {
+            await guild.scheduledEvents.delete(event);
+        } catch (e) {}
+    }
+}
+function discordEventExists(guild, discordEventID)
+{
+    return discordEvents[guild.id].has(discordEventID);
+}
+export function sessionsCollection(guild)
+{
+    return guildsCollection.doc(guild.id).collection("sessions");
+}
+
+export async function getNextSession(guild, ofType)
+{
+    var sessions = getAllSessionsInOrder(guild, ofType);
     
     var now = moment();
     var nextSession = null;
     var found = false;
-    weeks.forEach(week => {
-        week.sessions.forEach(session => {
-            if (found == false) //haven't found yet (PS: this function relies on sorted sessions, which is /fine/)
+    sessions.forEach(session => {
+        if (found == false) //haven't found yet (PS: this function relies on sorted sessions, which is /fine/)
+        {
+            var start = session.startTime;
+            if (start.isAfter(now))
             {
-                var start = session.startTimestamp;
-                if (start.isAfter(now))
-                {
-                    found = true;
-                    nextSession = session;
-                }
+                found = true;
+                nextSession = session;
             }
-
-        });
+        }
     });
     return nextSession;
 }
-export async function getNextSessionCountdown(guild, linkChannelName)
+function getAllSessionsInOrder(guild, ofType)
 {
-    var nextSession = await getNextSession(guild);
+    var sessions = SESSIONS[guild.id];
+    if (sessions == null) return [];
+    
+    sessions = sessions.filter(e => e.startTime != null);
+    if (ofType != null)
+    {
+        sessions = sessions.filter(e => e.type.toLowerCase() == ofType.toLowerCase());
+    }
+    sessions.sort((a,b) => a.startTimestamp - b.startTimestamp);
+    return sessions;
+    /*
+    var semester = SEMESTERS[sessions.semester];
+    
+    var all = [];
+    sessions.forEach(config => 
+    {
+        if (ofType != null && config.type != ofType) return;
+
+        console.log(config);
+
+        var sessionTypeAll = [];
+        for (var i = 0; i < config.weeks.length; i++)
+        {
+            var week = config.weeks[i];
+            for (var j = 0; j < config.sessionsPerWeek.length; j++)
+            {
+                var scheduleInfo = config.sessionsPerWeek[j];
+                var weekStart = getSemesterWeekStart(null, semester, week, scheduleInfo.day);
+                var startTime = moment(weekStart).add(scheduleInfo.hour, "hour").add(scheduleInfo.minute, "minute");
+                var session = config;
+                session.startTimestamp = startTime;
+                sessionTypeAll.push(session);
+            }
+        }
+        all.push(...sessionTypeAll);
+    });
+    return all;
+    */
+}
+export async function getNextSessionCountdown(guild, linkChannelName, ofType)
+{
+    var nextSession = await getNextSession(guild, ofType);
     if (nextSession == null)
     {
         return { 
@@ -345,15 +379,20 @@ export async function getNextSessionCountdown(guild, linkChannelName)
     //console.log(nextSession);
 
     var text = "The next **";
-    text += nextSession.name;
+    text += nextSession.type;
     text += "** will be ";
     text += nextSession.startTimestamp.fromNow();
     //text += " (that's "+nextSession.startTimestamp.calendar()+").";
     
-    var desc = "That's "+nextSession.startTimestamp.calendar();
+    var desc = "That's "+nextSession.startTimestamp.format("dddd, MMMM Do YYYY, h:mm a");
     if (linkChannelName)
     {
-        desc += " in <#"+channelIDArrayHandler(nextSession.channelID)+">.";
+        var textChannelInfo = "";
+        if (nextSession.textChannelID)
+        {
+            textChannelInfo = " and <#"+nextSession.textChannelID+">";
+        }
+        desc += " in <#"+channelIDArrayHandler(nextSession.channelID)+">"+textChannelInfo+".";
     }
     else
     {
@@ -366,29 +405,54 @@ export async function getNextSessionCountdown(guild, linkChannelName)
     };
 }
 
+var cancelNextSessionCountdown = {};
+export function cancelNextSessionCountdownFunction(guild) { cancelNextSessionCountdown[guild.id] = true; }
 export async function scheduleNextSessionPost(guild)
 {
     var nextSession = await getNextSession(guild); //offset = remindBefore
     if (nextSession != null)
     {
-        var now = moment();
         var reminderTime = moment(nextSession.startTimestamp);
         reminderTime.subtract(remindBefore, "minutes");
 
-        var diffInMilliseconds = reminderTime.diff(now);
+        var diffInMilliseconds = reminderTime.diff(moment());
+
         if (diffInMilliseconds <= 0){
             //console.log("next session message was about to be scheduled /in the past/... not sure why heres deets:", diffInMilliseconds,  await getNextSessionCountdown(guild, false));
+            
+            await sleep(5000);
+
+            await scheduleNextSessionPost(guild);//rinse and repeat!
+
+            return;
         }
         else
         {
-            //console.log("waiting", diffInMilliseconds, "ms before next session countdown --", await getNextSessionCountdown(guild, false));
-            await sleep(diffInMilliseconds); 
+            do
+            {
+                var now = moment();
+                diffInMilliseconds = reminderTime.diff(now);
+                //console.log("b"+diffInMilliseconds, cancelNextSessionCountdown[guild.id], cancelNextSessionCountdown[guild.id] === true);
+                if (cancelNextSessionCountdown[guild.id] === true) 
+                {
+                    //console.log("detected a cancel call?");
+                    cancelNextSessionCountdown[guild.id] = false;
+                    await sleep(1000);
 
-            var countdown = await getNextSessionCountdown(guild, false);
-            var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.channelID));
-            await send(channel, {embeds: [ countdown ]});
-            //await send(channel, await getNextSessionCountdown(guild, false));
+                    await scheduleNextSessionPost(guild);//rinse and repeat!
+
+                    return;
+                }
+
+                await sleep(1000 * 10);
+            }
+            while(diffInMilliseconds > 0);
         }
+        
+        var countdown = await getNextSessionCountdown(guild, false);
+        var channel = await guild.client.channels.cache.get(channelIDArrayHandler(nextSession.textChannelID));
+        //console.log("SEND the scheduled thing zz");
+        await send(channel, {embeds: [ countdown ]});
 
         //sleep a little, just so the next session isn't the same as this one
         await sleep(5000);
@@ -413,10 +477,43 @@ export function didAttendSession(instance, session)
 {
     var time = moment(instance.joined);
     var leftTime = moment(instance.left);
-    return time.isBetween(session.earlyStartTimestamp, session.endTimestamp) || leftTime.isBetween(session.earlyStartTimestamp, session.endTimestamp);
+    
+    return time.isBetween(session.earlyStartTimestamp, session.endTime) || leftTime.isBetween(session.earlyStartTimestamp, session.endTime);
 }
 export function postWasForSession(instance, session)
 {
     var time = moment(instance.timestamp);
-    return time.isBetween(session.earlyStartTimestamp, session.endTimestamp);
+    return time.isBetween(session.earlyStartTimestamp, session.endTime);
+}
+
+
+export async function getCurrentWeek(guild)
+{
+    var now = moment();
+    //get sorted list of semesters
+    var sortedSemesters = Object.values(SEMESTERS);
+    sortedSemesters = sortedSemesters.sort((a,b) => b.start - a.start);
+    for (var semester of sortedSemesters) {
+        if (now.isBetween(semester.breakStart, semester.breakEnd, undefined, "[]"))
+        {
+            return "Semester Break";
+        }
+        else 
+        {
+            var daysAfter = now.diff(semester.start, 'day');
+            if (daysAfter >= 0)
+            {
+                var daysAfterBreak = Math.max(0, Math.min(7, now.diff(semester.breakStart, 'day')));
+                
+                var weeksAfter = Math.floor((daysAfter - daysAfterBreak) / 7) + 1;
+                //console.log({ daysAfter, daysAfterBreak, calc:(daysAfter - daysAfterBreak), weeksAfter});
+
+                if (weeksAfter >= 0 && weeksAfter <= 15)
+                {
+                    return `Week ${weeksAfter}`;
+                }
+            }
+        }
+    }
+    return "Outside Semester";
 }

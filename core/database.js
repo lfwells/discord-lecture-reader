@@ -11,8 +11,15 @@ admin.initializeApp({
 
 export const db = admin.firestore(); 
 export const guildsCollection = db.collection("guilds");
+export const studentsCollection = db.collection("students");
+export const applicationInteractionsCollection = db.collection("application_interactions");
 export async function init_db(){}
 export async function transfer(){}
+
+export function momentToTimestamp(momentObj)
+{
+  return admin.firestore.Timestamp.fromDate(momentObj.toDate());
+}
 /*
 export const db2 = admin.firestore(); 
 export const guildsCollection2 = db2.collection("guilds");

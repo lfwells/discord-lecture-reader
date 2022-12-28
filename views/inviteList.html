@@ -1,9 +1,10 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "Invites" }) %>
 
-<h2>Invites</h2>
 <p>Associate a role with an invite. Users who use that invite will automatically be assigned that role.</p>
-<table id="guilds">
-  <% invites.forEach(function(uses, code){ %>
+<table>
+  <% invites.forEach(function(kvp, key){
+    var invite = kvp[1];
+    var code = invite.code; %>
     <tr>
         <td><a href="https://discord.gg/<%= code %>">https://discord.gg/<%= code %></a></td>
         <td>
@@ -14,10 +15,13 @@
                 selected: appliedRolesList[code],
                 onChange:"applyRole(value, id);" }) %>
         </td>
+        <td>
+            <a href="#" class="copy">Copy Link</a>
+        </td>
     </tr>
   <% }) %>
   <tr>
-      <td><span class="btnAdd">+</span> <a href="generate">Generate New Invite</a></td>
+      <td><a href="invites/generate" class="login" style="margin:1em; display:block"><span>+</span> Generate New Invite</a></td>
   </tr>
 </table>
 <script>
@@ -33,6 +37,19 @@
             complete:(XPathResult) => document.location.reload()
         })
     }
+</script>
+<script>
+    
+    $(document).ready(() =>
+    {
+        $(".copy").on("click", (e) => {
+            var txt = $(e.target).parents("tr").find("a").first().text();
+            copyToClipboard(txt);
+            e.stopPropagation();
+            return false;
+        });
+    });
+
 </script>
 
 <%- include('footer.html') %>

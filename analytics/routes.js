@@ -1,10 +1,8 @@
-import moment from "moment";
 import { getAttendanceData } from "../attendance/routes.js";
-import { postWasForSession } from "../attendance/sessions.js";
-import { getUserFilterPredicate, getPostsFilterPredicate } from "../core/classList.js";
-import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } from "../core/config.js";
+import { getUserFilterPredicate, getPostsFilterPredicate } from "../classList/classList.js";
+import { asyncForEach } from "../core/utils.js";
 import { getStats, getStatsWeek, predicateExcludeAdmin, loadHistoricalData, getPostsData, loadTimeSeries, loadPostsPerDay, loadPostsPerHour, loadPostsPerSession, loadAttendanceSession } from "./analytics.js";
-import fakeData from "./fakeData.js";
+import { loadPresenceData } from "./presence.js";
 
 
 export async function getStatsData(req,res,next)
@@ -63,39 +61,70 @@ export async function getHistoricalData(req, res, next)
 
 export async function timeGraph(req, res, next)
 {
-    console.log("loading posts for time graph...");
- 
-    var  rawStatsData = await getPostsData(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
+    var rawStatsData = async function() { 
+        console.log("loading posts for time graph...");
+        var posts = await getPostsData(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
+        console.log("operating on", posts.length, "posts");
+        return posts;
+    };
     
-    console.log("operating on", rawStatsData.length, "posts");
+    var attendanceData = async function() {
+        return await getAttendanceData(req,res);
+    };
 
-    var postsOverTime = await loadTimeSeries(rawStatsData);
-    var postsOverTimeWeekly = await loadTimeSeries(rawStatsData, true);//weekly
-    
-    var postsPerDay = await loadPostsPerDay(rawStatsData);
-    var postsPerHour = await loadPostsPerHour(rawStatsData);
-    var postsPerSession = await loadPostsPerSession(rawStatsData, req.guild);
-    var postsPerSessionPlusOutOfSession = await loadPostsPerSession(rawStatsData, req.guild, true);
+    var graphSelections = {
+        "Posts Over Time": async function () {
+            return await loadTimeSeries(await rawStatsData());
+        },
+        "Posts Over Time (Weekly)": async function() {
+            return await loadTimeSeries(await rawStatsData(), true);
+        },
+        "Posts Per Day": async function() {
+            return await loadPostsPerDay(await rawStatsData());
+        },
+        "Posts Per Hour": async function() {
+            return await loadPostsPerHour(await rawStatsData());
+        },
+        "Posts Per Session": async function (){
+            return await loadPostsPerSession(await rawStatsData(), req.guild);
+        },
+        "Posts Per In/Out Session": async function() {
+            return await loadPostsPerSession(await rawStatsData(), req.guild, true);
+        },
 
-    await getAttendanceData(req,res);
-    var attendancePerSession = await loadAttendanceSession(req.attendanceData, req.guild, false, await getUserFilterPredicate(req));
-    var attendancePerSessionPlusOutOfSession = await loadAttendanceSession(req.attendanceData, req.guild, true, await getUserFilterPredicate(req));
-
-
-       
-    await res.render("timeGraph", {
-        postData:rawStatsData,
-        graphs: {
-            "Posts Over Time": postsOverTime,
-            "Posts Over Time (Weekly)": postsOverTimeWeekly,
-            "Posts Per Day": postsPerDay,
-            "Posts Per Hour": postsPerHour,
-            "Posts Per Session": postsPerSession,
-            "Posts Per In/Out Session": postsPerSessionPlusOutOfSession,
-
-            "Attendance Per Session": attendancePerSession,
-            "Attendance In/Out Session": attendancePerSessionPlusOutOfSession,
+        "Attendance Per Session": async function()
+        {
+            return await loadAttendanceSession(await attendanceData(), req.guild, false, await getUserFilterPredicate(req));
+        },
+        "Attendance In/Out Session": async function() {
+            return await loadAttendanceSession(await attendanceData(), req.guild, true, await getUserFilterPredicate(req));
+        },
+        "Online Presence Per Day": async function() {
+            return (await loadPresenceData(req.guild)).map(function  (e) { return { date: e.timestamp, value: e.count }; });
         }
+    };
+    console.log("time graph page", req.body); 
+    if (Object.keys(req.body).length == 0)
+        return await res.render("timeGraphSelection", { graphSelections });
+
+    function graphSelected(graph) {
+        return req.body[graph] != undefined;
+    }
+       
+    var graphs = [];
+    await asyncForEach(Object.keys(graphSelections), async function (graph) {
+        if (graphSelected(graph))
+        {
+            graphs.push({
+                title:graph,
+                data:await graphSelections[graph]()
+            });
+        }
+    });
+    await res.render("timeGraph", {
+        //postData:rawStatsData,
+        graphs,
+        graphSelections
     });
 }
 

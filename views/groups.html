@@ -1,0 +1,81 @@
+<%- include('header.html', { title: "Groups" }) %>
+
+<p>Upload a Gradebook CSV from MyLO to list group allocations. Roles and group-channels can then be generated.</p>
+<p>(This can be automated when MyLO Integration is enabled)</p>
+<form method="post" enctype='multipart/form-data'>
+
+    <div><input type="file" name="csv" style="width:500px" /></div>
+        
+    <div><input class="btn" type="submit" value="Upload"/></div>
+
+</form>
+
+<%
+if (locals.groupCategories != undefined)
+{
+    %>
+    <p>
+        <%=Object.keys(locals.groupCategories).length%> group categories detected.
+    </p>
+    <%
+    Object.keys(locals.groupCategories).forEach(categoryName => 
+    {
+        var category = locals.groupCategories[categoryName];
+        if (category == null || Object.keys(category).length == 0) return;
+        %>
+        <h3><%=categoryName%></h3>
+        <form target="_blank" action="/guild/<%= guild.id %>/classList/groups/create" method="post">
+            <p>
+                <input type="submit" name="generateGroups" value="Generate Groups" />
+                <input type="submit" name="generateGroupsAndChannels" value="Generate Groups with Channels" />
+                <%- include("subViews/channelCategorySelect.html", 
+                { 
+                    label: "In Category:",
+                    selectDefaultText:"-- Select Category--", 
+                    id: "createChannelsInCategory"
+                }) %>
+            </p>
+            <input type="hidden" name="category" value="<%=categoryName%>" />
+            <input type="hidden" name="groupInfo" value="<%=JSON.stringify(category)%>" />
+
+            <table>
+                <!--<thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Members</th>
+                    </tr>
+                </thead>-->
+                <tbody>
+                    <%
+                    var groupNames = Object.keys(category);
+                    groupNames.sort(function(a, b) {
+                        return a.localeCompare(b, undefined, {
+                        numeric: true,
+                        sensitivity: 'base'
+                        });
+                    });
+                    groupNames.forEach(groupName => 
+                    {
+                        var members = category[groupName];
+                        %>
+                        <tr>
+                            <td valign="top"><%=groupName%></td>
+                            <td><%=members.length%> Members</td>
+                        </tr>
+                        <%
+                    });
+                    %>
+                </tbody>
+            </table>
+        </form>
+        <%
+    });
+} 
+%>
+
+
+<%- include('footer.html') %>
+
+<style>
+    label span { min-width: auto !important; }
+</style>

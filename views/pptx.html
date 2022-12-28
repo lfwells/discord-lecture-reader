@@ -1,0 +1,89 @@
+<%- include('header.html', { title: "Extract Links from PPTX" }) %>
+
+<p>Using this tool, you can extract links from your slides and post them to a channel on Discord.</p>
+
+<% if (typeof(locals.success) !== "undefined")
+{
+    %>
+    <p><%=locals.success%></p>
+    <p><a href="/guild/<%=locals.guild.id%>/pptx">Upload Another File</a></p>
+    <%
+}
+else
+{
+    if (typeof(locals.successSingle) !== "undefined")
+    {
+        %>
+        <p><%=locals.successSingle%></p>
+        <%
+    }
+    %>
+
+    <h3>Step 1: Upload PPTX File</h3>
+    <% if (typeof(locals.links) === "undefined")
+    {
+        //TODO: make this prettier /make it so you can post individual links
+        %>
+        <form method="post" enctype='multipart/form-data'>
+        
+            <div><input type="file" name="pptxFile" style="width:500px" /></div>
+                
+            <div><input class="btn" type="submit" value="Upload"/></div>
+        
+        </form>
+        <%
+    }
+    else
+    {
+        %>
+        <p>File: <strong><%=locals.filename%></strong></p>
+        <%
+    }
+    %>
+
+
+    <h3>Step 2: Review Links and Post</h3>
+    <% if (typeof(locals.links) !== "undefined")
+    {
+        %>
+        <form method="post">
+            <p><%=locals.links.length%> links found:</p>
+            <ul>
+            <% 
+            var i = 0;
+            for (var link of locals.links)
+            {
+                var justPosted = typeof(locals.postIndividualLink) !== "undefined" && locals.postIndividualLink == i;
+                %>
+                <input type="hidden" name="links[<%=i%>]" value="<%=link%>"/>
+                <li><input type="submit" name="postIndividualLink<%=i%>" value="<%=justPosted ? "Posted" : "Post Link"%>" /> <%=link%></li>
+                <%
+                i++;
+            }
+            %>
+            </ul>
+
+            <p><%- include("subViews/channelSelect.html", 
+                { 
+                    label: "Channel to Post In:",
+                    selectDefaultText:"-- Select Channel--",
+                    id: "channelToPostIn",
+                    value: locals.channelToPostIn ? locals.channelToPostIn.id : (locals.lectureChannel ? locals.lectureChannel.id : undefined),
+                    type: "GUILD_TEXT",
+                    help: "Links will be posted one-by-one"
+                }) %></p>
+
+            <p>
+                <label><input type="checkbox" name="asThread" checked /> Post as Thread?</label>
+            </p>
+                
+            <input type="hidden" name="filename" value="<%=locals.filename%>" />
+            <div><input class="btn" type="submit" name="post" value="Post Links"/></div>
+
+        </form>
+        <%
+    }
+}
+%>
+
+<%- include('footer.html') %>

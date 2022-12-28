@@ -5,6 +5,8 @@ import { guildsCollection } from "../core/database.js"
 import * as sessions from "./sessions.js";
 import { ATTENDANCE_CACHE } from "./routes.js";
 import { hasFeature } from "../guild/guild.js";
+import { registerCommand } from "../guild/commands.js";
+import { setGuildContextForInteraction } from "../core/errors.js";
 
 //attendance (TODO: if you start the bot after people are already in there its not smort enough to track they are there (But could do), and I realise a better data structure would be <name,room,started,left>, but I don't have a database or anything like that)
 export default async function (client)
@@ -41,13 +43,7 @@ export default async function (client)
                 var attendanceRowReference = attendanceCollection.doc(attendanceRow.id);
                 await attendanceRowReference.update("left", d.getTime());
                 //also update the cache
-                if (ATTENDANCE_CACHE[guild.id])
-                {
-                    console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
-                    var cachedRow = ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id);
-                    cachedRow.left = d.getTime();
-                    console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRow.id));
-                }
+                updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.left = d.getTime(); });
 
                 console.log(`${member.displayName} (${oldMember.id}) has left the channel ${channel.name}`);
             }
@@ -77,6 +73,8 @@ export default async function (client)
                     var attendanceRow = attendanceQuery.docs.slice(-1)[0];//last item in array (should be latests)
                     var attendanceRowReference = attendanceCollection.doc(attendanceRow.id);
                     await attendanceRowReference.update("left", d.getTime());
+                    //also update the cache
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.left = d.getTime(); });
                     
                     console.log(`${member.displayName} (${oldMember.id}) has left the channel (for swap channel)`);
                 }
@@ -126,10 +124,17 @@ export default async function (client)
                 toLog.screenShares = 0;
                 toLog.videoShares = 0;
 
-                var id = d.getTime()+"_"+member.displayName;
+                var id = d.getTime()+"_"+member.id;
                 var attendanceRowReference = attendanceCollection.doc(id);
                 attendanceRowReference.set(toLog);
                 attendanceRow = await attendanceRowReference.get();
+                //also update the cache
+                if (ATTENDANCE_CACHE[guild.id])
+                {
+                    toLog.id = attendanceRowReference.id;
+                    ATTENDANCE_CACHE[guild.id].push(toLog);
+                    console.log(ATTENDANCE_CACHE[guild.id].length);
+                }
             }
 
             if (newMember.selfDeaf != oldMember.selfDeaf)
@@ -141,6 +146,7 @@ export default async function (client)
                     var deafens = Number.parseInt(await attendanceRow.get("deafens") ?? 0)+1;
                     console.log("deafens",deafens);
                     await attendanceRowReference.update("deafens", deafens);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.deafens = deafens; });
                 }
             }
             if (newMember.selfMute != oldMember.selfMute || (noChange && newMember.selfMute == false)) //second case is when they join server unmuted 
@@ -152,6 +158,7 @@ export default async function (client)
                     var unmutes = Number.parseInt(await attendanceRow.get("unmutes") ?? 0)+1;
                     console.log("unmutes",unmutes);
                     await attendanceRowReference.update("unmutes", unmutes);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.unmutes = unmutes; });
                 }
             }
             if (newMember.selfVideo != oldMember.selfVideo)
@@ -163,6 +170,7 @@ export default async function (client)
                     var videoShares = Number.parseInt(await attendanceRow.get("videoShares") ?? 0)+1;
                     console.log("videoShares",videoShares);
                     await attendanceRowReference.update("videoShares", videoShares);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.videoShares = videoShares; });
                 }
             }
             if (newMember.streaming != oldMember.streaming)
@@ -174,6 +182,7 @@ export default async function (client)
                     var screenShares = Number.parseInt(await attendanceRow.get("screenShares") ?? 0)+1;
                     console.log("screenShares",screenShares);
                     await attendanceRowReference.update("screenShares", screenShares);
+                    updateCachedAttendanceData(guild, attendanceRow.id, function (cachedRow) { cachedRow.screenShares = screenShares; });
                 }
             }
             if (newMember.serverMute != oldMember.serverMute)
@@ -192,44 +201,59 @@ export default async function (client)
     const nextSessionCommand = {
         name: 'nextsession',
         description: 'Replies with when the next session is!',
-        options: [/*{
-            name: 'user',
-            type: 'USER',
-            description: 'The user to see the awards for (leave blank for YOU)',
+        options: [{
+            name: 'type',
+            type: 'STRING',
+            description: 'Find out the next lecture or tutorial session',
             required: false,
-        }*/],
+        },{
+            name: 'public',
+            type: 'BOOLEAN',
+            description: 'Display this publically? (Default false)',
+            required: false,
+        }],
     };
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        var commands = await guild.commands.fetch(); 
-            for (const command in commands)
-            {
-                console.log(guild.name+"delete "+await command.delete());
-            }
-        /*console.log(guild.name+"add "+*/await guild.commands.create(nextSessionCommand);//); 
+        await registerCommand(guild, nextSessionCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
     {
+        setGuildContextForInteraction(interaction);
+        
         // If the interaction isn't a slash command, return
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() || interaction.guild == undefined) return;
     
         // Check if it is the correct command
         if (interaction.commandName === "nextsession") 
         {
-            await interaction.deferReply();
-
-            var msg = await sessions.getNextSessionCountdown(interaction.guild, true);//show channel name
-            await interaction.editReply({embeds: [ msg ]});
+            await doNextSessionCommand(interaction);
         }
     });
+}
 
-    //schedule a post for the next session
-    await guilds.each( async (guild) => { 
-        //if (guild.id == config.TEST_SERVER_ID)
-        {
-            await sessions.scheduleNextSessionPost(guild);
-        }
-    });
+function updateCachedAttendanceData(guild, attendanceRowID, action) //where action is a function that takes the found cached row and does something
+{
+    if (ATTENDANCE_CACHE[guild.id])
+    {
+        console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRowID));
+        var cachedRow = ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRowID);
+        if (cachedRow)
+            action(cachedRow);
+        console.log(ATTENDANCE_CACHE[guild.id].find(r => r.id == attendanceRowID));
+    }
+}
+
+async function doNextSessionCommand(interaction)
+{
+    var publicPost = interaction.options.getBoolean("public") ?? false;
+
+    await interaction.deferReply({ ephemeral:!publicPost });
+
+    var ofType = interaction.options.getString("type");
+
+    var msg = await sessions.getNextSessionCountdown(interaction.guild, true, ofType);//show channel name
+    await interaction.editReply({embeds: [ msg ]});
 }

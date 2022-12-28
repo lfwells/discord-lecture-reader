@@ -5,6 +5,7 @@ import { getAttendanceData } from "./attendance/routes.js";
 import { getStats } from "./analytics/analytics.js";
 import { getAwardListFullData } from "./awards/awards.js";
 import moment from "moment";
+import { beginStreamingRes } from "./core/server.js";
 
 var sheets;
 var drive;
@@ -27,7 +28,7 @@ export async function init_google()
     sheets = google.sheets({version: 'v4', auth});
     drive = google.drive('v3');
 
-    console.log("init google sheets");
+    //console.log("init google sheets");
 }
 
 export async function init_sheet_for_guild(guild)
@@ -103,13 +104,7 @@ export async function sheets_test(req,res,next)
 
 export async function update_sheet_contents(req,res,next)
 {
-    //stream the content thru
-    //should have used a websocket or something but meh
-    //just call res.write after this, and it will stream to browser
-    res.writeHead(200, {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
-        'X-Content-Type-Options': 'nosniff'});
+    beginStreamingRes(res);
 
     var spreadsheetId = res.locals.googleSheetID;
 

@@ -6,12 +6,14 @@ export default async function(client)
 {
     client.on("inviteDelete", (invite) => {
         // Delete the Invite from Cache
-        invites.get(invite.guild.id).delete(invite.code);
+        if (invites[invite.guild.id] == undefined) invites[invite.guild.id] = [];
+        delete invites[invite.guild.id][invite.code];
       });
       
       client.on("inviteCreate", (invite) => {
         // Update cache on new invites
-        invites.get(invite.guild.id).set(invite.code, invite.uses);
+        if (invites[invite.guild.id] == undefined) invites[invite.guild.id] = [];
+        invites[invite.guild.id][invite.code] = { code:invite.code, uses:invite.uses, createdTimestamp:invite.createdTimestamp };
       });
       
     client.on('guildMemberAdd', async (member) =>
@@ -34,9 +36,10 @@ export default async function(client)
             });*/
         member.guild.invites.fetch().then(async (newInvites) => {
             // This is the *existing* invites for the guild.
-            const oldInvites = invites.get(member.guild.id);
+            const oldInvites = invites[member.guild.id];
+            
             // Look through the invites, find the one for which the uses went up.
-            const invite = newInvites.find(i => i.uses > oldInvites.get(i.code));
+            const invite = newInvites.find(i => i.uses > oldInvites[i.code].uses);
             if (invite)
             {
                 console.log(invite); 
@@ -73,7 +76,11 @@ export default async function(client)
                     }
                 }*/
             }
-            init_invites(member.client);
+            else
+            {
+                console.log("invite not found");
+            }
+            init_invites(member.guild);
         
         });
     //}
@@ -81,10 +88,10 @@ export default async function(client)
 
     client.on('inviteCreate', invite => {
         console.log("inviteCreate");
-        init_invites(invite.client);
+        init_invites(invite.guild);
     });
     client.on('inviteDelete', invite => {
         console.log("inviteDelete");
-        init_invites(invite.client);
+        init_invites(invite.guild);
     });
 }

@@ -1,5 +1,7 @@
 import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard } from "./awards.js";
 import { send } from "../core/client.js";
+import { configureWelcomeScreen } from "../guide/routes.js";
+import * as config from "../core/config.js";
 
 //todo: summary (public?) pages that list achievements?
 export async function namesTest(req,res,next) 
@@ -96,7 +98,7 @@ export async function getGiveAward(req, res, next)
         var achievementEmbed = await giveAward(req.guild, award, member);
 
         //display popup if asked for
-        if (req.query.popupChannelID)
+        if (req.query.popupChannelID && req.query.popupChannelID != config.SELECT_FIELD_NONE)
         {
           var channel = await req.guild.channels.cache.get(req.query.popupChannelID);
           await send(channel, {embeds: [ achievementEmbed ]});

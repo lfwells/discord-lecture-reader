@@ -1,20 +1,13 @@
-export const invites = new Map();
+export const invites = {};
 
-export async function init_invites(client)
+export async function init_invites(guild)
 {
-    console.log("init_invites");
+    //console.log(`init_invites ${guild.name}`);
 
-    var guilds = client.guilds.cache;
-    //store them in the db
-    guilds.each( async (guild) => 
-    { 
-        var guildInvites = await guild.invites.fetch();
-        //guild.fetchInvites().then(guildInvites => 
-        //{
-            //invites[guild.id] = guildInvites;
-            invites.set(guild.id, new Map(guildInvites.map((invite) => [invite.code, invite.uses])));
-        //});
-
-      
+    invites[guild.id] = {};
+    
+    var guildInvites = await guild.invites.fetch();
+    guildInvites.forEach(invite => {
+        invites[guild.id][invite.code] = { code: invite.code, uses: invite.uses, createdTimestamp: invite.createdTimestamp };
     });
 }

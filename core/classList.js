@@ -3,6 +3,8 @@ import * as config from "./config.js";
 import { renderFile } from "ejs";
 import { getStats } from "../analytics/analytics.js";
 import { getClient } from "./client.js";
+import { hasRole, hasRoleID, isAdmin } from "../roles/roles.js";
+import { asyncFilter } from "./utils.js";
 
 
 export function loadClassList(req,res,next)
@@ -52,14 +54,13 @@ export async function _loadClassList(req,res,next, includeRemoved)
     classList = classList.filter(m => m.discordID != config.SIMPLE_POLL_BOT_ID /*&& m.discordID != config.IAN_ID && m.discordID != config.ROBO_LINDSAY_ID*/);
 
     //just some specific ian crap here lol, remove lindsay 
-    if (req.guild.id != config.KIT109_S2_2021_SERVER)
+    if (req.guild.id != config.KIT109_S2_2021_SERVER && req.guild.id != config.TEST_SERVER_ID)
     {
         classList = classList.filter(m => m.discordID != config.LINDSAY_ID);
     }
-
     if (req.query && req.query.filterByRole)
     {
-        if (req.query.filterByRole.startsWith("-"))
+        if (req.query.filterByRole.startsWith(config.SELECT_FIELD_NONE))
         {
             delete req.query.filterByRole;
         }
@@ -70,11 +71,12 @@ export async function _loadClassList(req,res,next, includeRemoved)
             delete req.query.includeAdmin;
         }
     }
+
     if (req.query && req.query.includeAdmin == undefined)
     {
-        var adminRoleID = await getGuildProperty("adminRoleID", req.guild, undefined, true);
-        if (adminRoleID)
-            classList = classList.filter(m => m.member.roles == null || m.member.roles.cache.has(adminRoleID) == false); 
+        console.log(req.query.includeAdmin);
+
+        classList = await asyncFilter(classList, async (m) => !(await isAdmin(m.member)) );
     }
     else if (req.query)
     {
@@ -88,9 +90,10 @@ export async function _loadClassList(req,res,next, includeRemoved)
 
         var studentRoleID = await getGuildProperty("studentRoleID", req.guild, undefined, true);
         if (studentRoleID)
-            classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(studentRoleID)); 
-        else
-            classList = [];
+            classList = await asyncFilter(classList, async (m) => await hasRoleID(m.member, studentRoleID) );
+            //classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(studentRoleID)); 
+        //else
+            //classList = [];
     }
 
     req.classList = classList.sort((a,b) => a.discordName.localeCompare(b.discordName));

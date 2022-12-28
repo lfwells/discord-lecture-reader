@@ -28,26 +28,14 @@ In the root directory, you will need a `users.js` file with the users and passwo
 
 ## Usage
 
-use pm2 start process.json
-
 `sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080`
 
 ```
-screen -S <process description>	start a session
-Ctrl+A Ctrl+D				detach from a session
-screen -ls				list sessions
-screen -r <process description>	        reattach a session
-```
-
-```
 npm install pm2 -g
-pm2 start discord.js --watch
+pm2 start ecosystem.config.cjs
 pm2 monit
 ```
 https://pm2.keymetrics.io/docs/usage/quick-start/#:~:text=Restart%20application%20on%20changes&text=This%20will%20watch%20%26%20restart%20the,check%20for%20restarted%20app%20logs.
-
-You can monitor the log with:
-`tail -n 15 -F out.log`
 
 ### Triggering a pre-defined poll via URL
 Navigate to:

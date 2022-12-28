@@ -1,31 +1,57 @@
-<%- include('header.html') %>
+<%- include('header.html', { title: "OBS Browser Sources" }) %>
+<%
+function hasFeature(feature)
+{
+    return locals["feature_"+feature];
+}
+%>
 
-<h2>OBS Pages</h2>
 <p>Use these links as URLs for Browser Sources in OBS.</p>
 <nav>
     <ul>
-        <% if (locals.lectureChannel) { %>
+        <% if (locals.lectureChannelID) { %>
             <li>
-                <a href="../poll/">Poll Widget
+                <div class="autoLink" data-link="../../chat/<%=locals.lectureChannelID%>">Lecture Chat Widget (Made By Lake Hopkins, see <a href="https://github.com/Lachee/discord-chat-preview">https://github.com/Lachee/discord-chat-preview</a>)
                     <br />
-                    <input class="autoLink copy" /> <button class="copy">Copy</button>
-                </a>
+                    <input class="copy" /> <button class="copy">Copy</button>
+                </div>
             </li>
         <% } %>
 
-        <li>
-            <a href="../text/">Lecture Popup Text Widget
-                <br />
-                <input class="autoLink copy" /> <button class="copy">Copy</button>
-            </a>
-        </li>
-        
-        <% if (locals.awardChannel) { %>
+        <% if (locals.lectureChannelID) { %>
             <li>
-                <a href="../analytics/obs">Top Posters and Award Leaderboard Widget
+                <div class="autoLink" data-link="../<%=guild.id%>/poll">Poll Widget
                     <br />
-                    <input class="autoLink copy" /> <button class="copy">Copy</button>
-                </a>
+                    <input class="copy" /> <button class="copy">Copy</button>
+                </div>
+            </li>
+        <% } %>
+
+        <% if (locals.lectureChannelID) { %>
+        <li>
+            <div class="autoLink" data-link="../<%=guild.id%>/text">Lecture Popup Text Widget
+                <br />
+                <input class="copy" /> <button class="copy">Copy</button>
+            </div>
+        </li>
+        <% } %>
+        
+        <% if (locals.lectureChannelID && hasFeature("achievements")) { %>
+            <li>
+                <div class="autoLink" data-link="../<%=guild.id%>/analytics/obs">Top Posters and Award Leaderboard Widget
+                    <br />
+                    <input class=" copy" /> <button class="copy">Copy</button>
+                </div>
+            
+            </li>
+        <% } %>
+
+        <% if (locals.lectureChannelID && hasFeature("sessions")) { %>
+            <li>
+                <div class="autoLink" data-link="../<%=guild.id%>/sessions/obs">Next Session Name
+                    <br />
+                    <input class=" copy" /> <button class="copy">Copy</button>
+                </div>
             
             </li>
         <% } %>
@@ -33,34 +59,31 @@
 </nav>
 
 <style>
-    .autoLink { width: 500px; }
+    .autoLink input { width: 500px; }
 </style>
 <script>
+    
     $(document).ready(() =>
     {
         $(".autoLink").each((i,e) => {
-            var a = $(e).parents("a");
-            var link = a.attr("href");
-            $(e).val(new URL(link, document.baseURI).href);
-        });
+            var link = $(e).data("link");
+            link = new URL(link, document.baseURI).href;
+            var input = $(e).find("input");
+            var button = $(e).find("button");
 
-        $(".copy, .autoLink").on("click", (e) => {
-            var txt = $(e.target).parents("a").find("input")[0];
-            copyToClipboard(txt);
-            e.stopPropagation();
-            return false;
+            var click = (e) => {
+                copyToClipboard(link);
+
+                button.text("Copied!");
+                return false;
+            };
+
+            input.on("click", click);
+            button.on("click", click);
+
+            input.val(link);
         });
     });
-
-    function copyToClipboard(txt) {
-        console.log($(txt));
-        //var $temp = $("<input>");
-        //$("body").append($temp);
-        //$temp.val(txt).select();
-        $(txt).select();
-        document.execCommand("copy");
-        //$temp.remove();
-    }
 
 </script>
 <%- include('footer.html') %>

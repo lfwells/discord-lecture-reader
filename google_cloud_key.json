@@ -1,0 +1,12 @@
+export default {
+  "type": "service_account",
+  "project_id": "carers-care",
+  "private_key_id": "7a3b6cbb7dbd7fefef80e887aacd223a024ffd18",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDdLI9ybngqaNYz\ngQ6hSlJtD3nC561SSLKqJDkiZ7JtFa95GruK97y4tjO3ZAvTU0DZLmwI+JazCoUq\nsd9hq7lLsCIj1x8rIGfIf81m5P0RXG9XERE3BtZJjH60/ycBXjKP8hRjsXi8pp+Z\nRDA0RgQHrcrdqENn5Y72FrNHOwOyIAKuFMqtdW8mFU7wRPGnS6qbHCdRm0PYgqbX\n6FuwRNvwsaVEbpBXv34CaDqNnrbGgarN+cE1dxwkKIWbfA04E5biYqHBu3UMeRck\n9txdsI9GZc7HZE1B+EiC67bDEGycqsJV8HYmZVbhwqbe6pMD46ojFwrMhyUVIxZY\nB8vg/4yxAgMBAAECggEACpPUO2qFlC+l2No59yQ9C2qzTcszKo1//+uSEO9pJNbl\n6LKK2BNPgvzxvbpK530ii5BxCb/Lwz3ETx2pG3xxNOm0REcIPlGDLR9RlTNr1+32\nBDG0g09wJZ3SvHi8ZpAY9nHjID5vUgRc+yE79fAIRs68tjuTF6+uld3Rjp1HqLfQ\n6uaJoN4ZeHkbx6BRatuxZyaP7cQJIsWahF9psIW5HtlwaoGre35gxXNncysB3X+p\nUu2i15iYCU4x+v3yXcDQIuXkhD3aCNcONGI0ORWHT1ia3qwW0dB0kioOO+QrVOOH\nzdFTo7Kf6BHd8jtt0+gd02p9GN3loX0twbrYc2r7AQKBgQD2aMl7xRS4WckXq2D1\nmF3jFYmmvjJUO9h58TYLbtCJs1BU7i25YfnvO5X33AMzc8XfLj00XyfgC1z+ICoK\nbsBsMr6tSx1D/I/26xRPPkAxGsgMJoBf7RzNV2mZuHYk0bOgPFNeFl9PhyXksHCn\nGMWoQcZX2Am+kZx/A5joI4RvcQKBgQDlyFSD3Qa8/+lyPfXZIGDnaNMKv6Q+Dyh3\nmQvzRTLDRsnmyuxyUbEI64V4flEpo9Z/jcVEgzUGkKOQsjGTZt4XC7B/4IuBcDOx\nyB1Z02V4814ImqUy6KbuOXHJPm92fNS7Hb+GXfa/EsEFuKpkh54E29Znvb7YZyh6\nTPi/aaTRQQKBgA0rtrFN7HiaG/yO5YTbGxGbQhtOiUQlWsHR2dCsoKrrkbyoantB\nOGnIJpD0CpvCcW4ne5AEEg6QrOzMbVLXbqOZ5sU+gZbztgI9uH0v16CITO8RU8VM\n2EBFjthvmqkHKHHFJ7OcwIVwtN7Pa4YS9eWzdlWVr5enEtVbLN4jn92RAoGAT7Za\nU1BGuSQSCPajpcoMs9pyc+UdhgXeJPcr5R2ZSZLyEaVNty7Numlx6OXxI//ZNnCp\nAWZ+66MbiuO2PQtPejEs7n+oBaQ12rOwMuwZ5IaQlW2IZ4u79SJqbcTCCBmv9qWQ\nPn20Tn6kBWcVfUBqugbFb0GsxgerTBoNpOFyMsECgYA7qV2/tB+J+fzOHFoTuA/h\nKUdvfXJ7BlgYxfrsDhnBq8YCh3GIY6t3XoeyhA2+D7WWcm/kI+Zy6bfjEz42lyZx\nNCaDLpHTP2I0vSx7UxxPc2RC54cA5ale18ldwn7M91jZUdPLJbIgK7+Gi40kB8UP\nL551Shk26zQ275dFr2+cLw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "carers-care@appspot.gserviceaccount.com",
+  "client_id": "",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/carers-care%40appspot.gserviceaccount.com"
+}

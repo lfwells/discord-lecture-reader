@@ -1,0 +1,27 @@
+<%- include('header.html', { title: "Copy Settings" }) %>
+
+<p>You can copy settings from Discord Servers that you are an admin of which have the UTAS Bot added to them.</p>
+
+<form method="post">
+    
+    <div>
+        <select name="originalGuild" id="guilds">
+        <option selected>-- Select a Server to Copy Settings From</option>
+        <%
+        guilds.forEach(function(guild)
+        { 
+            %>
+            <option value="<%=guild.id%>">
+                <%= guild.name %><br />
+            </option>
+            <% 
+        });
+        %>
+        </select>
+    </div>
+
+    <div><input class="btn" type="submit" value="Continue to Select Which Settings to Copy"/></div>
+
+</form>
+
+<%- include('footer.html') %>

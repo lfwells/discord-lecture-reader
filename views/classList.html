@@ -1,0 +1,112 @@
+<%- include('header.html', { title: "Class List" }) %>
+
+<style>
+    .col {
+        width:45%;
+        float:left;
+    }
+</style>
+
+<p>See all students, and sync with your MyLO Classlist</p>
+
+<h3><a href="/guild/<%= guild.id %>/classList/groups">Manage Groups</a></h3>
+
+%>
+<div class="col">
+    <h3>Post Count</h3>
+    <table id="classList">
+        <tbody>
+            <%
+            var list = locals.classList;
+            if (locals.unengagedClassList != null)
+            {
+                list.sort(function (a,b) {
+                    a = (typeof(a.myLOStudent) != "undefined") ? 1 : 0;
+                    b = (typeof(b.myLOStudent) != "undefined") ? 1 : 0;
+                    return a - b;
+                });
+            }
+            list.forEach(function(student)
+            { 
+            %>
+            <tr>
+                <td>
+                    <img src="" />
+                </td>
+                <td>
+                    <a href="/guild/<%= guild.id %>/classList/student/<%=student.discordID%>"><%= student.discordName %></a>
+                </td>
+                <td>
+                    <%=student.stats?.posts?.length ?? 0%>
+                </td>
+                <% if (locals.unengagedClassList != null)
+                {
+                    %>
+                    <td>
+                        <%=(typeof(student.myLOStudent) != "undefined") ? "Linked" : "Not Linked"%>
+                    </td>
+                    <%
+                }
+                %>
+            </tr>
+            <% 
+            });
+            %>
+        </tbody>
+    </table>
+</div>
+
+<div class="col">
+    <h3>Students Not On Discord</h3>
+    <% if (locals.unengagedClassList == null)
+    {
+        %>
+        <p>Upload a ClassList CSV from MyLO to see students not on Discord and Unlinked Discord Accounts</p>
+        <p>(This can be automated when MyLO Integration is enabled)</p>
+        <form method="post" enctype='multipart/form-data'>
+        
+            <div><input type="file" name="csv" style="width:500px" /></div>
+                
+            <div><input class="btn" type="submit" value="Upload"/></div>
+        
+        </form>
+        <%
+    }
+    else
+    {
+        %>
+        <table id="unengagedClassList">
+            <tbody>
+                <%
+                locals.unengagedClassList.forEach(function(student)
+                { 
+                %>
+                <tr>
+                    <td>
+                        <%=student["Student ID"]%>
+                    </td>
+                    <td>
+                        <%=student["Username"]%>
+                    </td>
+                    <td>
+                        <%=student["First Name"]%>
+                    </td>
+                    <td>
+                        <%=student["Last Name"]%>
+                    </td>
+                    <td>
+                        <%=student["Email"]%>
+                    </td>
+                </tr>
+                <% 
+                });
+                %>
+            </tbody>
+        </table>
+        <%
+    }
+    %>    
+</div>
+
+
+<%- include('footer.html') %>
