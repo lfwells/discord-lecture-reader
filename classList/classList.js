@@ -6,6 +6,9 @@ import { getClient } from "../core/client.js";
 import { hasRoleID, isAdmin } from "../roles/roles.js";
 import { asyncFilter } from "../core/utils.js";
 
+import fs from "fs";
+import getStream from "get-stream";
+import { parse } from "csv-parse";
 
 export function loadClassList(req,res,next)
 {
@@ -275,3 +278,42 @@ async function filterPostPredicate(post, req, offTopicCategory)
     return true;
 }
 
+export async function parseCSV(req, fileUpload)
+{
+    var unenaged = [];
+    var content = await readCSVData(fileUpload.tempFilePath);
+
+    //first line is headers
+    var headers = content.shift();
+    console.log(headers);
+    content = content.map(function (row) {
+        var obj = {};
+        for (var i = 0; i < headers.length; i++)
+        {
+            obj[headers[i]] = row[i];
+        }
+        obj["Username"] = obj["Username"].substring(0, obj["Username"].indexOf("@"));
+        return obj;
+    });
+
+    content.forEach(myLOStudent => {
+        var foundOnDiscord = false;
+        req.classList.forEach(discordStudent => {
+            var username = discordStudent.username;
+            if (username && username.toLowerCase() == myLOStudent["Username"].toLowerCase())
+            {
+                foundOnDiscord = true;
+                discordStudent.myLOStudent = myLOStudent;
+            }
+        });
+        if (foundOnDiscord == false)
+            unenaged.push(myLOStudent);
+    });
+
+    return unenaged;
+}
+async function readCSVData (filePath) {
+    const parseStream = parse({delimiter: ','});
+    const data = await getStream.array(fs.createReadStream(filePath).pipe(parseStream));
+    return data;
+}
