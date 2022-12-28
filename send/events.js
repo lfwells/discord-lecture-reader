@@ -1,7 +1,7 @@
-import { reply } from "../core/client.js";
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { adminCommandOnly } from "../core/utils.js";
 import { registerCommand } from "../guild/commands.js";
+import * as Config from "../core/config.js";
 
 export default async function(client)
 {    
@@ -25,10 +25,25 @@ export default async function(client)
         ]
 
     }; 
+    const editCommand = {
+        name: 'edit',
+        description: "(ADMIN ONLY) Edit a message the Bot has posted.",
+        options: 
+        [
+            { 
+                name: "message_id", type: "STRING", description: "The Discord message ID of the message to be edited", required:true
+            },
+            { 
+                name: "content", type: "STRING", description: "What should the message content be", required:true,
+            },
+        ]
+
+    }; 
     
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
         await registerCommand(guild, sendCommand);
+        await registerCommand(guild, editCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
@@ -38,6 +53,10 @@ export default async function(client)
         if (interaction.commandName == "send")
         {
             doSendCommand(interaction);
+        }
+        else if (interaction.commandName == "edit")
+        {
+            doEditCommand(interaction);
         }
     
     });
@@ -85,5 +104,42 @@ async function doSendCommand(interaction)
     else
     {
         await interaction.editReply({ content: "You need to enter some content to post!" });
+    }
+}
+
+
+async function doEditCommand(interaction)
+{
+    await interaction.deferReply({ ephemeral: true });
+    if (await adminCommandOnly(interaction)) return;
+
+    var messageID = interaction.options.getString("message_id");
+    var newContent = interaction.options.getString("content");
+   
+    var channel = interaction.channel;
+    var msg = await channel.messages.fetch(messageID);
+
+    if (msg)
+    {
+        await edit(msg, newContent, interaction);
+    }
+    else
+    {
+        await interaction.editReply({ content: "Message not found." });
+    }
+
+}
+
+
+async function edit(messageObject, newContent, interaction)
+{
+    if (messageObject.author.id == Config.ROBO_LINDSAY_ID)
+    {
+        await messageObject.edit({content:newContent});
+        await interaction.editReply({ content: "Message edited." });
+    }
+    else
+    {
+        await interaction.editReply({ content: "Message was not posted by the bot." });
     }
 }
