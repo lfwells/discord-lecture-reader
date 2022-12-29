@@ -190,7 +190,7 @@ async function doEditModal(interaction)
 async function doEditModalSubmit(interaction)
 {
     await interaction.deferReply({ ephemeral: true });
-    if (await adminCommandOnly(interaction)) return;
+    if (await adminCommandOnly(interaction, true)) return;
 
     var messageID = interaction.customId.replace("editMessage_", "");
     var channel = interaction.channel;

@@ -72,15 +72,46 @@ export async function offTopicCommandOnly(interaction)
   }
   return false;
 }
-export async function adminCommandOnly(interaction)
+export async function adminCommandOnly(interaction, editReply)
 {
     if (interaction.member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) == false)
     {
-        interaction.reply({ 
+      if (interaction.commandName)
+      {
+        if (editReply)
+        {
+          interaction.editReply({ 
+              content:"Only admins can run `/"+interaction.commandName+"`, sorry.",
+              ephemeral:true
+          });
+        }
+        else
+        {
+          interaction.reply({ 
             content:"Only admins can run `/"+interaction.commandName+"`, sorry.",
             ephemeral:true
         });
+        }
         return true;
+      }
+      else
+      {
+        if (editReply)
+        {
+          interaction.editReply({ 
+            content:"Only admins can run this command, sorry.",
+            ephemeral:true
+          });
+        }
+        else
+        {
+          interaction.reply({ 
+            content:"Only admins can run this command, sorry.",
+            ephemeral:true
+          });
+        }
+        return true;
+      }
     }
     return false;
 }
