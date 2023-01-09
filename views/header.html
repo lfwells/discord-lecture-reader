@@ -178,7 +178,14 @@
                             <%
                         }
                         %>
-                        <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/pptx">PPTX Reader</a></li>
+                        <% if (hasFeature("experimental"))
+                        {
+                            %>
+                            <li><a <%=currentTab("pptx")%> href="/guild/<%= guild.id %>/pptx">PPTX Reader</a></li>
+                            <li><a <%=currentTab("clone_channel")%> href="/guild/<%= guild.id %>/clone_channel">Clone Channels</a></li>
+                            <%
+                        }
+                        %>
 
                         <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
 
