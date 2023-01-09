@@ -1,5 +1,5 @@
 import { init_invites, invites } from "./invite.js";
-import { ROLES } from "../roles/roles.js";
+import { init_roles, ROLES } from "../roles/roles.js";
 import { guessConfigurationValue } from "../guild/guild.js";
 
 
@@ -26,9 +26,14 @@ export async function inviteList(req, res)
         return -1;
     });
     console.log(sortedInvites.map(kvp => kvp[1].createdTimestamp));
+    
+    
+    let roles = ROLES[req.guild.id];
+    if (roles == undefined) await init_roles(req.guild);
+    
     res.render('inviteList', {
         invites: sortedInvites,
-        rolesList: ROLES[req.guild.id].map((role) => { return {
+        rolesList: roles.map((role) => { return {
             value: role.id,
             text: role.name
         }}),
