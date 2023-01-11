@@ -30,8 +30,10 @@ async function runMyLOScript(OrgID)
         try
         {
             console.log({api});
-            const classlist = await api(`/d2l/api/le/1.40/${OrgID}/classlist/`);
-            return classlist;
+            //const classlist = await api(`/d2l/api/le/1.40/${OrgID}/classlist/`);
+            //return classlist;
+            const content = await api(`/d2l/api/le/1.40/${OrgID}/content/root/`);
+            return content;
         }
         catch (e)
         {
