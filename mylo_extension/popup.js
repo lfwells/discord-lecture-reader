@@ -38,10 +38,10 @@ document.querySelector("#sync").addEventListener("click", async () =>
 async function sendToBot(guildID, data)
 {
     const response = await fetch(
-        `http://131.217.172.176/guild/${guildID}/myloUpload`,
+        `http://131.217.172.176/guild/${guildID}/mylo/data`,
         {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'cors',
             cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json'
@@ -49,7 +49,7 @@ async function sendToBot(guildID, data)
             body: JSON.stringify(data)
         }
     );
-    return response.json();
+    return await response.json();
 }
 
 async function runMyLOScript()

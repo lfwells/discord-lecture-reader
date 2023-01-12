@@ -7,6 +7,16 @@ import axios from 'axios';
 import { getMyLOConnectedMessage } from "./mylo.js";
 import { deleteStudentProperty, getStudentProperty, setStudentProperty } from "../student/student.js";
 
+export async function recieveMyLOData(req,res)
+{
+    console.log({body:req.body});
+    res.json({message:"Upload complete."});
+}
+
+//-------------------------------------------------------------
+//everything after here is the old (unapproved) mylo connection
+//-------------------------------------------------------------
+
 //myloConnectCompleteDiscord
 export async function discordConnectComplete(req,res)
 {
