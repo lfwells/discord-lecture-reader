@@ -22,12 +22,35 @@ document.querySelector("#sync").addEventListener("click", async () =>
     {
         target: {tabId: tabId},
         func: runMyLOScript
-    }, (injectionResults) => {
+    }, 
+    async (injectionResults) => 
+    {
         let result = injectionResults[0].result;
         console.log({result});
+
+        //TODO: discord guild id
+        let upload = await sendToBot("1061801549686394920", result);
+        console.log({upload});
     });
   //}
 });
+
+async function sendToBot(guildID, data)
+{
+    const response = await fetch(
+        `http://131.217.172.176/guild/${guildID}/myloUpload`,
+        {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }
+    );
+    return response.json();
+}
 
 async function runMyLOScript()
 {
