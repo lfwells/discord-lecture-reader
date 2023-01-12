@@ -64,7 +64,7 @@ async function runMyLOScript()
             console.log({api});
             let data = {};
             data.classlist = await getClassList();
-            //data.content = await getContent();
+            data.content = await getContent();
             return data;
             
         }
@@ -109,7 +109,7 @@ async function runMyLOScript()
         }
 
         let root = { Structure: content };
-        return await parseStructure(root).Structure;
+        return (await parseStructure(root)).Structure;
     }
 
 
