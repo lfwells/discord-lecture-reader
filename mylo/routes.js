@@ -19,6 +19,12 @@ export async function displayMyLOContent(req,res)
         data: (await getMyLOData(req.guild, "content")).data().data
     });
 }
+export async function createMyLOLinks(req,res)
+{
+    res.render("mylo/contentLinks", {
+        data: (await getMyLOData(req.guild, "content")).data().data
+    });
+}
 
 //-------------------------------------------------------------
 //everything after here is the old (unapproved) mylo connection

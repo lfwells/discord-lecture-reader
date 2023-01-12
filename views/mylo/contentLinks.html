@@ -1,0 +1,24 @@
+<%- include('../header.html', { showTitle: false }) %>
+
+<h2>Generate MyLO Content Links</h2>
+<%
+function printModule(module, level)
+{
+    %>
+    <option value="<%=module.Id%>">
+        <%for (var i = 0; i < level; i++) { %><%="    "%><%} %><%=module.Title%>
+        <% if (module.Structure)
+        {
+            var newLevel = level + 1; 
+            module.Structure.filter((module) => module.Type == 0).forEach((module) => printModule(module, newLevel));
+        }
+        %>
+    </option>
+    <% 
+}
+%><select><%
+locals.data.forEach(printModule, 0);
+%>
+</select>
+
+<%- include('../footer.html') %>

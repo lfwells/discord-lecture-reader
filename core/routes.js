@@ -229,6 +229,7 @@ function guildRouter()
     //mylo
     router.post("/mylo/data", mylo_routes.recieveMyLOData);
     router.get("/mylo/content", mylo_routes.displayMyLOContent);
+    router.get("/mylo/content/links", mylo_routes.createMyLOLinks);
 
     return router;
 }
