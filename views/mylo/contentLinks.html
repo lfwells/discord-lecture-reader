@@ -10,14 +10,16 @@ function printModule(module, level)
         <% if (module.Structure)
         {
             var newLevel = level + 1; 
-            module.Structure.filter((module) => module.Type == 0).forEach((module) => printModule(module, newLevel));
+            module.Structure
+                .filter((module) => module.Type == 0)
+                .forEach((module) => printModule(module, newLevel));
         }
         %>
     </option>
     <% 
 }
 %><select><%
-locals.data.forEach(printModule, 0);
+locals.data.forEach((module) => printModule(module, 0));
 %>
 </select>
 
