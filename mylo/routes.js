@@ -4,7 +4,7 @@ import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getCachedInteraction } from "../guild/commands.js";
 
 import axios from 'axios';
-import { getMyLOConnectedMessage, storeMyLOData } from "./mylo.js";
+import { getMyLOConnectedMessage, getMyLOData, storeMyLOData } from "./mylo.js";
 import { deleteStudentProperty, getStudentProperty, setStudentProperty } from "../student/student.js";
 
 export async function recieveMyLOData(req,res)
@@ -12,6 +12,12 @@ export async function recieveMyLOData(req,res)
     console.log("Uploading mylo data...");
     
     res.json({message:await storeMyLOData(req.guild, req.body)});
+}
+export async function displayMyLOContent(req,res)
+{
+    res.render("mylo/content", {
+        data: (await getMyLOData(req.guild, "content")).data().data
+    });
 }
 
 //-------------------------------------------------------------

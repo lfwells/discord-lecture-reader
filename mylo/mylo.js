@@ -4,6 +4,7 @@ import { scopeMyLOConnect } from '../core/login.js';
 import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getGuildDocument } from "../guild/guild.js";
 
+async function getMyLODataDoc(guild, key) { return (await getGuildDocument(guild.id)).collection("mylo").doc(key); }
 export async function storeMyLOData(guild, data)
 {
     //data = { structure: data };
@@ -12,10 +13,15 @@ export async function storeMyLOData(guild, data)
     for (var key of keys)
     {
         console.log({key});
-        let document = (await getGuildDocument(guild.id)).collection("mylo").doc(key);
+        let document = await getMyLODataDoc(guild, key);
         await document.set({data:data[key]});
     }
     return "Upload Complete";
+}
+export async function getMyLOData(guild, key)
+{
+    let document = await getMyLODataDoc(guild, key);
+    return await document.get();
 }
 
 //-------------------------------------------------------------
