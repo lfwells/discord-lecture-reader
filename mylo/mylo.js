@@ -2,6 +2,21 @@ import { getStudent, isStudentMyLOConnected } from "../student/student.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { scopeMyLOConnect } from '../core/login.js';
 import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
+import { getGuildDocument } from "../guild/guild.js";
+
+export async function storeMyLOData(guild, data)
+{
+    data = { structure: data };
+    //data = data.map((item) => item.Title);
+    console.log({data});
+    let document = (await getGuildDocument(guild.id)).collection("mylo").doc("sample");//TODO: sub documents for each data type
+    return await document.set(data);
+}
+
+//-------------------------------------------------------------
+//everything after here is the old (unapproved) mylo connection
+//-------------------------------------------------------------
+
 /*
 TODO: 
 - /mylo disconnect
