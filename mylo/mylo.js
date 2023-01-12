@@ -13,7 +13,7 @@ export async function storeMyLOData(guild, data)
     {
         console.log({key});
         let document = (await getGuildDocument(guild.id)).collection("mylo").doc(key);
-        await document.set(data);
+        await document.set({data:data[key]});
     }
     return "Upload Complete";
 }
