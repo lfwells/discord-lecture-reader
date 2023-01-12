@@ -6,11 +6,16 @@ import { getGuildDocument } from "../guild/guild.js";
 
 export async function storeMyLOData(guild, data)
 {
-    data = { structure: data };
+    //data = { structure: data };
     //data = data.map((item) => item.Title);
-    console.log({data});
-    let document = (await getGuildDocument(guild.id)).collection("mylo").doc("sample");//TODO: sub documents for each data type
-    return await document.set(data);
+    var keys = Object.keys(data);
+    for (var key of keys)
+    {
+        console.log({key});
+        let document = (await getGuildDocument(guild.id)).collection("mylo").doc(key);
+        await document.set(data);
+    }
+    return "Upload Complete";
 }
 
 //-------------------------------------------------------------

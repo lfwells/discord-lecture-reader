@@ -10,8 +10,8 @@ import { deleteStudentProperty, getStudentProperty, setStudentProperty } from ".
 export async function recieveMyLOData(req,res)
 {
     console.log("Uploading mylo data...");
-    console.log(await storeMyLOData(req.guild, req.body));
-    res.json({message:"Upload complete."});
+    
+    res.json({message:await storeMyLOData(req.guild, req.body)});
 }
 
 //-------------------------------------------------------------

@@ -28,11 +28,8 @@ document.querySelector("#sync").addEventListener("click", async () =>
         let result = injectionResults[0].result;
         console.log({result});
 
-        //TODO: discord guild id
-        /*
         let upload = await sendToBot("1061801549686394920", result);
         console.log({upload});
-        */
     });
   //}
 });
@@ -65,38 +62,54 @@ async function runMyLOScript()
         try
         {
             console.log({api});
-            //const classlist = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/classlist/`);
-            //return classlist;
-            const content = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/root/`);
-            console.log({content});;
-            //unfortunately, the root command doesn't go very deep, so we need to recurse...
-            async function parseStructure(module)
-            {
-                if (module.Structure == null) { return module; }
-
-                console.log("parseStructure", module);
-                let structure = [];
-                for (var i = 0; i < module.Structure.length; i++)
-                {
-                    let item = module.Structure[i];
-                    
-                    let result =  (item.Type == TOPIC) ?
-                        await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/topics/${item.Id}`) :
-                        await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/modules/${item.Id}`);
-                    let info = await parseStructure(result[0]);
-                    structure.push(info);
-                }
-                module.Structure = structure;
-                return module;
-            }
-            let root = { Structure: content };
-            let result = await parseStructure(root);
-            return result;
+            let data = {};
+            data.classlist = await getClassList();
+            //data.content = await getContent();
+            return data;
+            
         }
         catch (e)
         {
             console.log({e});
         }
+    }
+
+    async function getClassList()
+    {
+        return await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/classlist/`);
+    }
+    async function getContent()
+    {
+        const content = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/root/`);
+        
+        //unfortunately, the root command doesn't go very deep, so we need to recurse...
+        async function parseStructure(module)
+        {
+            if (module.Structure == null) { return module; }
+
+            console.log("parseStructure", module);
+            let structure = [];
+            for (var i = 0; i < module.Structure.length; i++)
+            {
+                let item = module.Structure[i];
+                
+                if (item.Type == TOPIC) 
+                {
+                    structure.push(item);
+                }
+                else
+                {
+                    let result = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/modules/${item.Id}`);
+                    let info = await parseStructure(result[0]);
+                    structure.push(info);
+                }
+            }
+            module.Structure = structure;
+            return module;
+        }
+
+        let root = { Structure: content };
+        return await parseStructure(root).Structure;
     }
 
 
