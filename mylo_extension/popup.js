@@ -29,8 +29,10 @@ document.querySelector("#sync").addEventListener("click", async () =>
         console.log({result});
 
         //TODO: discord guild id
+        /*
         let upload = await sendToBot("1061801549686394920", result);
         console.log({upload});
+        */
     });
   //}
 });
@@ -54,6 +56,8 @@ async function sendToBot(guildID, data)
 
 async function runMyLOScript()
 {
+    const MODULE = 0;
+    const TOPIC = 1;
 
     console.log("hello mylo world");
     async function _run()
@@ -64,7 +68,30 @@ async function runMyLOScript()
             //const classlist = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/classlist/`);
             //return classlist;
             const content = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/root/`);
-            return content;
+            console.log({content});;
+            //unfortunately, the root command doesn't go very deep, so we need to recurse...
+            async function parseStructure(module)
+            {
+                if (module.Structure == null) { return module; }
+
+                console.log("parseStructure", module);
+                let structure = [];
+                for (var i = 0; i < module.Structure.length; i++)
+                {
+                    let item = module.Structure[i];
+                    
+                    let result =  (item.Type == TOPIC) ?
+                        await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/topics/${item.Id}`) :
+                        await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/modules/${item.Id}`);
+                    let info = await parseStructure(result[0]);
+                    structure.push(info);
+                }
+                module.Structure = structure;
+                return module;
+            }
+            let root = { Structure: content };
+            let result = await parseStructure(root);
+            return result;
         }
         catch (e)
         {
