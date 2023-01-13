@@ -124,7 +124,6 @@ async function createChannels(res, category, root, forumChannel, doWithChannel)
             var newMessages = await doWithChannel(res,newChannel,forumChannel,module);
             messages.push(...newMessages);
         }
-        break;
     }
     return messages;
 }
