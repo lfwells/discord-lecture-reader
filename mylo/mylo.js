@@ -25,10 +25,70 @@ export async function getMyLOData(guild, key)
 }
 
 //TODO: implement all link generators
-export async function postChannelThreads(channel, root) { return "Not implemented yet"; }
-export async function postChannelLinks(channel, root) { return "Not implemented yet"; }
-export async function postChannelsWithThreads(category, root) { return "Not implemented yet"; }
-export async function postChannelsWithLinks(category, root) { return "Not implemented yet"; }
+export async function postChannelThreads(res, channel, root) 
+{    
+    var messages = [];
+    if (root.Structure)
+    {
+        for (var topic of root.Structure.reverse())
+        {
+            res.write(`Creating thread: ${topic.Title}\n`);
+            var newThread = await channel.threads.create({
+                name: topic.Title,
+                message: {
+                    content: getMyLOContentLink(topic)
+                }
+            });
+            messages.push(newThread);
+        }
+    }
+    return messages;
+}
+export async function postChannelLinks(res, channel, root) { return "Not implemented yet"; 
+}
+export async function postChannelsWithThreads(res, category, root) 
+{ 
+    let everyoneRole = category.guild.roles.cache.find(r => r.name === '@everyone');
+
+    var messages = [];
+    for (var module of root.Structure)
+    {
+        if (module.Type == 0)
+        {
+            let title = module.Title;
+            title = title.split(" - ")[0];
+            title = title.replace(/[^\w\s]/gi, '').replaceAll(" ", "-").toLowerCase();
+            res.write(`Creating module channel: ${title}\n`);
+
+            var newChannel = await category.createChannel(title, {
+                type: 15, //if this is 0, then newChannel is not null
+                permissionOverwrites: [
+                    {
+                      id: everyoneRole.id,
+                      deny: ['SEND_MESSAGES'],
+                   },
+                ],
+            });
+            
+            var newMessages = await postChannelThreads(res,newChannel, module);
+            messages.push(...newMessages);
+        }
+        break;
+    }
+    return messages;
+}
+export async function postChannelsWithLinks(res, category, root) { return "Not implemented yet"; }
+
+export function getMyLOContentLink(item)
+{
+    //TODO: orgID
+    let OrgID = 505363;
+    if (item.Type == 0)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.Id}`;
+    else if (item.Type == 1)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.Id}/View`;
+    
+}
 
 //-------------------------------------------------------------
 //everything after here is the old (unapproved) mylo connection

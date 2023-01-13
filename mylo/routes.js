@@ -7,6 +7,7 @@ import axios from 'axios';
 import { getMyLOConnectedMessage, getMyLOData, postChannelLinks, postChannelsWithLinks, postChannelsWithThreads, postChannelThreads, storeMyLOData } from "./mylo.js";
 import { deleteStudentProperty, getStudentProperty, setStudentProperty } from "../student/student.js";
 import { beginStreamingRes } from "../core/server.js";
+import { pluralize } from "../core/utils.js";
 
 export async function recieveMyLOData(req,res)
 {
@@ -48,7 +49,7 @@ export async function createMyLOLinksPost(req,res)
     if (req.body.postChannelsWithThreads) result = await postChannelsWithThreads(res, category, root);
     if (req.body.postChannelsWithLinks) result = await postChannelsWithLinks(res, category, root);
 
-    res.write(result);
+    res.write(`Posted ${pluralize(result.length, "message")}.`);
     res.end();
 }
 function traverseContentTree(root, findID)
