@@ -4,7 +4,7 @@ import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getCachedInteraction } from "../guild/commands.js";
 
 import axios from 'axios';
-import { getMyLOConnectedMessage, getMyLOData, postChannelLinks, postChannelsWithLinks, postChannelsWithThreads, postChannelThreads, storeMyLOData } from "./mylo.js";
+import { deleteCategoryChannels, getMyLOConnectedMessage, getMyLOData, postChannelLinks, postChannelsWithLinks, postChannelsWithThreads, postChannelThreads, storeMyLOData } from "./mylo.js";
 import { deleteStudentProperty, getStudentProperty, setStudentProperty } from "../student/student.js";
 import { beginStreamingRes } from "../core/server.js";
 import { pluralize } from "../core/utils.js";
@@ -40,8 +40,13 @@ export async function createMyLOLinksPost(req,res)
     var channel = req.body.channelID ? await req.guild.client.channels.cache.get(req.body.channelID) : null;
     var category = req.body.categoryID ? await req.guild.client.channels.cache.get(req.body.categoryID) : null;
     
-
     res.write(`Found root ${root.Title}.\n`);
+
+    if (category && req.body.emptyCategory)
+    {
+        res.write(`Deleting channels in ${category.name}.\n`);
+        await deleteCategoryChannels(res, category);
+    }
 
     var result = "";
     if (req.body.postChannelThreads) result = await postChannelThreads(res, channel, channel.type == 15, root, true);

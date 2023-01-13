@@ -50,12 +50,9 @@ function printModule(module, level)
 
     <h3>Category-Based</h3>
     <div>
-        <%- include("../subViews/longBotCommandButton.html", 
-        { 
-            id: "postChannelsWithThreads",
-            text: "Post as Channels with Topic Threads",
-            isFormSubmit: true
-        }) %>
+        <label><input type="checkbox" name="emptyCategory" /> Delete All Channels in Category First</label>
+    </div>
+    <div>
         <%- include("../subViews/longBotCommandButton.html", 
         { 
             id: "postForumChannelsWithThreads",
@@ -64,8 +61,14 @@ function printModule(module, level)
         }) %>
         <%- include("../subViews/longBotCommandButton.html", 
         { 
+            id: "postChannelsWithThreads",
+            text: "Post as Text Channels with Topic Threads",
+            isFormSubmit: true
+        }) %>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
             id: "postChannelsWithLinks",
-            text: "Post as Module Channels with Topic Links",
+            text: "Post as Text Channels with Topic Links",
             isFormSubmit: true
         }) %>
         <%- include("../subViews/channelCategorySelect.html", 

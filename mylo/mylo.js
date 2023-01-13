@@ -127,6 +127,14 @@ async function createChannels(res, category, root, forumChannel, doWithChannel)
     }
     return messages;
 }
+export async function deleteCategoryChannels(res, category)
+{
+    for await (var c of Array.from(category.children.values()))
+    {
+        res.write(`\tDeleting ${c.name}.\n`);
+        await c.delete();
+    }
+}
 export async function postChannelsWithThreads(res, category, forumChannel, root) 
 { 
     return await createChannels(res, category, root, forumChannel, postChannelThreads);
