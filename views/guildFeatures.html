@@ -102,6 +102,26 @@ function hasFeature(feature)
             feature: "experimental"
         }) %></dt>
     </dl>
+
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "MyLO Integration",
+            feature: "mylo",
+            onChanged: '$("#myloFeature").toggle(value)',
+            featureHasTab: true
+        }) %>
+    </dt>
+    
+        <dd id="myloFeature" style="display:<%=hasFeature("mylo") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+                { 
+                    label: "MyLO Unit Organisation ID:",
+                    id: "setMyLOOrgID",
+                    value: locals.myloOrgID ? locals.myloOrgID : "",
+                    help:"You can find this in the address bar for your MyLO unit",
+                    onChangedURL: "setGuildProperty"
+                }) %>
+        </dd>
 </div>
 
     <h3>Status Channels</h3>

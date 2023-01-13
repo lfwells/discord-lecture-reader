@@ -87,6 +87,7 @@ function guildRouter()
     router.use(guild.loadGuildProperty("todoChannelID"));
     router.use(guild.loadGuildProperty("todoEmoji"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
+    router.use(guild.loadGuildProperty("myloOrgID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
     router.use(guild.loadGuildProperty("feature_attendance"));
@@ -102,6 +103,7 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_showPostCount"));
     router.use(guild.loadGuildProperty("feature_showNextSession"));
     router.use(guild.loadGuildProperty("feature_showCurrentWeek"));
+    router.use(guild.loadGuildProperty("feature_mylo"));
 
 
     //TODO: this filterButtons could be expensive, I didn't realise!
