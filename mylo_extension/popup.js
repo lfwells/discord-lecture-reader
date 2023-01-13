@@ -109,7 +109,7 @@ async function runMyLOScript()
         }
 
         let root = { Structure: content };
-        return (await parseStructure(root)).Structure;
+        return (await parseStructure(root));
     }
 
 

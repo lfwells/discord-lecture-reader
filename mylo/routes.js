@@ -25,6 +25,33 @@ export async function createMyLOLinks(req,res)
         data: (await getMyLOData(req.guild, "content")).data().data
     });
 }
+export async function createMyLOLinksPost(req,res)
+{
+    var data = (await getMyLOData(req.guild, "content")).data().data;
+    var myLORoot = req.body.myloRoot;
+    var root = traverseContentTree(data, myLORoot);
+    var channel = req.body.channelID ? await req.guild.client.channels.cache.get(req.body.channelID) : null;
+    var category = req.body.categoryID ? await req.guild.client.channels.cache.get(req.body.categoryID) : null;
+    
+    res.json(root); return;
+    if (req.body.postChannelThreads) await postChannelThreads(channel, root);
+    if (req.body.postChannelLinks) await postChannelLinks(channel, root);
+    if (req.body.postChannelsWithThreads) await postChannelsWithThreads(channel, root);
+    if (req.body.postChannelsWithLinks) await postChannelsWithLinks(channel, root);
+}
+function traverseContentTree(root, findID)
+{
+    if (root.Id == findID) return root;
+    if (root.Structure)
+    {
+        for (var i = 0; i < root.Structure.length; i++)
+        {
+            var traverse = traverseContentTree(root.Structure[i], findID);
+            if (traverse != null) return traverse;
+        }
+    }
+    return null;
+}
 
 //-------------------------------------------------------------
 //everything after here is the old (unapproved) mylo connection

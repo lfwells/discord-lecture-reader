@@ -1,4 +1,4 @@
-<%- include('../header.html', { showTitle: false }) %>
+<%- include('../header.html') %>
 
 <h2>Generate MyLO Content Links</h2>
 <%
@@ -18,9 +18,36 @@ function printModule(module, level)
     </option>
     <% 
 }
-%><select><%
-locals.data.forEach((module) => printModule(module, 0));
 %>
-</select>
+<form method="post">
+    <div>
+        <label>Select Content Root: 
+            <select name="myloRoot">
+                <% locals.data.Structure.forEach((module) => printModule(module, 1)); %>
+            </select>
+        </label>
+    </div>
+
+    <h3>Channel-Based</h3>
+    <div>
+        <input name="postChannelThreads" type="submit" value="Post Topics as Threads" />
+        <input name="postChannelLinks" type="submit" value="Post Topics as Links" />
+        <%- include("../subViews/channelSelect.html", { 
+            selectDefaultText:"-- Select Target Channel --",
+            id: "channelID",
+        }) %>
+    </div>
+
+    <h3>Category-Based</h3>
+    <div>
+        <input name="postChannelsWithThreads" type="submit" value="Post as Module Channels with Topic Threads" />
+        <input name="postChannelsWithLinks" type="submit" value="Post as Module Channels with Topic Links" />
+        <%- include("../subViews/channelCategorySelect.html", 
+        { 
+            selectDefaultText:"-- Select Target Category--", 
+            id: "categoryID"
+        }) %>
+    </div>
+</form>
 
 <%- include('../footer.html') %>

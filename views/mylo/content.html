@@ -1,4 +1,4 @@
-<%- include('../header.html', { showTitle: false }) %>
+<%- include('../header.html') %>
 
 <h2>MyLO Content</h2>
 <%
@@ -27,7 +27,7 @@ function printModule(module)
     <% 
 }
 %><ul><%
-locals.data.forEach(printModule);
+locals.data.Structure.forEach(printModule);
 %>
 </ul>
 
