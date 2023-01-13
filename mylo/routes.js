@@ -4,8 +4,9 @@ import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getCachedInteraction } from "../guild/commands.js";
 
 import axios from 'axios';
-import { getMyLOConnectedMessage, getMyLOData, storeMyLOData } from "./mylo.js";
+import { getMyLOConnectedMessage, getMyLOData, postChannelLinks, postChannelsWithLinks, postChannelsWithThreads, postChannelThreads, storeMyLOData } from "./mylo.js";
 import { deleteStudentProperty, getStudentProperty, setStudentProperty } from "../student/student.js";
+import { beginStreamingRes } from "../core/server.js";
 
 export async function recieveMyLOData(req,res)
 {
@@ -27,17 +28,28 @@ export async function createMyLOLinks(req,res)
 }
 export async function createMyLOLinksPost(req,res)
 {
+    
+    beginStreamingRes(res);
+
+    res.write("Loading MyLO Data...\n");
+
     var data = (await getMyLOData(req.guild, "content")).data().data;
     var myLORoot = req.body.myloRoot;
     var root = traverseContentTree(data, myLORoot);
     var channel = req.body.channelID ? await req.guild.client.channels.cache.get(req.body.channelID) : null;
     var category = req.body.categoryID ? await req.guild.client.channels.cache.get(req.body.categoryID) : null;
     
-    res.json(root); return;
-    if (req.body.postChannelThreads) await postChannelThreads(channel, root);
-    if (req.body.postChannelLinks) await postChannelLinks(channel, root);
-    if (req.body.postChannelsWithThreads) await postChannelsWithThreads(channel, root);
-    if (req.body.postChannelsWithLinks) await postChannelsWithLinks(channel, root);
+
+    res.write(`Found root ${root.Title}.\n`);
+
+    var result = "";
+    if (req.body.postChannelThreads) result = await postChannelThreads(res, channel, root);
+    if (req.body.postChannelLinks) result = await postChannelLinks(res, channel, root);
+    if (req.body.postChannelsWithThreads) result = await postChannelsWithThreads(res, category, root);
+    if (req.body.postChannelsWithLinks) result = await postChannelsWithLinks(res, category, root);
+
+    res.write(result);
+    res.end();
 }
 function traverseContentTree(root, findID)
 {

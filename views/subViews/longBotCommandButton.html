@@ -6,54 +6,90 @@ function uuid() {
   });
 }
 
-var id = locals.id ?? uuid(); %>
-
+var id = locals.id ?? uuid(); 
+%>
 <button id="<%=id%>" class="botFunction"><%=locals.text%></button>
+
 <script>
+
+function longBotCommandButton<%=id%>()
+{
     if (typeof(resultWindows) === 'undefined') resultWindows = {};
     document.getElementById('<%=id%>').addEventListener('click',function() 
     {
-        //make a popup to display the output
-        if (resultWindows['<%=id%>']) resultWindows['<%=id%>'].close();
-        resultWindows['<%=id%>'] = window.open("", "<%=locals.title ?? "Discord Bot"%>...", "width=650,height=600");
-
-        try
+        <%
+        if (typeof(locals.isFormSubmit) != "undefined")
         {
-            resultWindows['<%=id%>'].document.querySelector('pre').remove();
-        } catch (e) {}
-        resultWindows['<%=id%>'].document.write("<html><head><title><%=locals.title ?? "Discord Bot"%>...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
+            %>
+            var $form = $('#<%=id%>').closest("form");
+            $form.unbind("submit");
+            $form.one("submit", function (event) {
+                event.preventDefault();
+                object= {}
+                formData = new FormData(event.target);
+                formData.forEach((value, key) => object[key] = value);
+                object['<%=id%>'] = '<%=id%>';//add in the pressed button
 
-        var last_response_len  = false;
-        $.ajax({
-            url:"<%=locals.url%>",
-            method:<%-typeof(locals.data) !== 'undefined' ? "'post'" : "'get'"%>,
-            data: <% if(typeof(locals.data) !== 'undefined')
+                doPopup(object, $form.attr("target") ?? "<%=locals.url ?? 'undefined'%>" ??  document.location.href);
+            });
+            <%
+        }
+        else
+        {
+            %>
+            var data = eval(<%=locals.data%>);
+            doPopup(data, "<%=locals.url%>");
+            <%
+        }
+        %>
+        longBotCommandButton<%=id%>();
+
+        function doPopup(data, url)
+        {
+            //make a popup to display the output
+            if (resultWindows['<%=id%>']) resultWindows['<%=id%>'].close();
+            resultWindows['<%=id%>'] = window.open("", "<%=locals.title ?? "Discord Bot"%>...", "width=650,height=600");
+
+            try
             {
-                %>JSON.stringify(eval(<%-locals.data%>))<%
-            } else { %>null<% }%>,
-            contentType: 'application/json',
-            xhrFields: {
-                onprogress: function(e)
+                resultWindows['<%=id%>'].document.querySelector('pre').remove();
+            } catch (e) {}
+            resultWindows['<%=id%>'].document.write("<html><head><title><%=locals.title ?? "Discord Bot"%>...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
+
+            var last_response_len  = false;
+            $.ajax({
+                url:url,
+                method:<%-typeof(data) !== 'undefined' ? "'post'" : "'get'"%>,
+                data: <% if(typeof(data) !== 'undefined')
                 {
-                    var this_response, response = e.currentTarget.response;
-                    if(last_response_len === false)
+                    %>JSON.stringify(data)<%
+                } else { %>null<% }%>,
+                contentType: 'application/json',
+                xhrFields: {
+                    onprogress: function(e)
                     {
-                        this_response = response;
-                        last_response_len = response.length;
-                    }
-                    else
+                        var this_response, response = e.currentTarget.response;
+                        if(last_response_len === false)
+                        {
+                            this_response = response;
+                            last_response_len = response.length;
+                        }
+                        else
+                        {
+                            this_response = response.substring(last_response_len);
+                            last_response_len = response.length;
+                        }
+                        console.log(this_response);
+                        resultWindows['<%=id%>'].document.write(this_response);
+                    },
+                    success: function(data)
                     {
-                        this_response = response.substring(last_response_len);
-                        last_response_len = response.length;
+                        resultWindows['<%=id%>'].document.write("</pre>");
                     }
-                    console.log(this_response);
-                    resultWindows['<%=id%>'].document.write(this_response);
                 },
-                success: function(data)
-                {
-                    resultWindows['<%=id%>'].document.write("</pre>");
-                }
-            },
-        });
+            });
+        }
     });
+}
+longBotCommandButton<%=id%>();
   </script>

@@ -30,8 +30,18 @@ function printModule(module, level)
 
     <h3>Channel-Based</h3>
     <div>
-        <input name="postChannelThreads" type="submit" value="Post Topics as Threads" />
-        <input name="postChannelLinks" type="submit" value="Post Topics as Links" />
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelThreads",
+            text: "Post Topics as Threads",
+            isFormSubmit: true,
+        }) %>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelLinks",
+            text: "Post Topics as Links",
+            isFormSubmit: true,
+        }) %>
         <%- include("../subViews/channelSelect.html", { 
             selectDefaultText:"-- Select Target Channel --",
             id: "channelID",
@@ -40,8 +50,18 @@ function printModule(module, level)
 
     <h3>Category-Based</h3>
     <div>
-        <input name="postChannelsWithThreads" type="submit" value="Post as Module Channels with Topic Threads" />
-        <input name="postChannelsWithLinks" type="submit" value="Post as Module Channels with Topic Links" />
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelsWithThreads",
+            text: "Post as Module Channels with Topic Threads",
+            isFormSubmit: true
+        }) %>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelsWithLinks",
+            text: "Post as Module Channels with Topic Links",
+            isFormSubmit: true
+        }) %>
         <%- include("../subViews/channelCategorySelect.html", 
         { 
             selectDefaultText:"-- Select Target Category--", 

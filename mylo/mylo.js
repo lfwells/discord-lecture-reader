@@ -24,6 +24,12 @@ export async function getMyLOData(guild, key)
     return await document.get();
 }
 
+//TODO: implement all link generators
+export async function postChannelThreads(channel, root) { return "Not implemented yet"; }
+export async function postChannelLinks(channel, root) { return "Not implemented yet"; }
+export async function postChannelsWithThreads(category, root) { return "Not implemented yet"; }
+export async function postChannelsWithLinks(category, root) { return "Not implemented yet"; }
+
 //-------------------------------------------------------------
 //everything after here is the old (unapproved) mylo connection
 //-------------------------------------------------------------
