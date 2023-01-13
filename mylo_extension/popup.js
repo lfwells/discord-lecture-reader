@@ -9,10 +9,20 @@ async function getCurrentTab() {
     
     //TODO: handle no mylo tab
     //TODO: handle multiple mylo tabs
-  }
+}
+
+document.querySelector("#discordServerID").addEventListener("change", (evt) => 
+{
+    if (evt.target.value != "")
+    {
+        document.querySelector("#hasDiscordID").setAttribute("id", "");
+    }
+});
 
 document.querySelector("#sync").addEventListener("click", async () => 
 {
+    var discordServerID = document.querySelector("#discordServerID").value;
+    
     let tab = await getCurrentTab();
     console.log({tab});
     
@@ -28,7 +38,7 @@ document.querySelector("#sync").addEventListener("click", async () =>
         let result = injectionResults[0].result;
         console.log({result});
 
-        let upload = await sendToBot("1061801549686394920", result);
+        let upload = await sendToBot(discordServerID, result);
         console.log({upload});
     });
   //}

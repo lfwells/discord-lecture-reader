@@ -11,13 +11,19 @@
     <h1>UTAS Discord Bot</h1>
     <h2>MyLO Integration</h2>
 
-    <p>Select the data to sync to the bot</p>
-    <ul>
-        <li>Content Structure</li>
-        <li>Classlist</li>
-    </ul>
+    <div id="noDiscordID">
+      <p><label>Discord Server ID: <input type="text" id="discordServerID" /></label></p>
+    </div>
 
-    <button id="sync">Sync</button>
+    <div id="hasDiscordID">
+      <p>The following data will be synced to the bot (TODO: selective syncing)</p>
+      <ul>
+          <li>Content Structure</li>
+          <li>Classlist</li>
+      </ul>
+
+      <button id="sync">Sync</button>
+    </div>
 
     <script src="./popup.js" type="module"></script>
   </body>
