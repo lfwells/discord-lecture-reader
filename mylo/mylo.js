@@ -3,6 +3,7 @@ import { MessageActionRow, MessageButton } from 'discord.js';
 import { scopeMyLOConnect } from '../core/login.js';
 import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getGuildDocument } from "../guild/guild.js";
+import { ROBO_LINDSAY_ID } from "../core/config.js";
 
 async function getMyLODataDoc(guild, key) { return (await getGuildDocument(guild.id)).collection("mylo").doc(key); }
 export async function storeMyLOData(guild, data)
@@ -25,29 +26,46 @@ export async function getMyLOData(guild, key)
 }
 
 //TODO: implement all link generators
-export async function postChannelThreads(res, channel, root) 
+export async function postChannelThreads(res, channel, forumChannel, root) 
 {    
     var messages = [];
     if (root.Structure)
     {
-        for (var topic of root.Structure.reverse())
+        if (forumChannel)
+        {
+            root.Structure.reverse();
+        }
+        for (var topic of root.Structure)
         {
             res.write(`Creating thread: ${topic.Title}\n`);
-            var newThread = await channel.threads.create({
+
+            var message = {
+                content: getMyLOContentLink(topic)
+            };
+
+            var newThread = forumChannel ? await channel.threads.create({
                 name: topic.Title,
-                message: {
-                    content: getMyLOContentLink(topic)
-                }
+                message
+            }) :  await channel.threads.create({
+                name: topic.Title
             });
-            messages.push(newThread);
+            if (forumChannel)
+            {
+                messages.push(newThread);
+            }
+            else
+            {
+                var newMessage = newThread.send(message);
+                messages.push(newMessage);
+            }
         }
     }
     return messages;
 }
-export async function postChannelLinks(res, channel, root) { return "Not implemented yet"; 
+export async function postChannelLinks(res, channel, forumChannel, root) { return "Not implemented yet"; 
 }
-export async function postChannelsWithThreads(res, category, root) 
-{ 
+async function createChannels(res, category, root, forumChannel, doWithChannel)
+{
     let everyoneRole = category.guild.roles.cache.find(r => r.name === '@everyone');
 
     var messages = [];
@@ -61,23 +79,34 @@ export async function postChannelsWithThreads(res, category, root)
             res.write(`Creating module channel: ${title}\n`);
 
             var newChannel = await category.createChannel(title, {
-                type: 15, //if this is 0, then newChannel is not null
+                type: forumChannel ? 15 : 0, 
                 permissionOverwrites: [
                     {
                       id: everyoneRole.id,
-                      deny: ['SEND_MESSAGES'],
+                      deny: ['SEND_MESSAGES', 'CREATE_PUBLIC_THREADS', 'CREATE_PRIVATE_THREADS'],
                    },
+                   {
+                     id: ROBO_LINDSAY_ID,
+                     allow: ['SEND_MESSAGES', 'CREATE_PUBLIC_THREADS', 'CREATE_PRIVATE_THREADS'],
+                  },
                 ],
             });
             
-            var newMessages = await postChannelThreads(res,newChannel, module);
+            var newMessages = await doWithChannel(res,newChannel,forumChannel,module);
             messages.push(...newMessages);
         }
         break;
     }
     return messages;
 }
-export async function postChannelsWithLinks(res, category, root) { return "Not implemented yet"; }
+export async function postChannelsWithThreads(res, category, forumChannel, root) 
+{ 
+    return await createChannels(res, category, root, forumChannel, postChannelThreads);
+}
+export async function postChannelsWithLinks(res, category, forumChannel, root) 
+{  
+    return await createChannels(res, category, root, forumChannel, postChannelLinks);
+}
 
 export function getMyLOContentLink(item)
 {

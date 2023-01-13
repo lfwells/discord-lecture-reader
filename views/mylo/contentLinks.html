@@ -53,7 +53,13 @@ function printModule(module, level)
         <%- include("../subViews/longBotCommandButton.html", 
         { 
             id: "postChannelsWithThreads",
-            text: "Post as Module Channels with Topic Threads",
+            text: "Post as Channels with Topic Threads",
+            isFormSubmit: true
+        }) %>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postForumChannelsWithThreads",
+            text: "Post as Forum Channels with Topic Threads",
             isFormSubmit: true
         }) %>
         <%- include("../subViews/longBotCommandButton.html", 
