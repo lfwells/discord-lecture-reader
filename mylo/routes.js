@@ -44,8 +44,8 @@ export async function createMyLOLinksPost(req,res)
     res.write(`Found root ${root.Title}.\n`);
 
     var result = "";
-    if (req.body.postChannelThreads) result = await postChannelThreads(res, channel, channel.type == 15, root);
-    if (req.body.postChannelLinks) result = await postChannelLinks(res, channel, false, root);
+    if (req.body.postChannelThreads) result = await postChannelThreads(res, channel, channel.type == 15, root, true);
+    if (req.body.postChannelLinks) result = await postChannelLinks(res, channel, false, root, true);
     if (req.body.postChannelsWithThreads) result = await postChannelsWithThreads(res, category, false, root);
     if (req.body.postChannelsWithLinks) result = await postChannelsWithLinks(res, category, false, root);
     if (req.body.postForumChannelsWithThreads) result = await postChannelsWithThreads(res, category, true, root);

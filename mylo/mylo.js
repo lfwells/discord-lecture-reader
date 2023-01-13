@@ -26,7 +26,7 @@ export async function getMyLOData(guild, key)
 }
 
 //TODO: implement all link generators
-export async function postChannelThreads(res, channel, forumChannel, root) 
+export async function postChannelThreads(res, channel, forumChannel, root, singleLevel) 
 {    
     var messages = [];
     if (root.Structure)
@@ -62,7 +62,37 @@ export async function postChannelThreads(res, channel, forumChannel, root)
     }
     return messages;
 }
-export async function postChannelLinks(res, channel, forumChannel, root) { return "Not implemented yet"; 
+export async function postChannelLinks(res, channel, forumChannel, root, singleLevel) 
+{ 
+    var messages = [];
+    if (root.Structure)
+    {
+        for (var topic of root.Structure)
+        {
+            res.write(`Creating message: ${topic.Title}\n`);
+
+            var message = {
+                //content: `**${getModuleTitle(module.Title)} - ${topic.Title}**\n${getMyLOContentLink(topic)}`
+                embeds:[
+                    {
+                        title:singleLevel ? 
+                            `${topic.Title}` :
+                            `${getModuleTitle(root.Title)} - ${topic.Title}`,
+                        description:`${getMyLOContentLink(topic)}`
+                    }
+                ]
+            };
+
+            var newMessage = channel.send(message);
+            messages.push(newMessage);
+        }
+    }
+    return messages;
+}
+function getModuleTitle(title)
+{
+    title = title.split(" - ")[0];
+    return title;
 }
 async function createChannels(res, category, root, forumChannel, doWithChannel)
 {
@@ -73,8 +103,7 @@ async function createChannels(res, category, root, forumChannel, doWithChannel)
     {
         if (module.Type == 0)
         {
-            let title = module.Title;
-            title = title.split(" - ")[0];
+            let title = getModuleTitle(module.Title);
             title = title.replace(/[^\w\s]/gi, '').replaceAll(" ", "-").toLowerCase();
             res.write(`Creating module channel: ${title}\n`);
 
