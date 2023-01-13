@@ -19,10 +19,13 @@ document.querySelector("#discordServerID").addEventListener("change", (evt) =>
     }
 });
 
-document.querySelector("#sync").addEventListener("click", async () => 
+document.querySelector("#sync").addEventListener("click", async (evt) => 
 {
+    evt.target.disabled = true;
+    evt.target.textContent = "Syncing...";
+
     var discordServerID = document.querySelector("#discordServerID").value;
-    
+
     let tab = await getCurrentTab();
     console.log({tab});
     
@@ -38,8 +41,13 @@ document.querySelector("#sync").addEventListener("click", async () =>
         let result = injectionResults[0].result;
         console.log({result});
 
+        evt.target.textContent = "Uploading Data...";
+
         let upload = await sendToBot(discordServerID, result);
         console.log({upload});
+
+        evt.target.disabled = false;
+        evt.target.textContent = "Sync Data";
     });
   //}
 });
@@ -128,7 +136,8 @@ async function runMyLOScript()
     function GetOrgIdLindsay() {
         let path = document.location.pathname;
         path = path.replace("/d2l/le/content/", "");
-        path = path.substring(0, path.indexOf("/"));
+        path = path.replace("/d2l/home/", "");
+        path = path.split("/")[0];
         return path;
     }
     
