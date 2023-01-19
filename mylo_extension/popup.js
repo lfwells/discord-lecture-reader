@@ -41,13 +41,26 @@ document.querySelector("#sync").addEventListener("click", async (evt) =>
         let result = injectionResults[0].result;
         console.log({result});
 
-        evt.target.textContent = "Uploading Data...";
+        if (discordServerID == "json")
+        {
+            var vLink = document.createElement('a'),
+            vBlob = new Blob([JSON.stringify(result)], {type: "octet/stream"}),
+            vName = 'mylo.json',//TODO: name this with org id, but thats in other context
+            vUrl = window.URL.createObjectURL(vBlob);
+            vLink.setAttribute('href', vUrl);
+            vLink.setAttribute('download', vName );
+            vLink.click();
+        }
+        else
+        {
+            evt.target.textContent = "Uploading Data...";
 
-        let upload = await sendToBot(discordServerID, result);
-        console.log({upload});
+            let upload = await sendToBot(discordServerID, result);
+            console.log({upload});
 
-        evt.target.disabled = false;
-        evt.target.textContent = "Sync Data";
+            evt.target.disabled = false;
+            evt.target.textContent = "Sync Data";
+        }
     });
   //}
 });
