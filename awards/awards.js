@@ -5,6 +5,7 @@ import { showText } from "../lecture_text/routes.js";
 import { pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { botRoleHigherThanMemberRole } from '../roles/roles.js';
+import { getGuildDocument } from '../guild/guild.js';
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
@@ -252,4 +253,31 @@ export async function giveAward(guild, award, member)
 
   return achievementEmbed;
 
+}
+
+//new database-based stuff
+async function getAwardsCollection(guild) {
+  return (await getGuildDocument(guild.id)).collection("awards");
+}
+export async function getAwardDocument(guild, emoji) {
+  return (await getAwardsCollection(guild)).doc(emoji);
+}
+export async function getAwardDisplayName(doc) {
+  var snapshot = await doc.get();
+  var title = snapshot.data().title;
+  var description = snapshot.data().description;
+  return `${snapshot.id} ***${title}*** -  ${description}`;
+}
+
+function getAwardNominationsCollectionFromDoc(doc) {
+  return doc.collection("nominations");
+}
+async function getAwardNominationsCollection(guild, emojiOrDoc) {
+  return (typeof(emojiOrDoc) === "string") ? getAwardNominationsCollectionFromDoc(await getAwardDocument(guild, emojiOrDoc)) : getAwardNominationsCollectionFromDoc(emojiOrDoc);
+}
+
+export async function getAwardNominationsCount(guild, emojiOrDoc) {
+  let collection = await getAwardNominationsCollection(guild, emojiOrDoc);
+  let snapshot = await collection.count().get();
+  return snapshot.data().count;
 }

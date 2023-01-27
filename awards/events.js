@@ -1,6 +1,6 @@
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
@@ -183,6 +183,10 @@ export default async function(client)
         {
             doAwardCommand(interaction);
         }
+        else if (interaction.commandName === "nom") 
+        {
+            doNomCommand(interaction);
+        }
         else if (interaction.commandName === "leaderboard") 
         {
             doLeaderboardCommand(interaction);
@@ -262,6 +266,83 @@ async function doAwardCommand(interaction)
         //console.log("award", member.id, award, emoji);
         if (award)
         {
+            var achievementEmbed = await giveAward(interaction.guild, award, member); 
+            await interaction.editReply({ embeds: [ achievementEmbed ] });
+            //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
+        }
+        else
+        {
+            //new award
+            if (award_text)
+            {
+                award_text = "***"+award_text+"***";
+                if (description)
+                {
+                    award_text = award_text + " --- " + description;
+                }
+
+                await send(awardChannel, emoji+" "+award_text+"\n<@"+member.id+">");
+
+                var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
+                var awardNameForShow = award_text;
+                if (awardNameForShow.lastIndexOf("*") > 0)
+                    awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
+                if (awardNameForShow.length > 32)
+                    awardNameForShow = awardNameForShow.substring(0, 32)+"...";
+                showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
+                
+                var achievementEmbed = {
+                    title:  baseName(member.displayName) + " just earned "+emoji+" "+award_text+"!",
+                    description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
+                };
+                await interaction.editReply({ embeds: [ achievementEmbed ]});
+            }
+            else
+            {
+                interaction.user.send("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)");
+                //interaction.editReply("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)", {ephemeral:true});
+
+                await interaction.deleteReply();
+            }
+        }
+    
+    }
+    /*else
+    {
+        interaction.user.send("You don't have permission to `/award` achievements. You can suggest an award to your UC though!");
+        //interaction.editReply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
+        
+        await interaction.deleteReply();
+    }*/
+}
+async function doNomCommand(interaction)
+{
+    var member = interaction.options.getMember("user") ?? interaction.member.id;
+    var nominatedSelf = member == interaction.member.id;
+    member = await interaction.guild.members.fetch(member);
+
+    var emoji = interaction.options.getString("award");//interaction.options[1].value;
+
+    await interaction.deferReply();
+
+
+    //if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
+    {
+        
+        var awardChannel = await getAwardChannel(interaction.guild);
+
+        var award = await getAwardDocument(interaction.guild, emoji);
+        if (award)
+        {
+            
+
+            return await interaction.editReply({
+                embeds:[{
+                    title: (nominatedSelf ? `${member.displayName} nominated themselves for ` : `${interaction.member.displayName} nominated ${member.displayName} for `)+(await getAwardDisplayName(award)),
+                    description: `${await getAwardNominationsCount(interaction.guild, award)}`
+                }]
+            })
+
             var achievementEmbed = await giveAward(interaction.guild, award, member); 
             await interaction.editReply({ embeds: [ achievementEmbed ] });
             //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
