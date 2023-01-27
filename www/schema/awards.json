@@ -1,0 +1,31 @@
+{
+
+        "type": "array",
+        "title": "Awards",
+        "items":{
+          "type": "object",
+          "title": "Award",
+          
+          "required": ["title", "description"],
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "canNominate": {
+              "type": "boolean"
+            },
+            "requiredNominations": {
+              "type": "number"
+            },
+            "autoPop": {
+              "type": "boolean"
+            }
+          }
+        }
+      
+  
+
+}

@@ -7,6 +7,7 @@ import { send } from '../core/client.js';
 import { botRoleHigherThanMemberRole } from '../roles/roles.js';
 import { getGuildDocument, getGuildProperty, getGuildPropertyConverted, setGuildProperty } from '../guild/guild.js';
 import * as admin from 'firebase-admin';
+import { getAwardsData } from './routes.js';
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
@@ -302,6 +303,11 @@ async function getAwardsCollection(guild)
 {
   return (await getGuildDocument(guild.id)).collection("awards");
 }
+export async function getAwardsDatabase(guild) {
+  var collection = await getAwardsCollection(guild);
+  var awards = await collection.get();
+  return awards;
+}
 export async function getAwardDocument(guild, emoji)
 {
   return (await getAwardsCollection(guild)).doc(emoji);
@@ -323,8 +329,7 @@ export async function hasAward(awardDoc, member)
 }
 export async function getAwardCount(member) //TODO award count cross-servers
 {
-  var collection = await getAwardsCollection(member.guild);
-  var awards = await collection.get();
+  var awards = await getAwardsDatabase(member.guild);
   return awards.docs.filter((award) => award.data().earned != null && award.data().earned[member.id] != undefined).length;
 }
 
@@ -389,7 +394,7 @@ export async function getAwardCanNominate(award) {
   return (await getAwardData(award)).canNominate ?? true;
 }
 export async function getAwardRequiredNominations(award) {
-  return (await getAwardData(award)).requiredNominations ?? 2;
+  return (await getAwardData(award)).requiredNominations ?? 1;
 }
 export async function getAwardAutoPop(award) {
   return (await getAwardData(award)).autoPop ?? true;

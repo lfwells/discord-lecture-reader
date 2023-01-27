@@ -1,4 +1,4 @@
-import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard } from "./awards.js";
+import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase } from "./awards.js";
 import { send } from "../core/client.js";
 import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
@@ -39,6 +39,15 @@ export async function leaderboardOBS(req,res,next)
 {
   req.classList = await getLeaderboard(req.guild, req.classList);
   await res.render("leaderboard_obs");
+  next();
+}
+
+
+export async function editor(req,res,next)
+{
+  var awards = await getAwardsDatabase(req.guild);
+  awards = awards.docs.map(doc => doc.data());
+  await res.render("awards_editor", { awards });
   next();
 }
 

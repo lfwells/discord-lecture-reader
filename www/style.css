@@ -581,3 +581,5 @@
         label > span:empty {
             display:none;
         }
+
+        .property-selector * { color: black !important; }
