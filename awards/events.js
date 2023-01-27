@@ -1,6 +1,6 @@
 import { getClient, send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField, getAwardsDatabase, getAwardsCollection, awardExists } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
@@ -294,12 +294,12 @@ async function doAwardCommand(interaction)
 
     //if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
     {
-        
+        var useLegacyAwards = await useLegacyAwardsSystem(interaction.guild);
         var awardChannel = await getAwardChannel(interaction.guild);
 
         var award = await getAwardByEmoji(interaction.guild, emoji);
         //console.log("award", member.id, award, emoji);
-        if (award)
+        if (useLegacyAwards ? award : (await awardExists(award)))
         {
             var achievementEmbed = await giveAward(interaction.guild, award, member); 
             await interaction.editReply({ embeds: [ achievementEmbed ] });
@@ -310,26 +310,42 @@ async function doAwardCommand(interaction)
             //new award
             if (award_text)
             {
-                award_text = "***"+award_text+"***";
-                if (description)
+                var achievementEmbed;
+                if (useLegacyAwards)
                 {
-                    award_text = award_text + " --- " + description;
+                    award_text = "***"+award_text+"***";
+                    if (description)
+                    {
+                        award_text = award_text + " --- " + description;
+                    }
+
+                    await send(awardChannel, emoji+" "+award_text+"\n<@"+member.id+">");
+
+                    var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
+                    var awardNameForShow = award_text;
+                    if (awardNameForShow.lastIndexOf("*") > 0)
+                        awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
+                    if (awardNameForShow.length > 32)
+                        awardNameForShow = awardNameForShow.substring(0, 32)+"...";
+                    showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });   
+                    
+                    achievementEmbed = {
+                        title:  baseName(member.displayName) + " just earned "+emoji+" "+award_text+"!",
+                        description: "<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
+                    };
                 }
-
-                await send(awardChannel, emoji+" "+award_text+"\n<@"+member.id+">");
-
-                var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
-                var awardNameForShow = award_text;
-                if (awardNameForShow.lastIndexOf("*") > 0)
-                    awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
-                if (awardNameForShow.length > 32)
-                    awardNameForShow = awardNameForShow.substring(0, 32)+"...";
-                showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
-                
-                var achievementEmbed = {
-                    title:  baseName(member.displayName) + " just earned "+emoji+" "+award_text+"!",
-                    description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
-                };
+                else
+                {
+                    var collection = await getAwardsCollection(interaction.guild);
+                    var awardDoc = collection.doc(emoji);
+                    await awardDoc.set({
+                        title: award_text,
+                        description
+                    });
+                    achievementEmbed = await giveAward(interaction.guild, awardDoc, member);
+                }
+                achievementEmbed.description = achievementEmbed.description + "\n(Brand new award 🤩!)";
+                console.log({achievementEmbed});
                 await interaction.editReply({ embeds: [ achievementEmbed ]});
             }
             else
@@ -363,7 +379,7 @@ async function doNomCommand(interaction)
     //if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
     {
         var award = await getAwardDocument(interaction.guild, emoji);
-        if ((await award.get()).exists)
+        if (await awardExists(award))
         {
             var result = await nominateForAward(interaction, award, member, interaction.member);
 

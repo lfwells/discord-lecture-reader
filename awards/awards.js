@@ -312,7 +312,7 @@ function paramIsDoc(emojiOrDoc)
 {
   return typeof(emojiOrDoc) !== "string";
 }
-async function getAwardsCollection(guild) 
+export async function getAwardsCollection(guild) 
 {
   return (await getGuildDocument(guild.id)).collection("awards");
 }
@@ -401,6 +401,11 @@ export async function nominateForAward(interaction, awardDoc, member, nominatedB
   {
     return { message: `Nomination recieved. ${pluralize(requiredCount, "nomination")} needed for this award.`, success: true, pop: false };
   }
+}
+
+export async function awardExists(awardDoc) {
+  if(awardDoc == null) return false;
+  return (await awardDoc.get()).exists;
 }
 
 export async function getAwardCanNominate(award) {
