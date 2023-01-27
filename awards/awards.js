@@ -304,7 +304,7 @@ export async function getAwardDocument(guild, emoji)
 }
 async function getAwardData(awardDoc)
 {
-  var snapshot = await doc.get();
+  var snapshot = await awardDoc.get();
   return snapshot.data();
 }
 export async function getAwardDisplayName(doc) 
@@ -314,9 +314,10 @@ export async function getAwardDisplayName(doc)
 }
 export async function hasAward(awardDoc, member) 
 {
-  return false;//TODO
+  var data = await getAwardData(awardDoc);
+  return data.earned[member.id] != undefined;
 }
-export async function getAwardCount(member) 
+export async function getAwardCount(member) //TODO award count cross-servers
 {
   return 69; //TODO
 }
