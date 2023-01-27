@@ -1,6 +1,6 @@
-import { send } from "../core/client.js";
+import { getClient, send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
@@ -214,16 +214,34 @@ async function doFlexCommand(interaction)
     await interaction.deferReply({ ephemeral: !publicPost });
 
     var member = interaction.options.getMember("user") ?? interaction.member;
+    if (typeof(member) == "string")
+    {
+        member = await interaction.guild.members.fetch(member);
+    }
+    console.log({member});
 
     var awardsObj = await getAwardList(interaction.guild, member);
     var awards = [];
-    for(var emoji in awardsObj)
+    var useLegacyAwards = await useLegacyAwardsSystem(interaction.guild);
+    if (useLegacyAwards)
     {
-        awards.push(emoji+" "+awardsObj[emoji]); 
+        for(var emoji in awardsObj)
+        {
+            awards.push(emoji+" "+awardsObj[emoji]); 
+        }        
+    }
+    else
+    {
+        for(var doc of awardsObj)
+        {
+            var d = doc.data();
+            d.id = d.emoji = doc.id;
+            awards.push(d);
+        }
     }
 
     var flexEmbed = {
-        title: (member.nickname ?? member.username)+" has "+pluralize(awards.length, "award"),
+        title: (member.displayName)+" has "+pluralize(awards.length, "award"),
         fields:[]
     };
     if (member.user)
@@ -237,16 +255,27 @@ async function doFlexCommand(interaction)
     {
         flexEmbed.description = ":(";
     }
+
     var i = 0;
-    for(var emoji in awardsObj)
+    for(var item in useLegacyAwards ? awardsObj : awards)
     {
-        if (i == 25) break;//discord max
-        flexEmbed.fields.push({
-            name:emoji,
-            value:awardsObj[emoji]
-        });
+        if (i == 25) break;//discord max, TODO: X more awards
+
+        if (useLegacyAwards)
+        {
+            flexEmbed.fields.push({
+                name:item,
+                value:awardsObj[item]
+            });
+        }
+        else
+        {
+            var award = awards[item];
+            flexEmbed.fields.push(getAwardAsField(award.emoji, award));
+        }
         i++;
     }
+    
     await interaction.editReply({ embeds: [ flexEmbed ] });
     //await interaction.reply(flex);
 }

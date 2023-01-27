@@ -128,6 +128,12 @@ export async function getAwardChannel(guild)
 
 export async function getAwardList(guild, member) //optionally get award list for member
 {
+  if (!(await useLegacyAwardsSystem(guild)))
+  {
+    if (member) return await getAwardsForMember(member);
+    else return await getAwardsDatabase(guild);
+  }
+
   var awards = {};
   var awardChannel = await getAwardChannel(guild);
   var messages = await awardChannel.messages.fetch();
@@ -241,7 +247,7 @@ export async function giveAward(guild, award, member)
 
     await handleAwardNicknames(getClient(), await getAwardChannel(guild));
 
-    var awardCount = await getAwardCount(member);
+    var awardCount = (await getAwardsForMember(member)).length;
     achievementEmbed = {
         title: baseName(member.displayName) + " just earned "+(await getAwardDisplayName(awardDoc))+"!",
         description: "<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+".",
@@ -327,10 +333,10 @@ export async function hasAward(awardDoc, member)
   var data = await getAwardData(awardDoc);
   return data.earned != null && data.earned[member.id] != undefined;
 }
-export async function getAwardCount(member) //TODO award count cross-servers
+export async function getAwardsForMember(member) //TODO award count cross-servers
 {
   var awards = await getAwardsDatabase(member.guild);
-  return awards.docs.filter((award) => award.data().earned != null && award.data().earned[member.id] != undefined).length;
+  return awards.docs.filter((award) => award.data().earned != null && award.data().earned[member.id] != undefined);
 }
 
 export async function getAwardNominationsCount(awardDoc, member) 
@@ -400,10 +406,8 @@ export async function getAwardAutoPop(award) {
   return (await getAwardData(award)).autoPop ?? true;
 }
 
-export async function useLegacyAwardsSystem(guild) { //the new system will only ever have one message in achievmeents ... this is a pretty dumb check lol
-  var awardChannel = await getGuildPropertyConverted("awardChannel", guild);
-  return awardChannel != null && awardChannel.messages.size > 1;
-  //return (await getGuildProperty("awardPost", guild)) != undefined;
+export async function useLegacyAwardsSystem(guild) { 
+  return await getGuildProperty("useNewAwardsSystem", guild, false) == false;
 }
 
 async function updateAwardPosts(awardChannel)
@@ -444,15 +448,20 @@ async function updateAwardPosts(awardChannel)
       });
       currentEmbedIndex = postData.embeds.length - 1;
     }
-
+    
     var data = awards.docs[i].data();
-    postData.embeds[currentEmbedIndex].fields.push({
-      name: awards.docs[i].id +" "+ data.title,
-      value: data.description,
-    });
+    postData.embeds[currentEmbedIndex].fields.push(getAwardAsField(awards.docs[i], data));
   }
 
   await awardPost.edit(postData);
 
   //TODO: now do the actual nicknames...
+}
+
+export function getAwardAsField(id, award)
+{
+  return {
+    name: id +" "+ award.title,
+    value: award.description,
+  }
 }
