@@ -256,28 +256,39 @@ export async function giveAward(guild, award, member)
 }
 
 //new database-based stuff
-async function getAwardsCollection(guild) {
+async function getAwardsCollection(guild) 
+{
   return (await getGuildDocument(guild.id)).collection("awards");
 }
-export async function getAwardDocument(guild, emoji) {
+export async function getAwardDocument(guild, emoji)
+{
   return (await getAwardsCollection(guild)).doc(emoji);
 }
-export async function getAwardDisplayName(doc) {
+export async function getAwardDisplayName(doc) 
+{
   var snapshot = await doc.get();
   var title = snapshot.data().title;
   var description = snapshot.data().description;
-  return `${snapshot.id} ***${title}*** -  ${description}`;
+  return `${doc.id} ***${title}*** -  ${description}`;
 }
 
-function getAwardNominationsCollectionFromDoc(doc) {
-  return doc.collection("nominations");
+export async function getAwardNominationsCount(awardDoc, member) 
+{
+  var snapshot = await awardDoc.get();
+  var nominations = snapshot.data().nominations ?? {};
+  return nominations[member.id]?.length ?? 0;
 }
-async function getAwardNominationsCollection(guild, emojiOrDoc) {
-  return (typeof(emojiOrDoc) === "string") ? getAwardNominationsCollectionFromDoc(await getAwardDocument(guild, emojiOrDoc)) : getAwardNominationsCollectionFromDoc(emojiOrDoc);
-}
+export async function nominateForAward(awardDoc, member, nominatedByMember) 
+{
+  var snapshot = await awardDoc.get();
+  var nominations = snapshot.data().nominations ?? {};
+  if (nominations[member.id] == undefined) nominations[member.id] = [];
+  if (nominations[member.id].indexOf(nominatedByMember.id) == -1)
+  {
+    nominations[member.id].push(nominatedByMember.id);
 
-export async function getAwardNominationsCount(guild, emojiOrDoc) {
-  let collection = await getAwardNominationsCollection(guild, emojiOrDoc);
-  let snapshot = await collection.count().get();
-  return snapshot.data().count;
+    await awardDoc.set({
+      nominations
+    }, { merge: true });
+  }
 }

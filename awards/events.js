@@ -1,6 +1,6 @@
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
@@ -334,12 +334,12 @@ async function doNomCommand(interaction)
         var award = await getAwardDocument(interaction.guild, emoji);
         if (award)
         {
-            
+            await nominateForAward(award, member, interaction.member);
 
             return await interaction.editReply({
                 embeds:[{
                     title: (nominatedSelf ? `${member.displayName} nominated themselves for ` : `${interaction.member.displayName} nominated ${member.displayName} for `)+(await getAwardDisplayName(award)),
-                    description: `${await getAwardNominationsCount(interaction.guild, award)}`
+                    description: `${pluralize(await getAwardNominationsCount(award, member), "Nomination")}`
                 }]
             })
 
