@@ -192,19 +192,26 @@ export async function getLeaderboard(guild, classList)
 }
 export async function getAwardByEmoji(guild, emoji)
 {
-  var result;
-  var awardChannelID = await getAwardChannelID(guild.id);
-  var awardChannel = await guild.client.channels.cache.get(awardChannelID);
-  var messages = await awardChannel.messages.fetch();
-  messages.forEach(award => 
+  if (await useLegacyAwardsSystem(guild))
   {
-    var thisEmoji = getAwardEmoji(award);
-    if (emoji == thisEmoji)
+    var result;
+    var awardChannelID = await getAwardChannelID(guild.id);
+    var awardChannel = await guild.client.channels.cache.get(awardChannelID);
+    var messages = await awardChannel.messages.fetch();
+    messages.forEach(award => 
     {
-      result = award;
-    }
-  });
-  return result;
+      var thisEmoji = getAwardEmoji(award);
+      if (emoji == thisEmoji)
+      {
+        result = award;
+      }
+    });
+    return result;
+  }
+  else
+  {
+    return await getAwardDocument(guild, emoji);
+  }
 }
 export function getAwardEmoji(award)
 {
@@ -448,7 +455,7 @@ async function updateAwardPosts(awardChannel)
       });
       currentEmbedIndex = postData.embeds.length - 1;
     }
-    
+
     var data = awards.docs[i].data();
     postData.embeds[currentEmbedIndex].fields.push(getAwardAsField(awards.docs[i], data));
   }
