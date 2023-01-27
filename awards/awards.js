@@ -379,7 +379,7 @@ export async function nominateForAward(interaction, awardDoc, member, nominatedB
 {
   var nominatedSelf = member.id == interaction.member.id;
 
-  if (!(await getAwardCanNominate(awardDoc))) return { message: "Nominations have been disabled for this award.", success: false };
+  if (!(await getAwardCanNominate(awardDoc, interaction.guild))) return { message: "Nominations have been disabled for this award.", success: false };
   if (await hasAward(awardDoc, member)) return { message: nominatedSelf ? 
       "You already have this award." :
       "This user already has this award.",
@@ -406,10 +406,10 @@ export async function nominateForAward(interaction, awardDoc, member, nominatedB
 
   //now time to check if they have enough nominations
   var nominationsCount = await getAwardNominationsCount(awardDoc, member);
-  var requiredCount = await getAwardRequiredNominations(awardDoc);
+  var requiredCount = await getAwardRequiredNominations(awardDoc, interaction.guild);
   if (nominationsCount >= requiredCount)
   {
-    if (await getAwardAutoPop(awardDoc))
+    if (await getAwardAutoPop(awardDoc, interaction.guild))
     {
       //note success is false if nominatedSelf, we don't need the "nominated self" popup, I don't think
       return { message: "Nomination recieved. The award has been given automatically as enough nominations have been recieved.", success: nominatedSelf == false, pop: true };
@@ -431,14 +431,14 @@ export async function awardExists(awardDoc) {
   return (await awardDoc.get()).exists;
 }
 
-export async function getAwardCanNominate(award) {
-  return (await getAwardData(award)).canNominate ?? true;
+export async function getAwardCanNominate(award, guild) {
+  return (await getAwardData(award)).canNominate ?? await getGuildProperty("awardsDefaultCanNominate", guild, true);
 }
-export async function getAwardRequiredNominations(award) {
-  return (await getAwardData(award)).requiredNominations ?? 1;
+export async function getAwardRequiredNominations(award, guild) {
+  return (await getAwardData(award)).requiredNominations ?? await getGuildProperty("awardsDefaultRequiredNominations", guild, 1);
 }
-export async function getAwardAutoPop(award) {
-  return (await getAwardData(award)).autoPop ?? true;
+export async function getAwardAutoPop(award, guild) {
+  return (await getAwardData(award)).autoPop ?? await getGuildProperty("awardsDefaultAutoPop", guild, true);
 }
 
 export async function useLegacyAwardsSystem(guild) { 

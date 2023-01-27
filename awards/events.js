@@ -390,7 +390,7 @@ async function doNomCommand(interaction)
                 await interaction.channel.send({
                     embeds:[{
                         title: (nominatedSelf ? `${member.displayName} nominated themselves for ` : `${interaction.member.displayName} nominated ${member.displayName} for `)+(await getAwardDisplayName(award)),
-                        description: `${pluralize(await getAwardNominationsCount(award, member), "Nomination")} made for this user. ${pluralize(await getAwardRequiredNominations(award), "Nomination")} required.`
+                        description: `${pluralize(await getAwardNominationsCount(award, member), "Nomination")} made for this user. ${pluralize(await getAwardRequiredNominations(award, interaction.guild), "Nomination")} required.`
                     }]
                 })
             }

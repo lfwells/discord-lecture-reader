@@ -105,6 +105,10 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_showCurrentWeek"));
     router.use(guild.loadGuildProperty("feature_mylo"));
 
+    router.use(guild.loadGuildProperty("awardsDefaultRequiredNominations"));
+    router.use(guild.loadGuildProperty("awardsDefaultAutoPop"));
+    router.use(guild.loadGuildProperty("awardsDefaultCanNominate"));
+
 
     //TODO: this filterButtons could be expensive, I didn't realise!
     router.use(filterButtons);

@@ -32,7 +32,10 @@ export const POLL_COMMAND = 'poll';
 export const DEFAULT_GUILD_PROPERTIES = {
     feature_attendance: true,
     feature_analytics: true,
-    todoEmoji:"🎗️"
+    todoEmoji:"🎗️",
+    awardsDefaultRequiredNominations: 1,
+    awardsDefaultCanNominate: true,
+    awardsDefaultAutoPop: true
 }
 
 var _TEST_MODE = false; //limit to test server only
