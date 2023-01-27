@@ -347,7 +347,7 @@ async function doNomCommand(interaction)
             if (result.pop)
             {
                 var achievementEmbed = await giveAward(interaction.guild, award, member); 
-                await interaction.editReply({ embeds: [ achievementEmbed ] });
+                await interaction.channel.send({ embeds: [ achievementEmbed ] });
                 //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
             }
         }

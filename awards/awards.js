@@ -6,6 +6,7 @@ import { pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { botRoleHigherThanMemberRole } from '../roles/roles.js';
 import { getGuildDocument } from '../guild/guild.js';
+import * as admin from 'firebase-admin';
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
@@ -221,41 +222,78 @@ export function getAwardName(award)
 
 export async function giveAward(guild, award, member)
 {
-  var client = getClient();
-  var content = award.content+"\n<@"+member.id+">";
-  //found the award, just append the name 
-  if (award.author != client.user)
+  var awardNameForShow;
+  var emoji;
+  var achievementEmbed = {};
+  if (paramIsDoc(award))
   {
-      await award.delete();
-      var awardChannel = await getAwardChannel(guild);
-      await send(awardChannel, content);
+    var awardDoc = award;
+    var snapshot = await awardDoc.get();
+    var earned = snapshot.data()?.earned ?? {};
+    earned[member.id] = Date.now();
+
+    await awardDoc.set({
+      earned
+    }, { merge: true });
+
+    var awardCount = await getAwardCount(member);
+    achievementEmbed = {
+        title: baseName(member.displayName) + " just earned "+(await getAwardDisplayName(awardDoc))+"!",
+        description: "<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+".",
+        thumbnail: { 
+          url:member.user.displayAvatarURL()
+        }
+    };
+
+    awardNameForShow = await getAwardDisplayName(awardDoc);
+    emoji = awardDoc.id;
   }
   else
   {
-      await award.edit(content);
-  }
-  var awardCount = Object.keys(await getAwardList(guild, member)).length;
-  var awardNameForShow = getAwardName(award);
-  if (awardNameForShow.lastIndexOf("*") > 0)
-      awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
-  if (awardNameForShow.length > 32)
-      awardNameForShow = awardNameForShow.substring(0, 32)+"...";
-  showText({ guild: guild }, { text: baseName(member.displayName)+" earned\n"+getAwardEmoji(award)+" "+awardNameForShow+"!", style:"yikes" });
+    var client = getClient();
+    var content = award.content+"\n<@"+member.id+">";
+    //found the award, just append the name 
+    if (award.author != client.user)
+    {
+        await award.delete();
+        var awardChannel = await getAwardChannel(guild);
+        await send(awardChannel, content);
+    }
+    else
+    {
+        await award.edit(content);
+    }
 
-  var achievementEmbed = {
+    var awardCount = Object.keys(await getAwardList(guild, member)).length;
+    achievementEmbed = {
       title: baseName(member.displayName) + " just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!",
       description: "<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+".",
       thumbnail: { 
         url:member.user.displayAvatarURL()
       }
-  };
-  console.log(achievementEmbed);
+    };
+    
+    awardNameForShow = getAwardName(award);
+    emoji = getAwardEmoji(award);
+  }
+
+  //console.log(achievementEmbed);
+  
+  if (awardNameForShow.lastIndexOf("*") > 0)
+      awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
+  if (awardNameForShow.length > 32)
+      awardNameForShow = awardNameForShow.substring(0, 32)+"...";
+  showText({ guild: guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });
 
   return achievementEmbed;
 
 }
 
 //new database-based stuff
+function paramIsDoc(emojiOrDoc)
+{
+  return typeof(emojiOrDoc) !== "string";
+}
 async function getAwardsCollection(guild) 
 {
   return (await getGuildDocument(guild.id)).collection("awards");
@@ -274,6 +312,10 @@ export async function getAwardDisplayName(doc)
 export async function hasAward(awardDoc, member) 
 {
   return false;//TODO
+}
+export async function getAwardCount(member) 
+{
+  return 69; //TODO
 }
 
 export async function getAwardNominationsCount(awardDoc, member) 
