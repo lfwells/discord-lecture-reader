@@ -160,28 +160,41 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
     classList[i].awards = [];
   }
 
-  var messages = await awardChannel.messages.fetch();
-  messages.forEach(award => 
+  if (await useLegacyAwardsSystem(guild))
   {
-    var emoji = getAwardEmoji(award);
-    var name = getAwardName(award);
-    var awardData = {
-      emoji:emoji,
-      name:name,
-      students:[]
-    };
+    var messages = await awardChannel.messages.fetch();
+    messages.forEach(award => 
+    {
+      var emoji = getAwardEmoji(award);
+      var name = getAwardName(award);
+      var awardData = {
+        emoji:emoji,
+        name:name,
+        students:[]
+      };
+      for (var i in classList)
+      {
+        var student = classList[i];
+        var member = student.member;
+        if (member.user && award.mentions.users.has(member.user.id))
+        {
+          awardData.students.push(student);
+          student.awards.push(awardData);
+        }
+      }
+      awards.push(awardData);
+    });
+  }
+  else
+  {
+    //dont need to modify awards array in new version, just adjust the students.awards lists
     for (var i in classList)
     {
       var student = classList[i];
       var member = student.member;
-      if (member.user && award.mentions.users.has(member.user.id))
-      {
-        awardData.students.push(student);
-        student.awards.push(awardData);
-      }
+      student.awards = await getAwardsForMember(member);
     }
-    awards.push(awardData);
-  });
+  }
   return awards;
 }
 export async function getLeaderboard(guild, classList)
