@@ -64,7 +64,23 @@ function award(studentDiscordID, emoji, button)
 }
 </script>
 
-<div><a class="btn" href="awards/editor">Open Award Editor</a></div>
+<div>
+  <a class="btn" href="<%=locals.showAwardEditorButton ? "awards/editor" : "#" %>">Open Award Editor</a> 
+  <% if (locals.showAwardEditorButton == false)
+  {
+    %>To use the Awards Editor, you need to enable the new awards system.
+    <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Use New Achievement System",
+                id: "setUseNewAwardsSystem",
+                value: locals.useNewAwardsSystem ? locals.useNewAwardsSystem : "false",
+                help:"true or false (too hard to make a checkbox right now)",
+                onChangedURL: "setGuildProperty"
+            }) %>
+    <%
+  }
+  %>
+</div>
 
 <%- locals.classlistFilters() %>
 
