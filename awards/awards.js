@@ -190,7 +190,7 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
     });
   }
   else
-  {;
+  {
     awards = await getAwardsDatabase(guild);
     for (var i in classList)
     {
@@ -198,12 +198,12 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
       var member = student.member;
       student.awards = await getAwardsForMember(member, awards);
     }
+    awards = awards.docs.map(function(award) {
+      var d = award.data();
+      d.id = d.emoji = award.id;
+      return d;
+    });
   }
-  awards = awards.docs.map(function(award) {
-    var d = award.data();
-    d.id = d.emoji = award.id;
-    return d;
-  });
   return awards;
 }
 export async function getLeaderboard(guild, classList)
