@@ -1,7 +1,9 @@
-import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase } from "./awards.js";
-import { send } from "../core/client.js";
+import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel } from "./awards.js";
+import { getClient, send } from "../core/client.js";
 import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
+import { beginStreamingRes } from "../core/server.js";
+import { pluralize } from "../core/utils.js";
 
 //todo: summary (public?) pages that list achievements?
 export async function namesTest(req,res,next) 
@@ -53,6 +55,30 @@ export async function editor(req,res,next)
   });
   await res.render("awards_editor", { awards });
   next();
+}
+
+export async function editor_post(req,res,next)
+{
+  beginStreamingRes(res);
+
+  res.write("Updating Awards Database...\n");
+
+  for (var i = 0; i < req.body.length; i++)
+  {
+    res.write(`\tUpdating ${req.body[i].emoji} ${req.body[i].title}...`);
+    var id = req.body[i].emoji.trim();
+    delete req.body[i].emoji;
+    
+    var doc = await getAwardDocument(req.guild, id);
+    await doc.set(req.body[i], { merge: true });
+    res.write("Done\n");
+  }
+  res.write(`Updated ${pluralize(req.body.length, "award")}.\n`);
+
+  res.write(`Updating achievements channel...`);
+  await handleAwardNicknames(getClient(), await getAwardChannel(req.guild));
+  res.write("Done\n");
+  res.end();
 }
 
 export async function getAwardsData(req,res,next)

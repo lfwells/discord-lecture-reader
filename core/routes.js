@@ -142,6 +142,7 @@ function guildRouter()
     router.get("/awards/giveAward", 
                     award_routes.getGiveAward); 
     router.get("/awards/editor", award_routes.editor); 
+    router.post("/awards/editor", award_routes.editor_post); 
                     
     router.get("/leaderboard/", loadClassList, award_routes.leaderboard); 
     router.get("/leaderboard/obs", loadClassList, award_routes.leaderboardOBS); 
