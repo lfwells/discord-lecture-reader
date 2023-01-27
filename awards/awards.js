@@ -5,7 +5,7 @@ import { showText } from "../lecture_text/routes.js";
 import { pluralize } from '../core/utils.js';
 import { send } from '../core/client.js';
 import { botRoleHigherThanMemberRole } from '../roles/roles.js';
-import { getGuildDocument } from '../guild/guild.js';
+import { getGuildDocument, getGuildProperty, getGuildPropertyConverted, setGuildProperty } from '../guild/guild.js';
 import * as admin from 'firebase-admin';
 
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
@@ -15,6 +15,8 @@ var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
 //kit109 IRL off topic "814020643711746068"
 export async function handleAwardNicknames(client, offtopiclistschannel)
 {  
+  if (!(await useLegacyAwardsSystem(offtopiclistschannel.guild))) return await updateAwardPosts(offtopiclistschannel);
+
   var awardedMembers = {}; 
   
   var messages = await offtopiclistschannel.messages.fetch();
@@ -236,6 +238,8 @@ export async function giveAward(guild, award, member)
       earned
     }, { merge: true });
 
+    await handleAwardNicknames(getClient(), await getAwardChannel(guild));
+
     var awardCount = await getAwardCount(member);
     achievementEmbed = {
         title: baseName(member.displayName) + " just earned "+(await getAwardDisplayName(awardDoc))+"!",
@@ -389,4 +393,61 @@ export async function getAwardRequiredNominations(award) {
 }
 export async function getAwardAutoPop(award) {
   return (await getAwardData(award)).autoPop ?? true;
+}
+
+export async function useLegacyAwardsSystem(guild) { //the new system will only ever have one message in achievmeents ... this is a pretty dumb check lol
+  var awardChannel = await getGuildPropertyConverted("awardChannel", guild);
+  return awardChannel != null && awardChannel.messages.size > 1;
+  //return (await getGuildProperty("awardPost", guild)) != undefined;
+}
+
+async function updateAwardPosts(awardChannel)
+{
+  console.log("\n\nupdateAwardPosts");
+
+  //find the post by saved id, or create it (or if the saved id is invalid, also create it)
+  var awardPost = await getGuildProperty("awardPost", awardChannel.guild);
+  if (awardPost == undefined)
+  {
+    awardPost = await awardChannel.send({content: "Loading Awards..."});
+    await setGuildProperty(awardChannel.guild, "awardPost", awardPost.id);
+  }
+  else
+  {
+    try
+    {
+      awardPost = await awardChannel.messages.fetch(awardPost);
+    }
+    catch (DiscordAPIError) 
+    {
+      awardPost = await awardChannel.send({content: "Loading Awards..."});
+      await setGuildProperty(awardChannel.guild, "awardPost", awardPost.id);
+    }
+  }
+
+  var collection = await getAwardsCollection(awardChannel.guild);
+  var awards = await collection.get();
+  var currentEmbedIndex = -1;
+  var postData = { content:null, embeds: [] };
+  for (var i = 0; i < awards.docs.length; i++)
+  {
+    if (i % 25 == 0) //need a new post every 25 thingys
+    {
+      postData.embeds.push({
+        title: "Awards",
+        fields: []
+      });
+      currentEmbedIndex = postData.embeds.length - 1;
+    }
+
+    var data = awards.docs[i].data();
+    postData.embeds[currentEmbedIndex].fields.push({
+      name: awards.docs[i].id +" "+ data.title,
+      value: data.description,
+    });
+  }
+
+  await awardPost.edit(postData);
+
+  //TODO: now do the actual nicknames...
 }

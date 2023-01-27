@@ -1,6 +1,6 @@
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
@@ -13,6 +13,8 @@ export default async function(client)
     {
         if (await isAwardChannelID(msg.channel))
         {
+            if (!(await useLegacyAwardsSystem(msg.guild))) return;
+
             //detect update to awards (add)
             console.log("message added in achievements channel");
             handleAwardNicknames(client, msg.channel);
@@ -23,6 +25,8 @@ export default async function(client)
     {
         if (await isAwardChannelID(msg.channel))
         {
+            if (!(await useLegacyAwardsSystem(msg.guild))) return;
+
             //detect update to awards (edit)
             console.log("message update in achievements channel");
             handleAwardNicknames(client, msg.channel);
@@ -33,6 +37,8 @@ export default async function(client)
     {
         if (await isAwardChannelID(msg.channel))
         {
+            //if (!(await useLegacyAwardsSystem(msg.guild))) return;
+
             //detect update to awards (delete)
             console.log("message delete in achievements channel");
             handleAwardNicknames(client, msg.channel);
