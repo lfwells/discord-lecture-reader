@@ -173,7 +173,7 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
       var name = getAwardName(award);
       var awardData = {
         emoji:emoji,
-        name:name,
+        title:title,
         students:[]
       };
       for (var i in classList)
@@ -190,15 +190,20 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
     });
   }
   else
-  {
-    //dont need to modify awards array in new version, just adjust the students.awards lists
+  {;
+    awards = await getAwardsDatabase(guild);
     for (var i in classList)
     {
       var student = classList[i];
       var member = student.member;
-      student.awards = await getAwardsForMember(member);
+      student.awards = await getAwardsForMember(member, awards);
     }
   }
+  awards = awards.docs.map(function(award) {
+    var d = award.data();
+    d.id = d.emoji = award.id;
+    return d;
+  });
   return awards;
 }
 export async function getLeaderboard(guild, classList)

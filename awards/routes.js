@@ -1,4 +1,4 @@
-import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel } from "./awards.js";
+import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel, useLegacyAwardsSystem } from "./awards.js";
 import { getClient, send } from "../core/client.js";
 import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
@@ -85,16 +85,26 @@ export async function getAwardsData(req,res,next)
 {
     res.locals.awards = await getAwardListFullData(req.guild, req.classList);
     
+    var useLegacyAwards = await useLegacyAwardsSystem(req.guild);
     res.locals.checkAward = function(student, award)
     {
-      var complete = award.students.find(s => s.discordID == student.discordID);
-      if (complete)
+      var complete = false;
+      if (useLegacyAwards)
       {
-        return '<td title="'+award.name+'" class="pageResult complete">&nbsp;</td>';
+        complete = award.students.find(s => s.discordID == student.discordID);
       }
       else
       {
-        return '<td title="'+award.name+'" class="pageResult not_complete"><button onclick="award(\''+student.discordID+'\', \''+award.emoji+'\', this)">'+award.emoji+'</button></td>';
+        complete = Object.keys(award.earned ?? {}).indexOf(student.discordID) >= 0;
+      }
+
+      if (complete)
+      {
+        return '<td title="'+award.title+'" class="pageResult complete">&nbsp;</td>';
+      }
+      else
+      {
+        return '<td title="'+award.title+'" class="pageResult not_complete"><button onclick="award(\''+student.discordID+'\', \''+award.emoji+'\', this)">'+award.emoji+'</button></td>';
       }
     };
     next();
