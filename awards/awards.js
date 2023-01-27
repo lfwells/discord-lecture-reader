@@ -57,32 +57,36 @@ export async function handleAwardNicknames(client, offtopiclistschannel)
     //console.log("awards", awards);
     if (member)
     {
+      applyAwardsToNickname(member, awards);
       //console.log("member", baseName(member.nickname ?? member.user.username));
       //setNickname(member, baseName(member.nickname ?? member.user.username)+" "+awards.join(""))
       //this way may look dumb, but we dont want to split the last emoji in two 
-      var newNickname = baseName(member.nickname ?? member.user.username);
-      for (var a in awards)
-      {
-        var emoji = awards[a];
-        var newLengthAfterAddingEmoji = newNickname.length+emoji.length;
-        if (newLengthAfterAddingEmoji < 32)
-        {
-          newNickname = newNickname + emoji;
-        }
-        else {
-          //console.log(emoji, emoji.length, newNickname.length, newLengthAfterAddingEmoji);
-          break;
-        }
-      }
-      setNickname(client, member, newNickname);
+      
     }
   }
   return awardedMembers;
 }
+function applyAwardsToNickname(member, emojiArray)
+{
+  var newNickname = baseName(member.nickname ?? member.user.username);
+  for (var emoji of emojiArray)
+  {
+    var newLengthAfterAddingEmoji = newNickname.length+emoji.length;
+    if (newLengthAfterAddingEmoji < 32)
+    {
+      newNickname = newNickname + emoji;
+    }
+    else {
+      //console.log(emoji, emoji.length, newNickname.length, newLengthAfterAddingEmoji);
+      break;
+    }
+  }
+  setNickname(getClient(), member, newNickname);
+}
 async function setNickname(client, member, nickname)
 {
   //console.log(nickname.length); 
-  //console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
+  console.log("Set nickname of", (member.nickname ?? member.user.username), "to", nickname, "(length = " ,nickname.length, ")");
 
   //we can only set the nickname if the role is lower than us
   if (await botRoleHigherThanMemberRole(member))
@@ -353,9 +357,10 @@ export async function hasAward(awardDoc, member)
   var data = await getAwardData(awardDoc);
   return data.earned != null && data.earned[member.id] != undefined;
 }
-export async function getAwardsForMember(member) //TODO award count cross-servers
+//note the second param for caching
+export async function getAwardsForMember(member, awards) //TODO award count cross-servers
 {
-  var awards = await getAwardsDatabase(member.guild);
+  var awards = awards ?? await getAwardsDatabase(member.guild);
   return awards.docs.filter((award) => award.data().earned != null && award.data().earned[member.id] != undefined);
 }
 
@@ -439,12 +444,14 @@ async function updateAwardPosts(awardChannel)
 {
   console.log("\n\nupdateAwardPosts");
 
+  var guild = awardChannel.guild;
+
   //find the post by saved id, or create it (or if the saved id is invalid, also create it)
   var awardPost = await getGuildProperty("awardPost", awardChannel.guild);
   if (awardPost == undefined)
   {
     awardPost = await awardChannel.send({content: "Loading Awards..."});
-    await setGuildProperty(awardChannel.guild, "awardPost", awardPost.id);
+    await setGuildProperty(guild, "awardPost", awardPost.id);
   }
   else
   {
@@ -455,11 +462,11 @@ async function updateAwardPosts(awardChannel)
     catch (DiscordAPIError) 
     {
       awardPost = await awardChannel.send({content: "Loading Awards..."});
-      await setGuildProperty(awardChannel.guild, "awardPost", awardPost.id);
+      await setGuildProperty(guild, "awardPost", awardPost.id);
     }
   }
 
-  var collection = await getAwardsCollection(awardChannel.guild);
+  var collection = await getAwardsCollection(guild);
   var awards = await collection.get();
   var currentEmbedIndex = -1;
   var postData = { content:null, embeds: [] };
@@ -480,7 +487,18 @@ async function updateAwardPosts(awardChannel)
 
   await awardPost.edit(postData);
 
-  //TODO: now do the actual nicknames...
+  //now do the actual nicknames...
+  var awardsDB = await getAwardsDatabase(guild);
+  for (var member of Array.from(guild.members.cache.values())) {
+    if (member.id == guild.ownerID) continue; //cannot modify guild owner nickname
+
+    var awards = await getAwardsForMember(member, awardsDB);
+    //console.log("awards", awards);
+    if (member)
+    {
+      applyAwardsToNickname(member, awards.map(award => award.id));   
+    }
+  }
 }
 
 export function getAwardAsField(id, award)
