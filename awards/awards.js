@@ -321,10 +321,7 @@ export async function getAwardCount(member) //TODO award count cross-servers
 {
   var collection = await getAwardsCollection(member.guild);
   var awards = await collection.get();
-  return awards.docs.filter(function (award) {
-    console.log({award:award.data()});
-return award.data().earned != null && award.data().earned[member.id] != undefined;
-  } ).length;
+  return awards.docs.filter((award) => award.data().earned != null && award.data().earned[member.id] != undefined).length;
 }
 
 export async function getAwardNominationsCount(awardDoc, member) 
