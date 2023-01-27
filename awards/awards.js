@@ -302,12 +302,15 @@ export async function getAwardDocument(guild, emoji)
 {
   return (await getAwardsCollection(guild)).doc(emoji);
 }
-export async function getAwardDisplayName(doc) 
+async function getAwardData(awardDoc)
 {
   var snapshot = await doc.get();
-  var title = snapshot.data().title;
-  var description = snapshot.data().description;
-  return `${doc.id} ***${title}*** -  ${description}`;
+  return snapshot.data();
+}
+export async function getAwardDisplayName(doc) 
+{
+  var data = await getAwardData();
+  return `${doc.id} ***${data.title}*** -  ${data.description}`;
 }
 export async function hasAward(awardDoc, member) 
 {
