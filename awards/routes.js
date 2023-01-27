@@ -46,7 +46,11 @@ export async function leaderboardOBS(req,res,next)
 export async function editor(req,res,next)
 {
   var awards = await getAwardsDatabase(req.guild);
-  awards = awards.docs.map(doc => doc.data());
+  awards = awards.docs.map(function(doc) {
+    var d = doc.data();
+    d.emoji = doc.id;
+    return d;
+  });
   await res.render("awards_editor", { awards });
   next();
 }

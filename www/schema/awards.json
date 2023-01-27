@@ -6,8 +6,11 @@
           "type": "object",
           "title": "Award",
           
-          "required": ["title", "description"],
+          "required": ["emoji", "title", "description"],
           "properties": {
+            "emoji": {
+              "type": "string"
+            },
             "title": {
               "type": "string"
             },
