@@ -170,7 +170,7 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
     messages.forEach(award => 
     {
       var emoji = getAwardEmoji(award);
-      var name = getAwardName(award);
+      var title = getAwardName(award);
       var awardData = {
         emoji:emoji,
         title:title,
