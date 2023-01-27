@@ -462,7 +462,7 @@ async function updateAwardPosts(awardChannel)
     }
 
     var data = awards.docs[i].data();
-    postData.embeds[currentEmbedIndex].fields.push(getAwardAsField(awards.docs[i], data));
+    postData.embeds[currentEmbedIndex].fields.push(getAwardAsField(awards.docs[i].id, data));
   }
 
   await awardPost.edit(postData);
