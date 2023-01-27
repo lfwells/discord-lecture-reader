@@ -382,11 +382,11 @@ export async function nominateForAward(interaction, awardDoc, member, nominatedB
 }
 
 export async function getAwardCanNominate(award) {
-  return true;
+  return (await getAwardData(award)).canNominate ?? true;
 }
 export async function getAwardRequiredNominations(award) {
-  return 2;
+  return (await getAwardData(award)).requiredNominations ?? 2;
 }
 export async function getAwardAutoPop(award) {
-  return true;
+  return (await getAwardData(award)).autoPop ?? true;
 }
