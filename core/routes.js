@@ -87,7 +87,7 @@ function guildRouter()
     router.use(guild.loadGuildProperty("todoChannelID"));
     router.use(guild.loadGuildProperty("todoEmoji"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
-    router.use(guild.loadGuildProperty("myloOrgID"));
+    router.use(guild.loadGuildProperty("myLOOrgID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
     router.use(guild.loadGuildProperty("feature_attendance"));

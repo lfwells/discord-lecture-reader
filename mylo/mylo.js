@@ -2,7 +2,7 @@ import { getStudent, isStudentMyLOConnected } from "../student/student.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { scopeMyLOConnect } from '../core/login.js';
 import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
-import { getGuildDocument } from "../guild/guild.js";
+import { getGuildDocument, getGuildProperty } from "../guild/guild.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
 
 async function getMyLODataDoc(guild, key) { return (await getGuildDocument(guild.id)).collection("mylo").doc(key); }
@@ -40,7 +40,7 @@ export async function postChannelThreads(res, channel, forumChannel, root, singl
             res.write(`Creating thread: ${topic.Title}\n`);
 
             var message = {
-                content: getMyLOContentLink(topic)
+                content: await getMyLOContentLink(topic, channel.guild)
             };
 
             var newThread = forumChannel ? await channel.threads.create({
@@ -72,13 +72,13 @@ export async function postChannelLinks(res, channel, forumChannel, root, singleL
             res.write(`Creating message: ${topic.Title}\n`);
 
             var message = {
-                //content: `**${getModuleTitle(module.Title)} - ${topic.Title}**\n${getMyLOContentLink(topic)}`
+                //content: `**${getModuleTitle(module.Title)} - ${topic.Title}**\n${await getMyLOContentLink(topic, channel.guild)}`
                 embeds:[
                     {
                         title:singleLevel ? 
                             `${topic.Title}` :
                             `${getModuleTitle(root.Title)} - ${topic.Title}`,
-                        description:`${getMyLOContentLink(topic)}`
+                        description:`${await getMyLOContentLink(topic, channel.guild)}`
                     }
                 ]
             };
@@ -144,10 +144,9 @@ export async function postChannelsWithLinks(res, category, forumChannel, root)
     return await createChannels(res, category, root, forumChannel, postChannelLinks);
 }
 
-export function getMyLOContentLink(item)
+export async function getMyLOContentLink(item, guild)
 {
-    //TODO: orgID
-    let OrgID = 505363;
+    let OrgID = await getGuildProperty("myLOOrgID", guild);
     if (item.Type == 0)
         return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.Id}`;
     else if (item.Type == 1)
