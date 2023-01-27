@@ -271,6 +271,10 @@ export async function getAwardDisplayName(doc)
   var description = snapshot.data().description;
   return `${doc.id} ***${title}*** -  ${description}`;
 }
+export async function hasAward(awardDoc, member) 
+{
+  return false;//TODO
+}
 
 export async function getAwardNominationsCount(awardDoc, member) 
 {
@@ -278,10 +282,18 @@ export async function getAwardNominationsCount(awardDoc, member)
   var nominations = snapshot.data().nominations ?? {};
   return nominations[member.id]?.length ?? 0;
 }
-export async function nominateForAward(awardDoc, member, nominatedByMember) 
+export async function nominateForAward(interaction, awardDoc, member, nominatedByMember) 
 {
+  var nominatedSelf = member.id == interaction.member.id;
+
+  if (!(await getAwardCanNominate(awardDoc))) return { message: "Nominations have been disabled for this award.", success: false };
+  if (await hasAward(awardDoc, member)) return { message: nominatedSelf ? 
+      "You already have this award." :
+      "This user already has this award.",
+    success: false };
+
   var snapshot = await awardDoc.get();
-  var nominations = snapshot.data().nominations ?? {};
+  var nominations = snapshot.data()?.nominations ?? {};
   if (nominations[member.id] == undefined) nominations[member.id] = [];
   if (nominations[member.id].indexOf(nominatedByMember.id) == -1)
   {
@@ -291,4 +303,42 @@ export async function nominateForAward(awardDoc, member, nominatedByMember)
       nominations
     }, { merge: true });
   }
+  else
+  {
+    return { message: nominatedSelf ? 
+      "You've already nominated yourself for this award." : 
+      "You've already nominated this person for this award.", 
+    success: false };
+  }
+
+  //now time to check if they have enough nominations
+  var nominationsCount = await getAwardNominationsCount(awardDoc, member);
+  var requiredCount = await getAwardRequiredNominations(awardDoc);
+  if (nominationsCount >= requiredCount)
+  {
+    if (await getAwardAutoPop(awardDoc))
+    {
+      //note success is false if nominatedSelf, we don't need the "nominated self" popup, I don't think
+      return { message: "Nomination recieved. The award has been given automatically as enough nominations have been recieved.", success: nominatedSelf == false, pop: true };
+    }
+    else
+    {
+      //TODO: a list of awards with enough nominations
+      return { message: "Nomination recieved. This award can't be automatically given out, so admin will verify this nomination and give the award later.", success: true, pop: false };
+    }
+  }
+  else
+  {
+    return { message: `Nomination recieved. ${pluralize(requiredCount, "nomination")} needed for this award.`, success: true, pop: false };
+  }
+}
+
+export async function getAwardCanNominate(award) {
+  return true;
+}
+export async function getAwardRequiredNominations(award) {
+  return 2;
+}
+export async function getAwardAutoPop(award) {
+  return true;
 }

@@ -1,6 +1,6 @@
 import { send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
@@ -323,74 +323,40 @@ async function doNomCommand(interaction)
 
     var emoji = interaction.options.getString("award");//interaction.options[1].value;
 
-    await interaction.deferReply();
-
+    await interaction.deferReply({ephemeral: true});
 
     //if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
     {
-        
-        var awardChannel = await getAwardChannel(interaction.guild);
-
         var award = await getAwardDocument(interaction.guild, emoji);
-        if (award)
+        if ((await award.get()).exists)
         {
-            await nominateForAward(award, member, interaction.member);
+            var result = await nominateForAward(interaction, award, member, interaction.member);
 
-            return await interaction.editReply({
-                embeds:[{
-                    title: (nominatedSelf ? `${member.displayName} nominated themselves for ` : `${interaction.member.displayName} nominated ${member.displayName} for `)+(await getAwardDisplayName(award)),
-                    description: `${pluralize(await getAwardNominationsCount(award, member), "Nomination")}`
-                }]
-            })
+            await interaction.editReply({content: result.message});
 
-            var achievementEmbed = await giveAward(interaction.guild, award, member); 
-            await interaction.editReply({ embeds: [ achievementEmbed ] });
-            //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
+            if (result.success)
+            {
+                await interaction.channel.send({
+                    embeds:[{
+                        title: (nominatedSelf ? `${member.displayName} nominated themselves for ` : `${interaction.member.displayName} nominated ${member.displayName} for `)+(await getAwardDisplayName(award)),
+                        description: `${pluralize(await getAwardNominationsCount(award, member), "Nomination")} made for this user. ${pluralize(await getAwardRequiredNominations(award), "Nomination")} required.`
+                    }]
+                })
+            }
+
+            if (result.pop)
+            {
+                var achievementEmbed = await giveAward(interaction.guild, award, member); 
+                await interaction.editReply({ embeds: [ achievementEmbed ] });
+                //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
+            }
         }
         else
         {
-            //new award
-            if (award_text)
-            {
-                award_text = "***"+award_text+"***";
-                if (description)
-                {
-                    award_text = award_text + " --- " + description;
-                }
-
-                await send(awardChannel, emoji+" "+award_text+"\n<@"+member.id+">");
-
-                var awardCount = Object.keys(await getAwardList(interaction.guild, member)).length;
-                var awardNameForShow = award_text;
-                if (awardNameForShow.lastIndexOf("*") > 0)
-                    awardNameForShow = awardNameForShow.substring(0, awardNameForShow.lastIndexOf("*")).replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "").replace("*", "");
-                if (awardNameForShow.length > 32)
-                    awardNameForShow = awardNameForShow.substring(0, 32)+"...";
-                showText({ guild: interaction.guild }, { text: baseName(member.displayName)+" earned\n"+emoji+" "+awardNameForShow+"!", style:"yikes" });     
-                
-                var achievementEmbed = {
-                    title:  baseName(member.displayName) + " just earned "+emoji+" "+award_text+"!",
-                    description: "(Brand new award 🤩!)\n<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+"."
-                };
-                await interaction.editReply({ embeds: [ achievementEmbed ]});
-            }
-            else
-            {
-                interaction.user.send("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)");
-                //interaction.editReply("No award found for "+emoji+" make sure to set an award text to go with it (yes this is also sometimes shown in error)", {ephemeral:true});
-
-                await interaction.deleteReply();
-            }
+            await interaction.editReply({content: "That award doesn't exist. Check the emoji correctly. Note that some emojis just don't work for this, if you think this is in error, please contact admin."});
         }
     
     }
-    /*else
-    {
-        interaction.user.send("You don't have permission to `/award` achievements. You can suggest an award to your UC though!");
-        //interaction.editReply("You don't have permission to /award achievements. You can suggest an award to Lindsay or Ian though!", {ephemeral:true}); 
-        
-        await interaction.deleteReply();
-    }*/
 }
 
 async function doLeaderboardCommand(interaction)
