@@ -33,6 +33,7 @@ export const DEFAULT_GUILD_PROPERTIES = {
     feature_attendance: true,
     feature_analytics: true,
     todoEmoji:"🎗️",
+    useNewAwardsSystem: true,
     awardsDefaultRequiredNominations: 1,
     awardsDefaultCanNominate: true,
     awardsDefaultAutoPop: true
