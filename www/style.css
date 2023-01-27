@@ -577,3 +577,7 @@
             color: #7289DA;
             font-weight: bold;
         }
+
+        label > span:empty {
+            display:none;
+        }

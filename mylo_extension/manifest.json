@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "UTAS Bot MyLO Integration",
+    "description": "Configure and support the UTAS Bot using MyLO",
+    "version": "1.0",
+    "icons":{
+        "128":"icon128.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_icon": {
+          "128": "icon128.png"
+        },
+        "default_popup": "popup.html"
+    },
+    "permissions": ["tabs", "activeTab", "scripting"],
+    "host_permissions": [
+        "https://mylo.utas.edu.au/*"
+    ]
+  }

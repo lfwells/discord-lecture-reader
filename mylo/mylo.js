@@ -2,6 +2,162 @@ import { getStudent, isStudentMyLOConnected } from "../student/student.js";
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { scopeMyLOConnect } from '../core/login.js';
 import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
+import { getGuildDocument, getGuildProperty } from "../guild/guild.js";
+import { ROBO_LINDSAY_ID } from "../core/config.js";
+
+async function getMyLODataDoc(guild, key) { return (await getGuildDocument(guild.id)).collection("mylo").doc(key); }
+export async function storeMyLOData(guild, data)
+{
+    //data = { structure: data };
+    //data = data.map((item) => item.Title);
+    var keys = Object.keys(data);
+    for (var key of keys)
+    {
+        console.log({key});
+        let document = await getMyLODataDoc(guild, key);
+        await document.set({data:data[key]});
+    }
+    return "Upload Complete";
+}
+export async function getMyLOData(guild, key)
+{
+    let document = await getMyLODataDoc(guild, key);
+    return await document.get();
+}
+
+//TODO: implement all link generators
+export async function postChannelThreads(res, channel, forumChannel, root, singleLevel) 
+{    
+    var messages = [];
+    if (root.Structure)
+    {
+        if (forumChannel)
+        {
+            root.Structure.reverse();
+        }
+        for (var topic of root.Structure)
+        {
+            res.write(`Creating thread: ${topic.Title}\n`);
+
+            var message = {
+                content: await getMyLOContentLink(topic, channel.guild)
+            };
+
+            var newThread = forumChannel ? await channel.threads.create({
+                name: topic.Title,
+                message
+            }) :  await channel.threads.create({
+                name: topic.Title
+            });
+            if (forumChannel)
+            {
+                messages.push(newThread);
+            }
+            else
+            {
+                var newMessage = newThread.send(message);
+                messages.push(newMessage);
+            }
+        }
+    }
+    return messages;
+}
+export async function postChannelLinks(res, channel, forumChannel, root, singleLevel) 
+{ 
+    var messages = [];
+    if (root.Structure)
+    {
+        for (var topic of root.Structure)
+        {
+            res.write(`Creating message: ${topic.Title}\n`);
+
+            var message = {
+                //content: `**${getModuleTitle(module.Title)} - ${topic.Title}**\n${await getMyLOContentLink(topic, channel.guild)}`
+                embeds:[
+                    {
+                        title:singleLevel ? 
+                            `${topic.Title}` :
+                            `${getModuleTitle(root.Title)} - ${topic.Title}`,
+                        description:`${await getMyLOContentLink(topic, channel.guild)}`
+                    }
+                ]
+            };
+
+            var newMessage = channel.send(message);
+            messages.push(newMessage);
+        }
+    }
+    return messages;
+}
+function getModuleTitle(title)
+{
+    title = title.split(" - ")[0];
+    return title;
+}
+async function createChannels(res, category, root, forumChannel, doWithChannel)
+{
+    let everyoneRole = category.guild.roles.cache.find(r => r.name === '@everyone');
+
+    var messages = [];
+    for (var module of root.Structure)
+    {
+        if (module.Type == 0)
+        {
+            let title = getModuleTitle(module.Title);
+            title = title.replace(/[^\w\s]/gi, '').replaceAll(" ", "-").toLowerCase();
+            res.write(`Creating module channel: ${title}\n`);
+
+            var newChannel = await category.createChannel(title, {
+                type: forumChannel ? 15 : 0, 
+                permissionOverwrites: [
+                    {
+                      id: everyoneRole.id,
+                      deny: ['SEND_MESSAGES', 'CREATE_PUBLIC_THREADS', 'CREATE_PRIVATE_THREADS'],
+                   },
+                   {
+                     id: ROBO_LINDSAY_ID,
+                     allow: ['SEND_MESSAGES', 'CREATE_PUBLIC_THREADS', 'CREATE_PRIVATE_THREADS'],
+                  },
+                ],
+            });
+            
+            var newMessages = await doWithChannel(res,newChannel,forumChannel,module);
+            messages.push(...newMessages);
+        }
+    }
+    return messages;
+}
+export async function deleteCategoryChannels(res, category)
+{
+    for await (var c of Array.from(category.children.values()))
+    {
+        res.write(`\tDeleting ${c.name}.\n`);
+        await c.delete();
+    }
+}
+export async function postChannelsWithThreads(res, category, forumChannel, root) 
+{ 
+    return await createChannels(res, category, root, forumChannel, postChannelThreads);
+}
+export async function postChannelsWithLinks(res, category, forumChannel, root) 
+{  
+    return await createChannels(res, category, root, forumChannel, postChannelLinks);
+}
+
+export async function getMyLOContentLink(item, guild)
+{
+    let OrgID = await getGuildProperty("myLOOrgID", guild);
+    if (item.Type == 0)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.Id}`;
+    else if (item.Type == 1)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.Id}/View`;
+    
+}
+
+//-------------------------------------------------------------
+//everything after here is the old (unapproved) mylo connection
+//-------------------------------------------------------------
+
 /*
 TODO: 
 - /mylo disconnect

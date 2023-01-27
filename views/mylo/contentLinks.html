@@ -1,0 +1,82 @@
+<%- include('../header.html') %>
+
+<h2>Generate MyLO Content Links</h2>
+<%
+function printModule(module, level)
+{
+    %>
+    <option value="<%=module.Id%>">
+        <%for (var i = 0; i < level; i++) { %><%="    "%><%} %><%=module.Title%>
+        <% if (module.Structure)
+        {
+            var newLevel = level + 1; 
+            module.Structure
+                .filter((module) => module.Type == 0)
+                .forEach((module) => printModule(module, newLevel));
+        }
+        %>
+    </option>
+    <% 
+}
+%>
+<form method="post">
+    <div>
+        <label>Select Content Root: 
+            <select name="myloRoot">
+                <% locals.data.Structure.forEach((module) => printModule(module, 1)); %>
+            </select>
+        </label>
+    </div>
+
+    <h3>Channel-Based</h3>
+    <div>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelThreads",
+            text: "Post Topics as Threads",
+            isFormSubmit: true,
+        }) %>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelLinks",
+            text: "Post Topics as Links",
+            isFormSubmit: true,
+        }) %>
+        <%- include("../subViews/channelSelect.html", { 
+            selectDefaultText:"-- Select Target Channel --",
+            id: "channelID",
+        }) %>
+    </div>
+
+    <h3>Category-Based</h3>
+    <div>
+        <label><input type="checkbox" name="emptyCategory" /> Delete All Channels in Category First</label>
+    </div>
+    <div>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postForumChannelsWithThreads",
+            text: "Post as Forum Channels with Topic Threads",
+            isFormSubmit: true
+        }) %>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelsWithThreads",
+            text: "Post as Text Channels with Topic Threads",
+            isFormSubmit: true
+        }) %>
+        <%- include("../subViews/longBotCommandButton.html", 
+        { 
+            id: "postChannelsWithLinks",
+            text: "Post as Text Channels with Topic Links",
+            isFormSubmit: true
+        }) %>
+        <%- include("../subViews/channelCategorySelect.html", 
+        { 
+            selectDefaultText:"-- Select Target Category--", 
+            id: "categoryID"
+        }) %>
+    </div>
+</form>
+
+<%- include('../footer.html') %>

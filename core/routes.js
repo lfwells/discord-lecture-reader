@@ -87,6 +87,7 @@ function guildRouter()
     router.use(guild.loadGuildProperty("todoChannelID"));
     router.use(guild.loadGuildProperty("todoEmoji"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
+    router.use(guild.loadGuildProperty("myLOOrgID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
     router.use(guild.loadGuildProperty("feature_attendance"));
@@ -102,6 +103,7 @@ function guildRouter()
     router.use(guild.loadGuildProperty("feature_showPostCount"));
     router.use(guild.loadGuildProperty("feature_showNextSession"));
     router.use(guild.loadGuildProperty("feature_showCurrentWeek"));
+    router.use(guild.loadGuildProperty("feature_mylo"));
 
 
     //TODO: this filterButtons could be expensive, I didn't realise!
@@ -226,6 +228,11 @@ function guildRouter()
     router.post("/classList/groups", loadClassList, classList_routes.uploadMyLOGroupsCSV, classList_routes.displayGroups); 
     router.post("/classList/groups/create", loadClassList, classList_routes.createGroup); 
 
+    //mylo
+    router.post("/mylo/data", mylo_routes.recieveMyLOData);
+    router.get("/mylo/content", mylo_routes.displayMyLOContent);
+    router.get("/mylo/content/links", mylo_routes.createMyLOLinks);
+    router.post("/mylo/content/links", mylo_routes.createMyLOLinksPost);
 
     return router;
 }

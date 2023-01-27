@@ -186,6 +186,13 @@
                             <%
                         }
                         %>
+                        <% if (hasFeature("mylo") )
+                        {
+                            %>
+                            <li><a <%=currentTab("mylo")%> href="/guild/<%= guild.id %>/mylo/content/links">MyLO Content</a></li>
+                            <%
+                        }
+                        %>
 
                         <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
 
