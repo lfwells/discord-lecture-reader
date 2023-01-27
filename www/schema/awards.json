@@ -23,18 +23,21 @@
             },
             "canNominate": {
               "type": "boolean",
-              "title": "Can Nomainate?",
-              "description": "Allow users to nominate themselves or others for this award."
+              "title": "Can Nominate?",
+              "description": "Allow users to nominate themselves or others for this award.",
+              "default": true
             },
             "requiredNominations": {
               "type": "number",
               "title": "Required Nominations",
-              "description": "How many nominations must a user get before they either get the achievement, or admin are asked to review?"
+              "description": "How many nominations must a user get before they either get the achievement, or admin are asked to review?",
+              "default": 1
             },
             "autoPop": {
               "type": "boolean",
               "title": "Auto-Pop?",
-              "description": "Automatically award the achievement if required nominations are reached?"
+              "description": "Automatically award the achievement if required nominations are reached?",
+              "default": true
             }
           }
         }
