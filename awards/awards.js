@@ -309,17 +309,22 @@ async function getAwardData(awardDoc)
 }
 export async function getAwardDisplayName(doc) 
 {
-  var data = await getAwardData();
+  var data = await getAwardData(doc);
   return `${doc.id} ***${data.title}*** -  ${data.description}`;
 }
 export async function hasAward(awardDoc, member) 
 {
   var data = await getAwardData(awardDoc);
-  return data.earned[member.id] != undefined;
+  return data.earned != null && data.earned[member.id] != undefined;
 }
 export async function getAwardCount(member) //TODO award count cross-servers
 {
-  return 69; //TODO
+  var collection = await getAwardsCollection(member.guild);
+  var awards = await collection.get();
+  return awards.docs.filter(function (award) {
+    console.log({award:award.data()});
+return award.data().earned != null && award.data().earned[member.id] != undefined;
+  } ).length;
 }
 
 export async function getAwardNominationsCount(awardDoc, member) 
