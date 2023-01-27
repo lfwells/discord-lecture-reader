@@ -55,6 +55,7 @@ export default async function(client)
             required: false,
         }],
     };
+    
     const awardCommand = {
         name: 'award', 
         description: 'Gives an award to a user (admin only)',
@@ -85,6 +86,29 @@ export default async function(client)
             name: 'description',
             type: 'STRING', 
             description: 'The text to use for the description of the award (use only if creating a new award)',
+            required: false,
+        }],
+    }; 
+    const nomCommand = {
+        name: 'nom', 
+        description: 'Nominate a user to get an award. If enough nominations are given, the award may be awarded.',
+        //defaultPermission: true,
+        /*permissions: [
+            {
+                id: ,
+                type: 1,
+                permission: true
+            }
+        ],*/
+        options: [{
+            name: 'award',
+            type: 'STRING',
+            description: 'The emoji of the award',
+            required: true,
+        },{
+            name: 'user',
+            type: 'USER',
+            description: 'The user to nominate for the award (defaults to YOU)',
             required: false,
         }],
     }; 
@@ -125,6 +149,7 @@ export default async function(client)
             
         await registerCommand(guild, flexCommand);
         await registerCommand(guild, awardCommand2);
+        await registerCommand(guild, nomCommand);
         //await registerCommand(guild, awardNewCommand); 
         await registerCommand(guild, leaderboardCommand);
     });
