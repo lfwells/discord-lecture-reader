@@ -3,7 +3,7 @@ import { getClient, send } from "../core/client.js";
 import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
 import { beginStreamingRes } from "../core/server.js";
-import { pluralize } from "../core/utils.js";
+import { pluralize, redirectToWhereWeCameFrom } from "../core/utils.js";
 import e from "express";
 
 //todo: summary (public?) pages that list achievements?
@@ -190,5 +190,5 @@ export async function importAchievments(req,res,next)
   }
 
   await handleAwardNicknames(getClient(), await getAwardChannel(req.guild));
-  res.write(`Imported ${pluralize(awards.length, "award")}.`);
+  redirectToWhereWeCameFrom(req,res,`Imported ${pluralize(awards.length, "award")}.`);
 }
