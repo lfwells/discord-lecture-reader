@@ -13,12 +13,12 @@ function hasFeature(feature)
     { 
         label: "Achievements",
         feature: "achievements",
-        onChanged: '$("#achievementsFeature").toggle(value)',
+        onChanged: '$(".achievementsFeature").toggle(value)',
         featureHasTab: true
     }) %>
 </dt>
 
-    <dd id="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+    <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
      <%- include("subViews/channelSelect.html", 
         { 
             label: "Achievements Channel:",
@@ -28,6 +28,46 @@ function hasFeature(feature)
             onChangedURL: "setGuildProperty"
         }) %>
     </dd>
+    <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+        <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Use New Achievement System",
+                id: "setUseNewAwardsSystem",
+                value: locals.useNewAwardsSystem ? locals.useNewAwardsSystem : "true",
+                help:"true or false (too hard to make a checkbox right now)",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
+        <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Default Number of Required Nominations",
+                id: "setAwardsDefaultRequiredNominations",
+                value: locals.awardsDefaultRequiredNominations ? locals.awardsDefaultRequiredNominations : "1",
+                help:"How many nominations are required to either award/notify admin (used when not defined for an award)",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
+        <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Auto-award When Nominations Obtained by Default?",
+                id: "setAwardsDefaultAutoPop",
+                value: locals.awardsDefaultAutoPop ? locals.awardsDefaultAutoPop : "true",
+                help:"Used when not defined for an award",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
+        <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Allow Nominations for Awards by Default?",
+                id: "setAwardsDefaultCanNominate",
+                value: locals.awardsDefaultCanNominate ? locals.awardsDefaultCanNominate : "true",
+                help:"Used when not defined for an award",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
 
 
 <dt><%- include("subViews/featureSelect.html", 
@@ -86,7 +126,7 @@ function hasFeature(feature)
         }) %>
     </dd>
 
-    <dd>
+    <!--<dd>
         <%- include("subViews/guildSettingText.html", 
             { 
                 label: "TODOs Emoji (For tagging on mobile):",
@@ -95,7 +135,7 @@ function hasFeature(feature)
                 help:"You can paste from <a href='https://emojipedia.org/'>https://emojipedia.org/</a>.",
                 onChangedURL: "setGuildProperty"
             }) %>
-        </dd>
+        </dd>-->
     <dt><%- include("subViews/featureSelect.html", 
         { 
             label: "Experimental Features",

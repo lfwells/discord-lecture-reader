@@ -1,0 +1,47 @@
+{
+
+        "type": "array",
+        "title": "Awards",
+        "items":{
+          "type": "object",
+          "title": "Award",
+          
+          "required": ["emoji", "title", "description"],
+          "properties": {
+            "emoji": {
+              "type": "string",
+              "description": "Cannot be changed after first creation",
+              "title": "Award Emoji"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description"
+            },
+            "canNominate": {
+              "type": "boolean",
+              "title": "Can Nominate?",
+              "description": "Allow users to nominate themselves or others for this award.",
+              "default": true
+            },
+            "requiredNominations": {
+              "type": "number",
+              "title": "Required Nominations",
+              "description": "How many nominations must a user get before they either get the achievement, or admin are asked to review?",
+              "default": 1
+            },
+            "autoPop": {
+              "type": "boolean",
+              "title": "Auto-Pop?",
+              "description": "Automatically award the achievement if required nominations are reached?",
+              "default": true
+            }
+          }
+        }
+      
+  
+
+}

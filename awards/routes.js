@@ -1,7 +1,9 @@
-import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard } from "./awards.js";
-import { send } from "../core/client.js";
+import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel, useLegacyAwardsSystem } from "./awards.js";
+import { getClient, send } from "../core/client.js";
 import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
+import { beginStreamingRes } from "../core/server.js";
+import { pluralize } from "../core/utils.js";
 
 //todo: summary (public?) pages that list achievements?
 export async function namesTest(req,res,next) 
@@ -42,20 +44,67 @@ export async function leaderboardOBS(req,res,next)
   next();
 }
 
+
+export async function editor(req,res,next)
+{
+  var awards = await getAwardsDatabase(req.guild);
+  awards = awards.docs.map(function(doc) {
+    var d = doc.data();
+    d.emoji = doc.id;
+    return d;
+  });
+  await res.render("awards_editor", { awards });
+  next();
+}
+
+export async function editor_post(req,res,next)
+{
+  beginStreamingRes(res);
+
+  res.write("Updating Awards Database...\n");
+
+  for (var i = 0; i < req.body.length; i++)
+  {
+    res.write(`\tUpdating ${req.body[i].emoji} ${req.body[i].title}...`);
+    var id = req.body[i].emoji.trim();
+    delete req.body[i].emoji;
+    
+    var doc = await getAwardDocument(req.guild, id);
+    await doc.set(req.body[i], { merge: true });
+    res.write("Done\n");
+  }
+  res.write(`Updated ${pluralize(req.body.length, "award")}.\n`);
+
+  res.write(`Updating achievements channel...`);
+  await handleAwardNicknames(getClient(), await getAwardChannel(req.guild));
+  res.write("Done\n");
+  res.end();
+}
+
 export async function getAwardsData(req,res,next)
 {
     res.locals.awards = await getAwardListFullData(req.guild, req.classList);
     
+    var useLegacyAwards = await useLegacyAwardsSystem(req.guild);
     res.locals.checkAward = function(student, award)
     {
-      var complete = award.students.find(s => s.discordID == student.discordID);
-      if (complete)
+      var complete = false;
+      if (useLegacyAwards)
       {
-        return '<td title="'+award.name+'" class="pageResult complete">&nbsp;</td>';
+        complete = award.students.find(s => s.discordID == student.discordID);
       }
       else
       {
-        return '<td title="'+award.name+'" class="pageResult not_complete"><button onclick="award(\''+student.discordID+'\', \''+award.emoji+'\', this)">'+award.emoji+'</button></td>';
+        complete = Object.keys(award.earned ?? {}).indexOf(student.discordID) >= 0;
+      }
+
+      if (complete)
+      {
+        return '<td title="'+award.title+'" class="pageResult complete">&nbsp;</td>';
+      }
+      else
+      {
+        return '<td title="'+award.title+'" class="pageResult not_complete"><button onclick="award(\''+student.discordID+'\', \''+award.emoji+'\', this)">'+award.emoji+'</button></td>';
       }
     };
     next();
@@ -64,7 +113,7 @@ export async function getAwardsData(req,res,next)
 export async function displayAwards(req, res, next) 
 {
   console.log(res.locals.offTopicChannelID);
-    res.render("awards");
+    res.render("awards", { showAwardEditorButton: !(await useLegacyAwardsSystem(req.guild)) });
     next()
 }
 

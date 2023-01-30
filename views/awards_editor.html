@@ -1,0 +1,113 @@
+<%- include('header.html', { title: "Award Editor" }) %>
+
+  <div style="position:fixed; top:200; right:64; z-index: 9001; background-color: #1c1e20; padding:1em">
+    <button id='submit' style="font-size:larger">Save </button>
+  </div>
+  
+  <div id='editor_holder' class='medium-12 columns'></div>
+  
+  <script>
+    // This is the starting value for the editor
+    // We will use this to seed the initial editor 
+    // and to provide a "Restore to Default" button.
+    var starting_value = <%-JSON.stringify(locals.awards)%>;
+    
+    // Initialize the editor
+    var editor = new JSONEditor(document.getElementById('editor_holder'),{
+      // Enable fetching schemas via ajax
+      ajax: true,
+      
+      // The schema for the editor
+      schema: {
+        $ref: "/static/schema/awards.json",
+        theme: "bootstrap4",
+        template: "default"
+      },
+      
+      // Seed the form with a starting value
+      startval: starting_value,
+
+      no_additional_properties: true,
+      disable_array_delete_all_rows: true,
+      disable_array_delete_last_row: true,
+      disable_array_reorder: true,
+      disable_edit_json: false,
+      disable_properties : false,
+      disable_collapse: true,
+      array_controls_top: true,
+      enable_array_copy: true,
+      object_layout:"grid"
+    });
+    
+    // Hook up the submit button to log to the console
+    var resultWindow;
+    document.getElementById('submit').addEventListener('click',function() 
+    {
+      // Get the value from the editor
+      var DATA = editor.getValue();
+
+      console.log(DATA);
+
+      //make a popup to display the output
+      if (resultWindow) resultWindow.close();
+      resultWindow = window.open("", "Saving Awards...", "width=650,height=600");
+      try
+      {
+        resultWindow.document.querySelector('pre').remove();
+      } catch (e) {}
+      resultWindow.document.write("<html><head><title>Saving Awards...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
+
+      //TODO: turn this into a client-side util?
+      var last_response_len  = false;
+      $.ajax({
+          method:"post",
+          contentType: 'application/json',
+          data: JSON.stringify(DATA),
+          xhrFields: {
+              onprogress: function(e)
+              {
+                  var this_response, response = e.currentTarget.response;
+                  if(last_response_len === false)
+                  {
+                      this_response = response;
+                      last_response_len = response.length;
+                  }
+                  else
+                  {
+                      this_response = response.substring(last_response_len);
+                      last_response_len = response.length;
+                  }
+                  console.log(this_response);
+                  resultWindow.document.write(this_response);
+              },
+              success: function(data)
+              {
+                resultWindow.document.write("</pre>");
+              }
+          },
+      });
+    });
+    
+    // Hook up the validation indicator to update its 
+    // status whenever the editor changes
+    editor.on('change',function() {
+      // Get an array of errors from the validator
+      var errors = editor.validate();
+      
+      var indicator = document.getElementById('valid_indicator');
+      
+      // Not valid
+      if(errors.length) {
+        indicator.className = 'label alert';
+        indicator.textContent = 'not valid';
+      }
+      // Valid
+      else {
+        indicator.className = 'label success';
+        indicator.textContent = 'valid';
+      }
+    });
+  </script>
+
+
+<%- include('footer.html') %>
