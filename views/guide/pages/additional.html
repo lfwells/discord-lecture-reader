@@ -21,6 +21,12 @@ function guideTabLink(text, link)
     });
 }
 %>
+
+<script>
+    //avoiding quote problems...
+    var rules = "#rules";
+    var description = "#description";
+</script>
        
         <a>
             <h2>Additional Server Set Up Steps (~15 minutes)</h2>
@@ -39,7 +45,7 @@ function guideTabLink(text, link)
                 { 
                     text: "Get Bot to Post Rules",
                     url: "postRules",
-                    data: '{ rulesText: $("#rules").val() }'
+                    data: "{ rulesText: $(rules).val() }"
                 }) %></p>
                 
             <p>The text above can paste directly into Discord, and the emoji should appear. You may like to adjust these rules:</p>
@@ -84,7 +90,7 @@ function guideTabLink(text, link)
                     { 
                         text: "Get Bot to Configure a Basic Welcome Screen",
                         url: "configureWelcomeScreen",
-                        data: '{ description: $("#description").val() }'
+                        data: '{ description: $(description).val() }'
                     }) %>
                 </p><%
             }
