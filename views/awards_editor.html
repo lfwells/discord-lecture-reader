@@ -1,5 +1,10 @@
 <%- include('header.html', { title: "Award Editor" }) %>
 
+  <div>Use the form below to add/edit/delete awards. You can also try and import awards from a previous delivery, by pasting the entire content of the achievements channel in here (names, timestamps etc will be automatically stripped)</div>
+  <form action="editor/import" method="post">
+    <textarea name="paste"></textarea> Title/Desc Delimeter: <input type="text" name="titleAndDescriptionDelim" value=" -- " /><input type="submit" value="Import" />
+  </form>
+
   <div style="position:fixed; top:200; right:64; z-index: 9001; background-color: #1c1e20; padding:1em">
     <button id='submit' style="font-size:larger">Save </button>
   </div>

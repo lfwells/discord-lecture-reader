@@ -4,6 +4,7 @@ import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
 import { beginStreamingRes } from "../core/server.js";
 import { pluralize } from "../core/utils.js";
+import e from "express";
 
 //todo: summary (public?) pages that list achievements?
 export async function namesTest(req,res,next) 
@@ -156,4 +157,38 @@ export async function getGiveAward(req, res, next)
       }
     }
   }
+}
+
+export async function importAchievments(req,res,next)
+{
+  var titleAndDescriptionDelim = req.body.titleAndDescriptionDelim ?? "--";
+  var awards = req.body.paste.split("\n");
+
+  //var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
+  //var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
+  var reg = new RegExp(/[a-zA-Z0-9]/);
+
+  awards = awards.filter(element => reg.test(element[0]) == false && element[0] != " " && element[0] != "@" && element[0] != ":"  && element[0] != "—" && element[0] != "<"  && element[0] != ">"  && element[0] != "." && element[0] != "\r"  )
+  awards = awards.map((element) => { 
+    var firstSpace = element.indexOf(" ");
+    var secondHalf = element.substring(firstSpace).replace("---", "--");
+    secondHalf = secondHalf.split(titleAndDescriptionDelim);
+    return {
+      emoji: element.substring(0, firstSpace).trim(),
+      title: secondHalf[0].trim(),
+      description: secondHalf[1].trim()
+    }
+  });
+  
+  for (var i = 0; i < awards.length; i++)
+  {
+    var id = awards[i].emoji.trim();
+    delete awards[i].emoji;
+    
+    var doc = await getAwardDocument(req.guild, id);
+    await doc.set(awards[i], { merge: true });
+  }
+
+  await handleAwardNicknames(getClient(), await getAwardChannel(req.guild));
+  res.write(`Imported ${pluralize(awards.length, "award")}.`);
 }
