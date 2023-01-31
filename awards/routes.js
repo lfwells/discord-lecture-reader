@@ -90,6 +90,27 @@ export async function editor_post(req,res,next)
   res.end();
 }
 
+
+export async function noms(req,res,next)
+{
+  var collection = await getAwardsCollection(req.guild);
+  var awards = await collection.orderBy("title").get();
+  awards = awards.docs.map(function(doc) {
+    var d = doc.data();
+    d.emoji = doc.id;
+    return d;
+  });
+
+
+
+  await res.render("awards_noms", { 
+    awards,
+    classList: req.classList
+  });
+  next();
+}
+
+
 export async function getAwardsData(req,res,next)
 {
     res.locals.awards = await getAwardListFullData(req.guild, req.classList);
