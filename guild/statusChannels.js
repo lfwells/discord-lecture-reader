@@ -28,10 +28,23 @@ export async function init_status_channels(guild)
 		init_status_channel(guild, "nextSession", "showNextSession", async (guild) => {
 			var nextSession = await getNextSession(guild, "Lecture");
 			if (nextSession)
+			{
 				//return `📅 Next Lecture ${nextSession.startTimestamp.format("Do h:mm a")}`; 
 				return `📅  Lecture ${nextSession.startTimestamp.fromNow()}`; 
+			}
 			else
-				return `📅  No More Lectures :(`; 
+			{
+				var nextSession = await getNextSession(guild, "Lectorial");
+				if (nextSession)
+				{
+					//return `📅 Next Lecture ${nextSession.startTimestamp.format("Do h:mm a")}`; 
+					return `📅  Lectorial ${nextSession.startTimestamp.fromNow()}`; 
+				}
+				else
+				{
+					return `📅  No More Lectorials :(`; 
+				}
+			}
 		});
 		init_status_channel(guild, "currentWeek", "showCurrentWeek", async (guild) => {
 			var weekNumber = await getCurrentWeek(guild);
