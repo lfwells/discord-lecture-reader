@@ -387,23 +387,29 @@ export async function getAwardNominationsCount(awardDoc, member)
   var nominations = snapshot.data().nominations ?? {};
   return nominations[member.id]?.length ?? 0;
 }
-export async function nominateForAward(interaction, awardDoc, member, nominatedByMember) 
+export async function nominateForAward(interactionOrMessage, awardDoc, member, nominatedByMember, optionalMessageContext) 
 {
-  var nominatedSelf = member.id == interaction.member.id;
+  var type = interactionOrMessage.constructor.name;
+  var nominatedSelf = member.id == nominatedByMember.id;
 
-  if (!(await getAwardCanNominate(awardDoc, interaction.guild))) return { message: "Nominations have been disabled for this award.", success: false };
+  if (!(await getAwardCanNominate(awardDoc, interactionOrMessage.guild))) return { message: "Nominations have been disabled for this award.", success: false };
   if (await hasAward(awardDoc, member)) return { message: nominatedSelf ? 
       "You already have this award." :
       "This user already has this award.",
     success: false };
 
   var snapshot = await getAwardData(awardDoc);
-  var nominations = snapshot.data()?.nominations ?? {};
+  var nominations = snapshot?.nominations ?? {};
   if (nominations[member.id] == undefined) nominations[member.id] = [];
-  if (nominations[member.id].indexOf(nominatedByMember.id) == -1)
+  if (nominations[member.id].findIndex(e => e.nominatedBy == nominatedByMember.id) == -1)
   {
-    nominations[member.id].push(nominatedByMember.id);
+    nominations[member.id].push({
+      nominatedBy: nominatedByMember.id,
+      messageContext: interactionOrMessage.id,
+      type
+    });
 
+    if (awardDoc.data) awardDoc = awardDoc.ref;
     await awardDoc.set({
       nominations
     }, { merge: true });
@@ -418,10 +424,10 @@ export async function nominateForAward(interaction, awardDoc, member, nominatedB
 
   //now time to check if they have enough nominations
   var nominationsCount = await getAwardNominationsCount(awardDoc, member);
-  var requiredCount = await getAwardRequiredNominations(awardDoc, interaction.guild);
+  var requiredCount = await getAwardRequiredNominations(awardDoc, interactionOrMessage.guild);
   if (nominationsCount >= requiredCount)
   {
-    if (await getAwardAutoPop(awardDoc, interaction.guild))
+    if (type != "Message" && await getAwardAutoPop(awardDoc, interactionOrMessage.guild))
     {
       //note success is false if nominatedSelf, we don't need the "nominated self" popup, I don't think
       return { message: "Nomination recieved. The award has been given automatically as enough nominations have been recieved.", success: nominatedSelf == false, pop: true };

@@ -34,7 +34,7 @@ export default async function(client)
                 {
                     if (award.data().onlyNominateWhenPostInChannel ?? false)
                     {
-                        var nominationResult = await nominateForAward(null, award, msg.member, msg.member);
+                        var nominationResult = await nominateForAward(msg, award, msg.member, msg.member);
                         console.log({nominationResult});
                     }
                     else
