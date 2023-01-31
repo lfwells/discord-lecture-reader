@@ -16,6 +16,7 @@
     // We will use this to seed the initial editor 
     // and to provide a "Restore to Default" button.
     var starting_value = <%-JSON.stringify(locals.awards)%>;
+    var textChannels = <%-JSON.stringify(locals.textChannels)%>;
     
     // Initialize the editor
     var editor = new JSONEditor(document.getElementById('editor_holder'),{

@@ -23,49 +23,13 @@ export async function sessionPage(req, res)
 - bugfix and test the old analytics pages
 */
 
-
-
-    
     var sessions = await getGuildProperty("sessionsJSON", req.guild, {});
     console.log(sessions);
 
-    var channels = [];
-    var textChannels = [];
-
-    var categoryChannels = req.guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
-    categoryChannels.forEach(cat => {
-        var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
-        var filteredVoiceChannels = sortedChannels.filter((v) => v.type == "GUILD_VOICE");
-        var filteredTextChannels = sortedChannels.filter((v) => v.type == "GUILD_TEXT");
-        
-        channels.push(...filteredVoiceChannels.map((v,i) => {
-            var result = v;
-            result.category = cat.name;
-            return result;
-        }));
-        textChannels.push(...filteredTextChannels.map((v,i) => {
-            var result = v;
-            result.category = cat.name;
-            return result;
-        }));
-    });
-
-
-    channels.unshift({
-        id: "",
-        name: "Select Voice Channel -",
-        category: ""
-    });
-    textChannels.unshift({
-        id: "",
-        name: "Select Text Channel -",
-        category: ""
-    });
-
     res.render("sessions", {
         sessions: sessions,
-        channels: channels,
-        textChannels: textChannels
+        channels: req.channels,
+        textChannels: req.textChannels
     });
 }
 export async function sessionPagePost(req,res,next)

@@ -145,8 +145,8 @@ function guildRouter()
                     award_routes.displayAwards); 
     router.get("/awards/giveAward", 
                     award_routes.getGiveAward); 
-    router.get("/awards/editor", award_routes.editor); 
-    router.post("/awards/editor", award_routes.editor_post); 
+    router.get("/awards/editor", loadChannels, award_routes.editor); 
+    router.post("/awards/editor", loadChannels, award_routes.editor_post); 
     router.post("/awards/editor/import", award_routes.importAchievments, award_routes.editor); 
                     
     router.get("/leaderboard/", loadClassList, award_routes.leaderboard); 
@@ -211,10 +211,10 @@ function guildRouter()
        
     //scheduled_events
     router.get("/schedule_test", schedule_test);
-    router.get("/sessions", attendance_routes.sessionPage);
-    router.post("/sessions", attendance_routes.sessionPagePost);
-    router.get("/sessions/deleteAll", attendance_routes.deleteAllEvents);
-    router.get("/sessions/obs", attendance_routes.nextSessionOBS);
+    router.get("/sessions", loadChannels, attendance_routes.sessionPage);
+    router.post("/sessions", loadChannels, attendance_routes.sessionPagePost);
+    router.get("/sessions/deleteAll", loadChannels, attendance_routes.deleteAllEvents);
+    router.get("/sessions/obs", loadChannels, attendance_routes.nextSessionOBS);
 
     //pptx
     router.get("/pptx", pptx_routes.parse_pptx_page); 
@@ -244,6 +244,48 @@ function guildRouter()
     return router;
 }
 
+async function loadChannels(req,res,next)
+{
+
+    var channels = [];
+    var textChannels = [];
+
+    var categoryChannels = req.guild.channels.cache.filter(channel => channel.type === "GUILD_CATEGORY").sort((a,b) => a.position - b.position);
+    categoryChannels.forEach(cat => {
+        var sortedChannels = cat.children.sort((a,b) => a.position - b.position);
+        var filteredVoiceChannels = sortedChannels.filter((v) => v.type == "GUILD_VOICE");
+        var filteredTextChannels = sortedChannels.filter((v) => v.type == "GUILD_TEXT");
+        
+        channels.push(...filteredVoiceChannels.map((v,i) => {
+            var result = v;
+            result.category = cat.name;
+            return result;
+        }));
+        textChannels.push(...filteredTextChannels.map((v,i) => {
+            var result = v;
+            result.category = cat.name;
+            return result;
+        }));
+    });
+
+
+    channels.unshift({
+        id: "",
+        name: "Select Voice Channel -",
+        category: ""
+    });
+    textChannels.unshift({
+        id: "",
+        name: "Select Text Channel -",
+        category: ""
+    });
+
+    req.channels = channels;
+    req.textChannels = textChannels;
+
+    next();
+}
+
 //this will just render out a page for us
 function basic_render(page, data)
 {
@@ -252,3 +294,4 @@ function basic_render(page, data)
         res.render(page, data);
     };
 }
+
