@@ -54,6 +54,12 @@
                   "title": "{{item.category}} - {{item.name}}"
                 }
               ]
+            },
+            "onlyNominateWhenPostInChannel": {
+              "type": "boolean",
+              "title": "Only Nominate When User Posts Channel",
+              "description": "Overrides default behaviour of auto-awarding when the user posts in the specified channel, to just creating a nomination.",
+              "default": false
             }
           }
         }
