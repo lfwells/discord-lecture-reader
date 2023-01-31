@@ -156,13 +156,6 @@
                             <%
                         }
                         %>
-                        <% if (hasFeature("sessions"))
-                        {
-                            %>
-                            <li><a <%=currentTab("sessions")%> href="/guild/<%= guild.id %>/sessions/">Sessions</a></li>
-                            <%
-                        }
-                        %>
 
                         <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
                         <% if (hasFeature("obs") && locals.lectureChannelID) { %>
