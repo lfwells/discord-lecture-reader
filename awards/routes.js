@@ -48,7 +48,7 @@ export async function leaderboardOBS(req,res,next)
 
 export async function editor(req,res,next)
 {
-  var collection = await getAwardsCollection(guild);
+  var collection = await getAwardsCollection(req.guild);
   var awards = await collection.orderBy("title").get();
   awards = awards.docs.map(function(doc) {
     var d = doc.data();
