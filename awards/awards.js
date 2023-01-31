@@ -472,7 +472,7 @@ async function updateAwardPosts(awardChannel)
   }
 
   var collection = await getAwardsCollection(guild);
-  var awards = await collection.get();
+  var awards = await collection.orderBy("title").get();
   var currentEmbedIndex = -1;
   var postData = { content:null, embeds: [] };
   for (var i = 0; i < awards.docs.length; i++)
