@@ -104,7 +104,8 @@ export async function noms(req,res,next)
 
 
   await res.render("awards_noms", { 
-    awards
+    awards,
+    classList: req.classList
   });
   next();
 }

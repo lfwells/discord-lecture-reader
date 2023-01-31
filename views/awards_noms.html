@@ -1,4 +1,4 @@
-<%- include('header.html', { title: "Awards" }) %>
+<%- include('header.html', { title: "Award Nominations" }) %>
 <style>
 .pageResult {
   width:2px;
@@ -75,27 +75,54 @@ function award(studentDiscordID, emoji, button)
 </div>
 <style>
     .desc { font-size: smaller; margin-left:4ex; font-weight:normal !important; }
+    .nom_table { margin-left:4ex; font-weight:normal !important; }
+    .nom_table td { padding:1em !important; }
+    .nom_table th, .nom_table td { min-width:200px; text-align: center;}
 </style>
 
 <%
-//filter(award => (award.nomimations?.length ?? 0) != 0)
-locals.awards.filter(award => award.nominations != null && Object.entries(award.nominations).length > 0).forEach(function(award)
-{ 
-    console.log(award);
-    %>
-    <h3><%=award.emoji%> <%=award.title%><br/><span class="desc"><%=award.description%></span></h3>
-    
-    <ul>
-        <%
-        Object.entries(award.nominations).forEach(function(nomination)
-        {
-            %><li>
-                <%=nomination[0]%>
-            </li><%
-        });
+locals.awards = locals.awards.filter(award => award.nominations != null && Object.entries(award.nominations).length > 0)
+locals.awards.forEach(award => award.nominations = Object.fromEntries(Object.entries(award.nominations).filter(nom => locals.classList.find(s => s.discordID == nom[0]) != undefined)));
+
+
+locals.awards
+    .filter(award => award.nominations != null && Object.entries(award.nominations).length > 0)
+    .forEach(function(award)
+    { 
         %>
-    </ul><%
-});
+        <h3><%=award.emoji%> <%=award.title%><br/><span class="desc"><%=award.description%></span></h3>
+
+        <table class="nom_table">
+            <thead>
+                <tr>
+                    <th>Nominee</th>
+                    <th>Nominated By</th>
+                    <th>Award</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+            Object.entries(award.nominations).forEach(function(nomination)
+            {
+                %><tr>
+                    <th><%=locals.classList.find(s => s.member.id == nomination[0]).discordName %></th>
+                    <td><%-nomination[1].map(function(info){
+                        if (info.type == "Message")
+                        {
+                            return '<a href="'+info.messageUrl+'">Message Link</a>';
+                        }
+                        else
+                        {
+                            return locals.classList.find(s => s.member.id == info.nominatedBy)?.discordName ?? "Unknown";
+                        }
+                    }).join("<br />")%></td>
+                    <td><button>Give Award</button></td>
+                </tr><%
+            });
+            %>
+            </tbody>
+        </table><%
+    });
 %>
 
 <%- include('footer.html') %>
