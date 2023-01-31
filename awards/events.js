@@ -1,11 +1,12 @@
 import { getClient, send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField, getAwardsDatabase, getAwardsCollection, awardExists } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField, getAwardsDatabase, getAwardsCollection, awardExists, hasAward } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { hasFeature } from '../guild/guild.js';
 import { registerCommand } from '../guild/commands.js';
 import { setGuildContextForInteraction } from "../core/errors.js";
+import { ROBO_LINDSAY_ID } from "../core/config.js";
 
 export default async function(client)
 {
@@ -18,6 +19,23 @@ export default async function(client)
             //detect update to awards (add)
             console.log("message added in achievements channel");
             handleAwardNicknames(client, msg.channel);
+        }
+
+        if (msg.author.id != ROBO_LINDSAY_ID)
+        {
+            //also, we can check for posts in an auto-pop channel
+            var awards = await getAwardsDatabase(msg.guild);
+            var awardsForThisChannel = awards.docs.filter(award => award.data().autoPopChannel == msg.channel.id);
+            
+            //TODO alow for just nominations instead of autopop, for now just autopop
+            for (var award of awardsForThisChannel)
+            {
+                if (await hasAward(award, msg.member) == false)
+                {
+                    var achievementEmbed = await giveAward(msg.guild, award, msg.member);
+                    msg.channel.send({embeds:[achievementEmbed]});
+                }
+            }
         }
     });
 
