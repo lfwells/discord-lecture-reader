@@ -30,7 +30,7 @@
     "cors": "^2.8.5",
     "csv-parse": "^5.3.0",
     "csvtojson": "^2.0.10",
-    "discord-chat-preview": "^1.0.0",
+    "discord-chat-preview": "https://github.com/lfwells/discord-chat-preview",
     "discord-oauth2": "^2.7.1",
     "discord.js": "https://github.com/discordjs/discord.js#v13",
     "ejs": "^3.1.6",
