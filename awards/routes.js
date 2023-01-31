@@ -54,7 +54,11 @@ export async function editor(req,res,next)
     d.emoji = doc.id;
     return d;
   });
-  await res.render("awards_editor", { awards });
+  await res.render("awards_editor", { 
+    awards,
+    textChannels: req.textChannels,
+    channels: req.channels
+  });
   next();
 }
 
