@@ -41,7 +41,7 @@
             },
             "autoPopChannel": {
               "title": "Auto-Award When User Posts In Channel",
-              "description": "Leave blank if physical location",
+              "description": "Can be overridden for nomination instead of auto-award.",
               "type": "string",
               "enumSource": [
                 {
@@ -57,7 +57,7 @@
             },
             "onlyNominateWhenPostInChannel": {
               "type": "boolean",
-              "title": "Only Nominate When User Posts Channel",
+              "title": "Only Nominate When User Posts In Channel",
               "description": "Overrides default behaviour of auto-awarding when the user posts in the specified channel, to just creating a nomination.",
               "default": false
             }
