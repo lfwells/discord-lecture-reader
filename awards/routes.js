@@ -1,4 +1,4 @@
-import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel, useLegacyAwardsSystem } from "./awards.js";
+import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel, useLegacyAwardsSystem, getAwardsCollection } from "./awards.js";
 import { getClient, send } from "../core/client.js";
 import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
