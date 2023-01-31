@@ -39,7 +39,7 @@ tr:hover, tr:hover button, tr:hover th {
 function award(studentDiscordID, emoji, button)
 {
     $.ajax({
-        url:"awards/giveAward",
+        url:"giveAward",
         data:{
             studentDiscordID:studentDiscordID,
             emoji:emoji,
@@ -55,7 +55,7 @@ function award(studentDiscordID, emoji, button)
             else
             {
                 var $button = $(button);
-                $button.parent("td").addClass("complete").removeClass("not_complete");
+                $button.parent("td").addClass("complete").removeClass("not_complete").text("Awarded!");
                 $button.remove();
             }
         }
@@ -116,7 +116,7 @@ locals.awards
                             return locals.classList.find(s => s.member.id == info.nominatedBy)?.discordName ?? "Unknown";
                         }
                     }).join("<br />")%></td>
-                    <td><button>Give Award</button></td>
+                    <td><button onclick="award('<%=nomination[0]%>', '<%=award.emoji%>', this)">Give Award</button></td>
                 </tr><%
             });
             %>
