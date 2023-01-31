@@ -40,7 +40,7 @@
               "default": true
             },
             "autoPopChannel": {
-              "title": "Auto-Award When User Posts Channel",
+              "title": "Auto-Award When User Posts In Channel",
               "description": "Leave blank if physical location",
               "type": "string",
               "enumSource": [
