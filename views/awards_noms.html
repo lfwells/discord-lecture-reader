@@ -82,7 +82,10 @@ function award(studentDiscordID, emoji, button)
 
 <%
 locals.awards = locals.awards.filter(award => award.nominations != null && Object.entries(award.nominations).length > 0)
-locals.awards.forEach(award => award.nominations = Object.fromEntries(Object.entries(award.nominations).filter(nom => locals.classList.find(s => s.discordID == nom[0]) != undefined)));
+locals.awards.forEach(award => award.nominations = Object.fromEntries(Object.entries(award.nominations)
+    .filter(nom => Object.keys(award.earned ?? {}).findIndex(earner => earner == nom[0]) == -1)
+    .filter(nom => locals.classList.find(s => s.discordID == nom[0]) != undefined))
+);
 
 
 locals.awards
