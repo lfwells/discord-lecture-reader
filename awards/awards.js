@@ -405,7 +405,7 @@ export async function nominateForAward(interactionOrMessage, awardDoc, member, n
   {
     nominations[member.id].push({
       nominatedBy: nominatedByMember.id,
-      messageContext: interactionOrMessage.id,
+      messageContext: interactionOrMessage.url,
       type
     });
 
