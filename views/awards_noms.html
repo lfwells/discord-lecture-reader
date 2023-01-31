@@ -64,28 +64,6 @@ function award(studentDiscordID, emoji, button)
 }
 </script>
 
-<div>
-  <a class="btn" href="<%=locals.showAwardEditorButton ? "awards/editor" : "#" %>">Award Editor</a> 
-  <a class="btn" href="<%=locals.showAwardEditorButton ? "awards/noms" : "#" %>">Award Nominations</a>
-  To use the Awards Editor, you need to enable the new awards system.
-</div>
-<div><% if (locals.showAwardEditorButton == false)
-  {
-    %>
-    <%- include("subViews/guildSettingText.html", 
-            { 
-                label: "Use New Achievement System",
-                id: "setUseNewAwardsSystem",
-                value: locals.useNewAwardsSystem ? locals.useNewAwardsSystem : "false",
-                help:"true or false (too hard to make a checkbox right now)",
-                onChangedURL: "setGuildProperty"
-            }) %>
-    <%
-  }
-  %>
-</div>
-
-<%- locals.classlistFilters() %>
 
 <div>
     <%- include("subViews/channelSelect.html", { 
@@ -95,36 +73,7 @@ function award(studentDiscordID, emoji, button)
         value: (typeof locals.offTopicChannelID != 'undefined' && locals.offTopicChannelID) ? locals.offTopicChannelID : "__DISCORD_BOT_NONE__"
     }) %>
 </div>
-<br/>
-<table border="1" cellpadding="0" cellspacing="0">
-    <tr class="header">
-      <th rowspan="2">Student</th>
-      <% 
-      locals.awards.forEach(function(award)
-      { 
-        %><th class="awardName">
-            <%= award.title.substring(0, 30) %>
-        </th><% 
-      }) %>
-    </tr>
-    <tr class="header">
-        <% locals.awards.forEach(function(award)
-        { 
-          %><th>
-              <%= award.emoji %>
-          </th><% 
-        }) %>
-      </tr>
-    <% locals.classList.forEach(function(student){ 
-      %>
-      <tr class="studentRow">
-        %><th class="studentName"><%= student.discordName %></th>  
-        <% locals.awards.forEach(function(award)
-        { 
-            %><%- locals.checkAward(student, award) %><%
-        }) %>
-      </tr>
-    <% }) %>
-  </table>
+
+TODO
 
 <%- include('footer.html') %>
