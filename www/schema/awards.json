@@ -38,7 +38,23 @@
               "title": "Auto-Pop?",
               "description": "Automatically award the achievement if required nominations are reached?",
               "default": true
-            }
+            },
+            "autoPopChannel": {
+              "title": "Auto-Award When User Posts Channel",
+              "description": "Leave blank if physical location",
+              "type": "string",
+              "enumSource": [
+                {
+                  "value": "",
+                  "title": "-- Select Channel --"
+                },
+                {
+                  "source": "textChannels",
+                  "value": "{{item.id}}",
+                  "title": "{{item.category}} - {{item.name}}"
+                }
+              ]
+            },
           }
         }
       
