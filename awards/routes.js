@@ -1,4 +1,4 @@
-import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel, useLegacyAwardsSystem } from "./awards.js";
+import { handleAwardNicknames, getAwardList, getAwardListFullData, giveAward, getAwardByEmoji, getLeaderboard, getAwardsDatabase, getAwardDocument, getAwardChannel, useLegacyAwardsSystem, getAwardsCollection } from "./awards.js";
 import { getClient, send } from "../core/client.js";
 import { configureWelcomeScreen } from "../guide/routes.js";
 import * as config from "../core/config.js";
@@ -48,13 +48,21 @@ export async function leaderboardOBS(req,res,next)
 
 export async function editor(req,res,next)
 {
-  var awards = await getAwardsDatabase(req.guild);
+  var collection = await getAwardsCollection(req.guild);
+  var awards = await collection.orderBy("title").get();
   awards = awards.docs.map(function(doc) {
     var d = doc.data();
     d.emoji = doc.id;
     return d;
   });
-  await res.render("awards_editor", { awards });
+
+
+
+  await res.render("awards_editor", { 
+    awards,
+    textChannels: req.textChannels,
+    channels: req.channels
+  });
   next();
 }
 

@@ -12,6 +12,8 @@ import { getAwardsData } from './routes.js';
 var unified_emoji_ranges = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;//['\ud83c[\udf00-\udfff]','\ud83d[\udc00-\ude4f]','\ud83d[\ude80-\udeff]'];
 var reg = new RegExp(unified_emoji_ranges);//.join('|'), 'g');
 
+var AWARDS_CACHE;
+
 //giant lindsayys off topic "821597975166976030"
 //kit109 IRL off topic "814020643711746068"
 export async function handleAwardNicknames(client, offtopiclistschannel)
@@ -191,7 +193,7 @@ export async function getAwardListFullData(guild, classList) //optionally get aw
   }
   else
   {
-    awards = await getAwardsDatabase(guild);
+    awards = await getAwardsDatabase(guild, true);
     for (var i in classList)
     {
       var student = classList[i];
@@ -266,10 +268,11 @@ export async function giveAward(guild, award, member)
   if (paramIsDoc(award))
   {
     var awardDoc = award;
-    var snapshot = await awardDoc.get();
-    var earned = snapshot.data()?.earned ?? {};
+    var snapshot = await getAwardData(awardDoc);
+    var earned = snapshot.earned ?? {};
     earned[member.id] = Date.now();
 
+    if (award.data) awardDoc = award.ref;
     await awardDoc.set({
       earned
     }, { merge: true });
@@ -338,10 +341,16 @@ export async function getAwardsCollection(guild)
 {
   return (await getGuildDocument(guild.id)).collection("awards");
 }
-export async function getAwardsDatabase(guild) {
-  var collection = await getAwardsCollection(guild);
-  var awards = await collection.get();
-  return awards;
+export async function getAwardsDatabase(guild, dontCache) 
+{
+  if (dontCache || !AWARDS_CACHE)
+  {
+    var collection = await getAwardsCollection(guild);
+    var awards = await collection.get();
+    AWARDS_CACHE = awards;
+    return awards;
+  }
+  return AWARDS_CACHE;
 }
 export async function getAwardDocument(guild, emoji)
 {
@@ -349,6 +358,8 @@ export async function getAwardDocument(guild, emoji)
 }
 async function getAwardData(awardDoc)
 {
+  if (awardDoc.data) return awardDoc.data();//is already a data object
+
   var snapshot = await awardDoc.get();
   return snapshot.data();
 }
@@ -360,6 +371,7 @@ export async function getAwardDisplayName(doc)
 export async function hasAward(awardDoc, member) 
 {
   var data = await getAwardData(awardDoc);
+  console.log({earned: data.earned});
   return data.earned != null && data.earned[member.id] != undefined;
 }
 //note the second param for caching
@@ -375,23 +387,29 @@ export async function getAwardNominationsCount(awardDoc, member)
   var nominations = snapshot.data().nominations ?? {};
   return nominations[member.id]?.length ?? 0;
 }
-export async function nominateForAward(interaction, awardDoc, member, nominatedByMember) 
+export async function nominateForAward(interactionOrMessage, awardDoc, member, nominatedByMember, optionalMessageContext) 
 {
-  var nominatedSelf = member.id == interaction.member.id;
+  var type = interactionOrMessage.constructor.name;
+  var nominatedSelf = member.id == nominatedByMember.id;
 
-  if (!(await getAwardCanNominate(awardDoc, interaction.guild))) return { message: "Nominations have been disabled for this award.", success: false };
+  if (!(await getAwardCanNominate(awardDoc, interactionOrMessage.guild))) return { message: "Nominations have been disabled for this award.", success: false };
   if (await hasAward(awardDoc, member)) return { message: nominatedSelf ? 
       "You already have this award." :
       "This user already has this award.",
     success: false };
 
-  var snapshot = await awardDoc.get();
-  var nominations = snapshot.data()?.nominations ?? {};
+  var snapshot = await getAwardData(awardDoc);
+  var nominations = snapshot?.nominations ?? {};
   if (nominations[member.id] == undefined) nominations[member.id] = [];
-  if (nominations[member.id].indexOf(nominatedByMember.id) == -1)
+  if (nominations[member.id].findIndex(e => e.nominatedBy == nominatedByMember.id) == -1)
   {
-    nominations[member.id].push(nominatedByMember.id);
+    nominations[member.id].push({
+      nominatedBy: nominatedByMember.id,
+      messageContext: interactionOrMessage.id,
+      type
+    });
 
+    if (awardDoc.data) awardDoc = awardDoc.ref;
     await awardDoc.set({
       nominations
     }, { merge: true });
@@ -406,10 +424,10 @@ export async function nominateForAward(interaction, awardDoc, member, nominatedB
 
   //now time to check if they have enough nominations
   var nominationsCount = await getAwardNominationsCount(awardDoc, member);
-  var requiredCount = await getAwardRequiredNominations(awardDoc, interaction.guild);
+  var requiredCount = await getAwardRequiredNominations(awardDoc, interactionOrMessage.guild);
   if (nominationsCount >= requiredCount)
   {
-    if (await getAwardAutoPop(awardDoc, interaction.guild))
+    if (type != "Message" && await getAwardAutoPop(awardDoc, interactionOrMessage.guild))
     {
       //note success is false if nominatedSelf, we don't need the "nominated self" popup, I don't think
       return { message: "Nomination recieved. The award has been given automatically as enough nominations have been recieved.", success: nominatedSelf == false, pop: true };
@@ -493,7 +511,7 @@ async function updateAwardPosts(awardChannel)
   await awardPost.edit(postData);
 
   //now do the actual nicknames...
-  var awardsDB = await getAwardsDatabase(guild);
+  var awardsDB = await getAwardsDatabase(guild, true);
   for (var member of Array.from(guild.members.cache.values())) {
     if (member.id == guild.ownerID) continue; //cannot modify guild owner nickname
 

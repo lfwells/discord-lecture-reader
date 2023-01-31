@@ -38,6 +38,28 @@
               "title": "Auto-Pop?",
               "description": "Automatically award the achievement if required nominations are reached?",
               "default": true
+            },
+            "autoPopChannel": {
+              "title": "Auto-Award When User Posts In Channel",
+              "description": "Can be overridden for nomination instead of auto-award.",
+              "type": "string",
+              "enumSource": [
+                {
+                  "value": "",
+                  "title": "-- Select Channel --"
+                },
+                {
+                  "source": "textChannels",
+                  "value": "{{item.id}}",
+                  "title": "{{item.category}} - {{item.name}}"
+                }
+              ]
+            },
+            "onlyNominateWhenPostInChannel": {
+              "type": "boolean",
+              "title": "Only Nominate When User Posts In Channel",
+              "description": "Overrides default behaviour of auto-awarding when the user posts in the specified channel, to just creating a nomination.",
+              "default": false
             }
           }
         }
