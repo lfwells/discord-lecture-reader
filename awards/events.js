@@ -32,8 +32,16 @@ export default async function(client)
             {
                 if (await hasAward(award, msg.member) == false)
                 {
-                    var achievementEmbed = await giveAward(msg.guild, award, msg.member);
-                    msg.channel.send({embeds:[achievementEmbed]});
+                    if (award.data().onlyNominateWhenPostInChannel ?? false)
+                    {
+                        var nominationResult = await nominateForAward(null, award, msg.member, msg.member);
+                        console.log({nominationResult});
+                    }
+                    else
+                    {
+                        var achievementEmbed = await giveAward(msg.guild, award, msg.member);
+                        msg.channel.send({embeds:[achievementEmbed]});
+                    }
                 }
             }
         }
