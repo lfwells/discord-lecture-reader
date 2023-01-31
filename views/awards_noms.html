@@ -73,7 +73,29 @@ function award(studentDiscordID, emoji, button)
         value: (typeof locals.offTopicChannelID != 'undefined' && locals.offTopicChannelID) ? locals.offTopicChannelID : "__DISCORD_BOT_NONE__"
     }) %>
 </div>
+<style>
+    .desc { font-size: smaller; margin-left:4ex; font-weight:normal !important; }
+</style>
 
-TODO
+<%
+//filter(award => (award.nomimations?.length ?? 0) != 0)
+locals.awards.filter(award => award.nominations != null && Object.entries(award.nominations).length > 0).forEach(function(award)
+{ 
+    console.log(award);
+    %>
+    <h3><%=award.emoji%> <%=award.title%><br/><span class="desc"><%=award.description%></span></h3>
+    
+    <ul>
+        <%
+        Object.entries(award.nominations).forEach(function(nomination)
+        {
+            %><li>
+                <%=nomination[0]%>
+            </li><%
+        });
+        %>
+    </ul><%
+});
+%>
 
 <%- include('footer.html') %>
