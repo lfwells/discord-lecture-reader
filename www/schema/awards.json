@@ -35,7 +35,7 @@
             },
             "autoPop": {
               "type": "boolean",
-              "title": "Auto-Pop?",
+              "title": "Auto-Pop on Nomination Count Reached?",
               "description": "Automatically award the achievement if required nominations are reached?",
               "default": true
             },
