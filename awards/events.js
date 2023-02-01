@@ -12,6 +12,8 @@ export default async function(client)
 {
     client.on('messageCreate', async(msg) =>
     {
+        if (msg.type === 'GUILD_MEMBER_JOIN') return;
+        
         if (await isAwardChannelID(msg.channel))
         {
             if (!(await useLegacyAwardsSystem(msg.guild))) return;
