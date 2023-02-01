@@ -84,6 +84,9 @@ export default async function(client)
             { 
                 name: "question", type: "STRING", description: "What do you want to ask?", required:true,
             },
+            { 
+                name: "anonymous", type: "BOOLEAN", description: "Defaults to FALSE -- NOTE THAT STAFF CAN STILL SEE WHO POSTED", required:false,
+            },
         ]
     }; 
     const questionCommand2 = {
@@ -95,7 +98,7 @@ export default async function(client)
                 name: "question", type: "STRING", description: "What do you want to ask?", required:true,
             },
             { 
-                name: "anonymous", type: "BOOLEAN", description: "Ask your question 'anonymously' -- NOTE THAT STAFF CAN STILL SEE WHO POSTED", required:false,
+                name: "anonymous", type: "BOOLEAN", description: "Defaults to FALSE -- NOTE THAT STAFF CAN STILL SEE WHO POSTED", required:false,
             },
         ]
     }; 
