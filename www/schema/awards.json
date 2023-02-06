@@ -60,6 +60,12 @@
               "title": "Only Nominate When User Posts In Channel",
               "description": "Overrides default behaviour of auto-awarding when the user posts in the specified channel, to just creating a nomination.",
               "default": false
+            },
+            "popInPostedChannel": {
+              "type": "boolean",
+              "title": "Pop in Channel User Posted In?",
+              "description": "If false, will pop in the the configured achievement spam channel, or off topic channel if not found.",
+              "default": false
             }
           }
         }

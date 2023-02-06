@@ -3,7 +3,7 @@ import { showText } from "../lecture_text/routes.js";
 import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField, getAwardsDatabase, getAwardsCollection, awardExists, hasAward } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
-import { hasFeature } from '../guild/guild.js';
+import { getGuildProperty, getGuildPropertyConverted, hasFeature } from '../guild/guild.js';
 import { registerCommand } from '../guild/commands.js';
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
@@ -42,7 +42,8 @@ export default async function(client)
                     else
                     {
                         var achievementEmbed = await giveAward(msg.guild, award, msg.member);
-                        msg.channel.send({embeds:[achievementEmbed]});
+                        var channel = award.data().popInPostedChannel ? msg.channel : (await getGuildPropertyConverted("awardPopChannelID", msg.guild) ?? (await getGuildPropertyConverted("offTopicChannelID", msg.guild) ?? (await getGuildPropertyConverted("generalChannelID", msg.guild) ?? msg.channel)));   
+                        channel.send({embeds:[achievementEmbed]});
                     }
                 }
             }
