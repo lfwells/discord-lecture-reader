@@ -29,6 +29,16 @@ function hasFeature(feature)
         }) %>
     </dd>
     <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+        <%- include("subViews/channelSelect.html", 
+           { 
+               label: "Achievement Pop Channel:",
+               selectDefaultText:"-- Select Channel--",
+               id: "setAwardPopChannelID",
+               value: locals.awardPopChannelID,
+               onChangedURL: "setGuildProperty"
+           }) %>
+       </dd>
+    <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
         <%- include("subViews/guildSettingText.html", 
             { 
                 label: "Use New Achievement System",
