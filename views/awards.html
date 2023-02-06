@@ -92,7 +92,9 @@ function award(studentDiscordID, emoji, button)
         label: "Post popup in channel:",
         selectDefaultText:"-- No Popup --",
         id: "popupChannelID",
-        value: (typeof locals.offTopicChannelID != 'undefined' && locals.offTopicChannelID) ? locals.offTopicChannelID : "__DISCORD_BOT_NONE__"
+        value: (typeof locals.awardPopChannelID != 'undefined' && locals.awardPopChannelID) ? locals.awardPopChannelID :
+                (typeof locals.offTopicChannelID != 'undefined' && locals.offTopicChannelID) ? locals.offTopicChannelID : 
+                "__DISCORD_BOT_NONE__"
     }) %>
 </div>
 <br/>
