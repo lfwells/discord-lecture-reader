@@ -165,24 +165,9 @@ export default async function(client)
   
     var guilds = client.guilds.cache;
 
-    await guilds.each( async (guild) => { 
-        
-        var awardCommand2 = JSON.parse(JSON.stringify(awardCommand));
-        /* TODO: this still doesnt work!
-        var admin = (await getAdminRole(guild));
-        if (admin)
-        {
-            awardCommand2.permissions = [
-                {
-                    id: admin.id,
-                    type: "ROLE",
-                    permission: true
-                }
-            ];
-        }*/
-            
+    await guilds.each( async (guild) => {             
         await registerCommand(guild, flexCommand);
-        await registerCommand(guild, awardCommand2);
+        await registerCommand(guild, awardCommand);
         await registerCommand(guild, nomCommand);
         //await registerCommand(guild, awardNewCommand); 
         await registerCommand(guild, leaderboardCommand);
