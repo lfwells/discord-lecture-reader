@@ -71,8 +71,39 @@
     src: local('Whitney Light Italic'), url('whitneylightitalic.woff') format('woff');
     }
 
+    @font-face{
+        font-family:gg sans;font-style:normal;font-weight:400;src:url(8713b8a90bded5ae0c4872484f54fbde.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:italic;font-weight:400;src:url(bafc4dc2ddf48b1844be205a1a41f7d8.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:normal;font-weight:500;src:url(2d7928e1003804522e56efd448d4777b.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:italic;font-weight:500;src:url(08b07ff2a9cec73160a94e7bdbe7db34.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:normal;font-weight:600;src:url(568d4eaa150e7daa3b0b03bcde881aef.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:italic;font-weight:600;src:url(602b88afcc8ec0a5b9dd9c376fa353b7.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:normal;font-weight:700;src:url(e11a98be13e5ec1554b9f26f00c19fba.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:italic;font-weight:700;src:url(29b743aca44653b0ef7d2a01c5189bab.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:normal;font-weight:800;src:url(75104c2074707963465f6ab54556f1c3.woff2) format("woff2")
+        }
+        @font-face{
+        font-family:gg sans;font-style:italic;font-weight:800;src:url(69dc430aebda18f575265d85658407af.woff2) format("woff2")
+        }
+
     * {
-        font-family:'Whitney Medium';
+        font-family:'gg sans', 'Whitney Medium';
         color: white;
     }
 
