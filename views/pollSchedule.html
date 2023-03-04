@@ -37,7 +37,7 @@
                     <li><%= poll.note %>
                         <ul style="list-style:none">
                             <li><%= poll.poll %></li>
-                            <li><button onclick="poll('pollRoboLinds/<%= encodeURIComponent(poll.poll).replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23") %>')">POST POLL</a></li>
+                            <li><button onclick="poll('pollRoboLindsWebInterface/<%= encodeURIComponent(poll.poll).replaceAll("'","%27").replaceAll("/", "%2F").replaceAll("#", "%23") %>')">POST POLL</a></li>
                         </ul>
                     </li>
                 <% }) %>

@@ -193,6 +193,7 @@ function guildRouter()
     router.get("/poll/history/", guild.loadGuildProperty("lectureChannelID", true), poll_routes.pollHistory);
     router.get("/poll/:pollText/", removeQuestionMark, guild.loadGuildProperty("lectureChannelID", true), poll_routes.postPoll);  //send poll (uses get, so that we can do the cool powerpoint links)
     router.get("/pollRoboLinds/:pollText/", removeQuestionMark, guild.loadGuildProperty("lectureChannelID", true), poll_routes.postPollRoboLinds);  //send poll (uses get, so that we can do the cool powerpoint links)
+    router.get("/pollRoboLindsWebInterface/:pollText/", removeQuestionMark, guild.loadGuildProperty("lectureChannelID", true), poll_routes.postPollRoboLindsWebInterface);  //send poll (uses get, so that we can do the cool powerpoint links)
     router.get("/clearpoll/", guild.loadGuildProperty("lectureChannelID", false), poll_routes.clearPoll);
 
     //scheduled polls

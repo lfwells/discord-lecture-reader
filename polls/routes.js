@@ -225,7 +225,15 @@ export async function postPoll(req, res)
   //show web page
   res.end(`Poll ${pollText} sent to ${req.lectureChannel.name}`);
 }
-export async function postPollRoboLinds(req, res) 
+export async function postPollRoboLinds(req, res) //legacy, powerpoint version
+{
+  await postPollRoboLindsInternal(req,res,null);
+}
+export async function postPollRoboLindsWebInterface(req,res)
+{
+  await postPollRoboLindsInternal(req,res,true);
+}
+async function postPollRoboLindsInternal(req,res,webInterface)
 {
   var pollText = req.params.pollText;
 
@@ -236,7 +244,7 @@ export async function postPollRoboLinds(req, res)
   console.log("post poll",pollText);
 
   //ward off evil powerpoint duplicate requests
-  if (pollText == previousRequest) 
+  if (pollText == previousRequest && webInterface == null) 
   {  
     res.end();
     return; 
