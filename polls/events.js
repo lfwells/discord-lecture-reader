@@ -287,10 +287,16 @@ async function doPollCommandButton(i, originalInteraction)
                     //await i.update({ embeds: [ await resultsText(originalInteraction) ]});//, components: await createButtons(originalInteraction) });
                     //todo this should just switch but whatever
                     if (allow_undo)
-                        await i.reply({content: "You've already voted for something else, and the poll creator made it so you can only vote for one thing. Deselect the thing you have already voted before voting again.", ephemeral:true });
+                    {
+                        results[j] = results[j].filter(u => u != user);
+                        //await i.reply({content: "You've already voted for something else, and the poll creator made it so you can only vote for one thing. Deselect the thing you have already voted before voting again.", ephemeral:true });
+                        //return;
+                    }
                     else
+                    {
                         await i.reply({content: "You've already voted for something else, and the poll creator made it so you can only vote for one thing.", ephemeral:true });
-                    return;
+                        return;
+                    }
                 }
             }
         }
