@@ -259,6 +259,15 @@ async function doPollCommandButton(i, originalInteraction)
         }
     }
 
+    async function reset_button()
+    {
+        console.log("reset_button");
+        for (let j = 0; j < results.length; j++) {
+            results[j] = [];
+        }
+        await storeCachedInteractionData(i.guild, originalInteraction.id, {results: JSON.stringify(results)});
+    }
+
     if (i.customId.startsWith("poll_option_")) 
     {
         
@@ -335,6 +344,23 @@ async function doPollCommandButton(i, originalInteraction)
             await i.reply({content: "This option has been disabled for everyone other than the poll author.", ephemeral:true });
         }
     }
+    else if (i.customId == "poll_reset_button")
+    {
+        if (i.user.id == pollAuthor) 
+        {
+            await reset_button();
+            
+            var resultsEmbed = await resultsText(i.guild, originalInteraction);
+            await setGuildProperty(i.guild, "latestRoboLindsPoll", JSON.stringify(resultsEmbed));
+            await setGuildProperty(i.guild, "latestRoboLindsPollTimestamp", i.createdTimestamp);
+
+            await i.update({ embeds: [ resultsEmbed ]});
+        }
+        else
+        {
+            await i.reply({content: "This option has been disabled for everyone other than the poll author.", ephemeral:true });
+        }
+    }
 
 }
 
@@ -381,7 +407,7 @@ async function createButtons(interaction, channel)
         if (restrict_see_results_button) authorOnlyText = " (Poll Author Only)";
         
         var seeVotesButton = new MessageButton()
-            .setCustomId("poll_see_results") //TODO: this may need unique?
+            .setCustomId("poll_see_results") 
             .setLabel("See Full Results"+authorOnlyText)// (Poll Poster Only)") <-- bring this back if we enable this option
             .setStyle('SECONDARY')
             //.setEmoji('😄') ///TODO: emoji like ABC?
@@ -392,7 +418,7 @@ async function createButtons(interaction, channel)
     if (reset_button)
     {
         var resetButton = new MessageButton()
-            .setCustomId("reset") //TODO: this may need unique?
+            .setCustomId("poll_reset_button") 
             .setLabel("Reset Votes (Poll Poster Only)") 
             .setStyle('SECONDARY')
     
