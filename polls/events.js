@@ -350,7 +350,7 @@ async function createButtons(interaction, channel)
     var latestFollowUp = latestFollowUpID ? await channel.messages.fetch(latestFollowUpID) : undefined;
     var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : interaction.options.getBoolean("restrict_see_results_button") ?? true;
     var hide_results_button = scheduledOptions ? scheduledOptions.hide_results_button : cache.options.getBoolean("hide_results_button") ?? false;
-
+    var reset_button = scheduledOptions ? scheduledOptions.reset_button : cache.options.getBoolean("reset_button") ?? false;
 
     var id = 0;
     var rows = [];
@@ -373,11 +373,13 @@ async function createButtons(interaction, channel)
     }
 
     //admin only rows
+    var addedAnAdminButton = false;
+    var adminRow = new MessageActionRow();
     if (latestFollowUp == undefined && !hide_results_button)
     {
         var authorOnlyText = "";
         if (restrict_see_results_button) authorOnlyText = " (Poll Author Only)";
-        var adminRow = new MessageActionRow();
+        
         var seeVotesButton = new MessageButton()
             .setCustomId("poll_see_results") //TODO: this may need unique?
             .setLabel("See Full Results"+authorOnlyText)// (Poll Poster Only)") <-- bring this back if we enable this option
@@ -385,6 +387,21 @@ async function createButtons(interaction, channel)
             //.setEmoji('😄') ///TODO: emoji like ABC?
         
         adminRow.addComponents(seeVotesButton);
+        addedAnAdminButton = true;
+    }
+    if (reset_button)
+    {
+        var resetButton = new MessageButton()
+            .setCustomId("reset") //TODO: this may need unique?
+            .setLabel("Reset Votes (Poll Poster Only)") 
+            .setStyle('SECONDARY')
+    
+        adminRow.addComponents(resetButton);
+        addedAnAdminButton = true;
+    }
+
+    if (addedAnAdminButton)
+    {
         rows.push(adminRow);
     }
     return rows;
