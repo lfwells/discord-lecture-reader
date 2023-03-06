@@ -43,6 +43,7 @@ export default async function(client)
             { name: "allow_undo", type: "BOOLEAN", required: false, description: "Can people remove their vote and change their mind? (default true)" },
             { name: "restrict_see_results_button", type: "BOOLEAN", required: false, description: "Only the poll creator can show who voted for what? (default true)" },
             { name: "anonymous", type: "BOOLEAN", required: false, description: "Hide the Show Results button (default false)" },
+            { name: "reset_button", type: "BOOLEAN", required: false, description: "Enable the Reset Votes button (default false)" },
             
         ],
     };
@@ -258,6 +259,15 @@ async function doPollCommandButton(i, originalInteraction)
         }
     }
 
+    async function reset_button()
+    {
+        console.log("reset_button");
+        for (let j = 0; j < results.length; j++) {
+            results[j] = [];
+        }
+        await storeCachedInteractionData(i.guild, originalInteraction.id, {results: JSON.stringify(results)});
+    }
+
     if (i.customId.startsWith("poll_option_")) 
     {
         
@@ -334,6 +344,23 @@ async function doPollCommandButton(i, originalInteraction)
             await i.reply({content: "This option has been disabled for everyone other than the poll author.", ephemeral:true });
         }
     }
+    else if (i.customId == "poll_reset_button")
+    {
+        if (i.user.id == pollAuthor) 
+        {
+            await reset_button();
+            
+            var resultsEmbed = await resultsText(i.guild, originalInteraction);
+            await setGuildProperty(i.guild, "latestRoboLindsPoll", JSON.stringify(resultsEmbed));
+            await setGuildProperty(i.guild, "latestRoboLindsPollTimestamp", i.createdTimestamp);
+
+            await i.update({ embeds: [ resultsEmbed ]});
+        }
+        else
+        {
+            await i.reply({content: "This option has been disabled for everyone other than the poll author.", ephemeral:true });
+        }
+    }
 
 }
 
@@ -349,7 +376,7 @@ async function createButtons(interaction, channel)
     var latestFollowUp = latestFollowUpID ? await channel.messages.fetch(latestFollowUpID) : undefined;
     var restrict_see_results_button = scheduledOptions ? scheduledOptions.restrict_see_results_button : interaction.options.getBoolean("restrict_see_results_button") ?? true;
     var hide_results_button = scheduledOptions ? scheduledOptions.hide_results_button : cache.options.getBoolean("hide_results_button") ?? false;
-
+    var reset_button = scheduledOptions ? scheduledOptions.reset_button : cache.options.getBoolean("reset_button") ?? false;
 
     var id = 0;
     var rows = [];
@@ -372,18 +399,35 @@ async function createButtons(interaction, channel)
     }
 
     //admin only rows
+    var addedAnAdminButton = false;
+    var adminRow = new MessageActionRow();
     if (latestFollowUp == undefined && !hide_results_button)
     {
         var authorOnlyText = "";
         if (restrict_see_results_button) authorOnlyText = " (Poll Author Only)";
-        var adminRow = new MessageActionRow();
+        
         var seeVotesButton = new MessageButton()
-            .setCustomId("poll_see_results") //TODO: this may need unique?
+            .setCustomId("poll_see_results") 
             .setLabel("See Full Results"+authorOnlyText)// (Poll Poster Only)") <-- bring this back if we enable this option
             .setStyle('SECONDARY')
             //.setEmoji('😄') ///TODO: emoji like ABC?
         
         adminRow.addComponents(seeVotesButton);
+        addedAnAdminButton = true;
+    }
+    if (reset_button)
+    {
+        var resetButton = new MessageButton()
+            .setCustomId("poll_reset_button") 
+            .setLabel("Reset Votes (Poll Poster Only)") 
+            .setStyle('SECONDARY')
+    
+        adminRow.addComponents(resetButton);
+        addedAnAdminButton = true;
+    }
+
+    if (addedAnAdminButton)
+    {
         rows.push(adminRow);
     }
     return rows;
