@@ -43,6 +43,7 @@ export default async function(client)
             { name: "allow_undo", type: "BOOLEAN", required: false, description: "Can people remove their vote and change their mind? (default true)" },
             { name: "restrict_see_results_button", type: "BOOLEAN", required: false, description: "Only the poll creator can show who voted for what? (default true)" },
             { name: "anonymous", type: "BOOLEAN", required: false, description: "Hide the Show Results button (default false)" },
+            { name: "reset_button", type: "BOOLEAN", required: false, description: "Enable the Reset Votes button (default false)" },
             
         ],
     };
