@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html><head></head><body style="color: rgb(32, 33, 34); font-family: Lato, sans-serif;"><p>Loading MyLO Homepage...</p>
 <p>
-<script src="https://playur.io/mylo_homepage.js"></script>
+<script src="https://utasbot.dev/static/mylo_homepage.js"></script>
 </p></body></html>
 ```
 (Note to self: this code links to playur.io to use https, will update this to link to discord bot server in future)
