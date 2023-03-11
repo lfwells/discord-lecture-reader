@@ -24,7 +24,7 @@ console.log({mylo_homepage_override_announcement});
 mylo_homepage_override_announcement = $(mylo_homepage_override_announcement).parent().parent().parent().parent();
 console.log({mylo_homepage_override_announcement}); 
 
-mylo_homepage_override_announcement.html('<iframe width="100%" height="450" src="https://utasbot.dev/chat/1070520290930593842?previous_messages=10" />');
+mylo_homepage_override_announcement.html('<iframe width="100%" height="450" src="https://utasbot.dev/chat/1070520290930593842?previous_messages=10&mylo=true" />');
 
 //announcementsPanel.html("yo");
 
