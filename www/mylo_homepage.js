@@ -6,8 +6,12 @@ $ = window.parent.$;
 //var overrideFrame = $(".mylo_homepage_override_frame");
 //var announcementsPanel = overrideFrame.parent(".d2l-widget");
 
+//find the unit information panel (first row in the main column)
+var unitInformationPanel = $(".homepage-col-8 > div:nth-child(1)");
+unitInformationPanel.hide();
+
 //find the announcements panel (second row in the main column)
-var announcementsPanel = $(".homepage-col-8 div:nth-child(2)");
+var announcementsPanel = $(".homepage-col-8 > div:nth-child(2)");
 
 var mylo_homepage_override_announcement = $(".d2l-datalist-item d2l-html-block")
     .get()
