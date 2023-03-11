@@ -10,7 +10,10 @@
 (Note to self: this code links to playur.io to use https, will update this to link to discord bot server in future)
 
 ## Step 2: Post an announcement with an iframe linking to the file
-Replace the `src` URL in the code snippet below with the URL of your file from step 1
+Replace the `src` URL in the code snippet below with the URL of your file from step 1. You can get this url via
+- Manage Files
+- Find the file and in the dropdown menu select "Edit File"
+- The URL is `https://mylo.utas.edu.au` plus the URL displayed on this page (that begins with `/content`)
 ```
 <p id="mylo_homepage_override_frame"><iframe name="d2l_1_76_442" src="https://mylo.utas.edu.au/content/enforced/527784-NA_SP_lfwells_29638/mylo_homepage.html" frameborder="0" scrolling="auto" allowfullscreen="allowfullscreen" allow="microphone *; camera *" style="height: 6036px;"></iframe></p>
 ```
