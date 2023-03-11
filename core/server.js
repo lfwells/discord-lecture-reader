@@ -5,6 +5,10 @@ import init_routes from './routes.js';
 import express  from 'express';
 import expressWebSocket from "express-ws";
 
+import fsfs from 'fs';
+import http from 'http';
+import https from 'https';
+
 export const app = express();
 
 //import basicAuth from 'express-basic-auth';
@@ -43,10 +47,6 @@ export function init_server()
       cookie: { maxAge: oneDay * 90 },
       resave: false 
   }));
-
-  //Lake's chat preview package (TODO: authenticate)
-  expressWebSocket(app);    // << Make sure you have WS support on your express
-  app.use("/chat", createRouter(getClient()));
   
 
   app.use(authHandler);
@@ -79,7 +79,10 @@ export function init_server()
   
   app.set('views', path.join(__dirname, 'views')); 
   app.set('view engine', 'html');
+
+  //when doing lets-encrypt rewnal and they want a challenge, need to adjust this to be just `/`
   app.use('/static', express.static(path.join(__dirname, 'www')))
+
   app.use(function(req, res, next) {
     res.locals.query = req.query;
     res.locals.params = req.params;
@@ -99,8 +102,36 @@ export function init_server()
     res.redirect("/");
   });
   
-  app.listen(config.__port, () => console.log(`Server running on ${config.__port}...`));
+  //app.listen(config.__port, () => console.log(`Server running on ${config.__port}...`));
   
+  // Certificate
+  const privateKey = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/privkey.pem', 'utf8');
+  const certificate = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/cert.pem', 'utf8');
+  const ca = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/chain.pem', 'utf8');
+
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+    ca: ca
+  };
+
+  // Starting both http & https servers
+  const httpServer = http.createServer(app);
+  const httpsServer = https.createServer(credentials, app);
+
+  httpServer.listen(8080, () => {
+    console.log('HTTP Server running on port 8080');
+  });
+
+  httpsServer.listen(443, () => {
+    console.log('HTTPS Server running on port 443');
+  });
+
+  
+  //Lake's chat preview package (TODO: authenticate)
+  expressWebSocket(app, httpsServer);    // << Make sure you have WS support on your express
+  app.use("/chat", createRouter(getClient()));
+
   
   //web server routes
   init_routes(app);
