@@ -40,17 +40,17 @@ https://pm2.keymetrics.io/docs/usage/quick-start/#:~:text=Restart%20application%
 ### Triggering a pre-defined poll via URL
 Navigate to:
 
-`http://131.217.172.176/guild/<guild_id>/poll/<poll info here>`
+`https://utasbot.dev/guild/<guild_id>/poll/<poll info here>`
 
 e.g.
 
-`http://131.217.172.176/guild/<guild_id>/poll/%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
+`https://utasbot.dev/guild/<guild_id>/poll/%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
 
 (if making this link in powerpoint etc, you don't need to write `%20` or `%25` yourself, these are just spaces and double-quotes that will get automatically changed)
 
 Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
 
-You can clear the poll on this page by clicking the button or navigating to `http://131.217.172.176/guild/<guild_id>/clearpoll`.
+You can clear the poll on this page by clicking the button or navigating to `https://utasbot.dev/guild/<guild_id>/clearpoll`.
 
 Note: for sessions to work, you will need a `sessions` subdirectory with write permissions.
 

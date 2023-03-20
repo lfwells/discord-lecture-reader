@@ -211,7 +211,7 @@ export async function getMyLOConnectedMessage(studentDiscordID, interaction, wit
                 new MessageButton()
                     .setLabel(withButtonText ?? 'Disconnect Account')
                     .setStyle('LINK')
-                    .setURL(`http://131.217.172.176/myloDisconnect/${interaction.id}/${interaction.guild?.id ?? "dm"}`)
+                    .setURL(`https://utasbot.dev/myloDisconnect/${interaction.id}/${interaction.guild?.id ?? "dm"}`)
                     .setEmoji('❌')
             );
 
