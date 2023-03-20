@@ -20,7 +20,7 @@ import * as classList_routes from "../classList/routes.js";
 import { Router } from "express";
 import * as sheet_routes from "../analytics/sheets.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
-import { renderEJS } from "./server.js";
+import { renderEJS, restart } from "./server.js";
 import * as pptx_routes from "../pptx_parse/pptx.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
@@ -57,6 +57,10 @@ function defaultRouter()
     router.get("/loginComplete", login_routes.loginComplete)
 
     router.get("/logout", login_routes.logout);
+
+    //restart
+    router.get("/restart", basic_render("restart"));
+    router.post("/restart", restart, basic_render("restart"));
 
     //mylo
     router.get("/myloConnectCompleteDiscord", mylo_routes.discordConnectComplete); 
