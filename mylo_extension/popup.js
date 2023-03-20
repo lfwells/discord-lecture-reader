@@ -68,7 +68,7 @@ document.querySelector("#sync").addEventListener("click", async (evt) =>
 async function sendToBot(guildID, data)
 {
     const response = await fetch(
-        `http://131.217.172.176/guild/${guildID}/mylo/data`,
+        `https://utasbot.dev/guild/${guildID}/mylo/data`,
         {
             method: 'POST',
             mode: 'cors',
