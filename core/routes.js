@@ -60,7 +60,7 @@ function defaultRouter()
 
     //restart
     router.get("/restart", basic_render("restart"));
-    router.post("/restart", restart, basic_render("restart"));
+    router.post("/restart", restart);
 
     //mylo
     router.get("/myloConnectCompleteDiscord", mylo_routes.discordConnectComplete); 

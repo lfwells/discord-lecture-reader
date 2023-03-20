@@ -234,10 +234,11 @@ export function renderEJS(page, options)
   };
 }
 
-export function restart()
+export async function restart(req,res,next)
 {
   console.log("\n\n---RESTART REQUESTED---\n\n");
 
+  res.json({restarting:true});
 
   exec('pm2 restart all', (error, stdout, stderr) => {
     if (error) {
