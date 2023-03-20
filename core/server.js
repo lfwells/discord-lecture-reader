@@ -31,6 +31,9 @@ import { log } from 'console';
 import { createRouter } from 'discord-chat-preview';
 import { getClient } from './client.js';
 
+
+import { exec } from 'child_process';
+
 export function init_server()
 {
   app.use(cors())
@@ -229,4 +232,21 @@ export function renderEJS(page, options)
   return function (req,res,next) {
     res.render(page, options);
   };
+}
+
+export async function restart(req,res,next)
+{
+  console.log("\n\n---RESTART REQUESTED---\n\n");
+
+  res.json({restarting:true});
+
+  exec('pm2 restart all', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return;
+    }
+
+    console.log(`stdout: ${stdout}`);
+    console.error(`stderr: ${stderr}`);
+  });
 }
