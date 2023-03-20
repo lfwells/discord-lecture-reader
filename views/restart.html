@@ -1,10 +1,12 @@
 <%- include('header.html', { title: "Restart Server" }) %>
 
 
-
-<!-- a html form to trigger the post endpoint of this page using a button -->
-
+<% console.log({q:locals.query})%>
+<% if (locals.query.restarted) { %>
+    <h3>Server restarted successfully!</h3>
+<% } %>
     <p>Click this button to confirm that you want to restart the server: <button id="restart" class="btn">Restart</button></p>
+    <p>This operation may take around 30 seconds.</p>
 <script>
     //when the user clicks restart, trigger the post callback for this page, and then frequently poll the server to see if it's back up
     $("#restart").click(function()
@@ -19,7 +21,7 @@
                 $.get("/restart", function(data, status){
                     //give immediate feedback that the server is back up
                     $("#restart").text("Restarted! Reloading Page...");
-                    location.reload();
+                    location.href = "/restart?restarted=true";
                 });
             }, 1000);
         });

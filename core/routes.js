@@ -298,6 +298,8 @@ function basic_render(page, data)
 {
     return (req,res,next) =>
     {
+        if (data == undefined) data = {}
+        data.query = req.query;
         res.render(page, data);
     };
 }
