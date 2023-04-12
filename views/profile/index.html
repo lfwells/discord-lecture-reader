@@ -59,8 +59,15 @@
     }
 </style>
 
+<% if (locals.isOurProfile)
+{
+    %><div>
+
+    </div><%
+}%>
+
 <div>
-    <div class="profilePanel " style="float: right; width:55%; height:440px">
+    <div class="profilePanel scrollable" style="float: right; width:55%; height:440px">
         <h3>Awards</h3>
         <content>
             <% locals.profile.awards.forEach(award => { %>
