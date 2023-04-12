@@ -5,5 +5,5 @@ export async function load(req, res, next)
 export async function profile_home(req,res,next)
 {
     var discordID = req.params.discordID;
-    res.json({result:`Profile Home ${discordID}`});
+    res.render("profile/index");
 }
