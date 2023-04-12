@@ -10,7 +10,20 @@
         padding: 10px;
         margin: 10px;
         background-color: rgba(128, 128, 128, 0.171);
-
+    }
+    .profilePanel h3 {
+        margin-top: 0px;
+    }
+    .profilePanel content {
+        width: 100%;
+        height: 160px;
+        overflow-y: scroll;
+    }
+    .server h4 {
+        display:inline-block;
+    }
+    .server img {
+        vertical-align: middle;
     }
 </style>
 
@@ -23,6 +36,14 @@
     </div>
     <div class="profilePanel">
         <h3>Servers</h3>
+        <content>
+        <% locals.profile.guilds.forEach(guild => { %>
+            <div class="server">
+                <img src="<%= guild.iconURL() %>" alt="" style="width: 50px; height: 50px; border-radius: 50%">
+                <h4><%= guild.name %></h4>
+            </div>
+        <% })%>
+        </content>
     </div>
 </div>
 
