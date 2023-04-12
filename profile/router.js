@@ -5,10 +5,10 @@ import { isUTASBotAdminCached } from "../core/permissions.js";
 async function checkAllowLoadProfile(req,res,next)
 {
     //not logged in users must go through the login process
+    console.log("req.discord user here 3 =",req.discordUser);
     if (req.discordUser == null)
     {
-        //TODO: redirect path back to here...
-        res.redirect("/login");
+        res.redirect("/login?path=" + req.originalUrl);
         return;
     }   
     

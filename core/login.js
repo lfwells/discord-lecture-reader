@@ -11,7 +11,7 @@ export async function loginPage(req,res)
 {
     const url = oauth.generateAuthUrl({
         scope: scope, 
-        state: crypto.randomBytes(16).toString("hex"), // Be aware that randomBytes is sync if no callback is provided
+        state: req.query.path, 
     });
 
     //console.log(url);  
@@ -29,10 +29,13 @@ export async function loginComplete(req,res)
     //console.log(auth);
     var session = req.session;
     session.auth = auth;
+    req.session = session;
     //console.log("saving auth to session", req.session);
-    //await authHandler(true)(req,res, function() {}); //forceAuth = true is used to ensure req.discordUser gets populated
+    await authHandler(req,res, function() {}); //used to ensure req.discordUser gets populated
 //    guildList(req,res);
-    res.redirect("/");
+
+    let state = req.query.state;
+    res.redirect(state ?? "/");
 
 }
 
