@@ -7,6 +7,7 @@ async function checkAllowLoadProfile(req,res,next)
     //not logged in users must go through the login process
     if (req.discordUser == null)
     {
+        //TODO: redirect path back to here...
         res.redirect("/login");
         return;
     }   
