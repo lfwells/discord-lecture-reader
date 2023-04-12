@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { load, profile_home } from "./routes.js";
+import { load, profile_home, toggle_public_profile } from "./routes.js";
 import { isUTASBotAdminCached } from "../core/permissions.js";
 
 async function checkAllowLoadProfile(req,res,next)
@@ -36,6 +36,7 @@ export function profileRouter()
     router.use(checkAllowLoadProfile);
 
     router.get("/", profile_home);
+    router.post("/public", toggle_public_profile);
 
     return router;
 }

@@ -1,4 +1,4 @@
-import { loadProfile } from "./profile.js";
+import { loadProfile, saveProfileProperty } from "./profile.js";
 import { getClient } from '../core/client.js';
 import { getPostsFilterPredicate } from "../classList/classList.js";
 import { getPostsData } from "../analytics/analytics.js";
@@ -76,10 +76,23 @@ export async function load(req, res, next)
     }
 
     res.locals.profile = req.profile;
+    res.locals.isOurProfile = req.discordUser != null && req.discordUser.id == req.profile.id;
     
     next();
 }
 export async function profile_home(req,res,next)
 {
     res.render("profile/index");
+}
+export async function toggle_public_profile(req,res,next)
+{
+    if (req.profile.id == req.discordUser.id)
+    {
+        req.profile.public = !req.profile.public;
+        await saveProfileProperty(req.profile.id, "public", req.profile.public);
+        res.redirect("/profile/" + req.profile.id);
+        return;
+    }
+
+    res.render("profile/accessDenied");
 }

@@ -57,12 +57,21 @@
     .pair > img {
         margin-right:1ex;
     }
+
+    #publicSwitch {
+        cursor: pointer;
+    }
 </style>
 
 <% if (locals.isOurProfile)
 {
-    %><div>
-
+    %><div style="text-align: right;">
+        <div class="pair" id="publicSwitch" title="<%=locals.profile.public ? "Change to Private" : "Change to Public"%>">
+            <span><%= locals.profile.public ? "🔓" : "🔒" %></span>
+            <h4>
+                <span><%= locals.profile.public ? "Profile is Public" : "Profile is Hidden"%></span>
+            </h4>
+        </div>
     </div><%
 }%>
 
@@ -114,5 +123,18 @@
         </content>
     </div>
 </div>
+
+<script>
+    $("#publicSwitch").click(function() {
+        $(this).find("h4 span").text("Loading...");
+        $.ajax({
+            url: window.location.href+"/public",
+            type: "POST",
+            success: function(data) {
+                window.location.reload();
+            }
+        });
+    });
+</script>
 
 <%- include('../footer.html') %>
