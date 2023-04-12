@@ -94,28 +94,33 @@ export function load() {
   }
 }
 
-export async function getAdminGuilds(client, req)
+export async function isGuildAdmin(g, client, req, ownedGuilds)
+{  
+  if (!ownedGuilds) ownedGuilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+  return ownedGuilds.findIndex(g2 => {
+    if (g2.id == g.id)
+    {
+      //if owner then yess
+      if (g2.owner) { /*console.log("is owner of "+g2.name); */return true; }
+
+      //check admin permissions, but this is not enough
+      if ((g2.permissions & 0x0000000008) == 0x0000000008) { /*console.log("is admin of "+g2.name); */return true; }
+
+      //check if theyre in the admins list
+      if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id] && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
+        /*console.log("is in staff role of "+g2.name); */return true;
+      }
+    }
+    return false;
+  }) >= 0;
+}
+export async function getGuilds(client, req, showAllGuilds)
 {
   if (req.session && req.session.auth && req.discordUser)
   {
     var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
     //console.log("user guilds", guilds);
-    var result = client.guilds.cache.filter(g => guilds.findIndex(g2 => {
-      if (g2.id == g.id)
-      {
-        //if owner then yess
-        if (g2.owner) { /*console.log("is owner of "+g2.name); */return true; }
-
-        //check admin permissions, but this is not enough
-        if ((g2.permissions & 0x0000000008) == 0x0000000008) { /*console.log("is admin of "+g2.name); */return true; }
-
-        //check if theyre in the admins list
-        if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id] && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
-          /*console.log("is in staff role of "+g2.name); */return true;
-        }
-      }
-      return false;
-    }) >= 0);
+    var result = showAllGuilds ? client.guilds.cache : client.guilds.cache.filter(g => guilds.findIndex(g2 => g2.id == g.id) >= 0);
 
     if (req.path.indexOf("clone") == -1)
     {
@@ -154,8 +159,7 @@ export async function checkGuildAdmin(req, res, next)
   else if (req.discordUser)
   {
     var client = getClient();
-    var adminGuilds = (await getAdminGuilds(client, req)).map(g => g.id);
-    if (adminGuilds.indexOf(req.guild.id) >= 0)
+    if (isGuildAdmin(req.guild.id, client, req))
     {
       next();
       return;
