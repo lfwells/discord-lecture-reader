@@ -82,6 +82,13 @@ export function load() {
       return;
     }
 
+    if (req.discordUser)
+    {
+      var permissions = await getPermissions(req.discordUser.id);
+      var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token));
+      req.guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(req.guild, client, req, guilds);
+    }
+
     if (isOutsideTestServer(req.guild))
     {
       res.end("Tried to use non-test server in test mode. Disable test mode.");
@@ -168,7 +175,7 @@ export async function checkGuildAdmin(req, res, next)
     }
   }
 
-  res.render("accessDenied");
+  res.render("guildPublic");
 }
 
 export async function getGuildDocument(guildID)

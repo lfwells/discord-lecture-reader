@@ -47,7 +47,7 @@
             %>
             <header>
             <% 
-            if (locals.guild && locals.discordUser)
+            if (locals.guild && locals.discordUser && locals.guild.isGuildAdmin)
             {
                 %>
                 <h1>
@@ -55,8 +55,7 @@
                     <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
                 </h1>
                 <% 
-                
-                
+                   
                 if (locals.query && locals.query.message) 
                 { 
                     %>
@@ -66,9 +65,10 @@
                 
                 function currentTab(checkFor)
                 {
-                    var path = locals.path
-                        .replace("/guild/"+guild.id+"/",  "")
-                        .replace("/profile/"+profile.id+"/",  "");
+                    var path = locals.path.replace("/guild/"+guild.id+"/",  "")
+                    if (typeof locals.profile != "undefined")
+                        path = path.replace("/profile/"+profile.id+"/",  "");
+
                     var isCurrent = false;
                     if (path.length == 0 && checkFor == "")
                     {
@@ -149,7 +149,7 @@
                             <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Award Leaderboard</a></li><%
                         }
                         %>
-                       
+                    
                         
                         <% if (hasFeature("invites"))
                         {
@@ -199,6 +199,7 @@
                     </ul>
                 </nav>
                 <%
+            
             } 
             else
             {
@@ -216,8 +217,23 @@
                     }
                     return isCurrent ? ' class=current ' : "";
                 }
+                
+                if (locals.guild && locals.discordUser && !locals.guild.isGuildAdmin)
+                {
+                    %>
+                    <h1>
+                        <img src="<%=guild.iconURL()%>" />
+                        <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
+                    </h1>
+                    <% 
+                }
+                else
+                {
+                    %>
+                    <h1><a href="/">UTAS Discord Bot</a></h1>
+                    <%
+                }
                 %>
-                <h1><a href="/">UTAS Discord Bot</a></h1>
                 
                 <nav>
 

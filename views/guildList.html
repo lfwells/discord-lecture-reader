@@ -32,11 +32,7 @@
         %>
         <li>
           <img src="<%=guild.iconURL()%>" />
-          <% if (guild.isGuildAdmin) { %>
-            <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>">
-          <% } else { %>
-            <a href="#" title="Not an Admin">
-          <% } %>
+          <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>">
             <%= guild.name %><br />
             <span class="serverInfo">
               <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
