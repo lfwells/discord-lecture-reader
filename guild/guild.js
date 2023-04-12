@@ -148,27 +148,26 @@ export async function getGuilds(client, req, showAllGuilds)
 
 export async function checkGuildAdmin(req, res, next)
 {
-  //console.log("checkGuildAdmin");
-  if (req.path.indexOf("obs") >= 0 || 
+  if (req.path.indexOf("/obs") >= 0 || 
     req.path.indexOf("/text") >= 0 || 
-    req.path.indexOf("/text/latest") || 
+    req.path.indexOf("/text/latest") >= 0 || 
     req.path.indexOf("/poll") >= 0 || 
     req.path.indexOf("/recordProgress") >= 0 || 
     req.path.indexOf("/recordSectionProgress") >= 0)  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
   {
-//    console.log("next");
     next();
     return;
   }
   else if (req.discordUser)
   {
     var client = getClient();
-    if (isGuildAdmin(req.guild.id, client, req))
+    if (await isUTASBotAdminCached(req.permissions) || await isGuildAdmin(req.guild, client, req))
     {
       next();
       return;
     }
   }
+
   res.render("accessDenied");
 }
 
