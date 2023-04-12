@@ -22,6 +22,7 @@ import * as sheet_routes from "../analytics/sheets.js";
 import { schedule_test } from "../attendance/scheduled_events.js";
 import { renderEJS, restart } from "./server.js";
 import * as pptx_routes from "../pptx_parse/pptx.js";
+import { profileRouter } from "../profile/router.js";
 
 //TODO: decided i hate this appraoch, we need an init_routes for each section instead
 export default function(app)
@@ -36,6 +37,7 @@ export default function(app)
 
     app.use(defaultRouter());
     app.use("/guild/:guildID", guildRouter());
+    app.use("/profile/:discordID", profileRouter());
 }
 
 function defaultRouter() 
