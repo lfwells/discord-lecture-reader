@@ -4,6 +4,13 @@ import { isUTASBotAdminCached } from "../core/permissions.js";
 
 async function checkAllowLoadProfile(req,res,next)
 {
+    //not logged in users must go through the login process
+    if (req.discordUser == null)
+    {
+        res.redirect("/login");
+        return;
+    }   
+    
     //rules:
     // 1. if the user is the profile owner, allow
     // 2. if the profile is public, allow
