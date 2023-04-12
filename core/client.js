@@ -64,6 +64,7 @@ import init_threader_events from "../threader/events.js";
 import init_voice_events from "../voice/events.js";
 import init_mylo_events from "../mylo/events.js";
 import init_send_events from "../send/events.js";
+import init_profile_events from "../profile/events.js";
 import { init_application_commands, init_interaction_cache } from '../guild/commands.js';
 import { getStudentCount } from '../student/student.js';
 
@@ -97,5 +98,6 @@ export async function init_client(client)
     console.log("Init Voice Events...");        await init_voice_events(client);
     console.log("Init MyLO Events...");         await init_mylo_events(client);
     console.log("Init Send Events...");         await init_send_events(client);
+    console.log("Init Profile Events...");      await init_profile_events(client);
     console.log("End init_client.");
 }
