@@ -21,11 +21,14 @@
     .profilePanel.scrollable content {
         overflow-y: scroll;
     }
+    .pair {
+        margin-bottom:8px;
+    }
     .pair h4 {
         display:inline-block;
-        margin-top: 0.2em;
-        margin-bottom: 0.2em;
-        max-width:90%;
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+        max-width:80%;
     }
     .pair h4 span {
         display:block;
@@ -38,7 +41,7 @@
     {
         font-weight: normal !important;
         font-size:0.75em;
-        color: #494949;
+        color: #999;
     }
     .pair > * {
         vertical-align: middle;
@@ -115,7 +118,7 @@
             <div class="pair">
                 <img src="<%= guild.iconURL() %>" alt="" style="width: 50px; height: 50px; border-radius: 50%">
                 <h4>
-                    <span><%= guild.name %></span>
+                    <span><a href="/guild/<%=guild.id%>"><%= guild.name %></a></span>
                 </h4>
                 
             </div>
