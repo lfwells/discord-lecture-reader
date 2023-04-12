@@ -96,7 +96,7 @@
                                 <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
                             <% }%>
                             <div>
-                                <%=locals.discordUser.username%><br />
+                                <a href="/profile/<%=locals.discordUser.id%>"><%=locals.discordUser.username%></a><br />
                                 <a href="/logout" class="logout">Logout</a>
                             </div>
                         </div>
@@ -227,7 +227,7 @@
                                 <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
                             <% }%>
                             <div>
-                                <%=locals.discordUser.username%><br />
+                                <a href="/profile/<%=locals.discordUser.id%>"><%=locals.discordUser.username%></a><br />
                                 <a href="/logout" class="logout">Logout</a>
                             </div>
                         </div>
