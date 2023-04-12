@@ -9,7 +9,7 @@ import { oauth } from '../_oathDiscord.js';
 import { init_sheet_for_guild } from '../analytics/sheets.js';
 import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
-import { asyncForEach, isOutsideTestServer } from "../core/utils.js";
+import { asyncFilter, asyncForEach, isOutsideTestServer } from "../core/utils.js";
 import { init_status_channels } from "./statusChannels.js";
 import { stripEmoji } from "../awards/awards.js";
 import { init_presence_scrape } from "../analytics/presence.js";
@@ -18,6 +18,7 @@ import { getPostsData } from "../analytics/analytics.js";
 import { setGuildContextForRoute } from "../core/errors.js";
 import { getPermissions, isUTASBotAdminCached } from "../core/permissions.js";
 import { loadClassList } from "../classList/classList.js";
+import { profileIsPublic } from "../profile/profile.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -176,8 +177,11 @@ export async function checkGuildAdmin(req, res, next)
     }
   }
 
+  await loadClassList(req, res);
+  req.classList = await asyncFilter(req.classList, async (member) => await profileIsPublic(member));
+  
   res.render("guildPublic", {
-    classList: req.classList
+    classList: req.classList,
   });
 }
 

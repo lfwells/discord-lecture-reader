@@ -2,4 +2,13 @@
 
 <p>A public-facing list of public profiles from this server.</p>
 
+
+<ul>
+    <% locals.classList.forEach(function(member) { %>
+        <li>
+            <a href="/profile/<%= member.discordID %>"><%= member.discordName %></a>
+        </li>
+    <% }) %>
+</ul>
+
 <%- include('footer.html') %>

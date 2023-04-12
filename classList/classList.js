@@ -101,8 +101,8 @@ export async function _loadClassList(req,res,next, includeRemoved)
 
     req.classList = classList.sort((a,b) => a.discordName.localeCompare(b.discordName));
     res.locals.classList = req.classList;
-    next(); 
 
+    if (next != undefined) next(); 
 }
 
 
