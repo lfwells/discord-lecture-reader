@@ -1,5 +1,7 @@
 import { loadProfile } from "./profile.js";
 import { getClient } from '../core/client.js';
+import { getPostsFilterPredicate } from "../classList/classList.js";
+import { getPostsData } from "../analytics/analytics.js";
 
 export async function load(req, res, next)
 {
@@ -15,6 +17,13 @@ export async function load(req, res, next)
         {
             req.profile.guilds.push(guild);
         }
+    }
+
+    //read in the stats for each server
+    req.profile.total = 0;
+    for (let guild of req.profile.guilds)
+    {
+        req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
     }
 
     res.locals.profile = req.profile;

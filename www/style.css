@@ -614,3 +614,11 @@
         }
 
         .property-selector * { color: black !important; }
+
+        h2 img {
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 16px;
+        }

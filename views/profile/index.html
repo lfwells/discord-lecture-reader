@@ -12,18 +12,34 @@
         background-color: rgba(128, 128, 128, 0.171);
     }
     .profilePanel h3 {
-        margin-top: 0px;
+        margin-top: 8px;
+        margin-bottom: 0px;
     }
     .profilePanel content {
         width: 100%;
         height: 160px;
         overflow-y: scroll;
     }
-    .server h4 {
+    .pair h4 {
         display:inline-block;
     }
-    .server img {
+    .pair h4 span {
+        display:block;
+    }
+    .pair h4 span:nth-child(2)
+    {
+        font-weight: normal !important;
+    }
+    .pair > * {
         vertical-align: middle;
+    }
+    .pair > *:first-child {
+        vertical-align: middle;
+    }
+    .pair > span:first-child {
+        font-size: 1.5em;
+        padding: 0.5em;
+        font-weight:bold;
     }
 </style>
 
@@ -33,14 +49,23 @@
     </div>
     <div class="profilePanel">
         <h3>Stats</h3>
+        <content>
+            <div class="pair">
+                <span><%=locals.profile.total%></span>
+                <h4><span>Total Posts</span></h4>
+            </div>
+        </content>
     </div>
     <div class="profilePanel">
         <h3>Servers</h3>
         <content>
         <% locals.profile.guilds.forEach(guild => { %>
-            <div class="server">
+            <div class="pair">
                 <img src="<%= guild.iconURL() %>" alt="" style="width: 50px; height: 50px; border-radius: 50%">
-                <h4><%= guild.name %></h4>
+                <h4>
+                    <span><%= guild.name %></span>
+                </h4>
+                
             </div>
         <% })%>
         </content>
