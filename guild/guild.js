@@ -17,6 +17,7 @@ import { getPostsData } from "../analytics/analytics.js";
 
 import { setGuildContextForRoute } from "../core/errors.js";
 import { getPermissions, isUTASBotAdminCached } from "../core/permissions.js";
+import { loadClassList } from "../classList/classList.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -175,7 +176,9 @@ export async function checkGuildAdmin(req, res, next)
     }
   }
 
-  res.render("guildPublic");
+  res.render("guildPublic", {
+    classList: req.classList
+  });
 }
 
 export async function getGuildDocument(guildID)

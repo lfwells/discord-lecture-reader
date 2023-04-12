@@ -340,7 +340,7 @@
             min-width:initial !important;
         }
 
-        .btn {
+        .btn, .btnSmall {
             display:inline-block !important;
             margin:2ex;
             padding:2ex !important;
@@ -370,6 +370,11 @@
         }
         .btn.outline, .btn.outlined {
             background-color: transparent;
+        }
+
+        .btnSmall {
+            padding:1ex !important;
+            font-size:normal !important;
         }
 
 
