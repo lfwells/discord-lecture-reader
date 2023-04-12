@@ -2,10 +2,17 @@ import { loadProfile } from "./profile.js";
 import { getClient } from '../core/client.js';
 import { getPostsFilterPredicate } from "../classList/classList.js";
 import { getPostsData } from "../analytics/analytics.js";
+import { getAwardsForMember } from "../awards/awards.js";
+import { useLegacyAwardsSystem } from "../awards/awards.js";
+import { getAwardName } from "../awards/awards.js";
+import { getAwardEmoji } from "../awards/awards.js";
+import { getAwardsDatabase } from "../awards/awards.js";
+import { getAwardChannel } from "../awards/awards.js";
 
 export async function load(req, res, next)
 {
     req.profile = getClient().users.cache.get(req.params.discordID);
+    req.profile.id = req.params.discordID;
     
     req.profile = Object.assign(req.profile, (await loadProfile(req.params.discordID)).data());
 
@@ -23,7 +30,49 @@ export async function load(req, res, next)
     req.profile.total = 0;
     for (let guild of req.profile.guilds)
     {
-        req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
+        //TODO: uncomment this line
+        //req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
+    }
+
+    //read in the awards for each server
+    req.profile.awards = [];
+    for (let guild of req.profile.guilds)
+    {
+        if (await useLegacyAwardsSystem(guild))
+        {
+            var awardChannel = await getAwardChannel(guild);
+            if (awardChannel == undefined) continue;
+
+            var messages = await awardChannel.messages.fetch();
+            messages.forEach(award => 
+            {
+                var emoji = getAwardEmoji(award);
+                var title = getAwardName(award);
+                var awardData = {
+                    emoji:emoji,
+                    title:title,
+                    server:guild.name,
+                };
+                if (award.mentions.users.has(req.params.discordID))
+                {
+                    req.profile.awards.push(awardData);
+                }
+            });
+        }
+        else
+        {
+            let awards = await getAwardsDatabase(guild, true);
+            awards = await getAwardsForMember(req.profile, awards);
+            
+            req.profile.awards.push(...(awards.map(function(award) {
+                var d = award.data();
+                d.id = d.emoji = award.id;
+                d.server = guild.name;
+                return d;
+            })));
+
+            console.log({rpa:req.profile.awards});
+        }
     }
 
     res.locals.profile = req.profile;

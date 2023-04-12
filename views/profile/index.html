@@ -12,18 +12,20 @@
         background-color: rgba(128, 128, 128, 0.171);
     }
     .profilePanel h3 {
-        margin-top: 8px;
-        margin-bottom: 0px;
+        margin:8px;
     }
     .profilePanel content {
         width: 100%;
-        height: 160px;
+        height: calc(100% - 40px);
     }
     .profilePanel.scrollable content {
         overflow-y: scroll;
     }
     .pair h4 {
         display:inline-block;
+        margin-top: 0.2em;
+        margin-bottom: 0.2em;
+        max-width:90%;
     }
     .pair h4 span {
         display:block;
@@ -31,6 +33,12 @@
     .pair h4 span:nth-child(2)
     {
         font-weight: normal !important;
+    }
+    .pair h4 span:nth-child(3)
+    {
+        font-weight: normal !important;
+        font-size:0.75em;
+        color: #494949;
     }
     .pair > * {
         vertical-align: middle;
@@ -59,14 +67,15 @@
                 <div class="pair">
                     <span><%= award.emoji %></span>
                     <h4>
-                        <span><%= award.name %></span>
+                        <span><%= award.title %></span>
                         <span><%= award.description %></span>
+                        <span><%= award.server %></span>
                     </h4>
                 </div>
             <% })%>
         </content>
     </div>
-    <div class="profilePanel">
+    <div class="profilePanel scrollable">
         <h3>Stats</h3>
         <content>
             <div class="pair">
