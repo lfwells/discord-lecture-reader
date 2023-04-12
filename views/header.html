@@ -186,9 +186,14 @@
                             <%
                         }
                         %>
-
-                        <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
-                        <li><a href="/restart">Restart Server</a></li>
+                        <% if (locals.isUTASBotAdmin())
+                        {
+                            %>
+                            <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
+                            <li><a href="/restart">Restart Server</a></li>
+                            <%
+                        }
+                        %>
                     </ul>
                 </nav>
                 <%
@@ -239,11 +244,17 @@
 
                     <ul>
                         <li><a <%=currentTab("")%> href="/"><%=locals.discordUser ? "Unit List" : "Home" %></a></li>
-                        <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
-                        <% if (locals.discordUser)
+                        <% if (locals.isUTASBotAdmin())
                         {
-                            %><li><a href="/restart">Restart Server</a></li><%
-                        } %>
+                            %>
+                            <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
+                            <% if (locals.discordUser)
+                            {
+                                %><li><a href="/restart">Restart Server</a></li><%
+                            } %>
+                            <%
+                        }
+                        %>
                     </ul>
                 </nav>
                 <%

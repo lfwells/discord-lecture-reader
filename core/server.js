@@ -174,6 +174,9 @@ export async function authHandler (req, res, next)
       res.locals.hasPermission = (permission) => {
         return isUTASBotAdminCached(permissions) || hasPermissionCached(permission, permissions);
       };
+      res.locals.isUTASBotAdmin = () => {
+        return isUTASBotAdminCached(permissions);
+      };
     }
     catch (DiscordHTTPError) { }
 
@@ -199,6 +202,9 @@ export async function authHandler (req, res, next)
         var permissions = await getPermissions(req.discordUser.id);
         res.locals.hasPermission = (permission) => {
           return isUTASBotAdminCached(permissions) || hasPermissionCached(permission, permissions);
+        };
+        res.locals.isUTASBotAdmin = () => {
+          return isUTASBotAdminCached(permissions);
         };
       }
       catch (DiscordHTTPError) {
