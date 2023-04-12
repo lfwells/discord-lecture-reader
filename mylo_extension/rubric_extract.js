@@ -44,6 +44,7 @@ for (const r of results)
 
         //now parse the rubric
         let rubric = feedback.RubricAssessments[0];
+        if (!rubric) continue;
         for (const outcome of rubric.CriteriaOutcome) {
             const rowID = criteria[outcome.CriterionId];
             const obj = {};
