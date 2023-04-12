@@ -170,12 +170,12 @@ export async function authHandler (req, res, next)
       req.discordUser = await oauth.getUser(req.session.auth.access_token);
       res.locals.discordUser = req.discordUser;
 
-      var permissions = await getPermissions(req.discordUser.id);
+      req.permissions = await getPermissions(req.discordUser.id);
       res.locals.hasPermission = (permission) => {
-        return isUTASBotAdminCached(permissions) || hasPermissionCached(permission, permissions);
+        return isUTASBotAdminCached(req.permissions) || hasPermissionCached(permission, req.permissions);
       };
       res.locals.isUTASBotAdmin = () => {
-        return isUTASBotAdminCached(permissions);
+        return isUTASBotAdminCached(req.permissions);
       };
     }
     catch (DiscordHTTPError) { }
@@ -199,12 +199,12 @@ export async function authHandler (req, res, next)
         req.discordUser = await oauth.getUser(req.session.auth.access_token);
         res.locals.discordUser = req.discordUser;
 
-        var permissions = await getPermissions(req.discordUser.id);
+        req.permissions = await getPermissions(req.discordUser.id);
         res.locals.hasPermission = (permission) => {
-          return isUTASBotAdminCached(permissions) || hasPermissionCached(permission, permissions);
+          return isUTASBotAdminCached(req.permissions) || hasPermissionCached(permission, req.permissions);
         };
         res.locals.isUTASBotAdmin = () => {
-          return isUTASBotAdminCached(permissions);
+          return isUTASBotAdminCached(req.permissions);
         };
       }
       catch (DiscordHTTPError) {

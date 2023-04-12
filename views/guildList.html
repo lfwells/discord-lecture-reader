@@ -32,12 +32,17 @@
         %>
         <li>
           <img src="<%=guild.iconURL()%>" />
-          <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>"><%= guild.name %><br />
-          <span class="serverInfo">
-            <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
-            <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%> - 
-            <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
-          </span>
+          <% if (guild.isGuildAdmin) { %>
+            <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>">
+          <% } else { %>
+            <a href="#" title="Not an Admin">
+          <% } %>
+            <%= guild.name %><br />
+            <span class="serverInfo">
+              <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
+              <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%> - 
+              <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
+            </span>
           </a>
         </li>
         <% 

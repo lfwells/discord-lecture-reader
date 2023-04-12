@@ -16,6 +16,7 @@ import { init_presence_scrape } from "../analytics/presence.js";
 import { getPostsData } from "../analytics/analytics.js";
 
 import { setGuildContextForRoute } from "../core/errors.js";
+import { getPermissions, isUTASBotAdminCached } from "../core/permissions.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -119,6 +120,7 @@ export async function getGuilds(client, req, showAllGuilds)
   if (req.session && req.session.auth && req.discordUser)
   {
     var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+    var permissions = req.permissions;
     //console.log("user guilds", guilds);
     var result = showAllGuilds ? client.guilds.cache : client.guilds.cache.filter(g => guilds.findIndex(g2 => g2.id == g.id) >= 0);
 
@@ -127,6 +129,8 @@ export async function getGuilds(client, req, showAllGuilds)
       //a once-off cache totalPost count
         await asyncForEach(result, async function(guild)  
         {
+          guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(guild, client, req, guilds);
+
           await getGuildProperty("totalPosts", guild, "totalPosts");
           if (!guild.totalPosts)
           {
