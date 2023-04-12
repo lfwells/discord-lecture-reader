@@ -189,6 +189,7 @@ export async function authHandler (req, res, next)
     //console.log(("auth check"), req.session);
     if (req.session == undefined || req.session.auth == undefined)
     {
+      console.log("auth check failed", req.session);
       loginPage(req,res);
     }
     else
