@@ -1,5 +1,6 @@
 import { getClient } from "../core/client.js";
 import * as config from "../core/config.js";
+import { hasPermission } from "../core/permissions.js";
 import { renderErrorPage } from "../core/server.js";
 import { isOutsideTestServer } from "../core/utils.js";
 
@@ -16,6 +17,7 @@ export async function guildList(req, res)
   res.render('guildList', {
     guilds: req.guilds,
     testMode: config.getTestMode(),
+    allowCreateServer: await hasPermission(req.discordUser.id, "create_server")
   });
 }
 
