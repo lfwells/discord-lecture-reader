@@ -15,9 +15,6 @@ export async function loginPage(req,res)
         state: req.query.path, 
     });
 
-    //console.log(url);  
-    console.log("how did we get here?");
-    console.trace();
     res.render('login', { url: url });//TODO: redirect url within the site??
 }
 export async function loginComplete(req,res)
