@@ -2,6 +2,7 @@ import { offTopicCommandOnly, pluralize } from '../core/utils.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 import { setGuildContextForInteraction } from '../core/errors.js';
+import { profileIsPublic } from './profile.js';
 
 export default async function(client)
 {    
@@ -61,6 +62,12 @@ async function doProfileCommand(interaction)
     else
     {
         member = interaction.member;
+    }
+
+    if (await profileIsPublic(member) == false)
+    {
+        await interaction.editReply({ content: `Sorry, ${member.displayName}'s profile is not public. Why not ask them to make it public?`, ephemeral:true });
+        return;
     }
 
     const row = new MessageActionRow()
