@@ -66,7 +66,9 @@
                 
                 function currentTab(checkFor)
                 {
-                    var path = locals.path.replace("/guild/"+guild.id+"/",  "");
+                    var path = locals.path
+                        .replace("/guild/"+guild.id+"/",  "")
+                        .replace("/profile/"+profile.id+"/",  "";
                     var isCurrent = false;
                     if (path.length == 0 && checkFor == "")
                     {
@@ -244,6 +246,11 @@
 
                     <ul>
                         <li><a <%=currentTab("")%> href="/"><%=locals.discordUser ? "Unit List" : "Home" %></a></li>
+                        <% if (locals.discordUser)
+                        {
+                            %><li><a <%=currentTab("profile")%> href="/profile/<%=locals.discordUser.id%>">My Profile</a></li><%
+                        }
+                        %>
                         <% if (locals.isUTASBotAdmin())
                         {
                             %>
