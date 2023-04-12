@@ -274,7 +274,13 @@ if ( (typeof showTitle == 'undefined' || showTitle))
     <main>
         <% if ( typeof title != 'undefined' )
         {
-            %><h2><%=title%></h2><%
+            %><h2>
+                <% if ( typeof icon != 'undefined')
+                {   
+                    %><img src="<%=icon%>" style="vertical-align: middle; margin:10px; border-radius: 50%;" /><%
+                }%>
+                <%=title%>
+            </h2><%
         }
 }
 %>

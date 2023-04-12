@@ -1,5 +1,29 @@
-<%- include('../header.html', { title: locals.profile.username }) %>
+<%- include('../header.html', { title: locals.profile.username, icon:locals.profile.displayAvatarURL() }) %>
 
-<p>Epic Profile Page</p>
+<style>
+    .profilePanel {
+        width: 33%;
+        height: 200px;
+        float: left;
+        border: 1px solid #000;
+        border-radius: 16px;
+        padding: 10px;
+        margin: 10px;
+        background-color: rgba(128, 128, 128, 0.171);
+
+    }
+</style>
+
+<div>
+    <div class="profilePanel" style="float: right; width:55%; height:440px">
+        <h3>Awards</h3>
+    </div>
+    <div class="profilePanel">
+        <h3>Stats</h3>
+    </div>
+    <div class="profilePanel">
+        <h3>Servers</h3>
+    </div>
+</div>
 
 <%- include('../footer.html') %>
