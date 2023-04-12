@@ -33,6 +33,7 @@ import { getClient } from './client.js';
 
 
 import { exec } from 'child_process';
+import { getPermissions, hasPermissionCached, isUTASBotAdminCached } from './permissions.js';
 
 export function init_server()
 {
@@ -168,6 +169,11 @@ export async function authHandler (req, res, next)
     {
       req.discordUser = await oauth.getUser(req.session.auth.access_token);
       res.locals.discordUser = req.discordUser;
+
+      var permissions = await getPermissions(req.discordUser.id);
+      res.locals.hasPermission = (permission) => {
+        return isUTASBotAdminCached(permissions) || hasPermissionCached(permission, permissions);
+      };
     }
     catch (DiscordHTTPError) { }
 
@@ -189,9 +195,14 @@ export async function authHandler (req, res, next)
       {
         req.discordUser = await oauth.getUser(req.session.auth.access_token);
         res.locals.discordUser = req.discordUser;
+
+        var permissions = await getPermissions(req.discordUser.id);
+        res.locals.hasPermission = (permission) => {
+          return isUTASBotAdminCached(permissions) || hasPermissionCached(permission, permissions);
+        };
       }
       catch (DiscordHTTPError) {
-        console.log("caught discord http error");
+        console.log("caught discord http error", DiscordHTTPError);
         return loginPage(req,res);
       }
       //console.log(req.discordUser);

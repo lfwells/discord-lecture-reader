@@ -6,7 +6,7 @@
   {
     %>
     <p>You aren't in any servers with the UTAS Bot yet. </p>
-      <% if (locals.allowCreateServer)
+      <% if (locals.hasPermission("create_server"))
       {
         %><p>Let's get started!<%- include("subViews/addServerLink.html") %></p><%
       } else {
@@ -18,7 +18,7 @@
   {
     %>
     <ul id="guilds">
-      <% if (locals.allowCreateServer)
+      <% if (locals.hasPermission("create_server"))
       {
         %><li>
           <%- include("subViews/addServerLink.html") %>
