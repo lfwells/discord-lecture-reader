@@ -1,21 +1,23 @@
 import { getClient } from "../core/client.js";
 import * as config from "../core/config.js";
+import { isUTASBotAdmin } from "../core/permissions.js";
 import { renderErrorPage } from "../core/server.js";
 import { isOutsideTestServer } from "../core/utils.js";
 
-import { getAdminGuilds, saveGuildProperty, setBotNickname } from "./guild.js";
+import { getGuilds, saveGuildProperty, setBotNickname } from "./guild.js";
 
 export async function loadGuildList(req,res,next)
 {
   var client = getClient();
-  req.guilds = (await getAdminGuilds(client, req)).filter(g => !isOutsideTestServer(g)).sort((a, b) => a.name.localeCompare(b.name));
+  req.guilds = (await getGuilds(client, req, await isUTASBotAdmin(req.discordUser.id)))
+    .filter(g => !isOutsideTestServer(g)).sort((a, b) => a.name.localeCompare(b.name));
   next();
 }
 export async function guildList(req, res) 
 {  
   res.render('guildList', {
     guilds: req.guilds,
-    testMode: config.getTestMode(),
+    testMode: config.getTestMode()
   });
 }
 

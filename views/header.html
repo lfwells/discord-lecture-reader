@@ -47,7 +47,7 @@
             %>
             <header>
             <% 
-            if (locals.guild && locals.discordUser)
+            if (locals.guild && locals.discordUser && locals.guild.isGuildAdmin)
             {
                 %>
                 <h1>
@@ -55,8 +55,7 @@
                     <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
                 </h1>
                 <% 
-                
-                
+                   
                 if (locals.query && locals.query.message) 
                 { 
                     %>
@@ -66,7 +65,10 @@
                 
                 function currentTab(checkFor)
                 {
-                    var path = locals.path.replace("/guild/"+guild.id+"/",  "");
+                    var path = locals.path.replace("/guild/"+guild.id+"/",  "")
+                    if (typeof locals.profile != "undefined")
+                        path = path.replace("/profile/"+profile.id+"/",  "");
+
                     var isCurrent = false;
                     if (path.length == 0 && checkFor == "")
                     {
@@ -96,7 +98,7 @@
                                 <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
                             <% }%>
                             <div>
-                                <%=locals.discordUser.username%><br />
+                                <a href="/profile/<%=locals.discordUser.id%>"><%=locals.discordUser.username%></a><br />
                                 <a href="/logout" class="logout">Logout</a>
                             </div>
                         </div>
@@ -147,7 +149,7 @@
                             <li><a <%=currentTab("leaderboard")%> href="/guild/<%= guild.id %>/leaderboard/">Award Leaderboard</a></li><%
                         }
                         %>
-                       
+                    
                         
                         <% if (hasFeature("invites"))
                         {
@@ -186,12 +188,18 @@
                             <%
                         }
                         %>
-
                         <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
-                        <li><a href="/restart">Restart Server</a></li>
+                        <% if (locals.discordUser && locals.isUTASBotAdmin && locals.isUTASBotAdmin())
+                        {
+                            %>
+                            <li><a href="/restart">Restart Server</a></li>
+                            <%
+                        }
+                        %>
                     </ul>
                 </nav>
                 <%
+            
             } 
             else
             {
@@ -209,8 +217,23 @@
                     }
                     return isCurrent ? ' class=current ' : "";
                 }
+                
+                if (locals.guild && locals.discordUser && !locals.guild.isGuildAdmin)
+                {
+                    %>
+                    <h1>
+                        <img src="<%=guild.iconURL()%>" />
+                        <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
+                    </h1>
+                    <% 
+                }
+                else
+                {
+                    %>
+                    <h1><a href="/">UTAS Discord Bot</a></h1>
+                    <%
+                }
                 %>
-                <h1><a href="/">UTAS Discord Bot</a></h1>
                 
                 <nav>
 
@@ -222,7 +245,7 @@
                                 <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
                             <% }%>
                             <div>
-                                <%=locals.discordUser.username%><br />
+                                <a href="/profile/<%=locals.discordUser.id%>"><%=locals.discordUser.username%></a><br />
                                 <a href="/logout" class="logout">Logout</a>
                             </div>
                         </div>
@@ -239,11 +262,18 @@
 
                     <ul>
                         <li><a <%=currentTab("")%> href="/"><%=locals.discordUser ? "Unit List" : "Home" %></a></li>
-                        <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
                         <% if (locals.discordUser)
                         {
+                            %><li><a <%=currentTab("profile")%> href="/profile/<%=locals.discordUser.id%>">My Profile</a></li><%
+                        }
+                        %>
+                        <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
+                        <% if (locals.discordUser && locals.isUTASBotAdmin && locals.isUTASBotAdmin())
+                        {
                             %><li><a href="/restart">Restart Server</a></li><%
-                        } %>
+                            
+                        }
+                        %>
                     </ul>
                 </nav>
                 <%
@@ -260,7 +290,13 @@ if ( (typeof showTitle == 'undefined' || showTitle))
     <main>
         <% if ( typeof title != 'undefined' )
         {
-            %><h2><%=title%></h2><%
+            %><h2>
+                <% if ( typeof icon != 'undefined')
+                {   
+                    %><img src="<%=icon%>" /><%
+                }%>
+                <%=title%>
+            </h2><%
         }
 }
 %>

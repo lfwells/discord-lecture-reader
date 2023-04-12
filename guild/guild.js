@@ -9,13 +9,16 @@ import { oauth } from '../_oathDiscord.js';
 import { init_sheet_for_guild } from '../analytics/sheets.js';
 import { init_sessions } from '../attendance/sessions.js';
 import { unregisterAllCommandsIfNecessary } from "./commands.js";
-import { asyncForEach, isOutsideTestServer } from "../core/utils.js";
+import { asyncFilter, asyncForEach, isOutsideTestServer } from "../core/utils.js";
 import { init_status_channels } from "./statusChannels.js";
 import { stripEmoji } from "../awards/awards.js";
 import { init_presence_scrape } from "../analytics/presence.js";
 import { getPostsData } from "../analytics/analytics.js";
 
 import { setGuildContextForRoute } from "../core/errors.js";
+import { getPermissions, isUTASBotAdminCached } from "../core/permissions.js";
+import { loadClassList } from "../classList/classList.js";
+import { profileIsPublic } from "../profile/profile.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -81,6 +84,13 @@ export function load() {
       return;
     }
 
+    if (req.discordUser)
+    {
+      var permissions = await getPermissions(req.discordUser.id);
+      var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token));
+      req.guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(req.guild, client, req, guilds);
+    }
+
     if (isOutsideTestServer(req.guild))
     {
       res.end("Tried to use non-test server in test mode. Disable test mode.");
@@ -94,34 +104,42 @@ export function load() {
   }
 }
 
-export async function getAdminGuilds(client, req)
+export async function isGuildAdmin(g, client, req, ownedGuilds)
+{  
+  if (!ownedGuilds) ownedGuilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+  return ownedGuilds.findIndex(g2 => {
+    if (g2.id == g.id)
+    {
+      //if owner then yess
+      if (g2.owner) { /*console.log("is owner of "+g2.name); */return true; }
+
+      //check admin permissions, but this is not enough
+      if ((g2.permissions & 0x0000000008) == 0x0000000008) { /*console.log("is admin of "+g2.name); */return true; }
+
+      //check if theyre in the admins list
+      if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id] && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
+        /*console.log("is in staff role of "+g2.name); */return true;
+      }
+    }
+    return false;
+  }) >= 0;
+}
+export async function getGuilds(client, req, showAllGuilds)
 {
   if (req.session && req.session.auth && req.discordUser)
   {
     var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+    var permissions = req.permissions;
     //console.log("user guilds", guilds);
-    var result = client.guilds.cache.filter(g => guilds.findIndex(g2 => {
-      if (g2.id == g.id)
-      {
-        //if owner then yess
-        if (g2.owner) { /*console.log("is owner of "+g2.name); */return true; }
-
-        //check admin permissions, but this is not enough
-        if ((g2.permissions & 0x0000000008) == 0x0000000008) { /*console.log("is admin of "+g2.name); */return true; }
-
-        //check if theyre in the admins list
-        if (req.discordUser && GUILD_CACHE && GUILD_CACHE[g2.id] && GUILD_CACHE[g2.id].admins && GUILD_CACHE[g2.id].admins.indexOf(req.discordUser.id) >= 0) {
-          /*console.log("is in staff role of "+g2.name); */return true;
-        }
-      }
-      return false;
-    }) >= 0);
+    var result = showAllGuilds ? client.guilds.cache : client.guilds.cache.filter(g => guilds.findIndex(g2 => g2.id == g.id) >= 0);
 
     if (req.path.indexOf("clone") == -1)
     {
       //a once-off cache totalPost count
         await asyncForEach(result, async function(guild)  
         {
+          guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(guild, client, req, guilds);
+
           await getGuildProperty("totalPosts", guild, "totalPosts");
           if (!guild.totalPosts)
           {
@@ -139,29 +157,32 @@ export async function getAdminGuilds(client, req)
 
 export async function checkGuildAdmin(req, res, next)
 {
-  //console.log("checkGuildAdmin");
-  if (req.path.indexOf("obs") >= 0 || 
+  if (req.path.indexOf("/obs/") >= 0 || 
     req.path.indexOf("/text") >= 0 || 
-    req.path.indexOf("/text/latest") || 
+    req.path.indexOf("/text/latest") >= 0 || 
     req.path.indexOf("/poll") >= 0 || 
     req.path.indexOf("/recordProgress") >= 0 || 
     req.path.indexOf("/recordSectionProgress") >= 0)  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
   {
-//    console.log("next");
     next();
     return;
   }
   else if (req.discordUser)
   {
     var client = getClient();
-    var adminGuilds = (await getAdminGuilds(client, req)).map(g => g.id);
-    if (adminGuilds.indexOf(req.guild.id) >= 0)
+    if (await isUTASBotAdminCached(req.permissions) || await isGuildAdmin(req.guild, client, req))
     {
       next();
       return;
     }
   }
-  res.render("accessDenied");
+
+  await loadClassList(req, res);
+  req.classList = await asyncFilter(req.classList, async (member) => await profileIsPublic(member));
+  
+  res.render("guildPublic", {
+    classList: req.classList,
+  });
 }
 
 export async function getGuildDocument(guildID)

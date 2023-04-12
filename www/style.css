@@ -294,7 +294,7 @@
             padding-top:0.5em;
             margin-top:-1em !important;
             background-color: rgba(0,0,0,0.1);
-            min-height: 80vh;
+            min-height: 79vh;
         }
         main, header > *, footer
         {
@@ -340,7 +340,7 @@
             min-width:initial !important;
         }
 
-        .btn {
+        .btn, .btnSmall {
             display:inline-block !important;
             margin:2ex;
             padding:2ex !important;
@@ -370,6 +370,11 @@
         }
         .btn.outline, .btn.outlined {
             background-color: transparent;
+        }
+
+        .btnSmall {
+            padding:1ex !important;
+            font-size:normal !important;
         }
 
 
@@ -614,3 +619,11 @@
         }
 
         .property-selector * { color: black !important; }
+
+        h2 img {
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 16px;
+        }

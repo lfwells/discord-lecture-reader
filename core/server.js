@@ -33,6 +33,7 @@ import { getClient } from './client.js';
 
 
 import { exec } from 'child_process';
+import { getPermissions, hasPermissionCached, isUTASBotAdminCached } from './permissions.js';
 
 export function init_server()
 {
@@ -168,6 +169,14 @@ export async function authHandler (req, res, next)
     {
       req.discordUser = await oauth.getUser(req.session.auth.access_token);
       res.locals.discordUser = req.discordUser;
+
+      req.permissions = await getPermissions(req.discordUser.id);
+      res.locals.hasPermission = (permission) => {
+        return isUTASBotAdminCached(req.permissions) || hasPermissionCached(permission, req.permissions);
+      };
+      res.locals.isUTASBotAdmin = () => {
+        return isUTASBotAdminCached(req.permissions);
+      };
     }
     catch (DiscordHTTPError) { }
 
@@ -180,6 +189,7 @@ export async function authHandler (req, res, next)
     //console.log(("auth check"), req.session);
     if (req.session == undefined || req.session.auth == undefined)
     {
+      console.log("auth check failed", req.session);
       loginPage(req,res);
     }
     else
@@ -189,9 +199,17 @@ export async function authHandler (req, res, next)
       {
         req.discordUser = await oauth.getUser(req.session.auth.access_token);
         res.locals.discordUser = req.discordUser;
+
+        req.permissions = await getPermissions(req.discordUser.id);
+        res.locals.hasPermission = (permission) => {
+          return isUTASBotAdminCached(req.permissions) || hasPermissionCached(permission, req.permissions);
+        };
+        res.locals.isUTASBotAdmin = () => {
+          return isUTASBotAdminCached(req.permissions);
+        };
       }
       catch (DiscordHTTPError) {
-        console.log("caught discord http error");
+        console.log("caught discord http error", DiscordHTTPError);
         return loginPage(req,res);
       }
       //console.log(req.discordUser);

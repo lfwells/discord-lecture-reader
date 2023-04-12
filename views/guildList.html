@@ -1,33 +1,44 @@
 <%- include('header.html', { title: "Unit List" }) %>
 
-<p>Discord Servers that you are an admin of and you have added the Discord Bot to will appear here.</p>
+<p>Discord Servers that you are a member of and have the UTAS Bot on them to will appear here.</p>
 
   <% if (guilds.size == 0)
   {
     %>
-    <p>You haven't added the Bot to any servers yet. Let's get started!</p>
-    <%- include("subViews/addServerLink.html") %>
+    <p>You aren't in any servers with the UTAS Bot yet. </p>
+      <% if (locals.hasPermission("create_server"))
+      {
+        %><p>Let's get started!<%- include("subViews/addServerLink.html") %></p><%
+      } else {
+        %><p>How did you find this page?!</p><%
+      }%>
     <%
   }
   else
   {
     %>
     <ul id="guilds">
-      <li>
-        <%- include("subViews/addServerLink.html") %>
-      </li>
+      <% if (locals.hasPermission("create_server"))
+      {
+        %><li>
+          <%- include("subViews/addServerLink.html") %>
+        </li><%
+      }
+      %>
+
       <%
       guilds.forEach(function(guild)
       { 
         %>
         <li>
           <img src="<%=guild.iconURL()%>" />
-          <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>"><%= guild.name %><br />
-          <span class="serverInfo">
-            <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
-            <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%> - 
-            <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
-          </span>
+          <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>">
+            <%= guild.name %><br />
+            <span class="serverInfo">
+              <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
+              <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%> - 
+              <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
+            </span>
           </a>
         </li>
         <% 
