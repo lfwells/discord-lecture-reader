@@ -1,7 +1,7 @@
 import { loadProfile, saveProfileProperty } from "./profile.js";
 import { getClient } from '../core/client.js';
 import { getPostsFilterPredicate } from "../classList/classList.js";
-import { getPostsData } from "../analytics/analytics.js";
+import { getPostsCount, getPostsData } from "../analytics/analytics.js";
 import { getAwardsForMember } from "../awards/awards.js";
 import { useLegacyAwardsSystem } from "../awards/awards.js";
 import { getAwardName } from "../awards/awards.js";
@@ -30,14 +30,12 @@ export async function load(req, res, next)
     req.profile.total = 0;
     for (let guild of req.profile.guilds)
     {
-        //comment this line out to be faster!
-        //TODO: need to use firebase count queries for this
-        //req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
+        req.profile.total += await getPostsCount(guild, req.profile.id);
     }
-    req.profile.total = "69 lol idk";
 
     //read in the awards for each server
     req.profile.awards = [];
+    /*
     for (let guild of req.profile.guilds)
     {
         if (await useLegacyAwardsSystem(guild))
@@ -76,7 +74,7 @@ export async function load(req, res, next)
             console.log({rpa:req.profile.awards});
         }
     }
-
+*/
     res.locals.profile = req.profile;
     res.locals.isOurProfile = req.discordUser != null && req.discordUser.id == req.profile.id;
     

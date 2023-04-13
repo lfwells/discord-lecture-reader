@@ -57,10 +57,15 @@ function postsCollection(guild)
 }
 
 
-export async function getPostsCount(guild, userPredicate, postPredicate)
+export async function getPostsCount(guild, forUserID)
 {
     let guildDocument = await getGuildDocument(guild.id);
-    let count = await guildDocument.collection(postsCollection(guild)).count().get();
+    let collection = guildDocument.collection(postsCollection(guild));
+    if (forUserID)
+    {
+        collection = collection.where("author", "==", forUserID);
+    }
+    let count = await collection.count().get();
     return count.data().count;
 }
 export async function getPostsData(guild, userPredicate, postPredicate)
