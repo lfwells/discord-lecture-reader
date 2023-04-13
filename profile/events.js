@@ -57,17 +57,17 @@ async function doProfileCommand(interaction)
     var member = interaction.options.getMember("user");
     if (member)
     {
+        
         member = await interaction.guild.members.fetch(member);
+        if (await profileIsPublic(member) == false)
+        {
+            await interaction.editReply({ content: `Sorry, ${member.displayName}'s profile is not public. Why not ask them to make it public?`, ephemeral:true });
+            return;
+        }
     }
     else
     {
         member = interaction.member;
-    }
-
-    if (await profileIsPublic(member) == false)
-    {
-        await interaction.editReply({ content: `Sorry, ${member.displayName}'s profile is not public. Why not ask them to make it public?`, ephemeral:true });
-        return;
     }
 
     const row = new MessageActionRow()
