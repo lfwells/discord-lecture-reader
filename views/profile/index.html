@@ -82,23 +82,14 @@
     <div class="profilePanel scrollable" style="float: right; width:55%; height:552px">
         <h3>Awards</h3>
         <content>
-            <% locals.profile.awards.forEach(award => { %>
-                <div class="pair">
-                    <span><%= award.emoji %></span>
-                    <h4>
-                        <span><%= award.title %></span>
-                        <span><%= award.description %></span>
-                        <span><%= award.server %></span>
-                    </h4>
-                </div>
-            <% })%>
+            ⌛Loading...
         </content>
     </div>
     <div class="profilePanel scrollable">
         <h3>Stats</h3>
         <content>
             <div class="pair">
-                <span><%=locals.profile.total%></span>
+                <span id="totalPosts">⌛</span>
                 <h4><span>Total Posts</span></h4>
             </div>
             <div class="pair">
@@ -106,7 +97,7 @@
                 <h4><span>UTAS Bot Servers</span></h4>
             </div>
             <div class="pair">
-                <span><%=locals.profile.awards.length%></span>
+                <span id="totalAwards">⌛</span>
                 <h4><span>Awards</span></h4>
             </div>
         </content>

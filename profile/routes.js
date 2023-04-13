@@ -26,6 +26,14 @@ export async function load(req, res, next)
         }
     }
 
+    res.locals.profile = req.profile;
+    res.locals.isOurProfile = req.discordUser != null && req.discordUser.id == req.profile.id;
+    
+    next();
+}
+export async function loadTotalPostCount(req,res,next)
+{
+    req.profile = req.profile ?? {};
     //read in the stats for each server
     req.profile.total = 0;
     for (let guild of req.profile.guilds)
@@ -33,9 +41,12 @@ export async function load(req, res, next)
         req.profile.total += await getPostsCount(guild, req.profile.id);
     }
 
-    //read in the awards for each server
-    req.profile.awards = [];
-    /*
+    res.json({total:req.profile.total});
+}
+export async function loadTotalAwards(req,res,next)
+{
+    req.profile = req.profile ?? {};
+    //read in the stats for each server
     for (let guild of req.profile.guilds)
     {
         if (await useLegacyAwardsSystem(guild))
@@ -74,12 +85,9 @@ export async function load(req, res, next)
             console.log({rpa:req.profile.awards});
         }
     }
-*/
-    res.locals.profile = req.profile;
-    res.locals.isOurProfile = req.discordUser != null && req.discordUser.id == req.profile.id;
-    
-    next();
+    res.json({awards:req.profile.awards});
 }
+
 export async function profile_home(req,res,next)
 {
     res.render("profile/index");
