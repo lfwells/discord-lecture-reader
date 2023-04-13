@@ -268,7 +268,7 @@ export function loadGuildProperty(property, required, now)
     //if required or called as a "do it now", then just do the function
     if (required || now)
     {
-      await func(res,req,next);
+      await func(req,res,next);
     }
     //otherwise, cache it
     else
