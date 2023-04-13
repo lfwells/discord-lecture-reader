@@ -32,8 +32,9 @@ export async function load(req, res, next)
     {
         //comment this line out to be faster!
         //TODO: need to use firebase count queries for this
-        req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
+        //req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
     }
+    req.profile.total = "69 lol idk";
 
     //read in the awards for each server
     req.profile.awards = [];
