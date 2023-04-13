@@ -175,7 +175,7 @@ export async function authHandler (req, res, next)
     //store some basic discord info (but in this case, don't error)
     try
     {
-      req.discordUser = await oauth.getUser(req.session.auth.access_token);
+      req.discordUser = await oauth(req).getUser(req.session.auth.access_token);
       res.locals.discordUser = req.discordUser;
 
       req.permissions = await getPermissions(req.discordUser.id);
@@ -205,7 +205,7 @@ export async function authHandler (req, res, next)
       //store some basic discord info
       try
       {
-        req.discordUser = await oauth.getUser(req.session.auth.access_token);
+        req.discordUser = await oauth(req).getUser(req.session.auth.access_token);
         res.locals.discordUser = req.discordUser;
 
         req.permissions = await getPermissions(req.discordUser.id);

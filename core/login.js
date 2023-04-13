@@ -10,7 +10,7 @@ export const scopeMyLOConnect = ["identify", "guilds"];
 
 export async function loginPage(req,res)
 {
-    const url = oauth.generateAuthUrl({
+    const url = oauth(req).generateAuthUrl({
         scope: scope, 
         state: req.query.path, 
     });
@@ -21,7 +21,7 @@ export async function loginComplete(req,res)
 {
     //console.log(req.query);
 
-    var auth = await oauth.tokenRequest({
+    var auth = await oauth(req).tokenRequest({
         code: req.query.code,
         scope: scope,
         grantType: "authorization_code",

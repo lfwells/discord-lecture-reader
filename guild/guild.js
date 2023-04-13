@@ -87,7 +87,7 @@ export function load() {
     if (req.discordUser)
     {
       var permissions = await getPermissions(req.discordUser.id);
-      var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token));
+      var guilds = Object.values(await oauth(req).getUserGuilds(req.session.auth.access_token));
       req.guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(req.guild, client, req, guilds);
     }
 
@@ -106,7 +106,7 @@ export function load() {
 
 export async function isGuildAdmin(g, client, req, ownedGuilds)
 {  
-  if (!ownedGuilds) ownedGuilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+  if (!ownedGuilds) ownedGuilds = Object.values(await oauth(req).getUserGuilds(req.session.auth.access_token)); 
   return ownedGuilds.findIndex(g2 => {
     if (g2.id == g.id)
     {
@@ -128,7 +128,7 @@ export async function getGuilds(client, req, showAllGuilds)
 {
   if (req.session && req.session.auth && req.discordUser)
   {
-    var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+    var guilds = Object.values(await oauth(req).getUserGuilds(req.session.auth.access_token)); 
     var permissions = req.permissions;
     //console.log("user guilds", guilds);
     var result = showAllGuilds ? client.guilds.cache : client.guilds.cache.filter(g => guilds.findIndex(g2 => g2.id == g.id) >= 0);
