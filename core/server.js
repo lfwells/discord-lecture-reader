@@ -108,33 +108,41 @@ export function init_server()
   
   //app.listen(config.__port, () => console.log(`Server running on ${config.__port}...`));
   
-  // Certificate
-  const privateKey = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/privkey.pem', 'utf8');
-  const certificate = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/cert.pem', 'utf8');
-  const ca = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/chain.pem', 'utf8');
-
-  const credentials = {
-    key: privateKey,
-    cert: certificate,
-    ca: ca
-  };
-
-  // Starting both http & https servers
+  
   const httpServer = http.createServer(app);
-  const httpsServer = https.createServer(credentials, app);
-
   httpServer.listen(8080, () => {
     console.log('HTTP Server running on port 8080');
   });
 
-  httpsServer.listen(443, () => {
-    console.log('HTTPS Server running on port 443');
-  });
+  try
+  {
+    // Certificate
+    const privateKey = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/privkey.pem', 'utf8');
+    const certificate = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/cert.pem', 'utf8');
+    const ca = fsfs.readFileSync('/etc/letsencrypt/live/utasbot.dev/chain.pem', 'utf8');
 
-  
-  //Lake's chat preview package (TODO: authenticate)
-  expressWebSocket(app, httpsServer);    // << Make sure you have WS support on your express
-  app.use("/chat", createRouter(getClient()));
+    const credentials = {
+      key: privateKey,
+      cert: certificate,
+      ca: ca
+    };
+
+    // Starting both http & https servers
+    const httpsServer = https.createServer(credentials, app);
+
+    httpsServer.listen(443, () => {
+      console.log('HTTPS Server running on port 443');
+    });
+
+    
+    //Lake's chat preview package (TODO: authenticate)
+    expressWebSocket(app, httpsServer);    // << Make sure you have WS support on your express
+    app.use("/chat", createRouter(getClient()));
+  }
+  catch 
+  {
+    console.log("failed to start https server");
+  }
 
   
   //web server routes
