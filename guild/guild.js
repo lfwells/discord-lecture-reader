@@ -13,7 +13,7 @@ import { asyncFilter, asyncForEach, isOutsideTestServer } from "../core/utils.js
 import { init_status_channels } from "./statusChannels.js";
 import { stripEmoji } from "../awards/awards.js";
 import { init_presence_scrape } from "../analytics/presence.js";
-import { getPostsData } from "../analytics/analytics.js";
+import { getPostsCount, getPostsData } from "../analytics/analytics.js";
 
 import { setGuildContextForRoute } from "../core/errors.js";
 import { getPermissions, isUTASBotAdminCached } from "../core/permissions.js";
@@ -140,6 +140,9 @@ export async function getGuilds(client, req, showAllGuilds)
         {
           guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(guild, client, req, guilds);
 
+          guild.totalPosts = await getPostsCount(guild);
+          console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
+          /*
           await getGuildProperty("totalPosts", guild, "totalPosts");
           if (!guild.totalPosts)
           {
@@ -147,7 +150,7 @@ export async function getGuilds(client, req, showAllGuilds)
             guild.totalPosts = (await getPostsData(guild)).length;
             console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
             await setGuildProperty(guild, "totalPosts", guild.totalPosts);
-          }
+          }*/
         });
     }
     return result;

@@ -43,7 +43,26 @@ export async function getStatsWeek(guild, userPredicate, postPredicate)
         d => d.timestamp.isSame(new Date(), 'week') && (userPredicate == null || userPredicate(d)), 
         d => d.timestamp.isSame(new Date(), 'week') && (postPredicate == null || postPredicate(d)));
 }
+function postsCollection(guild)
+{
+    var collection = "analytics";
+    if (
+        guild.id == "801006169496748063" || //kit305 2021
+        guild.id == "801757073083203634" //kit109 2021 sem 1
+    )
+    {
+        collection = "analytics_history";
+    }
+    return collection;
+}
 
+
+export async function getPostsCount(guild, userPredicate, postPredicate)
+{
+    let guildDocument = await getGuildDocument(guild.id);
+    let count = await guildDocument.collection(postsCollection(guild)).count().get();
+    return count.data().count;
+}
 export async function getPostsData(guild, userPredicate, postPredicate)
 {
 
@@ -70,15 +89,8 @@ export async function getPostsData(guild, userPredicate, postPredicate)
         return filtered;
     }
 
-    console.log(`getPostsData called with no cache for ${guild.id}, this little manauevr will cost us 10 years`);
-    var collection = "analytics";
-    if (
-        guild.id == "801006169496748063" || //kit305 2021
-        guild.id == "801757073083203634" //kit109 2021 sem 1
-    )
-    {
-        collection = "analytics_history";
-    }
+    console.trace(`getPostsData called with no cache for ${guild.id}, this little manauevr will cost us 10 years`);
+    var collection = postsCollection(guild);
 
 
     var guildDocument = await getGuildDocument(guild.id);
