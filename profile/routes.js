@@ -30,8 +30,9 @@ export async function load(req, res, next)
     req.profile.total = 0;
     for (let guild of req.profile.guilds)
     {
-        //TODO: uncomment this line
-        //req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
+        //comment this line out to be faster!
+        //TODO: need to use firebase count queries for this
+        req.profile.total += (await getPostsData(guild, null, (post) => post.author == req.profile.id)).length;
     }
 
     //read in the awards for each server
