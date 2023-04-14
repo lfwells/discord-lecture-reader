@@ -52,7 +52,7 @@
     .pair > span:first-child {
         font-size: 1.5em;
         padding: 0.5em;
-        width:2ex;
+        min-width:2ex;
         text-align: center;
         font-weight:bold;
         display:inline-block;
@@ -63,6 +63,11 @@
 
     #publicSwitch {
         cursor: pointer;
+    }
+
+    .loading::before {
+        content: "⌛";
+        margin-right:1ex;
     }
 </style>
 
@@ -81,24 +86,15 @@
 <div>
     <div class="profilePanel scrollable" style="float: right; width:55%; height:552px">
         <h3>Awards</h3>
-        <content>
-            <% locals.profile.awards.forEach(award => { %>
-                <div class="pair">
-                    <span><%= award.emoji %></span>
-                    <h4>
-                        <span><%= award.title %></span>
-                        <span><%= award.description %></span>
-                        <span><%= award.server %></span>
-                    </h4>
-                </div>
-            <% })%>
+        <content class="loading" id="awards">
+            Loading...
         </content>
     </div>
     <div class="profilePanel scrollable">
         <h3>Stats</h3>
         <content>
             <div class="pair">
-                <span><%=locals.profile.total%></span>
+                <span id="totalPosts" class="loading"></span>
                 <h4><span>Total Posts</span></h4>
             </div>
             <div class="pair">
@@ -106,7 +102,7 @@
                 <h4><span>UTAS Bot Servers</span></h4>
             </div>
             <div class="pair">
-                <span><%=locals.profile.awards.length%></span>
+                <span id="totalAwards" class="loading"></span>
                 <h4><span>Awards</span></h4>
             </div>
         </content>
@@ -138,6 +134,77 @@
             }
         });
     });
+
+    var last_response_len  = false;
+    $.ajax({
+        url:window.location.href+"/data/totalPosts",
+        method:"get",
+        contentType: 'application/json',
+        xhrFields: {
+            onprogress: function(e)
+            {
+                var this_response, response = e.currentTarget.response;
+                if(last_response_len === false)
+                {
+                    this_response = response;
+                    last_response_len = response.length;
+                }
+                else
+                {
+                    this_response = response.substring(last_response_len);
+                    last_response_len = response.length;
+                }
+                console.log(this_response);
+                var resp = JSON.parse(this_response);
+                if (resp.done)
+                    $("#totalPosts").removeClass("loading");
+                else
+                    $("#totalPosts").text(resp.total);
+            },
+        },
+    });
+
+    var last_response_len2  = false;
+    var totalAwards = [];
+    $.ajax({
+        url:window.location.href+"/data/awards",
+        method:"get",
+        contentType: 'application/json',
+        xhrFields: {
+            onprogress: function(e)
+            {
+                var this_response, response = e.currentTarget.response;
+                if(last_response_len2 === false)
+                {
+                    this_response = response;
+                    last_response_len2 = response.length;
+                }
+                else
+                {
+                    this_response = response.substring(last_response_len2);
+                    last_response_len2 = response.length;
+                }
+                console.log(this_response);
+                var resp = JSON.parse(this_response);
+                if (resp.done)
+                    $("#totalAwards, #awards").removeClass("loading");
+                else
+                {
+                    totalAwards.push(...resp.awards);
+                    $("#totalAwards").text(totalAwards.length);
+                    $("#awards").html(totalAwards.map(award => `<div class="pair">
+                        <span>${award.emoji}</span>
+                        <h4>
+                            <span>${award.title}</span>
+                            <span>${award.description ?? ""}</span>
+                            <span>${award.server}</span>
+                        </h4></div>`).join(""));
+                }
+            },
+        },
+    });
+
+    
 </script>
 
 <%- include('../footer.html') %>

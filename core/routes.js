@@ -116,6 +116,9 @@ function guildRouter()
     router.use(guild.loadGuildProperty("awardsDefaultAutoPop"));
     router.use(guild.loadGuildProperty("awardsDefaultCanNominate"));
 
+    router.use(guild.loadGuildProperty("adminRoleID")), 
+
+    router.use(guild.loadAllGuildProperties);
 
     //TODO: this filterButtons could be expensive, I didn't realise!
     router.use(filterButtons);
@@ -174,8 +177,8 @@ function guildRouter()
     router.get("/analytics/obs/week", analytics_routes.getStatsDataWeekOBS, analytics_routes.obsStatsWeek); 
 
     router.get("/analytics/history", analytics_routes.getHistoricalData); 
-    router.get("/analytics/timeGraph", guild.loadGuildProperty("adminRoleID"), analytics_routes.timeGraph); 
-    router.post("/analytics/timeGraph", guild.loadGuildProperty("adminRoleID"), analytics_routes.timeGraph); 
+    router.get("/analytics/timeGraph", analytics_routes.timeGraph); 
+    router.post("/analytics/timeGraph", analytics_routes.timeGraph); 
 
     //progress
     router.get("/progress/", loadClassList, attendance_routes.getProgressData, attendance_routes.displayProgress);

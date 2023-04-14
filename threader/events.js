@@ -2,7 +2,7 @@ import { getClient } from "../core/client.js";
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { adminCommandOnly, asyncForEach, dateToHuman, pluralize } from "../core/utils.js";
 import { registerCommand } from "../guild/commands.js";
-import { getGuildDocument, getGuildProperty, loadGuildProperty, setGuildProperty } from "../guild/guild.js";
+import { setGuildProperty } from "../guild/guild.js";
 import { addFlaggedMessage, clearFlaggedMessages, deleteFlaggedDocument, getFlaggedMessageIDs, getFlaggedMessages, getForums, postFlaggedMessagesEphemeral, removeFlaggedMessage } from "./threader.js";
 
 export default async function(client)

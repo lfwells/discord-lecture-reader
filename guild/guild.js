@@ -13,7 +13,7 @@ import { asyncFilter, asyncForEach, isOutsideTestServer } from "../core/utils.js
 import { init_status_channels } from "./statusChannels.js";
 import { stripEmoji } from "../awards/awards.js";
 import { init_presence_scrape } from "../analytics/presence.js";
-import { getPostsData } from "../analytics/analytics.js";
+import { getPostsCount, getPostsData } from "../analytics/analytics.js";
 
 import { setGuildContextForRoute } from "../core/errors.js";
 import { getPermissions, isUTASBotAdminCached } from "../core/permissions.js";
@@ -87,7 +87,7 @@ export function load() {
     if (req.discordUser)
     {
       var permissions = await getPermissions(req.discordUser.id);
-      var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token));
+      var guilds = Object.values(await oauth(req).getUserGuilds(req.session.auth.access_token));
       req.guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(req.guild, client, req, guilds);
     }
 
@@ -106,7 +106,7 @@ export function load() {
 
 export async function isGuildAdmin(g, client, req, ownedGuilds)
 {  
-  if (!ownedGuilds) ownedGuilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+  if (!ownedGuilds) ownedGuilds = Object.values(await oauth(req).getUserGuilds(req.session.auth.access_token)); 
   return ownedGuilds.findIndex(g2 => {
     if (g2.id == g.id)
     {
@@ -128,7 +128,7 @@ export async function getGuilds(client, req, showAllGuilds)
 {
   if (req.session && req.session.auth && req.discordUser)
   {
-    var guilds = Object.values(await oauth.getUserGuilds(req.session.auth.access_token)); 
+    var guilds = Object.values(await oauth(req).getUserGuilds(req.session.auth.access_token)); 
     var permissions = req.permissions;
     //console.log("user guilds", guilds);
     var result = showAllGuilds ? client.guilds.cache : client.guilds.cache.filter(g => guilds.findIndex(g2 => g2.id == g.id) >= 0);
@@ -140,6 +140,9 @@ export async function getGuilds(client, req, showAllGuilds)
         {
           guild.isGuildAdmin = await isUTASBotAdminCached(permissions) ||  await isGuildAdmin(guild, client, req, guilds);
 
+          guild.totalPosts = await getPostsCount(guild);
+          console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
+          /*
           await getGuildProperty("totalPosts", guild, "totalPosts");
           if (!guild.totalPosts)
           {
@@ -147,7 +150,7 @@ export async function getGuilds(client, req, showAllGuilds)
             guild.totalPosts = (await getPostsData(guild)).length;
             console.log("total posts", guild.name ?? "NO NAME DUMBO", guild.totalPosts);
             await setGuildProperty(guild, "totalPosts", guild.totalPosts);
-          }
+          }*/
         });
     }
     return result;
@@ -190,72 +193,89 @@ export async function getGuildDocument(guildID)
   return await guildsCollection.doc(guildID);
 }
 
-export function loadGuildProperty(property, required)
+
+export async function loadAllGuildProperties(req,res,next)
 {
-  return async function(req,res,next)  
+  await Promise.all(Object.values(req.loadPropertyFunctions).map(async (func) => await func(req,res)));
+  next();
+}
+export function loadGuildProperty(property, required, now)
+{
+  return async function(req,res,next)
   {
-    var client = getClient();
-    if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id][property])
+    req.loadPropertyFunctions = req.loadPropertyFunctions || {};
+    let func = async function(req,res,next)  
     {
-      req[property] = GUILD_CACHE[req.guild.id][property];
-    }
-
-    if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id][property]))
-    {
-      //console.log("loadGuildProperty cache miss --", property, "- ", req.guild.name, GUILD_CACHE[req.guild.id][property]);
-      //console.log(Object.keys(GUILD_CACHE[req.guild.id]).indexOf(property));
-      req.guildDocumentSnapshot = await req.guildDocument.get();
-      req[property] = await req.guildDocumentSnapshot.get(property);
-      if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
-      
-      GUILD_CACHE[req.guild.id][property] = req[property];
-      //console.log("loadGuildProperty setting", property, GUILD_CACHE[req.guild.id][property]);
-      //console.log(Object.keys(GUILD_CACHE[req.guild.id]).indexOf(property)); 
-      
-    } 
-    res.locals[property] = req[property];
-
-    if (property == "ruleChannelID" && isCommunityGuild(req.guild)) //special case
-    {
-      req[channelProperty] = await req.guild.rulesChannelID;
-      res.locals[channelProperty] = req[channelProperty];
-      GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
-    }
-    //auto detect an ChannelID or RoleID
-    else if (req[property])
-    {
-      if (property.endsWith("ChannelID"))
+      var client = getClient();
+      if (req.guild && GUILD_CACHE[req.guild.id] && GUILD_CACHE[req.guild.id][property])
       {
-        var channelProperty = property.replace("ChannelID", "Channel");
-        req[channelProperty] = GUILD_CACHE[req.guild.id][channelProperty] ?? await client.channels.fetch(req[property]);
+        req[property] = GUILD_CACHE[req.guild.id][property];
+      }
+
+      if (req.guild && (!GUILD_CACHE[req.guild.id] || !GUILD_CACHE[req.guild.id][property]))
+      {
+        req.guildDocumentSnapshot = await req.guildDocument.get();
+        req[property] = await req.guildDocumentSnapshot.get(property);
+        if (!GUILD_CACHE[req.guild.id]) { GUILD_CACHE[req.guild.id] = {} }
+        
+        GUILD_CACHE[req.guild.id][property] = req[property];
+        
+      } 
+      res.locals[property] = req[property];
+
+      if (property == "ruleChannelID" && isCommunityGuild(req.guild)) //special case
+      {
+        req[channelProperty] = await req.guild.rulesChannelID;
         res.locals[channelProperty] = req[channelProperty];
         GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
-        
       }
-      if (property.endsWith("RoleID"))
+      //auto detect an ChannelID or RoleID
+      else if (req[property])
       {
-        var roleProperty = property.replace("RoleID", "Role");
-        req[roleProperty] = GUILD_CACHE[req.guild.id][roleProperty] ?? await req.guild.roles.fetch(req[property]);
-        res.locals[roleProperty] = req[roleProperty];
-        GUILD_CACHE[req.guild.id][roleProperty] = req[roleProperty];
+        if (property.endsWith("ChannelID"))
+        {
+          var channelProperty = property.replace("ChannelID", "Channel");
+          req[channelProperty] = GUILD_CACHE[req.guild.id][channelProperty] ?? await client.channels.fetch(req[property]);
+          res.locals[channelProperty] = req[channelProperty];
+          GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
+          
+        }
+        if (property.endsWith("RoleID"))
+        {
+          var roleProperty = property.replace("RoleID", "Role");
+          req[roleProperty] = GUILD_CACHE[req.guild.id][roleProperty] ?? await req.guild.roles.fetch(req[property]);
+          res.locals[roleProperty] = req[roleProperty];
+          GUILD_CACHE[req.guild.id][roleProperty] = req[roleProperty];
+        }
+        if (property.endsWith("CategoryID"))
+        {
+          var categoryProperty = property.replace("CategoryID", "Category");
+          req[categoryProperty] = GUILD_CACHE[req.guild.id][categoryProperty] ?? await req.guild.channels.fetch(req[property]);
+          res.locals[categoryProperty] = req[categoryProperty];
+          GUILD_CACHE[req.guild.id][categoryProperty] = req[categoryProperty];
+        }
       }
-      if (property.endsWith("CategoryID"))
+      else
       {
-        var categoryProperty = property.replace("CategoryID", "Category");
-        req[categoryProperty] = GUILD_CACHE[req.guild.id][categoryProperty] ?? await req.guild.channels.fetch(req[property]);
-        res.locals[categoryProperty] = req[categoryProperty];
-        GUILD_CACHE[req.guild.id][categoryProperty] = req[categoryProperty];
+        if (required)
+        {
+          res.end("No "+property+" set. Please set one.");
+          return;
+        }
       }
+      if (next) next(); 
+    };
+    //if required or called as a "do it now", then just do the function
+    if (required || now)
+    {
+      await func(req,res,next);
     }
+    //otherwise, cache it
     else
     {
-      if (required)
-      {
-        res.end("No "+property+" set. Please set one.");
-        return;
-      }
+      req.loadPropertyFunctions[property] = func;
+      next();
     }
-    next(); 
   }
 }
   
@@ -264,7 +284,7 @@ export async function getGuildProperty(property, guild, defaultValue, required)
 {
   var req = await getFakeReq(guild);
   var res = {locals:{}, end:(a)=>{}};
-  await loadGuildProperty(property, required)(req, res, () => {});
+  await loadGuildProperty(property, required, true)(req, res, () => {});
   if (defaultValue != undefined && (res.error || res.locals[property] == undefined))
   {
     //console.log(`getGuildProperty got error ${res.error}, now filling in default value ${defaultValue}`);
@@ -284,7 +304,7 @@ export async function getGuildPropertyConverted(property, guild, defaultValue, r
 {
   var req = await getFakeReq(guild);
   var res = {locals:{}};
-  await loadGuildProperty(property, required)(req, res, () => {});
+  await loadGuildProperty(property, required, true)(req, res, () => {});
 
   if (defaultValue && res.error)
   {
@@ -345,7 +365,7 @@ export async function saveGuildProperty(property, value, req, res)
     await req.guild.setRulesChannel(channel);
   }
 
-  await loadGuildProperty(property, false)(req, res, () => {});
+  await loadGuildProperty(property, false, true)(req, res, () => {});
 }
 
 export async function deleteGuildProperty(guild, property)

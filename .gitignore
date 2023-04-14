@@ -16,3 +16,4 @@ google_cloud_key.js
 carers-care-service-account.json
 
 sessions/*
+.vscode/sftp.json

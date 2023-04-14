@@ -3,7 +3,7 @@ import { Permissions } from "discord.js";
 import * as Config from "../core/config.js";
 import { pluralize, sleep } from "../core/utils.js";
 import { getCurrentWeek, getNextSession } from "../attendance/sessions.js";
-import { getPostsData } from "../analytics/analytics.js";
+import { getPostsCount } from "../analytics/analytics.js";
 
 //this is very rate limited, can't do much
 export async function init_status_channels(guild)
@@ -11,8 +11,7 @@ export async function init_status_channels(guild)
 	try
 	{
 		init_status_channel(guild, "postCount", "showPostCount", async (guild) => {
-			var posts = await getPostsData(guild);
-			var postCount = posts.length ?? 0;
+			var postCount = await getPostsCount(guild);
 			return `📨  ${pluralize(postCount, "Post")}`; 
 		});
 		init_status_channel(guild, "onlineMembers", "showOnlineMemberCount", async (guild) => {

@@ -1,7 +1,7 @@
 
 import { google } from "googleapis";
 import { GoogleAuth } from "google-auth-library";
-import { getGuildProperty, GUILD_CACHE, loadGuildProperty, setGuildProperty } from "../guild/guild.js";
+import { getGuildProperty, GUILD_CACHE, setGuildProperty } from "../guild/guild.js";
 import { getAttendanceData } from "../attendance/routes.js";
 import { getStats } from "../analytics/analytics.js"; 
 import { getAwardListFullData } from "../awards/awards.js";
