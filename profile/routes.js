@@ -52,7 +52,10 @@ export async function loadTotalPostCount(req,res,next)
 }
 export async function loadTotalAwards(req,res,next)
 {
+    beginStreamingRes(res);
+    
     req.profile = req.profile ?? {};
+    req.profile.awards = [];
     //read in the stats for each server
     for (let guild of req.profile.guilds)
     {
@@ -61,6 +64,7 @@ export async function loadTotalAwards(req,res,next)
             var awardChannel = await getAwardChannel(guild);
             if (awardChannel == undefined) continue;
 
+            var awards = [];
             var messages = await awardChannel.messages.fetch();
             messages.forEach(award => 
             {
@@ -74,25 +78,32 @@ export async function loadTotalAwards(req,res,next)
                 if (award.mentions.users.has(req.params.discordID))
                 {
                     req.profile.awards.push(awardData);
+                    awards.push(awardData);
                 }
             });
+
+            res.write(JSON.stringify({awards}));
         }
         else
         {
             let awards = await getAwardsDatabase(guild, true);
             awards = await getAwardsForMember(req.profile, awards);
             
-            req.profile.awards.push(...(awards.map(function(award) {
+            var a = (awards.map(function(award) {
                 var d = award.data();
                 d.id = d.emoji = award.id;
                 d.server = guild.name;
                 return d;
-            })));
+            }));
+            req.profile.awards.push(...a);
 
-            console.log({rpa:req.profile.awards});
+            res.write(JSON.stringify({awards:a}));
         }
     }
-    res.json({awards:req.profile.awards});
+    
+    await sleep(1000);
+    res.write(JSON.stringify({done:true}));
+    res.end();
 }
 
 export async function profile_home(req,res,next)

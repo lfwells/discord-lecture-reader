@@ -86,7 +86,7 @@
 <div>
     <div class="profilePanel scrollable" style="float: right; width:55%; height:552px">
         <h3>Awards</h3>
-        <content class="loading">
+        <content class="loading" id="awards">
             Loading...
         </content>
     </div>
@@ -136,33 +136,75 @@
     });
 
     var last_response_len  = false;
-        $.ajax({
-            url:window.location.href+"/data/totalPosts",
-            method:"get",
-            contentType: 'application/json',
-            xhrFields: {
-                onprogress: function(e)
+    $.ajax({
+        url:window.location.href+"/data/totalPosts",
+        method:"get",
+        contentType: 'application/json',
+        xhrFields: {
+            onprogress: function(e)
+            {
+                var this_response, response = e.currentTarget.response;
+                if(last_response_len === false)
                 {
-                    var this_response, response = e.currentTarget.response;
-                    if(last_response_len === false)
-                    {
-                        this_response = response;
-                        last_response_len = response.length;
-                    }
-                    else
-                    {
-                        this_response = response.substring(last_response_len);
-                        last_response_len = response.length;
-                    }
-                    console.log(this_response);
-                    var resp = JSON.parse(this_response);
-                    if (resp.done)
-                        $("#totalPosts").removeClass("loading");
-                    else
-                        $("#totalPosts").text(resp.total);
-                },
+                    this_response = response;
+                    last_response_len = response.length;
+                }
+                else
+                {
+                    this_response = response.substring(last_response_len);
+                    last_response_len = response.length;
+                }
+                console.log(this_response);
+                var resp = JSON.parse(this_response);
+                if (resp.done)
+                    $("#totalPosts").removeClass("loading");
+                else
+                    $("#totalPosts").text(resp.total);
             },
-        });
+        },
+    });
+
+    var last_response_len2  = false;
+    var totalAwards = [];
+    $.ajax({
+        url:window.location.href+"/data/awards",
+        method:"get",
+        contentType: 'application/json',
+        xhrFields: {
+            onprogress: function(e)
+            {
+                var this_response, response = e.currentTarget.response;
+                if(last_response_len2 === false)
+                {
+                    this_response = response;
+                    last_response_len2 = response.length;
+                }
+                else
+                {
+                    this_response = response.substring(last_response_len2);
+                    last_response_len2 = response.length;
+                }
+                console.log(this_response);
+                var resp = JSON.parse(this_response);
+                if (resp.done)
+                    $("#totalAwards, #awards").removeClass("loading");
+                else
+                {
+                    totalAwards.push(...resp.awards);
+                    $("#totalAwards").text(totalAwards.length);
+                    $("#awards").html(totalAwards.map(award => `<div class="pair">
+                        <span>${award.emoji}</span>
+                        <h4>
+                            <span>${award.title}</span>
+                            <span>${award.description ?? ""}</span>
+                            <span>${award.server}</span>
+                        </h4></div>`).join(""));
+                }
+            },
+        },
+    });
+
+    
 </script>
 
 <%- include('../footer.html') %>
