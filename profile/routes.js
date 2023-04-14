@@ -8,6 +8,8 @@ import { getAwardName } from "../awards/awards.js";
 import { getAwardEmoji } from "../awards/awards.js";
 import { getAwardsDatabase } from "../awards/awards.js";
 import { getAwardChannel } from "../awards/awards.js";
+import { beginStreamingRes } from "../core/server.js";
+import { sleep } from "../core/utils.js";
 
 export async function load(req, res, next)
 {
@@ -33,15 +35,20 @@ export async function load(req, res, next)
 }
 export async function loadTotalPostCount(req,res,next)
 {
+    beginStreamingRes(res);
+
     req.profile = req.profile ?? {};
     //read in the stats for each server
     req.profile.total = 0;
     for (let guild of req.profile.guilds)
     {
         req.profile.total += await getPostsCount(guild, req.profile.id);
+        
+        res.write(JSON.stringify({total:req.profile.total}));
     }
-
-    res.json({total:req.profile.total});
+    await sleep(1000);
+    res.write(JSON.stringify({done:true}));
+    res.end();
 }
 export async function loadTotalAwards(req,res,next)
 {

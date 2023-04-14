@@ -64,6 +64,11 @@
     #publicSwitch {
         cursor: pointer;
     }
+
+    .loading::before {
+        content: "⌛";
+        margin-right:1ex;
+    }
 </style>
 
 <% if (locals.isOurProfile)
@@ -81,15 +86,15 @@
 <div>
     <div class="profilePanel scrollable" style="float: right; width:55%; height:552px">
         <h3>Awards</h3>
-        <content>
-            ⌛Loading...
+        <content class="loading">
+            Loading...
         </content>
     </div>
     <div class="profilePanel scrollable">
         <h3>Stats</h3>
         <content>
             <div class="pair">
-                <span id="totalPosts">⌛</span>
+                <span id="totalPosts" class="loading"></span>
                 <h4><span>Total Posts</span></h4>
             </div>
             <div class="pair">
@@ -97,7 +102,7 @@
                 <h4><span>UTAS Bot Servers</span></h4>
             </div>
             <div class="pair">
-                <span id="totalAwards">⌛</span>
+                <span id="totalAwards" class="loading"></span>
                 <h4><span>Awards</span></h4>
             </div>
         </content>
@@ -129,6 +134,35 @@
             }
         });
     });
+
+    var last_response_len  = false;
+        $.ajax({
+            url:window.location.href+"/data/totalPosts",
+            method:"get",
+            contentType: 'application/json',
+            xhrFields: {
+                onprogress: function(e)
+                {
+                    var this_response, response = e.currentTarget.response;
+                    if(last_response_len === false)
+                    {
+                        this_response = response;
+                        last_response_len = response.length;
+                    }
+                    else
+                    {
+                        this_response = response.substring(last_response_len);
+                        last_response_len = response.length;
+                    }
+                    console.log(this_response);
+                    var resp = JSON.parse(this_response);
+                    if (resp.done)
+                        $("#totalPosts").removeClass("loading");
+                    else
+                        $("#totalPosts").text(resp.total);
+                },
+            },
+        });
 </script>
 
 <%- include('../footer.html') %>
