@@ -30,6 +30,7 @@ export async function loginComplete(req,res)
     var session = req.session;
     session.auth = auth;
     req.session = session;
+    await req.session.save();
     //console.log("saving auth to session", req.session);
     console.log("req.session = ", req.session);
     await authHandler(req,res, function(req,res,next) {
@@ -57,8 +58,9 @@ export async function logout(req,res)
     await sleep(5000);
     req.discordUser = null;
     req.session.auth = null;
+    await req.session.save();
 
-    console.log("req.session 2 = ", req.session);
+    console.log("req.session 3 = ", req.session);
     let state = req.query.state;
     if (state == "") state = null;
     res.redirect(state ?? "/");
