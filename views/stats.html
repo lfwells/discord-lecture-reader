@@ -15,17 +15,17 @@ th, td {
 
 <%- locals.classlistFilters() %>
 
-<p><%=locals.statsData.rawStatsData.length%> Total Posts</p>
+<p><%=locals.statsData.total%> Total Posts</p>
 
 <table>
     <tr>
         <td class="col">
             <h3>Channel Post Counts</h3>
-            <%- include("subViews/statsTable.html", {data:locals.statsData["channels"], sum:true}) %>
+            <%- include("subViews/statsTableCount.html", {data:locals.statsData.channels, sum:true}) %>
         </td>
         <td class="col">
             <h3>Member Post Counts</h3>
-            <%- include("subViews/statsTable.html", {data:locals.statsData.members, sum:true}) %>
+            <%- include("subViews/statsTableCount.html", {data:locals.statsData.members, sum:true}) %>
         </td>
     </tr>
 </table>

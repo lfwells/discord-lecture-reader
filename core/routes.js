@@ -9,6 +9,7 @@ import * as mylo_routes from '../mylo/routes.js';
 import * as guild_routes from '../guild/routes.js';
 import * as award_routes from '../awards/routes.js';
 import * as analytics_routes from '../analytics/routes.js';
+import * as analytics_functions from '../analytics/analytics.js';
 import * as attendance_routes from '../attendance/routes.js';
 import * as lecture_text_routes from '../lecture_text/routes.js';
 import * as poll_routes from '../polls/routes.js';
@@ -169,7 +170,7 @@ function guildRouter()
     router.get("/attendanceOld/csv",  attendance_routes.getAttendanceDataOld, downloadResource("attendance.csv")); 
 
     //analytics
-    router.get("/analytics/", analytics_routes.getStatsData, analytics_routes.displayStats); 
+    router.get("/analytics/", analytics_functions.getStatsCounts(), analytics_routes.displayStats); 
     router.get("/analytics/week", analytics_routes.getStatsDataWeek, analytics_routes.displayStats); 
     
     router.get("/analytics/obs", analytics_routes.obs); 

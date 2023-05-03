@@ -57,13 +57,17 @@ function postsCollection(guild)
 }
 
 
-export async function getPostsCount(guild, forUserID)
+export async function getPostsCount(guild, forUserID, forChannelID)
 {
     let guildDocument = await getGuildDocument(guild.id);
     let collection = guildDocument.collection(postsCollection(guild));
     if (forUserID)
     {
         collection = collection.where("author", "==", forUserID);
+    }
+    if (forChannelID)
+    {
+        collection = collection.where("channel", "==", forChannelID);
     }
     let count = await collection.count().get();
     return count.data().count;
@@ -153,6 +157,55 @@ async function analyticsParseMessage(d, guild)
     {
         d.isOffTopic |= offTopicChannelID == d.postData.channelId;
     }
+}
+export function getStatsCounts(userPredicate, postPredicate)
+{
+    return async function (req,res,next)
+    {
+        var guild = req.guild;
+
+        var stats = {
+            channels: [],
+            members: []
+        };
+
+        stats.total = await getPostsCount(guild, null, null);
+
+        var classList = await getClassList(guild);
+        await Promise.all(classList.map(async function(student) 
+        {
+            var data = {
+                memberID:student.discordID,
+                name: student.discordName,
+                posts: await getPostsCount(guild, student.discordID)
+            };
+            stats.members.push(data);
+            console.log({data});
+        }));
+
+        var channels = guild.channels.cache;
+        await Promise.all(channels.map(async function(channel)
+        {
+            //TODO: get this right
+            //if (channel.type != "text") return;
+
+            var data = {
+                channelID:channel.id,
+                name: channel.name,
+                posts: await getPostsCount(guild, null, channel.id)
+            };
+            stats.channels.push(data);
+            console.log({data});
+        }));
+
+        //sort by post count
+        stats.members.sort((a,b) => b.posts - a.posts);
+        stats.channels.sort((a,b) => b.posts - a.posts);
+
+        console.log({stats});
+        res.locals.statsData = stats;
+        next();
+    };
 }
 export async function getStats(guild, userPredicate, postPredicate)
 {

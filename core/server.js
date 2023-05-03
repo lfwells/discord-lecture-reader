@@ -195,7 +195,7 @@ export async function authHandler (req, res, next)
   {
     //console.log("challenge:", req.path);
     //console.log(("auth check"), req.session);
-    if (req.session == undefined || req.session.auth == undefined)
+    if (req.session.auth == null || req.session == undefined || req.session.auth == undefined)
     {
       console.log("auth check failed", req.session);
       loginPage(req,res);
@@ -205,6 +205,7 @@ export async function authHandler (req, res, next)
       //store some basic discord info
       try
       {
+        console.log({token: req.session.auth.access_token}); 
         req.discordUser = await oauth(req).getUser(req.session.auth.access_token);
         res.locals.discordUser = req.discordUser;
 
