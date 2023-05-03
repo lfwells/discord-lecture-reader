@@ -21,7 +21,6 @@ function guideTabLink(text, link)
     });
 }
 %>
-
 <script>
     //avoiding quote problems...
     var rules = "#rules";
@@ -40,13 +39,17 @@ function guideTabLink(text, link)
             <p>You can write your own rules, or you might like to use the following template as a guide.</p>
 
             <textarea id="rules" style="width:100%; height:20em">
-    <%- include("../rulesTemplate.html") %></textarea>
-            <p><button id="copyRules">Copy Rules Template</button> <%- include("../../subViews/longBotCommandButton.html", 
+<%- include("../rulesTemplate.html") %></textarea>
+            <p><button id="copyRules">Copy Rules Template</button><% if (inGuild()) {%>
+                <%- include("../../subViews/longBotCommandButton.html", 
                 { 
                     text: "Get Bot to Post Rules",
                     url: "postRules",
                     data: "{ rulesText: $(rules).val() }"
-                }) %></p>
+                }) %>
+            <%
+            }
+        %></p>
                 
             <p>The text above can paste directly into Discord, and the emoji should appear. You may like to adjust these rules:</p>
             <ul>
