@@ -53,6 +53,12 @@ export async function _loadClassList(req,res,next, includeRemoved)
         }));
     }
 
+    //if a user filter is on, filter the class list
+    if (res.locals && res.locals.filterByUser() && res.locals.filterByUser() != "" && res.locals.filterByUser() != "__DISCORD_BOT_NONE__")
+    {
+        classList = classList.filter(m => m.discordID == res.locals.filterByUser());
+    }
+
     //filter out admin
     classList = classList.filter(m => m.discordID != config.SIMPLE_POLL_BOT_ID /*&& m.discordID != config.IAN_ID && m.discordID != config.ROBO_LINDSAY_ID*/);
 
