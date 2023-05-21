@@ -6,6 +6,7 @@ import { redirectToWhereWeCameFrom } from "../core/utils.js";
 
 import { getGuildProperty, GUILD_CACHE } from "../guild/guild.js";
 import { doPollCommand } from "./events.js";
+import { endStreamedPage, streamHeader } from "../core/server.js";
 var previousRequest;
 
 //poll display details
@@ -303,9 +304,12 @@ export async function clearPoll(req, res)
 
 export async function pollHistory(req,res,next)
 {
+  await streamHeader(res, "Poll History");
+  await res.write(`<p>Getting poll history...</p>`);
+
   //var messagesManager = req.lectureChannel.messages;
   //var messages = await messagesManager.fetch();//TODO need more than just the 100 most recent messages, is possible poll could be lost, so we need to search more, also uncertain if this uses cache or not
-  var messages = await loadAllMessagesForChannel(req.lectureChannel);
+  var messages = await loadAllMessagesForChannel(req.lectureChannel, res);
   console.log(messages[0]);
   
   var polls = [];
@@ -323,6 +327,8 @@ export async function pollHistory(req,res,next)
           var p = await readRoboLindsayPoll(post.embeds[0]);
           p.timestamp = moment(post.createdTimestamp);
           polls.push(p);
+
+          res.write(`<p>Found poll ${p.question}...</p>`);
         }
       }
       catch (e) { console.error(e); }
@@ -335,7 +341,7 @@ export async function pollHistory(req,res,next)
   {
     polls.push(await readSimplePoll(post));
   }));
-  res.render("poll_history", {
+  await endStreamedPage(res, "poll_history", {
     polls: polls
   });
 }

@@ -1,5 +1,4 @@
-<%- include('header.html', { title: "Poll History" }) %>
-
+<script>$("main p").html("");</script>
 <style>
     .question { font-size:16pt; }
     th { text-align: left; padding-right: 1ex; }
@@ -27,9 +26,9 @@
         poll.command = command;
 
 
-        %><%- include("pollTableHistory.html", poll);%>
+        %><%- include("/home/ubuntu/discord/views/pollTableHistory.html", poll);%>
         <p>
-            <%- include("subViews/download_csv.html", { data:poll.results, filename:poll.question }) ; %> 
+            <%- include("/home/ubuntu/discord/views/subViews/download_csv.html", { data:poll.results, filename:poll.question }) ; %> 
             Save: <input type="text" style="width:500px" value="<%=save%>" /> <button class="copy">Copy</button>
         </p>
 
@@ -46,4 +45,5 @@
         return false;
     });
 </script>
-<%- include('footer.html') %>
+
+<%- include('/home/ubuntu/discord/views/footer.html') %>

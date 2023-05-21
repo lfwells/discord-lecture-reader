@@ -353,9 +353,9 @@ export async function loadHistoricalData(res, guild)
     );
     return data;
 }
-export async function loadAllMessagesForChannel(channel)
+export async function loadAllMessagesForChannel(channel, res)
 {
-    return await lots_of_messages_getter(null, channel);
+    return await lots_of_messages_getter(res, channel);
 }
 
 //https://stackoverflow.com/questions/55153125/fetch-more-than-100-messages
@@ -393,7 +393,7 @@ async function lots_of_messages_getter(res, channel, writeToDBCollection, limit)
                     batch = db.batch();
                 }
                 console.log(channel.name, "sum_messages", sum_messages.length);
-                if (res) res.write([channel.name, "sum_messages", sum_messages.length].join(", "));
+                if (res) res.write(`<p>Loaded ${sum_messages.length} messages from ${channel.name}...</p>`);
                 last_id = messages.last().id; 
 
                 if (limit && sum_messages.length >= limit) { 
