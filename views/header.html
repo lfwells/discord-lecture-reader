@@ -289,7 +289,7 @@ if ( (typeof showTitle == 'undefined' || showTitle))
     <main>
         <% if ( typeof title != 'undefined' )
         {
-            %><h2>
+            %><h2 style="float:<%=( typeof floatTitle != 'undefined') ? floatTitle : 'none'%>">
                 <% if ( typeof icon != 'undefined')
                 {   
                     %><img src="<%=icon%>" /><%

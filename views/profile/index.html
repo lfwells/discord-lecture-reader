@@ -1,4 +1,4 @@
-<%- include('../header.html', { title: locals.profile.username, icon:locals.profile.displayAvatarURL() }) %>
+<%- include('../header.html', { title: locals.profile.username, icon:locals.profile.displayAvatarURL(), floatTitle:"left" }) %>
 
 <style>
     .profilePanel {
@@ -83,7 +83,7 @@
     </div><%
 }%>
 
-<div>
+<div style="clear:both">
     <div class="profilePanel scrollable" style="float: right; width:55%; height:552px">
         <h3>Awards</h3>
         <content class="loading" id="awards">
