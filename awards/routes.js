@@ -180,6 +180,8 @@ export async function getGiveAward(req, res, next)
         if (req.query.popupChannelID && req.query.popupChannelID != config.SELECT_FIELD_NONE)
         {
           var channel = await req.guild.channels.cache.get(req.query.popupChannelID);
+          
+          achievementEmbed = await appendAuthorProfileLink(achievementEmbed, member);
           await send(channel, {embeds: [ achievementEmbed ]});
         }
         res.json({success:true});

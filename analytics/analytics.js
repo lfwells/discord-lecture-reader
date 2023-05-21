@@ -254,18 +254,6 @@ export async function getStats(guild, userPredicate, postPredicate)
             var channelObj = await guild.channels.cache.get(channelID);
             if (channelObj == undefined) continue;
 
-            //determine if the channel is a thread, and if so record the count towards the parent
-            var isThread = false;
-            if (channelObj.parent)
-            {
-                isThread = channelObj.parent.type == "GUILD_TEXT";
-            }
-            if (isThead)
-            {
-                channel = channelObj.parent;
-                channelID = channel.id;
-            }
-
             stats.channels[channelID] = { 
                 name: channelObj.name,
                 posts:[]

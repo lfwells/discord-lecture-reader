@@ -7,6 +7,7 @@ import { getGuildProperty, getGuildPropertyConverted, hasFeature } from '../guil
 import { registerCommand } from '../guild/commands.js';
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
+import { appendAuthorProfileLink } from "../profile/profile.js";
 
 export default async function(client)
 {
@@ -289,7 +290,8 @@ async function doFlexCommand(interaction)
         }
         i++;
     }
-    
+    flexEmbed = await appendAuthorProfileLink(flexEmbed, embed);
+
     await interaction.editReply({ embeds: [ flexEmbed ] });
     //await interaction.reply(flex);
 }
@@ -316,6 +318,8 @@ async function doAwardCommand(interaction)
         if (useLegacyAwards ? award : (await awardExists(award)))
         {
             var achievementEmbed = await giveAward(interaction.guild, award, member); 
+
+            achievementEmbed = await appendAuthorProfileLink(achievementEmbed, member);
             await interaction.editReply({ embeds: [ achievementEmbed ] });
             //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
         }
@@ -359,7 +363,8 @@ async function doAwardCommand(interaction)
                     achievementEmbed = await giveAward(interaction.guild, awardDoc, member);
                 }
                 achievementEmbed.description = achievementEmbed.description + "\n(Brand new award 🤩!)";
-                console.log({achievementEmbed});
+                
+                achievementEmbed = await appendAuthorProfileLink(achievementEmbed, member);
                 await interaction.editReply({ embeds: [ achievementEmbed ]});
             }
             else
@@ -412,6 +417,7 @@ async function doNomCommand(interaction)
             if (result.pop)
             {
                 var achievementEmbed = await giveAward(interaction.guild, award, member); 
+                achievementEmbed = await appendAuthorProfileLink(achievementEmbed, member);
                 await interaction.channel.send({ embeds: [ achievementEmbed ] });
                 //await interaction.reply("<@"+member.id+"> just earned "+getAwardEmoji(award)+" "+getAwardName(award)+"!\nThey have now have "+awardCount+" achievement"+(awardCount == 1 ? "" : "s")+".");
             }
@@ -450,5 +456,6 @@ async function doLeaderboardCommand(interaction)
         });
     }
 
+    statsEmbed = await appendAuthorProfileLink(statsEmbed, member);
     await interaction.editReply({embeds: [ statsEmbed ]});
 }

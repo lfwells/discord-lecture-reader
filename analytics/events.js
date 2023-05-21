@@ -8,6 +8,7 @@ import { MessageActionRow, MessageButton } from 'discord.js';
 import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 import { setGuildProperty } from '../guild/guild.js';
 import { setGuildContextForInteraction } from '../core/errors.js';
+import { appendAuthorProfileLink } from "../profile/profile.js";
 
 export default async function(client)
 {
@@ -380,6 +381,7 @@ async function doStatsMeCommand(interaction)
 
     if (channelFilter != null) statsEmbed.title = `#${interaction.channel.name} Channel ${statsEmbed.title}`;
 
+    statsEmbed = await appendAuthorProfileLink(statsEmbed, member);
     await interaction.editReply({embeds: [ statsEmbed ] });
 }
 

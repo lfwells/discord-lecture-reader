@@ -23,3 +23,14 @@ export async function profileIsPublic(member)
     }
     return false;
 }
+export async function appendAuthorProfileLink(embed, member)
+{
+    if (await profileIsPublic(member) == false) return embed;
+
+    embed.author = {
+        name: member.displayName,
+        icon_url: member.user.displayAvatarURL(),
+        url: `https://utasbot.dev/profile/${member.id}`
+    };
+    return embed;
+}
