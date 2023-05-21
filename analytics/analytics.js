@@ -180,7 +180,7 @@ export function getStatsCounts(userPredicate, postPredicate)
                 posts: await getPostsCount(guild, student.discordID)
             };
             stats.members.push(data);
-            console.log({data});
+            //console.log({data});
         }));
 
         var channels = guild.channels.cache;
@@ -188,21 +188,48 @@ export function getStatsCounts(userPredicate, postPredicate)
         {
             //TODO: get this right
             //if (channel.type != "text") return;
-
             var data = {
                 channelID:channel.id,
+                channel,
                 name: channel.name,
                 posts: await getPostsCount(guild, null, channel.id)
             };
             stats.channels.push(data);
-            console.log({data});
+            //console.log({data});
         }));
+
+        //go through all channels, and merge them with their parent
+        stats.channels.forEach(channel =>
+        {   
+
+            //TODO GEORGE THIS DIDNT WORK
+
+
+
+            if (channel.channel.parent && (channel.channel.parent.type == "GUILD_FORUM" || channel.channel.parent.type == "GUILD_TEXT"))
+            {
+                var parent = stats.channels.find(c => c.channelID == channel.channel.parent.id);
+                if (parent)
+                {
+                    parent.posts += channel.posts;
+                }
+                //mark the channel for deletion
+                channel.delete = true;
+            }
+            else if (channel.channel.parent && channel.channel.parent.type != "GUILD_CATEGORY")
+            {
+                console.log(channel.channel.name);
+            }
+        });
+
+        //delete all channcels marked for deletion
+        stats.channels = stats.channels.filter(c => c.delete == undefined);
 
         //sort by post count
         stats.members.sort((a,b) => b.posts - a.posts);
         stats.channels.sort((a,b) => b.posts - a.posts);
 
-        console.log({stats});
+        //console.log({stats});
         res.locals.statsData = stats;
         next();
     };
@@ -226,6 +253,18 @@ export async function getStats(guild, userPredicate, postPredicate)
         {
             var channelObj = await guild.channels.cache.get(channelID);
             if (channelObj == undefined) continue;
+
+            //determine if the channel is a thread, and if so record the count towards the parent
+            var isThread = false;
+            if (channelObj.parent)
+            {
+                isThread = channelObj.parent.type == "GUILD_TEXT";
+            }
+            if (isThead)
+            {
+                channel = channelObj.parent;
+                channelID = channel.id;
+            }
 
             stats.channels[channelID] = { 
                 name: channelObj.name,
