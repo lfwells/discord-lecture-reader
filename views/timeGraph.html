@@ -1,4 +1,5 @@
-<%- include('header.html', { title: "Stats" }) %>
+<script>$("main p").html("");</script>
+
 <style>
 main { width: 100% !important; max-width: 100% !important; }
 </style>
@@ -13,11 +14,11 @@ main { width: 100% !important; max-width: 100% !important; }
 {
     console.log(graph.title);
     %>
-    <h3><%=graph.title%> <%- include("subViews/download_csv.html", { data:graph.data, filename:graph.title }) %></h3>
-    <%- include("subViews/barplot.html", {data:graph.data}) %>
+    <h3><%=graph.title%> <%- include("/home/ubuntu/discord/views/subViews/download_csv.html", { data:graph.data, filename:graph.title }) %></h3>
+    <%- include("/home/ubuntu/discord/views/subViews/barplot.html", {data:graph.data}) %>
     <%
 }
 %>
 
 
-<%- include('footer.html') %>
+<%- include('/home/ubuntu/discord/views/footer.html') %>

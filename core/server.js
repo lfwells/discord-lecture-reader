@@ -229,7 +229,7 @@ export async function authHandler (req, res, next)
   }
 }
 
-export function beginStreamingRes(res)
+export function beginStreamingRes(res, contentType)
 {
    //stream the content thru
   //should have used a websocket or something but meh
@@ -238,10 +238,28 @@ export function beginStreamingRes(res)
   //and finish it all up with res.end();
 
   res.writeHead(200, {
-      'Content-Type': 'text/plain; charset=utf-8',
+      'Content-Type': contentType ?? 'text/plain; charset=utf-8',
       'Transfer-Encoding': 'chunked',
       'X-Content-Type-Options': 'nosniff'});
   return res;
+}
+
+export async function streamHeader(res, title)
+{
+  await beginStreamingRes(res, "text/html; charset=utf-8"); 
+  //render the EJS header to a string
+  var data = Object.assign(res.locals, {title});
+  var header = ejs.render(fsfs.readFileSync("./views/header.html", "utf8"), data, { views: "views" });
+  res.write(header);
+}
+export async function endStreamedPage(res, renderPage, data)
+{  
+  data = Object.assign(res.locals, data);
+  //get the renderPage as a string
+  var page = ejs.render(fsfs.readFileSync("./views/"+renderPage+".html", "utf8"), data, { views: "views" });
+
+  //render the page
+  res.write(page);
 }
 
 export function renderErrorPage(message)

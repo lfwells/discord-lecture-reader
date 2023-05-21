@@ -1,5 +1,6 @@
 import { getAttendanceData } from "../attendance/routes.js";
 import { getUserFilterPredicate, getPostsFilterPredicate } from "../classList/classList.js";
+import { beginStreamingRes, streamHeader, endStreamedPage } from "../core/server.js";
 import { asyncForEach } from "../core/utils.js";
 import { getStats, getStatsWeek, predicateExcludeAdmin, loadHistoricalData, getPostsData, loadTimeSeries, loadPostsPerDay, loadPostsPerHour, loadPostsPerSession, loadAttendanceSession } from "./analytics.js";
 import { loadPresenceData } from "./presence.js";
@@ -61,6 +62,7 @@ export async function getHistoricalData(req, res, next)
 
 export async function timeGraph(req, res, next)
 {
+
     var rawStatsData = async function() { 
         console.log("loading posts for time graph...");
         var posts = await getPostsData(req.guild, await getUserFilterPredicate(req, res), await getPostsFilterPredicate(req, res));
@@ -110,21 +112,41 @@ export async function timeGraph(req, res, next)
     function graphSelected(graph) {
         return req.body[graph] != undefined;
     }
-       
-    var graphs = [];
-    await asyncForEach(Object.keys(graphSelections), async function (graph) {
-        if (graphSelected(graph))
+
+    var anyGraphSelected = Object.keys(graphSelections).some(graphSelected);
+    if (anyGraphSelected )
+    {
+        await streamHeader(res, "Graphs");
+        
+        var graphs = [];
+        //await asyncForEach(Object.keys(graphSelections), async function (graph) {
+        for (var graph in graphSelections)
         {
-            graphs.push({
-                title:graph,
-                data:await graphSelections[graph]()
-            });
-        }
-    });
-    await res.render("timeGraph", {
-        //postData:rawStatsData,
-        graphs,
-        graphSelections
-    });
+            if (graphSelected(graph))
+            {
+                res.write(`<p>Doing graph ${graph}...</p>`)
+                graphs.push({
+                    title:graph,
+                    data:await graphSelections[graph]()
+                });
+                
+                res.write(`<p>Done graph ${graph}.</p>`)
+            }
+        }//);
+
+        await endStreamedPage(res, "timeGraph", {
+            //postData:rawStatsData,
+            graphs,
+            graphSelections
+        });
+    }
+    else
+    {
+        await res.render("timeGraph", {
+            //postData:rawStatsData,
+            graphs,
+            graphSelections
+        });
+    }
 }
 
