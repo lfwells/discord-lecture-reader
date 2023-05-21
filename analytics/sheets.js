@@ -79,6 +79,10 @@ export async function init_sheet_for_guild(guild)
     }
 }
 
+export async function sheetsIndex(req,res,next)
+{
+    res.render("sheets");
+}
 
 export async function sheets_test(req,res,next)
 {

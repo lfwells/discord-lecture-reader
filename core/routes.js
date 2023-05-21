@@ -96,6 +96,7 @@ function guildRouter()
     router.use(guild.loadGuildProperty("todoEmoji"));
     router.use(guild.loadGuildProperty("offTopicCategoryID"));
     router.use(guild.loadGuildProperty("myLOOrgID"));
+    router.use(guild.loadGuildProperty("googleSheetID"));
     
     router.use(guild.loadGuildProperty("feature_achievements"));
     router.use(guild.loadGuildProperty("feature_attendance"));
@@ -216,11 +217,10 @@ function guildRouter()
     router.get("/invites/generate", invite_routes.generateInvite, invite_routes.inviteList);
 
     //sheets
-    /*
-    router.get("/sheets", guild.loadGuildProperty("googleSheetID"), sheet_routes.sheetsIndex); 
-    router.get("/sheets/update", loadClassListWithRemoved, guild.loadGuildProperty("googleSheetID"), sheet_routes.update_sheet_contents); 
-    router.get("/sheets/addSheetAccess", guild.loadGuildProperty("googleSheetID"), sheet_routes.addSheetAccess); 
-      */
+    router.get("/sheets", sheet_routes.sheetsIndex); 
+    router.get("/sheets/update", loadClassListWithRemoved, sheet_routes.update_sheet_contents); 
+    //router.get("/sheets/addSheetAccess", sheet_routes.addSheetAccess); 
+      
        
     //scheduled_events
     router.get("/schedule_test", schedule_test);
