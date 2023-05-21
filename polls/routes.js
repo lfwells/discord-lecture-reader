@@ -146,6 +146,7 @@ async function readRoboLindsayPoll(post)
 {  
   var req = {};
   var question = post.title;
+  console.log({post});
   //display question
   req.question = "Poll: "+question+"\n";
 
@@ -317,9 +318,12 @@ export async function pollHistory(req,res,next)
     {
       try 
       {
-        var p = await readRoboLindsayPoll(post.embeds[0]);
-        p.timestamp = moment(post.createdTimestamp);
-        polls.push(p);
+        if (post.interaction && post.interaction.commandName == config.POLL_COMMAND)
+        {
+          var p = await readRoboLindsayPoll(post.embeds[0]);
+          p.timestamp = moment(post.createdTimestamp);
+          polls.push(p);
+        }
       }
       catch (e) { console.error(e); }
     }
