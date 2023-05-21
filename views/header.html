@@ -164,14 +164,7 @@
                             <li><a <%=currentTab("text")%> href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
                             <li><a <%=currentTab("obs")%> href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
                         <% } %>
-
-                        <% if (hasFeature("analytics") && hasFeature("experimental") && (locals.discordUser.id == locals.config.LINDSAY_ID || locals.discordUser.id == locals.config.IAN_ID) )
-                        {
-                            %>
-                            <li><a <%=currentTab("sheets")%> href="/guild/<%= guild.id %>/sheets/">Google Sheet Export</a></li>
-                            <%
-                        }
-                        %>
+                        
                         <% if (hasFeature("experimental"))
                         {
                             %>

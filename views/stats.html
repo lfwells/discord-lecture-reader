@@ -13,6 +13,23 @@ th, td {
 }
 </style>
 
+
+
+<% 
+
+function hasFeature(feature)
+{
+    return locals["feature_"+feature];
+}
+
+if (hasFeature("analytics") && hasFeature("experimental") )
+{
+    %>
+    <div><a class="btn" href="/guild/<%= guild.id %>/sheets/">Google Sheet Export</a></div>
+    <%
+}
+%>
+
 <%- locals.classlistFilters() %>
 
 <p><%=locals.statsData.total%> Total Posts</p>
