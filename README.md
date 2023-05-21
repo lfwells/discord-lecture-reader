@@ -37,32 +37,4 @@ pm2 monit
 ```
 https://pm2.keymetrics.io/docs/usage/quick-start/#:~:text=Restart%20application%20on%20changes&text=This%20will%20watch%20%26%20restart%20the,check%20for%20restarted%20app%20logs.
 
-### Triggering a pre-defined poll via URL
-Navigate to:
-
-`https://utasbot.dev/guild/<guild_id>/poll/<poll info here>`
-
-e.g.
-
-`https://utasbot.dev/guild/<guild_id>/poll/%22Test%20Scheduled%20Polls%20are%20great?%22%20%22yes%22%20%22no%22%20%22maybe%22`
-
-(if making this link in powerpoint etc, you don't need to write `%20` or `%25` yourself, these are just spaces and double-quotes that will get automatically changed)
-
-Use simple-poll format for polls. See [https://top.gg/bot/simplepoll].
-
-You can clear the poll on this page by clicking the button or navigating to `https://utasbot.dev/guild/<guild_id>/clearpoll`.
-
-Note: for sessions to work, you will need a `sessions` subdirectory with write permissions.
-
-## TODO
-For fun: "latest vote: XX for YY" (actually is hard -- unless we do a robo lindsay version)
-
-- a button for enabling/disabling breakout rooms
-- a button for clearing a channel, or posting an announcement or all sorts of cool shit
-
-
-TODO:
-- lecturechannel can be set with extra query string junk on end
-- fix header to look nicer
-- add invites link
-- detect when new roles are made / refresh cache on load page
+See the built-in user guid for more info on how to use the actual bot.

@@ -50,7 +50,7 @@ export default async function(client)
                 
                 //now the cool part, auto assign a role :)
                 //this is not perfect as anyone can use any invite, and so would need moderation
-                //ALSO NOTE THE ROBO LINDSAY ROLE MUST BE HIGHER IN LIST THAN ANY ROLE YOU WANT TO ASSIGN
+                //ALSO NOTE THE BOT ROLE MUST BE HIGHER IN LIST THAN ANY ROLE YOU WANT TO ASSIGN
                 //TODO: web interface for this, but nowhere near enough time
 
                 var inviteCollection = guildsCollection.doc(member.guild.id).collection("invites");

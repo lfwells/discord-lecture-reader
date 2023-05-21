@@ -63,7 +63,7 @@ export default async function(client)
         if (hasFeature(newMember.guild, "dm_intro"))
         {
             newMember.send(`Hello ${newMember.displayName} and welcome to the **${newMember.guild.name}** Server!`);
-            newMember.send(`I'm ${await getGuildProperty("botName", newMember.guild, "Robo Lindsay")}. I'm a bot that you might see from time to time on the server. I'm here to help out and make the server more awesome!`);
+            newMember.send(`I'm ${await getGuildProperty("botName", newMember.guild,"UTAS Bot")}. I'm a bot that you might see from time to time on the server. I'm here to help out and make the server more awesome!`);
             newMember.send(`If you would like to know more about what I can do, then type \`/help\` here or on the server.`);
             newMember.send(`I now feature a "profile" page, where you can track your achievements and stats across all your UTAS Discord Units. You can view it here: https://utasbot.com/profile/${newMember.id}`);
             newMember.send(`Note, I *am* a robot, and staff members *won't* read these messages!`);

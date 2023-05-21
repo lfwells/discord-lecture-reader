@@ -1,6 +1,6 @@
 export const __port = 8080;
 
-export const enableSendMessagesAndReplies = true; //mute robo lindsay here
+export const enableSendMessagesAndReplies = true; //mute bot here
 
 export const UPDATE_STATUS_CHANNELS_EVERY_MS = 60 * 1000; //1 min (but is rate limited, will likely be slwoer)
 export const UPDATE_PRESENCE_EVERY_MS = 5 * 60 * 1000; //5 mins
