@@ -10,6 +10,11 @@ export const scopeMyLOConnect = ["identify", "guilds"];
 
 export async function loginPage(req,res)
 {
+    if (req.hostname == null || req.hostname == undefined)
+    {
+        return res.end("Hostname not set");
+    }
+    
     const url = oauth(req).generateAuthUrl({
         scope: scope, 
         state: req.query.path, 
