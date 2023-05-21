@@ -57,7 +57,8 @@ var sessionsCount = 0;
 
 console.log(locals.weeks);
 %>
-<table border="1" cellpadding="0" cellspacing="0">
+<table border="1" cellpadding="0" cellspacing="0" class="sortable">
+  <thead>
     <tr>
       <th>Student</th>
       <% Object.values(locals.weeks).forEach(function(session)
@@ -74,6 +75,8 @@ console.log(locals.weeks);
       { 
       }) %>
     </tr>
+  </thead>
+  <tbody>
     <% 
     var weekSummary = [];
     Object.values(locals.weeks).forEach(function(session)
@@ -84,7 +87,7 @@ console.log(locals.weeks);
     students.forEach(function(student){ 
       %>
       <tr class="studentRow">
-        %><th class="studentName"><%= student.discordName %></th>  
+        %><th class="studentName" sortValue="<%= student.discordName %>"><%= student.discordName %></th>  
         <% 
         var studentSessionCount = 0;
         var sessionsCount = 0;
@@ -99,9 +102,13 @@ console.log(locals.weeks);
             sessionsCount++;
             %><%- sessionData %><%
         }) %>
-        <td><%=Math.round(((studentSessionCount / sessionsCount)*100)*10)/10 %>% (<%=studentSessionCount%>)</td>
+        <td sortValue="<%=studentSessionCount%>">
+          <%=Math.round(((studentSessionCount / sessionsCount)*100)*10)/10 %>% (<%=studentSessionCount%>)
+        </td>
       </tr>
     <% }) %>
+  </tbody>
+  <tfoot>
     <tr>
       <th>Class %</th>
       <% 
@@ -112,6 +119,6 @@ console.log(locals.weeks);
       }) %>
       <td>&nbsp;</td>
     </tr>
-  </table>
-
+  </tfoot>
+</table>
 <%- include('footer.html') %>

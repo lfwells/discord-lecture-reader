@@ -330,13 +330,13 @@ export async function getProgressData(req,res,next)
             {
                 if (page.cache[i].username == student.username)
                 {
-                    text += '<td title="'+page.name+'" class="pageResult complete">&nbsp;</td>';
+                    text += '<td title="'+page.name+'" class="pageResult complete" sortValue="1">&nbsp;</td>';
                     found = true; 
                     break;
                 }
             }
             if (found == false)
-                text += '<td title="'+page.name+'" class="pageResult not_complete">&nbsp;</td>';
+                text += '<td title="'+page.name+'" class="pageResult not_complete" sortValue"0">&nbsp;</td>';
         }
         return text;
     };
@@ -445,7 +445,7 @@ export async function getAttendanceData(req,res,next)
         }
         else
         {
-            return '<td title="'+s.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'">&nbsp;</td>';
+            return '<td title="'+s.name+'" class="pageResult '+(complete ? "complete" : "not_complete")+'" sortValue="'+(complete?"1":"0")+'">&nbsp;</td>';
         }
     };
     if (next) next();

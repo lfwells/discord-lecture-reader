@@ -627,3 +627,7 @@
             vertical-align: middle;
             margin-right: 16px;
         }
+
+        table.sortable th {
+            cursor: pointer;
+        }
