@@ -6,7 +6,7 @@
         name="<%=typeof name !== 'undefined' ? name : "" %>"
         class="<%=typeof className !== 'undefined' ? className : "" %>"
         >
-        <option value=""><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
+        <option value="__DISCORD_BOT_NONE__"><%=typeof selectDefaultText !== 'undefined' ? selectDefaultText : "" %></option>
         <% 
         var members = guild.members.cache.sort((a,b) => (a.nickname ?? a.user.username).localeCompare(b.nickname ?? b.user.username));
         members.forEach(function(member)

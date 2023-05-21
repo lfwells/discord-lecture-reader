@@ -7,7 +7,7 @@ main { width: 100% !important; max-width: 100% !important; }
     <div><input type="submit" value="Generate More Graphs" /></div>
 </form>
 
-<%- locals.classlistFilters(true) %>
+<%- locals.classlistFilters(true, "post", graphs.map(graph => '<input type="hidden" name="'+graph.title+'" value="on" />').join("<br/>")) %>
 
 <% for (var graph of graphs)
 {

@@ -61,35 +61,35 @@ export async function _loadClassList(req,res,next, includeRemoved)
     {
         classList = classList.filter(m => m.discordID != config.LINDSAY_ID);
     }
-    if (req.query && req.query.filterByRole)
+    if (res.locals && res.locals.filterByRole())
     {
-        if (req.query.filterByRole.startsWith(config.SELECT_FIELD_NONE))
+        if (res.locals.filterByRole().startsWith(config.SELECT_FIELD_NONE))
         {
-            delete req.query.filterByRole;
+            delete res.locals.filterByRole();
         }
         else
         {
-            classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(req.query.filterByRole)); 
-            delete req.query.current;
-            delete req.query.includeAdmin;
+            classList = classList.filter(m => m.member.roles != null && m.member.roles.cache.has(res.locals.filterByRole())); 
+            //delete res.locals.current();
+            //delete res.locals.includeAdmin();
         }
     }
 
-    if (req.query && req.query.includeAdmin == undefined)
+    if (res.locals && res.locals.includeAdmin() == undefined)
     {
-        console.log(req.query.includeAdmin);
+        console.log({includeAdmin:res.locals.includeAdmin()});
 
         classList = await asyncFilter(classList, async (m) => !(await isAdmin(m.member)) );
     }
-    else if (req.query)
+    else if (res.locals)
     {
-        delete req.query.current;
+        delete res.locals.current();
     }
 
-    if (req.query && req.query.current && req.query.current == "on")
+    if (res.locals && res.locals.current() && res.locals.current() == "on")
     {
-        delete req.query.includeAdmin;
-        delete req.query.filterByRole;
+        //delete res.locals.includeAdmin();
+        //delete res.locals.filterByRole();
 
         var studentRoleID = await getGuildProperty("studentRoleID", req.guild, undefined, true);
         if (studentRoleID)
@@ -120,31 +120,34 @@ export async function getClassList(guild, includeRemoved)
 export async function filterButtons(req,res,next)
 {
     var studentRole = await getGuildPropertyConverted("studentRoleID", req.guild);
+    res.locals.current = () => res.locals.query.current ?? req.body.current ?? false;
     res.locals.classListFilterCurrentStudentCheckbox = function()
     {
         if (studentRole)
         {
-            return '<label><input type="checkbox" name="current" class="autosubmit" '+(res.locals.query.current ? "checked" : "" )+'/> Filter By <b>@'+studentRole.name+'</b> Only</label>'
+            return '<label><input type="checkbox" name="current" class="autosubmit" '+(res.locals.current() ? "checked" : "" )+'/> Filter By <b>@'+studentRole.name+'</b> Only</label>'
         }
     };
 
     var adminRole = await getGuildPropertyConverted("adminRoleID", req.guild);
+    res.locals.includeAdmin = () => res.locals.query.includeAdmin ?? req.body.includeAdmin ?? false;
     res.locals.classListFilterAdminCheckbox = function()
     {
         if (adminRole) 
         {
-            return '<label><input type="checkbox" name="includeAdmin" class="autosubmit" '+(res.locals.query.includeAdmin ? "checked" : "" )+'/> Include <b>@'+adminRole.name+'</b>?</label>'
+            return '<label><input type="checkbox" name="includeAdmin" class="autosubmit" '+(res.locals.includeAdmin() ? "checked" : "" )+'/> Include <b>@'+adminRole.name+'</b>?</label>'
         }
         return "";
     };
 
     //TODO: multi select?
+    res.locals.filterByRole = () => res.locals.query.filterByRole ?? req.body.filterByRole ?? "";
     var roleList = await renderFile("views/subViews/roleSelect.html", {
         name: "filterByRole",
         id: "filterByRole",
         guild: req.guild,
         className: "autosubmit",
-        value: res.locals.query.filterByRole,
+        value: res.locals.filterByRole(),
         selectDefaultText: "- Select -"
     });
     res.locals.classListFilterByRoleList = function()
@@ -153,12 +156,13 @@ export async function filterButtons(req,res,next)
     }
 
     //TODO: multi select?
+    res.locals.filterByUser = () => res.locals.query.filterByUser ?? req.body.filterByUser ?? "";
     var userList = await renderFile("views/subViews/userSelect.html", {
         name: "filterByUser",
         id: "filterByUser",
         guild: req.guild,
         className: "autosubmit",
-        value: res.locals.query.filterByUser,
+        value: res.locals.filterByUser(),
         selectDefaultText: "- Select -"
     });
     res.locals.classListFilterByUserList = function()
@@ -167,24 +171,25 @@ export async function filterButtons(req,res,next)
     }
 
     var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", req.guild, null);
-    
+    res.locals.includeOffTopic = () => res.locals.query.includeOffTopic ?? req.body.includeOffTopic ?? false;
     res.locals.classListFilterByOffTopicCheckbox = function()
     {
         if (offTopicCategory)
         {
-            return '<label><input type="checkbox" name="includeOffTopic" class="autosubmit" '+((res.locals.query.includeOffTopic) ? "checked" : "" )+'/> Include <b>'+offTopicCategory.name+'</b> Posts?</label>';
+            return '<label><input type="checkbox" name="includeOffTopic" class="autosubmit" '+((res.locals.includeOffTopic()) ? "checked" : "" )+'/> Include <b>'+offTopicCategory.name+'</b> Posts?</label>';
         }
         return "";
     };
 
     
     //TODO: multi select?
+    res.locals.filterByChannel = () => res.locals.query.filterByChannel ?? req.body.filterByChannel ?? "";
     var channelList = await renderFile("views/subViews/channelSelect.html", {
         name: "filterByChannel",
         id: "filterByChannel",
         guild: req.guild,
         className: "autosubmit",
-        value: res.locals.query.filterByChannel,
+        value: res.locals.filterByChannel(),
         selectDefaultText: "- Select -"
     });
     res.locals.classListFilterByChannelList = function()
@@ -194,9 +199,9 @@ export async function filterButtons(req,res,next)
     
     
 
-    res.locals.classlistFilters = function(includePostFilters)
+    res.locals.classlistFilters = function(includePostFilters, method, extraContent)
     {
-        var all = '<form method="get"><div class="filter">';
+        var all = '<form method="'+(method ?? "get")+'"><div class="filter">';
         //all += "<span>"+res.locals.classListFilterCurrentStudentCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterAdminCheckbox()+"</span>";
         all += "<span>"+res.locals.classListFilterByRoleList()+"</span>";
@@ -206,7 +211,7 @@ export async function filterButtons(req,res,next)
             all += "<span>"+res.locals.classListFilterByChannelList()+"</span>"; 
             all += "<span>"+res.locals.classListFilterByOffTopicCheckbox()+"</span>"; 
         }
-        all += "</div></form>";
+        all += "</div>"+extraContent+"</form>";
 
         return all;
     }
@@ -214,64 +219,68 @@ export async function filterButtons(req,res,next)
     next();
 }
 
-export async function getUserFilterPredicate(req)
+export async function getUserFilterPredicate(req, res)
 {
     var studentRoleID = await getGuildProperty("studentRoleID", req.guild);
     var adminRoleID = await getGuildProperty("adminRoleID", req.guild);
     return async function (user)
     {
-        return await filterUserPredicate(user, req, studentRoleID, adminRoleID);
+        return await filterUserPredicate(user, req, res, studentRoleID, adminRoleID);
     };
 }
 
-export async function getPostsFilterPredicate(req)
+export async function getPostsFilterPredicate(req, res)
 {
     var offTopicCategory = await getGuildPropertyConverted("offTopicCategoryID", req.guild);
     return async function (post)
     {
-        return await filterPostPredicate(post, req, offTopicCategory);
+        return await filterPostPredicate(post, req, res, offTopicCategory);
     };
 }
 
-async function filterUserPredicate(user, req, studentRoleID, adminRoleID)
+async function filterUserPredicate(user, req, res, studentRoleID, adminRoleID)
 {
     var member = await req.guild.members.cache.get(user.author);
     if (member == undefined) return false;
 
-    if (req.query.current && req.query.current == "on")
+    if (res.locals.current() && res.locals.current() == "on")
     {
+        //console.log("did this check current?",member.roles == undefined || member.roles.cache.has(studentRoleID) == false);
         if (member.roles == undefined || member.roles.cache.has(studentRoleID) == false) return false;
     }
     
-    if (req.query.includeAdmin == undefined)
+    if (res.locals.includeAdmin() == false)
     {
+        //console.log("did this check admin?",member.roles == undefined || member.roles.cache.has(adminRoleID) == true);
         if (member.roles == undefined || member.roles.cache.has(adminRoleID) == true) return false;
     }
 
-    if (req.query.filterByRole && req.query.filterByRole != "")
+    if (res.locals.filterByRole() && res.locals.filterByRole() != "" && res.locals.filterByRole() != "__DISCORD_BOT_NONE__")
     {
-        if (member.roles == undefined || member.roles.cache.has(req.query.filterByRole) == false) return false;
+        //console.log("did this check role?",member.roles == undefined || member.roles.cache.has(res.locals.filterByRole()) == false);
+        if (member.roles == undefined || member.roles.cache.has(res.locals.filterByRole()) == false) return false;
     }
 
-    if (req.query.filterByUser && req.query.filterByUser != "")
+    if (res.locals.filterByUser() && res.locals.filterByUser() != "" && res.locals.filterByUser() != "__DISCORD_BOT_NONE__")
     {
-        if (member.roles == undefined || member.id == (req.query.filterByUser) == false) return false;
+        //console.log("did this check user?",member.id == (res.locals.filterByUser()) == false);
+        if (member.roles == undefined || member.id == (res.locals.filterByUser()) == false) return false;
     }
 
     return true;
 }
 
-async function filterPostPredicate(post, req, offTopicCategory)
+async function filterPostPredicate(post, req, res, offTopicCategory)
 {
-    if (req.query.includeOffTopic == undefined && offTopicCategory)
+    if (res.locals.includeOffTopic() == false && offTopicCategory)
     {
         if (offTopicCategory.children.some(c => c.id == post.channel)) return false;
     }
 
     
-    if (req.query.filterByChannel && req.query.filterByChannel != "")
+    if (res.locals.filterByChannel() && res.locals.filterByChannel() != "" && res.locals.filterByChannel() != "__DISCORD_BOT_NONE__")
     {
-        if (post.channel != req.query.filterByChannel) return false;
+        if (post.channel != res.locals.filterByChannel()) return false;
     }
 
 

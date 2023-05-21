@@ -7,12 +7,12 @@ import { loadPresenceData } from "./presence.js";
 
 export async function getStatsData(req,res,next)
 {
-    res.locals.statsData = await getStats(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
+    res.locals.statsData = await getStats(req.guild, await getUserFilterPredicate(req, res), await getPostsFilterPredicate(req, res));
     next();
 }
 export async function getStatsDataWeek(req,res,next)
 {
-    res.locals.statsData = await getStatsWeek(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
+    res.locals.statsData = await getStatsWeek(req.guild, await getUserFilterPredicate(req, res), await getPostsFilterPredicate(req, res));
     next();
 }
 export async function getStatsDataOBS(req,res,next)
@@ -63,7 +63,7 @@ export async function timeGraph(req, res, next)
 {
     var rawStatsData = async function() { 
         console.log("loading posts for time graph...");
-        var posts = await getPostsData(req.guild, await getUserFilterPredicate(req), await getPostsFilterPredicate(req));
+        var posts = await getPostsData(req.guild, await getUserFilterPredicate(req, res), await getPostsFilterPredicate(req, res));
         console.log("operating on", posts.length, "posts");
         return posts;
     };
@@ -94,10 +94,10 @@ export async function timeGraph(req, res, next)
 
         "Attendance Per Session": async function()
         {
-            return await loadAttendanceSession(await attendanceData(), req.guild, false, await getUserFilterPredicate(req));
+            return await loadAttendanceSession(await attendanceData(), req.guild, false, await getUserFilterPredicate(req, res));
         },
         "Attendance In/Out Session": async function() {
-            return await loadAttendanceSession(await attendanceData(), req.guild, true, await getUserFilterPredicate(req));
+            return await loadAttendanceSession(await attendanceData(), req.guild, true, await getUserFilterPredicate(req, res));
         },
         "Online Presence Per Day": async function() {
             return (await loadPresenceData(req.guild)).map(function  (e) { return { date: e.timestamp, value: e.count }; });
