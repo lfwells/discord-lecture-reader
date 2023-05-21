@@ -21,7 +21,11 @@
                 return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB)
             }
         }
-        function getCellValue(row, index){ return $(row).children('td, th').eq(index).attr("sortValue") ?? -1}
+        function getCellValue(row, index)
+        { 
+            var $cell = $(row).children('td, th').eq(index);
+            return $cell.attr("sortValue") ?? $cell.text();
+        }
     });
     
     function copyToClipboard(txt) {

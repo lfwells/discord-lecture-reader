@@ -14,7 +14,21 @@
 %>
 <div class="col">
     <h3>Post Count</h3>
-    <table id="classList">
+    <table id="classList" class="sortable">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Name</th>
+                <th>Post Count</th>
+                <%if (locals.unengagedClassList != null)
+                {
+                    %>
+                    <th>Linked</th>
+                    <%
+                }
+                %>
+            </tr>
+        </thead>
         <tbody>
             <%
             var list = locals.classList;
@@ -75,7 +89,16 @@
     else
     {
         %>
-        <table id="unengagedClassList">
+        <table id="unengagedClassList" class="sortable">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
             <tbody>
                 <%
                 locals.unengagedClassList.forEach(function(student)
