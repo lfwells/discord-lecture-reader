@@ -87,10 +87,10 @@ export async function timeGraph(req, res, next)
         "Posts Per Hour": async function() {
             return await loadPostsPerHour(await rawStatsData());
         },
-        "Posts Per Session": async function (){
+        "Posts Per Session (Currently Slow)": async function (){
             return await loadPostsPerSession(await rawStatsData(), req.guild);
         },
-        "Posts Per In/Out Session": async function() {
+        "Posts Per In/Out Session (Currently Slow)": async function() {
             return await loadPostsPerSession(await rawStatsData(), req.guild, true);
         },
 
@@ -101,7 +101,7 @@ export async function timeGraph(req, res, next)
         "Attendance In/Out Session": async function() {
             return await loadAttendanceSession(await attendanceData(), req.guild, true, await getUserFilterPredicate(req, res));
         },
-        "Online Presence Per Day": async function() {
+        "Online Presence Per Day (Currently Slow)": async function() {
             return (await loadPresenceData(req.guild)).map(function  (e) { return { date: e.timestamp, value: e.count }; });
         }
     };
