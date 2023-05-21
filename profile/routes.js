@@ -1,6 +1,5 @@
 import { loadProfile, saveProfileProperty } from "./profile.js";
 import { getClient } from '../core/client.js';
-import { getPostsFilterPredicate } from "../classList/classList.js";
 import { getPostsCount, getPostsData } from "../analytics/analytics.js";
 import { getAwardsForMember } from "../awards/awards.js";
 import { useLegacyAwardsSystem } from "../awards/awards.js";
