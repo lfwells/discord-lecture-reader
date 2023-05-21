@@ -211,7 +211,7 @@ export async function filterButtons(req,res,next)
             all += "<span>"+res.locals.classListFilterByChannelList()+"</span>"; 
             all += "<span>"+res.locals.classListFilterByOffTopicCheckbox()+"</span>"; 
         }
-        all += "</div>"+extraContent+"</form>";
+        all += "</div>"+(extraContent??"")+"</form>";
 
         return all;
     }
