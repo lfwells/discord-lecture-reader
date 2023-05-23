@@ -9,7 +9,7 @@ import { getGuilds, saveGuildProperty, setBotNickname } from "./guild.js";
 export async function loadGuildList(req,res,next)
 {
   var client = getClient();
-  req.guilds = (await getGuilds(client, req, await isUTASBotAdmin(req.discordUser.id)))
+  req.guilds = (await getGuilds(client, req, await isUTASBotAdmin(req.discordUser?.id)))
     .filter(g => !isOutsideTestServer(g)).sort((a, b) => a.name.localeCompare(b.name));
   next();
 }

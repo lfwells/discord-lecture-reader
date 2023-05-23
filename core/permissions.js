@@ -23,6 +23,8 @@ export function hasPermissionCached(permission, permissions)
 
 export async function isUTASBotAdmin(discordID)
 {
+    if (discordID == null) return false;
+    
     let permissions = await getPermissions(discordID);
 
     if (permissions.exists == false) return false;
