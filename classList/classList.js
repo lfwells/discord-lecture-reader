@@ -54,7 +54,7 @@ export async function _loadClassList(req,res,next, includeRemoved)
     }
 
     //if a user filter is on, filter the class list
-    if (res.locals && res.locals.filterByUser() && res.locals.filterByUser() != "" && res.locals.filterByUser() != "__DISCORD_BOT_NONE__")
+    if (res.locals && res.locals.filterByUser && res.locals.filterByUser() != "" && res.locals.filterByUser() != "__DISCORD_BOT_NONE__")
     {
         classList = classList.filter(m => m.discordID == res.locals.filterByUser());
     }
@@ -67,11 +67,11 @@ export async function _loadClassList(req,res,next, includeRemoved)
     {
         classList = classList.filter(m => m.discordID != config.LINDSAY_ID);
     }
-    if (res.locals && res.locals.filterByRole())
+    if (res.locals && res.locals.filterByRole && res.locals.filterByRole() != "" && res.locals.filterByRole() != "__DISCORD_BOT_NONE__")
     {
         if (res.locals.filterByRole().startsWith(config.SELECT_FIELD_NONE))
         {
-            delete res.locals.filterByRole();
+            delete res.locals.filterByRole;
         }
         else
         {
@@ -81,18 +81,18 @@ export async function _loadClassList(req,res,next, includeRemoved)
         }
     }
 
-    if (res.locals && res.locals.includeAdmin() == undefined)
+    if (res.locals && res.locals.includeAdmin && res.locals.includeAdmin() == undefined)
     {
         console.log({includeAdmin:res.locals.includeAdmin()});
 
         classList = await asyncFilter(classList, async (m) => !(await isAdmin(m.member)) );
     }
-    else if (res.locals)
+    else if (res.locals && res.locals.current)
     {
-        delete res.locals.current();
+        delete res.locals.current;
     }
 
-    if (res.locals && res.locals.current() && res.locals.current() == "on")
+    if (res.locals && res.locals.current && res.locals.current() == "on")
     {
         //delete res.locals.includeAdmin();
         //delete res.locals.filterByRole();
