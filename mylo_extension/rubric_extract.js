@@ -24,7 +24,8 @@ const dropboxId = window.location.searchParams.db;
 const grades = {};
 
 const dropbox = (await api(`/d2l/api/le/1.48/${ou}/dropbox/folders/${dropboxId}`))[0];
-const criteria = Object.fromEntries(dropbox.Assessment.Rubrics[0].CriteriaGroups.map(group => [group.Criteria[0].Id, group.Criteria[0].Name]))
+const criteria = Object.fromEntries(dropbox.Assessment.Rubrics[0].CriteriaGroups.flatMap(group => group.Criteria).map(c => [c.Id, c.Name]));
+console.log({criteria});
 
 let classlist = await api(`/d2l/api/le/1.40/${ou}/classlist/`, { });
 classlist = Object.fromEntries(classlist.map(s => [s.Identifier, s]));
