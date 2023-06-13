@@ -1,0 +1,12 @@
+<h1>Cannot connect Discord Account to MyLO</h1>
+<!--<%=JSON.stringify(locals.discordUser)%>-->
+<% 
+if(locals.discordUser.mfa_enabled == false)
+{
+    %><p>Discord account does not have 2FA enabled. Please enable 2FA and try again.</p><%
+} 
+if (locals.discordUser.verified == false)
+{
+    %><p>Discord account is not verified. Please verify your account and try again.</p><%
+} 
+%>

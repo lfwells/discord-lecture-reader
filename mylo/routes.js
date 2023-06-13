@@ -4,7 +4,7 @@ import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getCachedInteraction } from "../guild/commands.js";
 
 import axios from 'axios';
-import { deleteCategoryChannels, getMyLOConnectedMessage, getMyLOData, postChannelLinks, postChannelsWithLinks, postChannelsWithThreads, postChannelThreads, storeMyLOData } from "./mylo.js";
+import { deleteCategoryChannels, getMyLOConnectedMessage, getMyLOConnectedOAuthUser, getMyLOData, postChannelLinks, postChannelsWithLinks, postChannelsWithThreads, postChannelThreads, storeMyLOData } from "./mylo.js";
 import { deleteStudentProperty, getStudentProperty, setStudentProperty } from "../student/student.js";
 import { beginStreamingRes } from "../core/server.js";
 import { pluralize } from "../core/utils.js";
@@ -89,9 +89,16 @@ export async function discordConnectComplete(req,res)
 
     //retrieve the discord interation that was used to trigger this button in the first place
     var state = req.query.state;
+    var discordUser = await getMyLOConnectedOAuthUser(auth);
+    console.log({discordUser, auth, state});
+
+    if (discordUser.mfa_enabled == false || discordUser.verified == false)
+    {
+        return res.render("mylo/myloOAuthDiscordInvalid", { discordUser });
+    }
 
     res.render("mylo/myloOAuth", {
-        state
+        state, discordUser
     });
 }
 

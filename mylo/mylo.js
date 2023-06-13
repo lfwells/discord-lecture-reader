@@ -4,6 +4,7 @@ import { scopeMyLOConnect } from '../core/login.js';
 import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getGuildDocument, getGuildProperty } from "../guild/guild.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
+import fetch, { Headers } from 'node-fetch';
 
 async function getMyLODataDoc(guild, key) { return (await getGuildDocument(guild.id)).collection("mylo").doc(key); }
 export async function storeMyLOData(guild, data)
@@ -261,4 +262,16 @@ export async function getMyLOConnectedMessage(studentDiscordID, interaction, wit
         const rows = [ row ];
         return { embeds:[ notConnectedWithButtonEmbed ], components: rows };
     }
+}
+
+export async function getMyLOConnectedOAuthUser(auth) 
+{
+    var myHeaders = new Headers({
+        "Authorization": `${auth.token_type} ${auth.access_token}`,
+    });
+    var result = await fetch('https://discord.com/api/users/@me', {
+        headers:myHeaders 
+    });
+	var response = result.json();
+    return response;
 }
