@@ -2,6 +2,7 @@ import { init_client } from '../core/client.js';
 import { getGuildDocument, getGuildProperty, guessConfigurationValues, hasFeature, init_admin_users } from "./guild.js";
 import * as config from "../core/config.js";
 import { newGuilds } from './commands.js';
+import { SESSIONS } from '../attendance/sessions.js';
 
 export default async function(client)
 {
@@ -30,6 +31,8 @@ export default async function(client)
         if (index > -1) {
             newGuilds.splice(index, 1); // 2nd parameter means remove one item only
         }
+
+        SESSIONS[guild.id] = [];
 
     });
 
@@ -60,6 +63,10 @@ export default async function(client)
     //TODO: only send a message if we've NEVER seen them before (or maybe send a "welcome back" message)
     client.on("guildMemberAdd", async function(newMember) {
         console.log("a new guild member has joined!");
+        
+        if (MEMBERS_DMD.indexOf(newMember.id) > -1) return;
+        MEMBERS_DMD.append(newMember.id);
+
         if (hasFeature(newMember.guild, "dm_intro"))
         {
             newMember.send(`Hello ${newMember.displayName} and welcome to the **${newMember.guild.name}** Server!`);
@@ -81,3 +88,5 @@ export default async function(client)
         }
     });
 }
+
+const MEMBERS_DMD = [];
