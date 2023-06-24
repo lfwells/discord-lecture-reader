@@ -32,7 +32,7 @@
       },
       
       // Seed the form with a starting value
-      startval: starting_value,
+      startval: {awards:starting_value},
 
       no_additional_properties: true,
       disable_array_delete_all_rows: true,
@@ -51,7 +51,7 @@
     document.getElementById('submit').addEventListener('click',function() 
     {
       // Get the value from the editor
-      var DATA = editor.getValue();
+      var DATA = editor.getValue().awards;
 
       console.log(DATA);
 

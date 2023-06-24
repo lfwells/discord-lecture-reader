@@ -1,7 +1,12 @@
 {
-
+  "type": "object",
+  "title": "Awards - Use JSON button to edit raw JSON (and import previous years raw JSON) ->",
+  
+  "required": ["awards"],
+  "properties": {
+      "awards": {
         "type": "array",
-        "title": "Awards",
+        "title": "Awards List",
         "items":{
           "type": "object",
           "title": "Award",
@@ -70,6 +75,7 @@
           }
         }
       
-  
+      }
+    }
 
 }
