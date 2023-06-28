@@ -65,7 +65,7 @@ export default async function(client)
         console.log("a new guild member has joined!");
         
         if (MEMBERS_DMD.indexOf(newMember.id) > -1) return;
-        MEMBERS_DMD.append(newMember.id);
+        MEMBERS_DMD.push(newMember.id);
 
         if (hasFeature(newMember.guild, "dm_intro"))
         {
