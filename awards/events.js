@@ -184,6 +184,15 @@ export default async function(client)
     {
         setGuildContextForInteraction(interaction);
         
+        if (interaction.isContextMenu())
+        {
+            if (interaction.commandName === awardContextMenuCommand.name) 
+            {
+                doAwardContextMenuCommand(interaction);          
+            }
+            return;
+        } 
+        
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand() || interaction.guild == undefined) return;
 
@@ -299,6 +308,14 @@ async function doFlexCommand(interaction)
 
     await interaction.editReply({ embeds: [ flexEmbed ] });
     //await interaction.reply(flex);
+}
+async function doAwardContextMenuCommand(interaction)
+{
+    await interaction.deferReply({ ephemeral: true });
+
+    await interaction.editReply({
+        content: "Right clicked yo"
+    });
 }
 async function doAwardCommand(interaction)
 {
