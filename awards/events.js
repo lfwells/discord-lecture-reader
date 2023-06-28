@@ -112,7 +112,7 @@ export default async function(client)
             name: 'award',
             type: 'STRING',
             description: 'The emoji to represent the award',
-            required: true,
+            required: false,
         },{
             name: 'title',
             type: 'STRING', 
@@ -125,6 +125,10 @@ export default async function(client)
             required: false,
         }],
     }; 
+    const awardContextMenuCommand = {
+        name: 'Give Award (ADMIN ONLY)',
+        type: 'MESSAGE',
+    }
     const nomCommand = {
         name: 'nom', 
         description: 'Nominate a user to get an award. If enough nominations are given, the award may be awarded.',
@@ -173,6 +177,7 @@ export default async function(client)
         await registerCommand(guild, nomCommand);
         //await registerCommand(guild, awardNewCommand); 
         await registerCommand(guild, leaderboardCommand);
+        await registerCommand(guild, awardContextMenuCommand);
     });
 
     client.on('interactionCreate', async function(interaction) 
