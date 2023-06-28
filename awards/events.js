@@ -8,6 +8,7 @@ import { registerCommand } from '../guild/commands.js';
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
 import { appendAuthorProfileLink } from "../profile/profile.js";
+import { MessageActionRow, MessageSelectMenu } from "discord.js";
 
 export default async function(client)
 {
@@ -313,8 +314,31 @@ async function doAwardContextMenuCommand(interaction)
 {
     await interaction.deferReply({ ephemeral: true });
 
+    let message = await interaction.channel.messages.fetch(interaction.targetId);
+    let member = message.member;
+
+    const row = new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+                .setCustomId('select')
+                .setPlaceholder('Nothing selected')
+                .addOptions([
+                    {
+                        label: 'Select me',
+                        description: 'This is a description',
+                        value: 'first_option',
+                    },
+                    {
+                        label: 'You can select me too',
+                        description: 'This is also a description',
+                        value: 'second_option',
+                    },
+                ]),
+        );
+
     await interaction.editReply({
-        content: "Right clicked yo"
+        content: `Give Award to <@${interaction.member.id}>`,
+        rows: [row]
     });
 }
 async function doAwardCommand(interaction)
