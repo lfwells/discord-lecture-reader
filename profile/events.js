@@ -61,7 +61,7 @@ async function doProfileCommand(interaction)
         member = await interaction.guild.members.fetch(member);
         if (await profileIsPublic(member) == false)
         {
-            await interaction.editReply({ content: `Sorry, ${member.displayName}'s profile is not public. Why not ask them to make it public?`, ephemeral:true });
+            await interaction.editReply({ content: `Sorry, <@${member.id}>'s profile is not public. Why not ask them to make it public?`, ephemeral:true });
             return;
         }
     }
