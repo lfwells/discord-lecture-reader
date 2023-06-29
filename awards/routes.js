@@ -5,6 +5,7 @@ import * as config from "../core/config.js";
 import { beginStreamingRes } from "../core/server.js";
 import { pluralize, redirectToWhereWeCameFrom } from "../core/utils.js";
 import e from "express";
+import { appendAuthorProfileLink } from "../profile/profile.js";
 
 //todo: summary (public?) pages that list achievements?
 export async function namesTest(req,res,next) 
