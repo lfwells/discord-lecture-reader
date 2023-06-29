@@ -7,7 +7,7 @@ export var STUDENT_CACHE = {}; //because querying the db every min is bad (canno
 
 export default async function init(client)
 {
-  /*
+  
   var guilds = client.guilds.cache;
   //store them in the db
   await Promise.all(guilds.map( async (guild) => 
@@ -15,15 +15,16 @@ export default async function init(client)
     await asyncForEach(Array.from(guild.members.cache.entries()), async function(kvp) {
       var studentDiscordID = kvp[0];
       var studentDiscordData = kvp[1];
-
+      STUDENT_CACHE[studentDiscordID] = studentDiscordData;
     });
   })
-  );;*/
+  );;
 
+  /*
   var allStudentsData = await studentsCollection.get();
   allStudentsData.forEach(d => {
     STUDENT_CACHE[d.id] = d.data();
-  });
+  });*/
   console.log(`Done awaiting all students - total ${getStudentCount()}`); 
 }
 
