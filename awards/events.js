@@ -8,7 +8,7 @@ import { getCachedInteraction, registerCommand, storeCachedInteractionData } fro
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
 import { appendAuthorProfileLink } from "../profile/profile.js";
-import { MessageActionRow, MessageSelectMenu } from "discord.js";
+import { MessageActionRow, MessageButton, MessageSelectMenu } from "discord.js";
 
 export default async function(client)
 {
@@ -199,8 +199,11 @@ export default async function(client)
             console.log({interaction});
             if (interaction.customId.startsWith("award_select")) 
             {
-                console.log((interaction.message.interaction ?? interaction.message).id);
                 await doAwardCommandSelectBoxInteraction(interaction, (interaction.message.interaction ?? interaction.message));
+            }
+            else if (interaction.customId.startsWith("award_"))
+            {
+                await doAwardCommandSelectBoxInteraction(interaction, (interaction.message.interaction ?? interaction.message), interaction.customId.replace("award_", ""));
             }
         }
         
@@ -337,6 +340,9 @@ async function doAwardDropdownInteraction(interaction, member)
 
     var awards = await getAwardsDocuments(interaction.guild);
 
+    //look at all awards and find the first one (if any) that has a channel associated with it that matches this interaction's channel
+    var awardsForThisChannel = awards.filter(award => award.autoPopChannel == interaction.channel.id);
+
     const row = new MessageActionRow()
         .addComponents(
             new MessageSelectMenu()
@@ -350,13 +356,21 @@ async function doAwardDropdownInteraction(interaction, member)
                 })
             )
         );
-
     await interaction.editReply({
         content: `Select the Award to give to <@${member.id}>`,
-        components: [row]
+        components: [row, ...awardsForThisChannel.map(
+            function (award) { return new MessageActionRow().addComponents(
+                    new MessageButton()
+                            .setCustomId(`award_${award.emoji}`)
+                            .setLabel(`${award.title} (intelligently guessed)`)
+                            .setStyle('PRIMARY')
+                            .setEmoji(award.emoji)
+                );
+            })
+        ]
     });
 }
-async function doAwardCommandSelectBoxInteraction(i, originalInteraction) 
+async function doAwardCommandSelectBoxInteraction(i, originalInteraction, emoji) 
 {  
     if (await adminCommandOnly(i)) return;
 
@@ -366,7 +380,7 @@ async function doAwardCommandSelectBoxInteraction(i, originalInteraction)
     let member = cache.member;
     member = await i.guild.members.fetch(member);
 
-    await _doAwardCommand(i, i.values[0].replace("award_", ""), member);
+    await _doAwardCommand(i, emoji ?? i.values[0].replace("award_", ""), member);
 }
 
 async function doAwardCommand(interaction)
