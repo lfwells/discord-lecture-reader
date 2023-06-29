@@ -39,7 +39,7 @@ export default async function(client)
             const oldInvites = invites[member.guild.id];
             
             // Look through the invites, find the one for which the uses went up.
-            const invite = newInvites.find(i => i.uses > oldInvites[i.code].uses);
+            const invite = newInvites.find(i => i.uses > oldInvites[i.code]?.uses);
             if (invite)
             {
                 console.log(invite); 
