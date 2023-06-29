@@ -1,10 +1,10 @@
 import { getClient, send } from "../core/client.js";
 import { showText } from "../lecture_text/routes.js";
-import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField, getAwardsDatabase, getAwardsCollection, awardExists, hasAward } from "./awards.js";
+import { baseName, handleAwardNicknames, isAwardChannelID, getAwardChannel, getAwardByEmoji, getAwardList, giveAward, getLeaderboard, getAwardEmoji, getAwardName, getAwardNominationsCount, getAwardDocument, getAwardDisplayName, nominateForAward, getAwardCanNominate, getAwardRequiredNominations, useLegacyAwardsSystem, getAwardAsField, getAwardsDatabase, getAwardsCollection, awardExists, hasAward, getAwardsDocuments } from "./awards.js";
 import { pluralize, offTopicCommandOnly, adminCommandOnly } from '../core/utils.js';
 import { getClassList } from '../classList/classList.js';
 import { getGuildProperty, getGuildPropertyConverted, hasFeature } from '../guild/guild.js';
-import { registerCommand } from '../guild/commands.js';
+import { getCachedInteraction, registerCommand, storeCachedInteractionData } from '../guild/commands.js';
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
 import { appendAuthorProfileLink } from "../profile/profile.js";
@@ -193,6 +193,16 @@ export default async function(client)
             }
             return;
         } 
+
+        if (interaction.isMessageComponent())// && interaction.message.interaction) 
+        {        
+            console.log({interaction});
+            if (interaction.customId.startsWith("award_select")) 
+            {
+                console.log((interaction.message.interaction ?? interaction.message).id);
+                await doAwardCommandSelectBoxInteraction(interaction, (interaction.message.interaction ?? interaction.message));
+            }
+        }
         
         // If the interaction isn't a slash command, return
         if (!interaction.isCommand() || interaction.guild == undefined) return;
@@ -312,35 +322,53 @@ async function doFlexCommand(interaction)
 }
 async function doAwardContextMenuCommand(interaction)
 {
+    if (await adminCommandOnly(interaction)) return;
+
     await interaction.deferReply({ ephemeral: true });
 
     let message = await interaction.channel.messages.fetch(interaction.targetId);
     let member = message.member;
 
+    await doAwardDropdownInteraction(interaction, member);
+}
+async function doAwardDropdownInteraction(interaction, member)
+{
+    await storeCachedInteractionData(interaction.guild, interaction.id, { member: member.id });
+
+    var awards = await getAwardsDocuments(interaction.guild);
+
     const row = new MessageActionRow()
         .addComponents(
             new MessageSelectMenu()
-                .setCustomId('select')
+                .setCustomId('award_select')
                 .setPlaceholder('Nothing selected')
-                .addOptions([
-                    {
-                        label: 'Select me',
-                        description: 'This is a description',
-                        value: 'first_option',
-                    },
-                    {
-                        label: 'You can select me too',
-                        description: 'This is also a description',
-                        value: 'second_option',
-                    },
-                ]),
+                .addOptions(awards.map(
+                    function (award) { return {
+                        label: `${award.emoji} ${award.title}`,
+                        value: `award_${award.emoji}`
+                    };
+                })
+            )
         );
 
     await interaction.editReply({
-        content: `Give Award to <@${interaction.member.id}>`,
-        rows: [row]
+        content: `Select the Award to give to <@${member.id}>`,
+        components: [row]
     });
 }
+async function doAwardCommandSelectBoxInteraction(i, originalInteraction) 
+{  
+    if (await adminCommandOnly(i)) return;
+
+    await i.deferReply();
+
+    let cache = await getCachedInteraction(i.guild, originalInteraction.id);
+    let member = cache.member;
+    member = await i.guild.members.fetch(member);
+
+    await _doAwardCommand(i, i.values[0].replace("award_", ""), member);
+}
+
 async function doAwardCommand(interaction)
 {
     if (await adminCommandOnly(interaction)) return;
@@ -349,11 +377,19 @@ async function doAwardCommand(interaction)
     member = await interaction.guild.members.fetch(member);
 
     var emoji = interaction.options.getString("award");//interaction.options[1].value;
+    if (emoji == undefined)
+    {
+        await interaction.deferReply({ephemeral: true});
+        return await doAwardDropdownInteraction(interaction, member);
+    }
     var award_text = interaction.options.getString("title");//interaction.options[2].value;
     var description = interaction.options.getString("description");
 
     await interaction.deferReply();
-
+    await _doAwardCommand(interaction, emoji, member, award_text, description);
+}
+async function _doAwardCommand(interaction, emoji, member, award_text, description)
+{
     //if (interaction.user.id == config.LINDSAY_ID || interaction.user.id == config.IAN_ID)
     {
         var useLegacyAwards = await useLegacyAwardsSystem(interaction.guild);
