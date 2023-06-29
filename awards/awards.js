@@ -352,6 +352,15 @@ export async function getAwardsDatabase(guild, dontCache)
   }
   return AWARDS_CACHE;
 }
+export async function getAwardsDocuments(guild)
+{
+  return (await getAwardsDatabase(guild)).docs.map(function(doc) {
+    var d = doc.data();
+    d.id = doc.id;
+    d.emoji = doc.id;
+    return d;
+  });
+}
 export async function getAwardDocument(guild, emoji)
 {
   return (await getAwardsCollection(guild)).doc(emoji);
