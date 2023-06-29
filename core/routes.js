@@ -51,6 +51,8 @@ function defaultRouter()
     router.get("/serverAdded", guild_routes.serverAddedRedirect);
     router.get("/serverAddedInGuide", guild_routes.serverAddedInGuideRedirect);
 
+    router.get("/toggleFavouriteGuild", guild_routes.toggleFavouriteGuildRoute);
+
     router.get("/guide", guild_routes.loadGuildList, guide_routes.guide); 
     router.get("/guide/:page", guild_routes.loadGuildList, guide_routes.guidePage); 
     router.get("/guide/downloadMyLOGuide", guide_routes.downloadMyLOGuideFile);
