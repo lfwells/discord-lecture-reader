@@ -261,7 +261,12 @@
             cursor:pointer;
             background-color: rgba(176, 196, 222, 0.582);/*lightstellblue with alpha*/
         }
-        #guilds li > *:first-child
+        #guilds li > .favourite
+        {
+            display: none !important;
+            text-decoration: none !important;
+        }
+        #guilds li:hover > .favourite
         {
             display: inline-block !important;
         }

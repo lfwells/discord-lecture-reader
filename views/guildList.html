@@ -21,7 +21,6 @@
     { 
       %>
       <li>
-        <a href="/toggleFavouriteGuild?guildID=<%= guild.id %>" title="Toggle Favourite" class="favourite"><%=favourite ? "❌" : "💖" %></a>
         <img src="<%=guild.iconURL()%>" />
         <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>">
           <%= guild.name %><br />
@@ -31,6 +30,7 @@
             <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
           </span>
         </a>
+        <a href="/toggleFavouriteGuild?guildID=<%= guild.id %>" title="Toggle Favourite" class="favourite"><%=favourite ? "❌" : "💖" %></a>
       </li>
       <% 
     }
