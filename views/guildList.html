@@ -16,6 +16,25 @@
   }
   else
   {
+    
+    function displayGuild(guild, favourite)
+    { 
+      %>
+      <li>
+        <a href="/toggleFavouriteGuild?guildID=<%= guild.id %>" title="Toggle Favourite" class="favourite"><%=favourite ? "❌" : "💖" %></a>
+        <img src="<%=guild.iconURL()%>" />
+        <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>">
+          <%= guild.name %><br />
+          <span class="serverInfo">
+            <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
+            <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%> - 
+            <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
+          </span>
+        </a>
+      </li>
+      <% 
+    }
+
     %>
     <ul id="guilds">
       <% if (locals.hasPermission("create_server"))
@@ -25,24 +44,27 @@
         </li><%
       }
       %>
+    </ul>
 
-      <%
-      guilds.forEach(function(guild)
-      { 
+    <% 
+    console.log("Favourite Guilds: "+locals.favouriteGuilds);
+    if (locals.favouriteGuilds.length > 0)
+    {
+      %>
+      <h2>Favourite Servers</h2>
+      <ul id="guilds">
+        <%
+        guilds.forEach(g => locals.favouriteGuilds.indexOf(g.id) >= 0 ? displayGuild(g, true) : "");
         %>
-        <li>
-          <img src="<%=guild.iconURL()%>" />
-          <a href="/guild/<%= guild.id %>/" title="Server ID <%= guild.id %>">
-            <%= guild.name %><br />
-            <span class="serverInfo">
-              <%=(guild.approximateMemberCount == 1) ? guild.approximateMemberCount+" Member" : guild.approximateMemberCount+" Members"%> - 
-              <%=(guild.approximatePresenceCount == 1) ? guild.approximatePresenceCount+" Online" : guild.approximatePresenceCount+" Online"%> - 
-              <%=(guild.totalPosts == 1) ? guild.totalPosts+" Post" : guild.totalPosts.toLocaleString()+" Posts"%>
-            </span>
-          </a>
-        </li>
-        <% 
-      });
+      </ul>
+      <%
+    }
+    %>
+
+    <h2>All Servers</h2>
+    <ul id="guilds">
+      <%
+      guilds.forEach(g => displayGuild(g, false));
       %>
     </ul><%
   }

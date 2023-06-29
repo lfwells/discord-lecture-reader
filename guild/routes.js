@@ -3,6 +3,7 @@ import * as config from "../core/config.js";
 import { isUTASBotAdmin } from "../core/permissions.js";
 import { renderErrorPage } from "../core/server.js";
 import { isOutsideTestServer } from "../core/utils.js";
+import { getFavouriteGuilds, toggleFavouriteGuild } from "./favourites.js";
 
 import { getGuilds, saveGuildProperty, setBotNickname } from "./guild.js";
 
@@ -15,8 +16,11 @@ export async function loadGuildList(req,res,next)
 }
 export async function guildList(req, res) 
 {  
+  let favs = await getFavouriteGuilds(req.discordUser?.id);
+
   res.render('guildList', {
     guilds: req.guilds,
+    favouriteGuilds: favs,
     testMode: config.getTestMode()
   });
 }
@@ -110,4 +114,11 @@ export async function setGuildProperty(req, res)
   await saveGuildProperty(property, value, req,res);
   
   res.json({success:true});
+}
+
+export async function toggleFavouriteGuildRoute(req,res,next)
+{
+  var guildId = req.query.guildID;
+  await toggleFavouriteGuild(req.discordUser?.id, guildId);
+  res.redirect("/");
 }

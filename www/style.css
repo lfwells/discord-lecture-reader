@@ -261,6 +261,10 @@
             cursor:pointer;
             background-color: rgba(176, 196, 222, 0.582);/*lightstellblue with alpha*/
         }
+        #guilds li > *:first-child
+        {
+            display: inline-block !important;
+        }
         #guilds li span.serverInfo
         {
             font-size: smaller;
