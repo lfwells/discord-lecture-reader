@@ -343,10 +343,28 @@ async function doAwardDropdownInteraction(interaction, member)
     //look at all awards and find the first one (if any) that has a channel associated with it that matches this interaction's channel
     var awardsForThisChannel = awards.filter(award => award.autoPopChannel == interaction.channel.id);
 
-    const row = new MessageActionRow()
+    //display the awards in groups of 25
+    var awardsGroups = [];
+    var i = 0;
+    for (var award of awards)
+    {
+        if (i == 25)
+        {
+            i = 0;
+        }
+        if (i == 0)
+        {
+            awardsGroups.push([]);
+        }
+        awardsGroups[awardsGroups.length-1].push(award);
+        i++;
+    }
+
+    i = 0;
+    const rows = awardsGroups.map(awards => new MessageActionRow()
         .addComponents(
             new MessageSelectMenu()
-                .setCustomId('award_select')
+                .setCustomId(`award_select_${i++}`)
                 .setPlaceholder('Nothing selected')
                 .addOptions(awards.map(
                     function (award) { return {
@@ -355,10 +373,11 @@ async function doAwardDropdownInteraction(interaction, member)
                     };
                 })
             )
-        );
+        )
+    );
     await interaction.editReply({
         content: `Select the Award to give to <@${member.id}>`,
-        components: [row, ...awardsForThisChannel.map(
+        components: [...rows, ...awardsForThisChannel.map(
             function (award) { return new MessageActionRow().addComponents(
                     new MessageButton()
                             .setCustomId(`award_${award.emoji}`)
