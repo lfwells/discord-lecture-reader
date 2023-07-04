@@ -139,12 +139,13 @@ export async function deleteCategory(req,res,next)
       if (channel.parent?.id == categoryID)
       {
         await res.write(`Deleting channel ${channel.name}...\n`);
-        //await channel.delete();
+        await channel.delete();
       }
     }
     //delete category
     await res.write(`Finish Deleting category ${category.name}...\n`);
-    //await category.delete();
+    await category.delete();
+    
     await res.write(`Done.`);
   }
   else
