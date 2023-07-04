@@ -1,7 +1,7 @@
 import { getClient } from "../core/client.js";
 import * as config from "../core/config.js";
 import { isUTASBotAdmin } from "../core/permissions.js";
-import { renderErrorPage } from "../core/server.js";
+import { beginStreamingRes, renderErrorPage } from "../core/server.js";
 import { isOutsideTestServer } from "../core/utils.js";
 import { getFavouriteGuilds, toggleFavouriteGuild } from "./favourites.js";
 
@@ -125,26 +125,30 @@ export async function toggleFavouriteGuildRoute(req,res,next)
 
 export async function deleteCategory(req,res,next)
 {
+  await beginStreamingRes(res);
+
   var categoryID = req.params.categoryID;
   var guild = req.guild;
   var category = guild.channels.cache.get(categoryID);
   if (category)
   {
+    await res.write(`Deleting category ${category.name}...\n`);
     //loop through all channels with parent category and delete them
     for (var channel of guild.channels.cache.values())
     {
       if (channel.parent?.id == categoryID)
       {
-        console.log("Deleting channel", channel.name);
+        await res.write(`Deleting channel ${channel.name}...\n`);
         //await channel.delete();
       }
     }
     //delete category
-    console.log("Deleting category", category.name);
+    await res.write(`Finish Deleting category ${category.name}...\n`);
     //await category.delete();
+    await res.write(`Done.`);
   }
   else
   {
-    console.log("Category not found");
+    await res.write(`Category ${categoryID} not found.`);
   }
 }

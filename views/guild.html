@@ -83,6 +83,52 @@
             id: "deleteCategoryID",
             help: "Use this tool to delete a category, because deleting in Discord just orphans the child channels. Use with care."
         }) %></p>
+        
+<script>
+    var resultWindows = {};
+    $('#deleteCategoryID').on('change',function(e) 
+    {
+        //make a popup to display the output
+        if (resultWindows['deleteCatgoryID']) resultWindows['deleteCatgoryID'].close();
+        resultWindows['deleteCatgoryID'] = window.open("", "Deleting Category...", "width=650,height=600");
+
+        try
+        {
+            resultWindows['deleteCatgoryID'].document.querySelector('pre').remove();
+        } catch (e) {}
+        resultWindows['deleteCatgoryID'].document.write("<html><head><title>Deleting Category...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
+
+        var last_response_len  = false;
+        $.ajax({
+            url:"<%= guild.id %>/deleteCategory/" + e.target.value,
+            method:"get",
+            contentType: 'application/json',
+            xhrFields: {
+                onprogress: function(e)
+                {
+                    var this_response, response = e.currentTarget.response;
+                    if(last_response_len === false)
+                    {
+                        this_response = response;
+                        last_response_len = response.length;
+                    }
+                    else
+                    {
+                        this_response = response.substring(last_response_len);
+                        last_response_len = response.length;
+                    }
+                    console.log(this_response);
+                    resultWindows['deleteCatgoryID'].document.write(this_response);
+                },
+                success: function(data)
+                {
+                    resultWindows['deleteCatgoryID'].document.write("</pre>");
+                }
+            },
+        });
+      }
+    );
+  </script>
 </form>
 
 <%- include('footer.html') %>
