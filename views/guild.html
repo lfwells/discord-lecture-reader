@@ -88,6 +88,15 @@
     var resultWindows = {};
     $('#deleteCategoryID').on('change',function(e) 
     {
+        //prompt the user to confirm by typing DELETE
+        var catName = e.target.options[e.target.selectedIndex].text;
+        var catID = e.target.value;
+        var catNameConfirm = prompt("Are you sure you want to delete the category '" + catName + "'? Type DELETE to confirm.");
+        if (catNameConfirm?.toLocaleLowerCase() != "delete") {
+            $(this).val(null);
+            return;
+        }
+
         //make a popup to display the output
         if (resultWindows['deleteCatgoryID']) resultWindows['deleteCatgoryID'].close();
         resultWindows['deleteCatgoryID'] = window.open("", "Deleting Category...", "width=650,height=600");
