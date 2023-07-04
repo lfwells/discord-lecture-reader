@@ -122,3 +122,29 @@ export async function toggleFavouriteGuildRoute(req,res,next)
   await toggleFavouriteGuild(req.discordUser?.id, guildId);
   res.redirect("/");
 }
+
+export async function deleteCategory(req,res,next)
+{
+  var categoryID = req.params.categoryID;
+  var guild = req.guild;
+  var category = guild.channels.cache.get(categoryID);
+  if (category)
+  {
+    //loop through all channels with parent category and delete them
+    for (var channel of guild.channels.cache.values())
+    {
+      if (channel.parent?.id == categoryID)
+      {
+        console.log("Deleting channel", channel.name);
+        //await channel.delete();
+      }
+    }
+    //delete category
+    console.log("Deleting category", category.name);
+    //await category.delete();
+  }
+  else
+  {
+    console.log("Category not found");
+  }
+}
