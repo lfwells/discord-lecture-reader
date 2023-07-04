@@ -91,9 +91,11 @@
         //prompt the user to confirm by typing DELETE
         var catName = e.target.options[e.target.selectedIndex].text;
         var catID = e.target.value;
+        if (catID == "__DISCORD_BOT_NONE__") return;
+
         var catNameConfirm = prompt("Are you sure you want to delete the category '" + catName + "'? Type DELETE to confirm.");
         if (catNameConfirm?.toLocaleLowerCase() != "delete") {
-            $(this).val(null);
+            $(this).val("__DISCORD_BOT_NONE__");
             return;
         }
 
