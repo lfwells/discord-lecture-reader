@@ -73,6 +73,16 @@
         }) %></p>
 
     <p><input type="submit" value="Save Configuration"/></p>  
+
+    <hr />
+    <h4>Delete Category</h4>
+    <p><%- include("subViews/channelCategorySelect.html", 
+        { 
+            label: "Delete Catgory:",
+            selectDefaultText:"-- Select Category--", 
+            id: "deleteCategoryID",
+            help: "Use this tool to delete a category, because deleting in Discord just orphans the child channels. Use with care."
+        }) %></p>
 </form>
 
 <%- include('footer.html') %>
