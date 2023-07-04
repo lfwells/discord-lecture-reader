@@ -140,6 +140,8 @@ function guildRouter()
     router.get("/", guild_routes.guildHome);
     router.post("/", guild_routes.guildHomePost, guild_routes.guildHome);
                     
+    router.get("/deleteCategory/:categoryID", guild_routes.deleteCategory);
+
     router.get("/clone", guild_routes.loadGuildList, cloner_routes.clone_select);
     router.post("/clone", cloner_routes.clone);
 
