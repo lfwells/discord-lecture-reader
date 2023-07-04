@@ -345,7 +345,7 @@ export async function getAwardsDatabase(guild, dontCache)
 {
   if (dontCache || !AWARDS_CACHE)
   {
-    var collection = await getAwardsCollection(guild);
+    var collection = (await getAwardsCollection(guild)).orderBy("title");
     var awards = await collection.get();
     AWARDS_CACHE = awards;
     return awards;
