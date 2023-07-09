@@ -41,9 +41,24 @@ export async function registerCommand(guild, commandData)
     else
         adminCommandData[commandData.name] = commandData;
 
-    if (registerAllOnStartUp || commandsToRegenerate.findIndex(e => e == commandData.name) >= 0 || newGuilds.findIndex(g => g.id == guild.id) >= 0)
+    if ( registerAllOnStartUp || commandsToRegenerate.findIndex(e => e == commandData.name) >= 0 || newGuilds.findIndex(g => g.id == guild.id) >= 0)
     {
         console.log("Registering Command", commandData.name," on ", guild.name, "...");
+        await guild.commands.create(commandData)
+    }
+    else
+    {
+        registerCommandIfNotAlreadyRegistered(guild, commandData); // NOTE: not await
+    }
+}
+async function registerCommandIfNotAlreadyRegistered(guild, commandData)
+{
+    //check if the command is registerd
+    var commands = await guild.commands.fetch();
+    var command = commands.find(e => e.name == commandData.name);
+    if (!command)
+    {
+        console.log("Registering Command", commandData.name," because not previously found on ", guild.name, " ...");
         await guild.commands.create(commandData)
     }
 }
