@@ -515,7 +515,7 @@ async function updateAwardPosts(awardChannel)
     }
 
     var data = awards.docs[i].data();
-    postData.embeds[currentEmbedIndex].fields.push(getAwardAsField(awards.docs[i].id, data));
+    postData.embeds[currentEmbedIndex].fields.push(getAwardAsField(awards.docs[i].id, data, data.earned ?? {}));
   }
 
   await awardPost.edit(postData);
@@ -534,10 +534,15 @@ async function updateAwardPosts(awardChannel)
   }
 }
 
-export function getAwardAsField(id, award)
+export function getAwardAsField(id, award, earned)
 {
+  let value = award.description;
+  if (earned)
+  {
+    value = value + "\n" + Object.keys(earned).map(e => `<@${e}>`).join(",");//pluralize(count, "earned.");
+  }
   return {
     name: id +" "+ award.title,
-    value: award.description,
+    value: value,
   }
 }
