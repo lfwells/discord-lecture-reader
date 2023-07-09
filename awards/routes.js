@@ -78,6 +78,8 @@ export async function editor_post(req,res,next)
     res.write(`\tUpdating ${req.body[i].emoji} ${req.body[i].title}...`);
     var id = req.body[i].emoji.trim();
     delete req.body[i].emoji;
+
+    if (id == null || id == "") continue;
     
     var doc = await getAwardDocument(req.guild, id);
     await doc.set(req.body[i], { merge: true });
