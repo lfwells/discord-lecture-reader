@@ -261,9 +261,9 @@ async function doFlexCommand(interaction)
     {
         member = await interaction.guild.members.fetch(member);
     }
-    console.log({member});
 
     var awardsObj = await getAwardList(interaction.guild, member);
+    console.log({awardsObj});
     var awards = [];
     var useLegacyAwards = await useLegacyAwardsSystem(interaction.guild);
     if (useLegacyAwards)
@@ -318,7 +318,7 @@ async function doFlexCommand(interaction)
         }
         i++;
     }
-    flexEmbed = await appendAuthorProfileLink(flexEmbed, embed);
+    flexEmbed = await appendAuthorProfileLink(flexEmbed, member);
 
     await interaction.editReply({ embeds: [ flexEmbed ] });
     //await interaction.reply(flex);
