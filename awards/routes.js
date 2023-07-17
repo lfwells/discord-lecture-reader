@@ -133,11 +133,11 @@ export async function getAwardsData(req,res,next)
 
       if (complete)
       {
-        return '<td title="'+award.title+'" class="pageResult complete">&nbsp;</td>';
+        return `<td title="${award.title} - ${award.description}" class="pageResult complete">&nbsp;</td>`;
       }
       else
       {
-        return '<td title="'+award.title+'" class="pageResult not_complete"><button onclick="award(\''+student.discordID+'\', \''+award.emoji+'\', this)">'+award.emoji+'</button></td>';
+        return `<td title="${award.title} - ${award.description}" class="pageResult not_complete"><button onclick="award(\'${student.discordID}', '${award.emoji}', this)">${award.emoji}</button></td>`;
       }
     };
     next();
