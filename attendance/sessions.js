@@ -51,7 +51,8 @@ export async function init_sessions(guild)
         //session.startTime = moment(session.weekStart).add(session.hour, "hour").add(session.minute, "minute");
         session.startTime = moment(session.startTime._seconds*1000);
         session.startTimestamp = session.startTime;
-        session.endTime = moment(session.startTime).add(session.duration == null || session.duration == 0 ? 60 : session.duration, "minute");
+        var d = session.durationMins == null || session.durationMins == 0 ? 60 : session.durationMins;
+        session.endTime = moment(session.startTime).add(d, "minute");
         session.earlyStartTimestamp = moment(session.startTime).subtract(earlyTime, "minutes");
         session.weekStart = moment(session.startTime).startOf("isoWeek")
         //console.log(session);
@@ -477,6 +478,18 @@ export function didAttendSession(instance, session)
     var time = moment(instance.joined);
     var leftTime = moment(instance.left);
     
+    //debug out th values in the if statment
+    /*
+    if (session.week == 2)
+        console.log({
+            memberID: instance.memberID,
+            time:time.format("dddd, MMMM Do YYYY, h:mm:ss a"), 
+            leftTime:leftTime.format("dddd, MMMM Do YYYY, h:mm:ss a"), 
+            SearlyStart:session.earlyStartTimestamp.format("dddd, MMMM Do YYYY, h:mm:ss a"), 
+            SendTime:session.endTime.format("dddd, MMMM Do YYYY, h:mm:ss a"), 
+            between:time.isBetween(session.earlyStartTimestamp, session.endTime),
+            betweenLeft:leftTime.isBetween(session.earlyStartTimestamp, session.endTime)
+        });*/
     return time.isBetween(session.earlyStartTimestamp, session.endTime) || leftTime.isBetween(session.earlyStartTimestamp, session.endTime);
 }
 export function postWasForSession(instance, session)
