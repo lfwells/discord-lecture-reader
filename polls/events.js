@@ -129,6 +129,9 @@ export async function doPollCommand(interaction, scheduledOptions, checklist)
         var option = (scheduledOptions && (i-1) < scheduledOptions.options.length) ? scheduledOptions.options[i-1] : interaction.options != undefined ? interaction.options.getString("option_"+i, false) : null;
         if (option) 
         {
+            //clamp the option length to 80
+            if (option.length > 80) option = option.substring(0, 80);
+            
             currentRow.push(option);
             answers.push(option);
             results.push([]);
@@ -143,7 +146,6 @@ export async function doPollCommand(interaction, scheduledOptions, checklist)
                 break;
             }
         }
-
     }
     pollOptions.push(currentRow);
 
