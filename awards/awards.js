@@ -505,7 +505,7 @@ async function updateAwardPosts(awardChannel)
   var postData = { content:null, embeds: [] };
   for (var i = 0; i < awards.docs.length; i++)
   {
-    if (i % 25 == 0) //need a new post every 25 thingys
+    if (i % 10 == 0) //need a new post every 10 thingys
     {
       postData.embeds.push({
         title: "Awards",
@@ -539,18 +539,19 @@ export function getAwardAsField(id, award, earned)
   let value = award.description;
   if (earned)
   {
-    //take the first 10 earned, and then add in "n" others, if there are more than 10 earned
+    var n = 5;
+    //take the first n earned, and then add in "x" others, if there are more than n earned
     var earnedArray = Object.keys(earned).filter(e=> e != undefined);
     var earnedCount = earnedArray.length;
-    earned = earnedArray.slice(0, 10);
-    value = value + "\n" + earned.map(e => `<@${e}>`).join(",");//pluralize(count, "earned.");
+    earned = earnedArray.slice(0, n);
+    /*value = value + "\n" + earned.map(e => `<@${e}>`).join(",");//pluralize(count, "earned.");
     
-    if (earnedCount > 10)
+    if (earnedCount > n)
     {
-      value = value + ` and ${earnedCount - 10} others.`;
-    }
+      value = value + ` and ${earnedCount - n} others.`;
+    }*/
 
-    //value = value + "\n" + Object.keys(earned).length + " earned.";
+    value = value + "\n" + Object.keys(earned).length + " earned.";
   }
   return {
     name: id +" "+ award.title,

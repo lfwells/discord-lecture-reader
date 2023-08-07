@@ -571,6 +571,6 @@ async function doLeaderboardCommand(interaction)
         });
     }
 
-    statsEmbed = await appendAuthorProfileLink(statsEmbed, member);
+    statsEmbed = await appendAuthorProfileLink(statsEmbed, interaction.member);
     await interaction.editReply({embeds: [ statsEmbed ]});
 }
