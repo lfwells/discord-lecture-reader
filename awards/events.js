@@ -282,27 +282,40 @@ async function doFlexCommand(interaction)
             awards.push(d);
         }
     }
-
-    var flexEmbed = {
-        title: (member.displayName)+" has "+pluralize(awards.length, "award"),
-        fields:[]
-    };
-    if (member.user)
+    async function baseFlexEmbed(first) 
     {
-        flexEmbed.thumbnail = { 
-            url:member.user.displayAvatarURL()
+        var flexEmbed = {
+            title: first ? (member.displayName)+" has "+pluralize(awards.length, "award") : "Continued...",
+            fields:[]
         };
+        if (member.user)
+        {
+            flexEmbed.thumbnail = { 
+                url:member.user.displayAvatarURL()
+            };
+        }
+        flexEmbed = await appendAuthorProfileLink(flexEmbed, member);
+        return flexEmbed;
     }
 
-    if (awards.length == 0)
+    var flexEmbeds = [];
+    var flexEmbed;
+
+    if (useLegacyAwards ? awardsObj.length == 0 : awards.length == 0)
     {
+        flexEmbed = await baseFlexEmbed(true);
         flexEmbed.description = ":(";
+        flexEmbeds.push(flexEmbed);
     }
 
     var i = 0;
     for(var item in useLegacyAwards ? awardsObj : awards)
     {
-        if (i == 25) break;//discord max, TODO: X more awards
+        if (i % 25 == 0) 
+        {
+            flexEmbed = await baseFlexEmbed(i == 0);
+            flexEmbeds.push(flexEmbed);
+        }
 
         if (useLegacyAwards)
         {
@@ -318,9 +331,8 @@ async function doFlexCommand(interaction)
         }
         i++;
     }
-    flexEmbed = await appendAuthorProfileLink(flexEmbed, member);
 
-    await interaction.editReply({ embeds: [ flexEmbed ] });
+    await interaction.editReply({ embeds: flexEmbeds });
     //await interaction.reply(flex);
 }
 async function doAwardContextMenuCommand(interaction)
