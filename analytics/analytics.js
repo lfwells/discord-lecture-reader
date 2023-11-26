@@ -529,6 +529,7 @@ export async function loadPostsPerSession(rawStatsData, guild, includeNoSession,
         {
             try
             {
+                console.log(`CHANNELS FETCH ${channelID} analytics`);
                 var channel = await guild.channels.fetch(channelID);
                 if (channel.isThread())
                 {

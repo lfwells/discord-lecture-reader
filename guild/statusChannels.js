@@ -8,6 +8,8 @@ import { getPostsCount } from "../analytics/analytics.js";
 //this is very rate limited, can't do much
 export async function init_status_channels(guild)
 {
+	return;
+	
 	try
 	{
 		init_status_channel(guild, "postCount", "showPostCount", async (guild) => {
@@ -61,7 +63,7 @@ async function init_status_channel(guild, name, feature, f)
 			text = await f(guild);
 		
 			var channelID = await getGuildPropertyConverted(key, guild);
-			var channel = channelID != null ? await guild.channels.cache.find(c => c.id == channelID) : null; 
+			var channel = (channelID != null && channelID != undefined && channelID != "undefined") ? await guild.channels.cache.find(c => c.id == channelID) : null; 
 			if (channel == null)
 			{
 				//create the channel
@@ -90,10 +92,14 @@ async function init_status_channel(guild, name, feature, f)
 		
 		try
 		{
-			var channel = channelID != null ? await guild.channels.fetch(channelID) : null; 
-			if (channel != undefined)
+			if (channelID != undefined)
 			{
-				await channel.delete();
+				console.log(`CHANNELS FETCH ${channelID} status ${guild.id}`);
+				var channel = await guild.channels.fetch(channelID); 
+				if (channel != null)
+				{
+					await channel.delete();
+				}
 			}
 		} catch (e) {}
 	}

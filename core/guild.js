@@ -43,6 +43,8 @@ export function loadLectureChannel(required)
       if (req.lectureChannelID)
       {
         //console.log("req.lectureChannelID", req.lectureChannelID);
+        
+        console.log(`CHANNELS FETCH ${req.lectureChannelID} guild`);
         req.lectureChannel = await client.channels.fetch(req.lectureChannelID);//.cache.filter(c => c.id == lectureChannelID);
         res.locals.lectureChannel = req.lectureChannel;
       }
