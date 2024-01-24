@@ -235,6 +235,9 @@ export function loadGuildProperty(property, required, now)
         if (property.endsWith("ChannelID"))
         {
           var channelProperty = property.replace("ChannelID", "Channel");
+          
+          console.log(`CHANNELS FETCH ${req[property]} ${GUILD_CACHE[req.guild.id][channelProperty]}, guild load`);
+          if (req[property] == undefined) return undefined;
           req[channelProperty] = GUILD_CACHE[req.guild.id][channelProperty] ?? await client.channels.fetch(req[property]);
           res.locals[channelProperty] = req[channelProperty];
           GUILD_CACHE[req.guild.id][channelProperty] = req[channelProperty];
@@ -250,6 +253,9 @@ export function loadGuildProperty(property, required, now)
         if (property.endsWith("CategoryID"))
         {
           var categoryProperty = property.replace("CategoryID", "Category");
+          
+        console.log(`CHANNELS FETCH ${req[property]} ${GUILD_CACHE[req.guild.id][categoryProperty]} guild load 2`);
+        if (req[property] == undefined) return undefined;
           req[categoryProperty] = GUILD_CACHE[req.guild.id][categoryProperty] ?? await req.guild.channels.fetch(req[property]);
           res.locals[categoryProperty] = req[categoryProperty];
           GUILD_CACHE[req.guild.id][categoryProperty] = req[categoryProperty];
@@ -361,6 +367,8 @@ export async function saveGuildProperty(property, value, req, res)
   if (property == "ruleChannelID" && isCommunityGuild(req.guild)) //special case
   {
     var client = getClient();
+    console.log(`CHANNELS FETCH ${req[property]} guild save`);
+    if (req[property] == undefined) return undefined;
     var channel = await client.channels.fetch(req[property]);
     await req.guild.setRulesChannel(channel);
   }

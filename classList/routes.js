@@ -99,6 +99,7 @@ export async function createGroup(req,res,next)
     //optionally, create the channels too
     if (req.body.generateGroupsAndChannels && req.body.createChannelsInCategory)
     {
+      console.log(`CHANNELS FETCH ${req.body.createChannelsInCategory} classlist`);
       var category = await req.guild.channels.fetch(req.body.createChannelsInCategory);
 
       //first check for the channel already in the category

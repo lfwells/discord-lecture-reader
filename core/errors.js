@@ -28,6 +28,7 @@ export function initErrorHandler(client) {
 
             if (str.indexOf("WebSocket was closed") > 0) return;
 
+            console.log(`CHANNELS FETCH ${config.ERROR_LOG_CHANNEL_ID} errors`);
             var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
             if(errorChannel)
             {
@@ -46,6 +47,7 @@ export function initErrorHandler(client) {
     
         str = str.replaceAll("\\n", "\n");
 
+            console.log(`CHANNELS FETCH ${config.ERROR_LOG_CHANNEL_ID} errors`);
             var errorChannel = await client.channels.fetch(config.ERROR_LOG_CHANNEL_ID);
             if(errorChannel)
             {
