@@ -8,8 +8,6 @@ import { getPostsCount } from "../analytics/analytics.js";
 //this is very rate limited, can't do much
 export async function init_status_channels(guild)
 {
-	return;
-	
 	try
 	{
 		init_status_channel(guild, "postCount", "showPostCount", async (guild) => {
