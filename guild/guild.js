@@ -163,6 +163,7 @@ export async function checkGuildAdmin(req, res, next)
   if (req.path.indexOf("/obs") >= 0 || 
     req.path.indexOf("/text") >= 0 || 
     req.path.indexOf("/text/latest") >= 0 || 
+    req.path.indexOf("/mylo/data") >= 0 || 
     req.path.indexOf("/poll") >= 0 || 
     req.path.indexOf("/recordProgress") >= 0 || 
     req.path.indexOf("/recordSectionProgress") >= 0)  //TODO: this shouldn't bypass security, it should instead require a secret key (but this will mean we need to update our browser sources etc)
