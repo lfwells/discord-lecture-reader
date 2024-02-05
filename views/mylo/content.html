@@ -26,9 +26,18 @@ function printModule(module)
     </li>
     <% 
 }
-%><ul><%
-locals.data.Structure.forEach(printModule);
+if (locals.data.Structure.length == 0)
+{
+    %><p>No content cached. Contact Lindsay for access to Chrome extension to scan MyLO content.</p><%
+}
+else
+{
+    %><ul><%
+    locals.data.Structure.forEach(printModule);
+    %>
+    </ul>
+    <%
+}
 %>
-</ul>
 
 <%- include('../footer.html') %>

@@ -18,13 +18,13 @@ export async function recieveMyLOData(req,res)
 export async function displayMyLOContent(req,res)
 {
     res.render("mylo/content", {
-        data: (await getMyLOData(req.guild, "content")).data().data
+        data: (await getMyLOData(req.guild, "content")).data()?.data ?? { Structure: [] }
     });
 }
 export async function createMyLOLinks(req,res)
 {
     res.render("mylo/contentLinks", {
-        data: (await getMyLOData(req.guild, "content")).data().data
+        data: (await getMyLOData(req.guild, "content")).data()?.data ?? { Structure: [] }
     });
 }
 export async function createMyLOLinksPost(req,res)
