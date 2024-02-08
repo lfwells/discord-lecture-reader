@@ -1,30 +1,58 @@
 //Init
-console.log("Injecting MyLO Dictionary", window.parent.$);
+console.log("Injecting MyLO Dictionary");
 $ = window.parent.$;
 
-alert("mylo dictionary...");
-/*
-//find the unit information panel (first row in the main column)
-var unitInformationPanel = $(".homepage-col-8 > div:nth-child(1)");
-unitInformationPanel.hide();
+var DICTIONARY = {
+    //fallback case if the orgID is not found
+    "default": {
+        "unityVersion": "Unity Version TBA",
+    },
 
-//find the announcements panel (second row in the main column)
-var announcementsPanel = $(".homepage-col-8 > div:nth-child(2)");
+    //KIT109 Semester 1 2024
+    "641665": {
+        "unityVersion": "Unity 2024.3.0f6",
+    },
 
-var mylo_homepage_override_announcement = $(".d2l-datalist-item d2l-html-block")
-    .get()
-    .map(block => [
-        $(block.shadowRoot).find("iframe").get(),
-        block
-    ])
-    .filter(found => found[0].length == 1)[0];
-    
-mylo_homepage_override_announcement = mylo_homepage_override_announcement[1];//.parent(".d2l-widget-content-padding");
-console.log({mylo_homepage_override_announcement}); 
-//mylo_homepage_override_announcement.html("yo"); 
+    //KIT305 Semester 1 2024
+    "641209": {
+        "balsamiqVersion": "4.7.4 -- latest",
+    },
+};
 
-mylo_homepage_override_announcement = $(mylo_homepage_override_announcement).parent().parent().parent().parent();
-console.log({mylo_homepage_override_announcement}); 
+function get(key, orgID)
+{
+    if (DICTIONARY[orgID])
+    {
+        if (DICTIONARY[orgID][key] == undefined)
+        { 
+            if (orgID == "default")
+            {
+                return null;
+            }
+            return get(key, "default");
+        }
+        return DICTIONARY[orgID][key];
+    }
+    return get(key, "default");
+}
 
-mylo_homepage_override_announcement.html('<iframe width="100%" height="450" src="https://utasbot.dev/chat/1199781171408670751?previous_messages=10&mylo=true" />');
-*/
+let url = window.top.document.location.href.replace("d2l", "");
+//extract numbers from the url
+let orgID = url.match(/\d+/g);
+orgID = orgID ? orgID[0] : null;
+
+//go through the outerHTML of the entire page and find any instances of ${key} and replace it with the value from the dictionary
+let html = $("body").html();
+let keys = html.match(/\${\w+}/g);
+keys = keys ? keys.map(key => key.substring(2, key.length - 1)) : [];
+keys = [...new Set(keys)];
+keys.forEach(key => {
+    let value = get(key, orgID);
+    if (value != null)
+    {
+        html = html.replace(new RegExp("\\${" + key + "}", "g"), value);
+    }
+});
+//also remove all iframes
+html = html.replace(/<iframe.*?\/iframe>/g, "");
+$("body").html(html);
