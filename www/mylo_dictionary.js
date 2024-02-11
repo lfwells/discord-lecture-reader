@@ -2,10 +2,12 @@
 console.log("Injecting MyLO Dictionary");
 $ = window.parent.$;
 
+//you can inherit another unit by having a key `__inherit` in the dictionary
 var DICTIONARY = {
     //fallback case if the orgID is not found
     "default": {
         "unityVersion": "Unity Version TBA",
+        "test": "test"
     },
 
     //KIT109 Semester 1 2024
@@ -15,6 +17,7 @@ var DICTIONARY = {
 
     //KIT305 Semester 1 2024
     "641209": {
+        "__inherit": "641665",
         "balsamiqVersion": "4.7.4 -- latest",
         "androidStudioVersion": "Giraffe 2023.1.1.28 -- latest",
         "xcodeVersion": "15.2 -- latest",
@@ -31,7 +34,15 @@ function get(key, orgID)
         { 
             if (orgID == "default")
             {
-                return null;
+                //un-camel case the key and capitalise the first letter of each word
+                key = key.replace(/([A-Z])/g, " $1").replace(/^./, function(str){ return str.toUpperCase(); });
+                //append "not found"
+                key += " not found";
+                return key;
+            }
+            else if (DICTIONARY[orgID]["__inherit"])
+            {
+                return get(key, DICTIONARY[orgID]["__inherit"]);
             }
             return get(key, "default");
         }
