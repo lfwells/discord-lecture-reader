@@ -16,6 +16,10 @@ var DICTIONARY = {
     //KIT305 Semester 1 2024
     "641209": {
         "balsamiqVersion": "4.7.4 -- latest",
+        "androidStudioVersion": "Giraffe 2023.1.1.28 -- latest",
+        "xcodeVersion": "15.2 -- latest",
+        "flutterVersion": "3.16.9 -- latest",
+        
     },
 };
 
