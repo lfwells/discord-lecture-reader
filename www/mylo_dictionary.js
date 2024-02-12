@@ -12,16 +12,22 @@ var DICTIONARY = {
 
     //KIT109 Semester 1 2024
     "641665": {
-        "unityVersion": "Unity 2024.3.0f6",
+        "unityVersion": '<a href="https://unity.com/releases/editor/whats-new/2023.2.8">Unity 2023.2.8(f1)</a>',
+        'blenderVersion': '<a href="https://www.blender.org/download/release/Blender4.0/blender-4.0.2-windows-x64.msi/">Blender 4.0.2</a>'
+    },
+
+    //KIT207 Semester 1 2024 (just inherits from KIT109)
+    "641666": {
+        "__inherit": "641665"
     },
 
     //KIT305 Semester 1 2024
     "641209": {
         "__inherit": "641665",
-        "balsamiqVersion": "4.7.4 -- latest",
-        "androidStudioVersion": "Giraffe 2023.1.1.28 -- latest",
-        "xcodeVersion": "15.2 -- latest",
-        "flutterVersion": "3.16.9 -- latest",
+        "balsamiqVersion": '<a href="https://balsamiq.com/wireframes/desktop/archives/">4.7.4 -- latest</a>',
+        "androidStudioVersion": '<a href="https://developer.android.com/studio">Giraffe 2023.1.1.28 -- latest</a>',
+        "xcodeVersion": '<a href="https://apps.apple.com/au/app/xcode/id497799835?mt=12">15.2 -- latest</a>',
+        "flutterVersion": '<a href="https://docs.flutter.dev/release/archive?tab=windows">3.16.9 -- latest</a>',
         
     },
 };
