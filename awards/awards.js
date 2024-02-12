@@ -280,8 +280,12 @@ export async function giveAward(guild, award, member)
     await handleAwardNicknames(getClient(), await getAwardChannel(guild));
 
     var awardCount = (await getAwardsForMember(member)).length;
+    if (member.displayName == undefined)
+    {
+      console.log("member.displayName is undefined", member);
+    }
     achievementEmbed = {
-        title: baseName(member.displayName) + " just earned "+(await getAwardDisplayName(awardDoc))+"!",
+        title: baseName(member.displayName ?? member.username) + " just earned "+(await getAwardDisplayName(awardDoc))+"!",
         description: "<@"+member.id+"> now has "+pluralize(awardCount, "achievement")+".",
         thumbnail: { 
           url:member.user.displayAvatarURL()

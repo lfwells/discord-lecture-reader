@@ -37,6 +37,10 @@ export default async function(client)
         member.guild.invites.fetch().then(async (newInvites) => {
             // This is the *existing* invites for the guild.
             const oldInvites = invites[member.guild.id];
+            if (oldInvites == null) {
+                console.log("oldInvites is null", member.guild.id);
+                return;
+            }
             
             // Look through the invites, find the one for which the uses went up.
             const invite = newInvites.find(i => i.uses > oldInvites[i.code]?.uses);

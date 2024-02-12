@@ -203,7 +203,7 @@ export async function getCachedInteraction(guild, interactionID)
 export async function storeCachedInteractionData(guild, interactionID, data)
 {
     var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
-    await interactionDocument.set(data, {merge: true});
+    await interactionDocument.set(data, {merge: true, ignoreUndefinedProperties:true});
     
     return await getCachedInteraction(guild, interactionID);
 }
