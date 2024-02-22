@@ -32,6 +32,16 @@ export default async function(client)
             {
                 name: "search", type: "STRING", description: "Search term to find a page on MyLO",
                 required: true
+            },
+            //optionally tag another member
+            {
+                name: "member", type: "USER", description: "Tag another member to share the link with",
+                required: false
+            },
+            //optionally search it just for yourself
+            {
+                name: "private", type: "BOOLEAN", description: "Only show the link to you (useful for searching for yourself)",
+                required: false
             }
         ]
     }
