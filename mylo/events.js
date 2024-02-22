@@ -22,13 +22,25 @@ export default async function(client)
             },
         ]
     };
+
+    const myloContentCommand = {
+        name: 'mylo_page',
+        description: 'Search for a MyLO page to hot-link. Bot will list possible pages to publicly post',
+        options: [  
+            {
+                name: "search", type: "STRING", description: "Search term to find a page on MyLO",
+                required: true
+            }
+        ]
+    }
     
     await registerApplicationCommand(client, myloCommand);
-    /*
+
+
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        await registerCommand(guild, myloCommand);
-    });*/
+        await registerCommand(guild, myloContentCommand);
+    });
 
     client.on('interactionCreate', async function(interaction) 
     {
@@ -55,6 +67,10 @@ export default async function(client)
                 {
                     await doMyLOGradesCommand(interaction);
                 }
+            }
+            else if (interaction.commandName == "mylo_page")
+            {
+                await doMyLOPageCommand(interaction);
             }
         }
         // If the interaction isn't a slash command, return
@@ -136,3 +152,9 @@ async function doMyLOGradesCommand(interaction)
     await interaction.editReply({ embeds: [ gradesEmbed ]});
 }
 
+async function doMyLOPageCommand(interaction)
+{
+    
+    await interaction.deferReply({ ephemeral: true });
+    await interaction.editReply("This command is not yet implemented. Please check back later.");
+}

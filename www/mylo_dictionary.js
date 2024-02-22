@@ -25,7 +25,7 @@ var DICTIONARY = {
     "641209": {
         "__inherit": "641665",
         "balsamiqVersion": '<a href="https://balsamiq.com/wireframes/desktop/archives/">4.7.4 -- latest</a>',
-        "androidStudioVersion": '<a href="https://developer.android.com/studio">Giraffe 2023.1.1.28 -- latest</a>',
+        "androidStudioVersion": '<a href="https://developer.android.com/studio">Hedgehog 2023.1.1 -- latest</a>',
         "xcodeVersion": '<a href="https://apps.apple.com/au/app/xcode/id497799835?mt=12">15.2 -- latest</a>',
         "flutterVersion": '<a href="https://docs.flutter.dev/release/archive?tab=windows">3.16.9 -- latest</a>',
         
