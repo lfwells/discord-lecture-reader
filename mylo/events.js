@@ -1,4 +1,4 @@
-import { getCachedInteraction, registerCommand,registerApplicationCommand, } from '../guild/commands.js';
+import { getCachedInteraction, registerCommand,registerApplicationCommand, storeCachedInteractionData, } from '../guild/commands.js';
 import { deleteStudentProperty, isStudentMyLOConnected } from '../student/student.js';
 
 import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOContentEmbed, getMyLOContentLink, getMyLOData } from './mylo.js';
@@ -180,6 +180,10 @@ async function doMyLOPageCommand(interaction)
         .map(e => { return { Title: e.Title, Id: e.ModuleId ?? e.TopicId, IsHidden: e.IsHidden } });
     console.log({flatContent});
 
+    //store the choice for private as a cached interaction
+    let priv = interaction.options.getBoolean("private");
+    if (priv) await storeCachedInteractionData(interaction.guild, interaction.id, {private:true});
+
     //indicate if no results found
     if (flatContent.length == 0)
     {
@@ -228,7 +232,12 @@ async function doMyLOPageSelectCommand(interaction)
     var pageID = interaction.customId.replace("mylo_page_", "");
     if (pageID == "select")
         pageID = interaction.values[0].replace("mylo_page_", "");
-    await interaction.deferReply({ ephemeral: false });
+
+    //get if the interaction was private
+    var cachedInteraction = await getCachedInteraction(interaction.guild, interaction.message.interaction.id);
+    var priv = cachedInteraction?.private;
+
+    await interaction.deferReply({ ephemeral: priv });
 
     let root = traverseContentTree((await getMyLOData(interaction.guild, "content")).data().data, pageID);
     console.log({root});
