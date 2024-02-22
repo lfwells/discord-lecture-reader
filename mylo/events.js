@@ -1,9 +1,11 @@
-import { getCachedInteraction, registerCommand,registerApplicationCommand, } from '../guild/commands.js';
+import { getCachedInteraction, registerCommand,registerApplicationCommand, storeCachedInteractionData, } from '../guild/commands.js';
 import { deleteStudentProperty, isStudentMyLOConnected } from '../student/student.js';
 
-import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction } from './mylo.js';
-import { MessageActionRow, MessageButton } from 'discord.js';
+import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOContentEmbed, getMyLOContentLink, getMyLOData } from './mylo.js';
+import { MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
 import { setGuildContextForInteraction } from '../core/errors.js';
+import { traverseContentTree, traverseContentTreeSearch } from './routes.js';
+import { pluralize } from '../core/utils.js';
 
 export default async function(client)
 {    
@@ -22,13 +24,35 @@ export default async function(client)
             },
         ]
     };
+
+    const myloContentCommand = {
+        name: 'mylo_page',
+        description: 'Search for a MyLO page to hot-link. Bot will list possible pages to publicly post',
+        options: [  
+            {
+                name: "search", type: "STRING", description: "Search term to find a page on MyLO",
+                required: true
+            },
+            //optionally tag another member
+            {
+                name: "member", type: "USER", description: "Tag another member to share the link with",
+                required: false
+            },
+            //optionally search it just for yourself
+            {
+                name: "private", type: "BOOLEAN", description: "Only show the link to you (useful for searching for yourself)",
+                required: false
+            }
+        ]
+    }
     
     await registerApplicationCommand(client, myloCommand);
-    /*
+
+
     var guilds = client.guilds.cache;
     await guilds.each( async (guild) => { 
-        await registerCommand(guild, myloCommand);
-    });*/
+        await registerCommand(guild, myloContentCommand);
+    });
 
     client.on('interactionCreate', async function(interaction) 
     {
@@ -56,6 +80,10 @@ export default async function(client)
                     await doMyLOGradesCommand(interaction);
                 }
             }
+            else if (interaction.commandName == "mylo_page")
+            {
+                await doMyLOPageCommand(interaction);
+            }
         }
         // If the interaction isn't a slash command, return
         else if (interaction.isMessageComponent() && interaction.message.interaction)
@@ -63,6 +91,11 @@ export default async function(client)
             if (interaction.customId == "disconnect") 
             {
                 await doMyLODisconnectCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            }
+
+            if (interaction.customId.startsWith("mylo_page_"))
+            {
+                await doMyLOPageSelectCommand(interaction);
             }
         }
     });
@@ -136,3 +169,100 @@ async function doMyLOGradesCommand(interaction)
     await interaction.editReply({ embeds: [ gradesEmbed ]});
 }
 
+async function doMyLOPageCommand(interaction)
+{
+    
+    await interaction.deferReply({ ephemeral: true });
+
+    var root = (await getMyLOData(interaction.guild, "content")).data().data;
+    let search = interaction.options.getString("search");
+    let flatContent = traverseContentTreeSearch(root, e => (e.Title ?? "").toLowerCase().includes(search.toLowerCase()))
+        .map(e => { return { Title: e.Title, Id: e.ModuleId ?? e.TopicId, IsHidden: e.IsHidden } });
+    console.log({flatContent});
+
+    //store the choice for private as a cached interaction
+    //store the choice for tagging another user as a cached interaction
+    let priv = interaction.options.getBoolean("private") ?? false;
+    let mem = interaction.options.getMember("member");
+    await storeCachedInteractionData(interaction.guild, interaction.id, {mem,priv});
+
+    //indicate if no results found
+    if (flatContent.length == 0)
+    {
+        await interaction.editReply({ content: "No pages found matching that search term."});
+        return;
+    }
+
+    //if only one result, ask the user if they would like to post it
+    if (flatContent.length == 1)
+    {
+        var page = flatContent[0];
+        var pageEmbed = {
+            title: page.Title,
+            description: `Would you like to post a link to this page?`
+        };
+        const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    .setCustomId(`mylo_page_${page.Id}`)
+                    .setLabel('Yes, post a link')
+                    .setStyle('PRIMARY')
+            );
+        await interaction.editReply({ embeds: [ pageEmbed ], components: [ row ] });
+        return;
+    }
+
+    //otherwise show a discord dropdown box of all possible options (without going over the documented limit of options)
+    var options = flatContent.map((e,i) => { return { label: e.Title, value: `mylo_page_${e.Id}` } });
+    if (options.length > 25) options = options.slice(0, 25);
+    console.log({options});
+
+    var selectRow = new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+                .setCustomId(`mylo_page_select`)
+                .setPlaceholder('Select a page to link')
+                .addOptions(options)
+            )
+        
+    await interaction.editReply({ content: `Found ${pluralize(options.length, "page")}. Select a page to link:`, components: [ selectRow ]});
+}
+
+async function doMyLOPageSelectCommand(interaction)
+{
+    //get the id of the page from the interaction
+    var pageID = interaction.customId.replace("mylo_page_", "");
+    if (pageID == "select")
+        pageID = interaction.values[0].replace("mylo_page_", "");
+
+    //get if the interaction was private
+    var cachedInteraction = await getCachedInteraction(interaction.guild, interaction.message.interaction.id);
+    var priv = cachedInteraction?.priv;
+
+    //get if the interaction was to tag another member
+    var member = cachedInteraction?.mem;
+
+    await interaction.deferReply({ ephemeral: priv });
+
+    let root = traverseContentTree((await getMyLOData(interaction.guild, "content")).data().data, pageID);
+    console.log({root});
+    let content = `<@${interaction.member.id}> shared a link to a MyLO page:`;
+    //if a user was to be tagged, give different content
+    if (member) content = `<@${interaction.member.id}> shared a link to a MyLO page for <@${member}>:`;
+    
+    let html = root.Description?.Html;
+    //extract a youtube embed url from the html
+    let youtubeURL = html?.match(/https:\/\/www.youtube.com\/embed\/[a-zA-Z0-9_-]{11}/)?.[0];
+    //convert that embed url into a regular youtube link
+    if (youtubeURL) youtubeURL = youtubeURL.replace("https://www.youtube.com/embed/", "https://www.youtube.com/watch?v=");
+    
+    let embed = await getMyLOContentEmbed(root, interaction.guild, youtubeURL);
+    //if there was a youtube url, obtain the thumbnail image for the video id
+    if (youtubeURL)
+    {
+        let videoID = youtubeURL.replace("https://www.youtube.com/watch?v=", "");
+        embed.image = { url: `https://img.youtube.com/vi/${videoID}/0.jpg` };
+    }
+
+    await interaction.editReply({ embeds: [embed], content });
+}

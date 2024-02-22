@@ -5,13 +5,13 @@
 function printModule(module, level)
 {
     %>
-    <option value="<%=module.Id%>">
+    <option value="<%=module.ModuleId%>">
         <%for (var i = 0; i < level; i++) { %><%="    "%><%} %><%=module.Title%>
-        <% if (module.Structure)
+        <% if (module.Modules)
         {
             var newLevel = level + 1; 
-            module.Structure
-                .filter((module) => module.Type == 0)
+            module.Modules
+                //.filter((module) => module.Type == 0)
                 .forEach((module) => printModule(module, newLevel));
         }
         %>
@@ -23,7 +23,7 @@ function printModule(module, level)
     <div>
         <label>Select Content Root: 
             <select name="myloRoot">
-                <% locals.data.Structure.forEach((module) => printModule(module, 1)); %>
+                <% locals.data.Modules.forEach((module) => printModule(module, 1)); %>
             </select>
         </label>
     </div>

@@ -111,36 +111,7 @@ async function runMyLOScript()
     }
     async function getContent()
     {
-        const content = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/root/`);
-        
-        //unfortunately, the root command doesn't go very deep, so we need to recurse...
-        async function parseStructure(module)
-        {
-            if (module.Structure == null) { return module; }
-
-            console.log("parseStructure", module);
-            let structure = [];
-            for (var i = 0; i < module.Structure.length; i++)
-            {
-                let item = module.Structure[i];
-                
-                if (item.Type == TOPIC) 
-                {
-                    structure.push(item);
-                }
-                else
-                {
-                    let result = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/modules/${item.Id}`);
-                    let info = await parseStructure(result[0]);
-                    structure.push(info);
-                }
-            }
-            module.Structure = structure;
-            return module;
-        }
-
-        let root = { Structure: content };
-        return (await parseStructure(root));
+        return (await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/toc`))[0];
     }
 
 

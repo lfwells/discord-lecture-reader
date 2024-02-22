@@ -2,6 +2,7 @@ import moment from "moment";
 import { applicationInteractionsCollection, db } from "../core/database.js";
 import { setGuildContextForInteraction } from "../core/errors.js";
 import { getGuildDocument, hasFeature } from "./guild.js";
+import { removeEmpty } from "../core/utils.js";
 
 /*
     TODO: Application Commands instead of these
@@ -203,6 +204,8 @@ export async function getCachedInteraction(guild, interactionID)
 export async function storeCachedInteractionData(guild, interactionID, data)
 {
     var interactionDocument = await getCachedInteractionDocument(guild, interactionID);
+    //remove all undefined items from data
+    data = removeEmpty(data);
     await interactionDocument.set(data, {merge: true, ignoreUndefinedProperties:true});
     
     return await getCachedInteraction(guild, interactionID);

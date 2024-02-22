@@ -17,14 +17,17 @@ export async function recieveMyLOData(req,res)
 }
 export async function displayMyLOContent(req,res)
 {
+    let data = (await getMyLOData(req.guild, "content")).data()?.data ?? { Modules: [] };
     res.render("mylo/content", {
-        data: (await getMyLOData(req.guild, "content")).data()?.data ?? { Structure: [] }
+        data
     });
 }
 export async function createMyLOLinks(req,res)
 {
+    let data = (await getMyLOData(req.guild, "content")).data()?.data ?? { Modules: [] };
+    console.log({data});
     res.render("mylo/contentLinks", {
-        data: (await getMyLOData(req.guild, "content")).data()?.data ?? { Structure: [] }
+        data
     });
 }
 export async function createMyLOLinksPost(req,res)
@@ -58,18 +61,55 @@ export async function createMyLOLinksPost(req,res)
     res.write(`Posted ${pluralize(result.length, "message")}.`);
     res.end();
 }
-function traverseContentTree(root, findID)
+export function traverseContentTree(root, findID)
 {
-    if (root.Id == findID) return root;
-    if (root.Structure)
+    if (root.ModuleId == findID) return root;
+    if (root.TopicId == findID) return root;
+
+    if (root.Modules)
     {
-        for (var i = 0; i < root.Structure.length; i++)
+        for (var i = 0; i < root.Modules.length; i++)
         {
-            var traverse = traverseContentTree(root.Structure[i], findID);
+            var traverse = traverseContentTree(root.Modules[i], findID);
             if (traverse != null) return traverse;
         }
     }
+
+    if (root.Topics)
+    {
+        for (var i = 0; i < root.Topics.length; i++)
+        {
+            var traverse = traverseContentTree(root.Topics[i], findID);
+            if (traverse != null) return traverse;
+        }
+    }
+
     return null;
+}
+export function traverseContentTreeSearch(root, predicate, results) 
+{
+    if (results == undefined) results = [];
+    if (root.IsHidden != undefined && root.IsHidden) return results;
+    
+    if (predicate(root)) results.push(root);
+
+    if (root.Modules)
+    {
+        for (var i = 0; i < root.Modules.length; i++)
+        {
+            traverseContentTreeSearch(root.Modules[i], predicate, results);
+        }
+    }
+
+    if (root.Topics)
+    {
+        for (var i = 0; i < root.Topics.length; i++)
+        {
+            traverseContentTreeSearch(root.Topics[i], predicate, results);
+        }
+    }
+    
+    return results;
 }
 
 //-------------------------------------------------------------

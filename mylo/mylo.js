@@ -38,6 +38,8 @@ export async function postChannelThreads(res, channel, forumChannel, root, singl
         }
         for (var topic of root.Structure)
         {
+            if(topic.IsHidden) continue;
+            
             res.write(`Creating thread: ${topic.Title}\n`);
 
             var message = {
@@ -70,6 +72,8 @@ export async function postChannelLinks(res, channel, forumChannel, root, singleL
     {
         for (var topic of root.Structure)
         {
+            if(topic.IsHidden) continue;
+            
             res.write(`Creating message: ${topic.Title}\n`);
 
             var message = {
@@ -102,6 +106,8 @@ async function createChannels(res, category, root, forumChannel, doWithChannel)
     var messages = [];
     for (var module of root.Structure)
     {
+        if(module.isHidden) continue;
+            
         if (module.Type == 0)
         {
             let title = getModuleTitle(module.Title);
@@ -148,10 +154,28 @@ export async function postChannelsWithLinks(res, category, forumChannel, root)
 export async function getMyLOContentLink(item, guild)
 {
     let OrgID = await getGuildProperty("myLOOrgID", guild);
-    if (item.Type == 0)
-        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.Id}`;
-    else if (item.Type == 1)
-        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.Id}/View`;
+    if (item.ModuleId != undefined)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.ModuleId}`;
+    else if (item.TopicId != undefined)
+    {
+        if (item.Url?.startsWith("http"))
+            return item.Url;
+        else
+            return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.TopicId}/View`;
+    }
+    else
+        return '';
+    
+}
+export async function getMyLOContentEmbed(item, guild, appendToDescription)
+{
+    let link = await getMyLOContentLink(item, guild);  
+    return {
+        title: item.Title,
+        url: link,
+        description: `${item.Description.Text} ${appendToDescription ?? ""}`,
+        footer: { text: link.substr(0,2000) }
+    };
     
 }
 
