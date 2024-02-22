@@ -181,8 +181,10 @@ async function doMyLOPageCommand(interaction)
     console.log({flatContent});
 
     //store the choice for private as a cached interaction
-    let priv = interaction.options.getBoolean("private");
-    if (priv) await storeCachedInteractionData(interaction.guild, interaction.id, {private:true});
+    //store the choice for tagging another user as a cached interaction
+    let priv = interaction.options.getBoolean("private") ?? false;
+    let mem = interaction.options.getMember("member");
+    await storeCachedInteractionData(interaction.guild, interaction.id, {mem,priv});
 
     //indicate if no results found
     if (flatContent.length == 0)
@@ -237,16 +239,22 @@ async function doMyLOPageSelectCommand(interaction)
     var cachedInteraction = await getCachedInteraction(interaction.guild, interaction.message.interaction.id);
     var priv = cachedInteraction?.private;
 
+    //get if the interaction was to tag another member
+    var member = cachedInteraction?.mem;
+
     await interaction.deferReply({ ephemeral: priv });
 
     let root = traverseContentTree((await getMyLOData(interaction.guild, "content")).data().data, pageID);
     console.log({root});
+    let content = `<@${interaction.member.id}> shared a link to a MyLO page:`;
+    //if a user was to be tagged, give different content
+    if (member) content = `<@${interaction.member.id}> shared a link to a MyLO page for <@${member}>:`;
+    
     let html = root.Description?.Html;
     //extract a youtube embed url from the html
     let youtubeURL = html?.match(/https:\/\/www.youtube.com\/embed\/[a-zA-Z0-9_-]{11}/)?.[0];
     //convert that embed url into a regular youtube link
     if (youtubeURL) youtubeURL = youtubeURL.replace("https://www.youtube.com/embed/", "https://www.youtube.com/watch?v=");
-    let content = `<@${interaction.member.id}> shared a link to a MyLO page:`;
     
     let embed = await getMyLOContentEmbed(root, interaction.guild, youtubeURL);
     //if there was a youtube url, obtain the thumbnail image for the video id
