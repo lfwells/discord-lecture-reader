@@ -2,9 +2,10 @@ import { getCachedInteraction, registerCommand,registerApplicationCommand, } fro
 import { deleteStudentProperty, isStudentMyLOConnected } from '../student/student.js';
 
 import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOData } from './mylo.js';
-import { MessageActionRow, MessageButton } from 'discord.js';
+import { MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
 import { setGuildContextForInteraction } from '../core/errors.js';
 import { traverseContentTreeSearch } from './routes.js';
+import { pluralize } from '../core/utils.js';
 
 export default async function(client)
 {    
@@ -80,6 +81,11 @@ export default async function(client)
             if (interaction.customId == "disconnect") 
             {
                 await doMyLODisconnectCommandButton(interaction, await getCachedInteraction(interaction.guild, interaction.message.interaction.id));
+            }
+
+            if (interaction.customId.startsWith("mylo_page_"))
+            {
+                await doMyLOPageSelectCommand(interaction);
             }
         }
     });
@@ -164,5 +170,54 @@ async function doMyLOPageCommand(interaction)
         .map(e => { return { Title: e.Title, Id: e.Id, IsHidden: e.IsHidden } });
     console.log({flatContent});
 
-    await interaction.editReply(JSON.stringify(flatContent).substring(0, 2000));
+    //indicate if no results found
+    if (flatContent.length == 0)
+    {
+        await interaction.editReply({ content: "No pages found matching that search term."});
+        return;
+    }
+
+    //if only one result, ask the user if they would like to post it
+    if (flatContent.length == 1)
+    {
+        var page = flatContent[0];
+        var pageEmbed = {
+            title: page.Title,
+            description: `Would you like to post a link to this page?`
+        };
+        const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    .setCustomId(`mylo_page_${page.Id}`)
+                    .setLabel('Yes, post a link')
+                    .setStyle('PRIMARY')
+            );
+        await interaction.editReply({ embeds: [ pageEmbed ], components: [ row ] });
+        return;
+    }
+
+    //otherwise show a discord dropdown box of all possible options (without going over the documented limit of options)
+    var options = flatContent.map((e,i) => { return { label: e.Title, value: `mylo_page_${e.Id}` } });
+    if (options.length > 25) options = options.slice(0, 25);
+    console.log({options});
+
+    var selectRow = new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+                .setCustomId(`mylo_page_select`)
+                .setPlaceholder('Select a page to link')
+                .addOptions(options)
+            )
+        
+    await interaction.editReply({ content: `Found ${pluralize(options.length, "page")}. Select a page to link:`, components: [ selectRow ]});
+}
+
+async function doMyLOPageSelectCommand(interaction)
+{
+    //get the id of the page from the interaction
+    var pageID = interaction.customId.replace("mylo_page_", "");
+    if (pageID == "select")
+        pageID = interaction.values[0];
+    await interaction.deferReply({ ephemeral: false });
+    await interaction.editReply({ content: "Posting link..."+pageID });
 }
