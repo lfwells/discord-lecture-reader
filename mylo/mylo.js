@@ -156,8 +156,8 @@ export async function getMyLOContentLink(item, guild)
     let OrgID = await getGuildProperty("myLOOrgID", guild);
     if (item.ModuleId != undefined)
         return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.ModuleId}`;
-    else if (item.TopicID != undefined)
-        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.ModuleId}/View`;
+    else if (item.TopicId != undefined)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.TopicId}/View`;
     else
         return '';
     
