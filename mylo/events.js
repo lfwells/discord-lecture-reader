@@ -1,7 +1,7 @@
 import { getCachedInteraction, registerCommand,registerApplicationCommand, } from '../guild/commands.js';
 import { deleteStudentProperty, isStudentMyLOConnected } from '../student/student.js';
 
-import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOContentLink, getMyLOData } from './mylo.js';
+import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOContentEmbed, getMyLOContentLink, getMyLOData } from './mylo.js';
 import { MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
 import { setGuildContextForInteraction } from '../core/errors.js';
 import { traverseContentTree, traverseContentTreeSearch } from './routes.js';
@@ -222,6 +222,6 @@ async function doMyLOPageSelectCommand(interaction)
 
     let root = traverseContentTree((await getMyLOData(interaction.guild, "content")).data().data, pageID);
     console.log({root});
-    let link = await getMyLOContentLink(root, interaction.guild);
-    await interaction.editReply({ content: "Posting link..."+link });
+    let embed = await getMyLOContentEmbed(root, interaction.guild);
+    await interaction.editReply({ embeds: [embed] });
 }

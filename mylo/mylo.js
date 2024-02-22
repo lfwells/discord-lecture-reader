@@ -160,6 +160,16 @@ export async function getMyLOContentLink(item, guild)
         return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.Id}/View`;
     
 }
+export async function getMyLOContentEmbed(item, guild)
+{
+    let link = await getMyLOContentLink(item, guild);  
+    return {
+        title: item.Title,
+        url: link,
+        description: item.Description,
+    };
+    
+}
 
 //-------------------------------------------------------------
 //everything after here is the old (unapproved) mylo connection
