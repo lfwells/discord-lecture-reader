@@ -38,6 +38,8 @@ export async function postChannelThreads(res, channel, forumChannel, root, singl
         }
         for (var topic of root.Structure)
         {
+            if(topic.IsHidden) continue;
+            
             res.write(`Creating thread: ${topic.Title}\n`);
 
             var message = {
@@ -70,6 +72,8 @@ export async function postChannelLinks(res, channel, forumChannel, root, singleL
     {
         for (var topic of root.Structure)
         {
+            if(topic.IsHidden) continue;
+            
             res.write(`Creating message: ${topic.Title}\n`);
 
             var message = {
@@ -102,6 +106,8 @@ async function createChannels(res, category, root, forumChannel, doWithChannel)
     var messages = [];
     for (var module of root.Structure)
     {
+        if(module.isHidden) continue;
+            
         if (module.Type == 0)
         {
             let title = getModuleTitle(module.Title);

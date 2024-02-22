@@ -58,7 +58,7 @@ export async function createMyLOLinksPost(req,res)
     res.write(`Posted ${pluralize(result.length, "message")}.`);
     res.end();
 }
-function traverseContentTree(root, findID)
+export function traverseContentTree(root, findID)
 {
     if (root.Id == findID) return root;
     if (root.Structure)
@@ -70,6 +70,23 @@ function traverseContentTree(root, findID)
         }
     }
     return null;
+}
+export function traverseContentTreeSearch(root, predicate, results) 
+{
+    if (results == undefined) results = [];
+    if (root.IsHidden != undefined && root.IsHidden) return results;
+    
+    if (predicate(root)) results.push(root);
+
+    if (root.Structure)
+    {
+        for (var i = 0; i < root.Structure.length; i++)
+        {
+            traverseContentTreeSearch(root.Structure[i], predicate, results);
+            
+        }
+    }
+    return results;
 }
 
 //-------------------------------------------------------------

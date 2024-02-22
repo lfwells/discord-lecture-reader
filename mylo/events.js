@@ -1,9 +1,10 @@
 import { getCachedInteraction, registerCommand,registerApplicationCommand, } from '../guild/commands.js';
 import { deleteStudentProperty, isStudentMyLOConnected } from '../student/student.js';
 
-import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction } from './mylo.js';
+import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOData } from './mylo.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 import { setGuildContextForInteraction } from '../core/errors.js';
+import { traverseContentTreeSearch } from './routes.js';
 
 export default async function(client)
 {    
@@ -156,5 +157,12 @@ async function doMyLOPageCommand(interaction)
 {
     
     await interaction.deferReply({ ephemeral: true });
-    await interaction.editReply("This command is not yet implemented. Please check back later.");
+
+    var root = (await getMyLOData(interaction.guild, "content")).data().data;
+    let search = interaction.options.getString("search");
+    let flatContent = traverseContentTreeSearch(root, e => (e.Title ?? "").toLowerCase().includes(search.toLowerCase()))
+        .map(e => { return { Title: e.Title, Id: e.Id, IsHidden: e.IsHidden } });
+    console.log({flatContent});
+
+    await interaction.editReply(JSON.stringify(flatContent).substring(0, 2000));
 }
