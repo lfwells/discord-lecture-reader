@@ -157,7 +157,12 @@ export async function getMyLOContentLink(item, guild)
     if (item.ModuleId != undefined)
         return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.ModuleId}`;
     else if (item.TopicId != undefined)
-        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.TopicId}/View`;
+    {
+        if (item.Url?.startsWith("http"))
+            return item.Url;
+        else
+            return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.TopicId}/View`;
+    }
     else
         return '';
     
