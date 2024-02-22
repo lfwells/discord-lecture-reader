@@ -84,8 +84,21 @@ export function init_server()
   app.set('views', path.join(__dirname, 'views')); 
   app.set('view engine', 'html');
 
+  //   ||
+  //   ||
+  //   ||
+  //   ||
+  //   ||
+  // \ || /
+  //  \||/
   //when doing lets-encrypt rewnal and they want a challenge, need to adjust this to be just `/`
   app.use('/static', express.static(path.join(__dirname, 'www')))
+  //  /||\
+  // / || \
+  //   ||
+  //   ||
+  //   ||
+  //   ||
 
   app.use(function(req, res, next) {
     res.locals.query = req.query;
