@@ -180,3 +180,14 @@ export function dateToHuman(d)
 {
   return moment(d).format("dddd, MMMM Do YYYY, h:mm:ss a");
 }
+
+//https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object
+export const removeEmpty = (obj) => {
+  let newObj = {};
+  Object.keys(obj).forEach((key) => {
+    if (key == "timestamp") newObj[key] = obj[key];
+    else if (obj[key] === Object(obj[key])) newObj[key] = removeEmpty(obj[key]);
+    else if (obj[key] !== undefined) newObj[key] = obj[key];
+  });
+  return newObj;
+};
