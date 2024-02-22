@@ -154,19 +154,21 @@ export async function postChannelsWithLinks(res, category, forumChannel, root)
 export async function getMyLOContentLink(item, guild)
 {
     let OrgID = await getGuildProperty("myLOOrgID", guild);
-    if (item.Type == 0)
-        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.Id}`;
-    else if (item.Type == 1)
-        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.Id}/View`;
+    if (item.ModuleId != undefined)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${item.ModuleId}`;
+    else if (item.TopicID != undefined)
+        return `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${item.ModuleId}/View`;
+    else
+        return '';
     
 }
-export async function getMyLOContentEmbed(item, guild)
+export async function getMyLOContentEmbed(item, guild, appendToDescription)
 {
     let link = await getMyLOContentLink(item, guild);  
     return {
         title: item.Title,
         url: link,
-        description: item.Description,
+        description: `${item.Description.Text} ${appendToDescription ?? ""}`,
     };
     
 }

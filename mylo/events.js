@@ -167,7 +167,7 @@ async function doMyLOPageCommand(interaction)
     var root = (await getMyLOData(interaction.guild, "content")).data().data;
     let search = interaction.options.getString("search");
     let flatContent = traverseContentTreeSearch(root, e => (e.Title ?? "").toLowerCase().includes(search.toLowerCase()))
-        .map(e => { return { Title: e.Title, Id: e.Id, IsHidden: e.IsHidden } });
+        .map(e => { return { Title: e.Title, Id: e.ModuleId ?? e.TopicId, IsHidden: e.IsHidden } });
     console.log({flatContent});
 
     //indicate if no results found
@@ -222,6 +222,20 @@ async function doMyLOPageSelectCommand(interaction)
 
     let root = traverseContentTree((await getMyLOData(interaction.guild, "content")).data().data, pageID);
     console.log({root});
-    let embed = await getMyLOContentEmbed(root, interaction.guild);
-    await interaction.editReply({ embeds: [embed] });
+    let html = root.Description?.Html;
+    //extract a youtube embed url from the html
+    let youtubeURL = html?.match(/https:\/\/www.youtube.com\/embed\/[a-zA-Z0-9_-]{11}/)?.[0];
+    //convert that embed url into a regular youtube link
+    if (youtubeURL) youtubeURL = youtubeURL.replace("https://www.youtube.com/embed/", "https://www.youtube.com/watch?v=");
+    let content = `<@${interaction.member.id}> shared a link to a MyLO page:`;
+    
+    let embed = await getMyLOContentEmbed(root, interaction.guild, youtubeURL);
+    //if there was a youtube url, obtain the thumbnail image for the video id
+    if (youtubeURL)
+    {
+        let videoID = youtubeURL.replace("https://www.youtube.com/watch?v=", "");
+        embed.image = { url: `https://img.youtube.com/vi/${videoID}/0.jpg` };
+    }
+
+    await interaction.editReply({ embeds: [embed], content });
 }
