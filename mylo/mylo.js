@@ -174,6 +174,7 @@ export async function getMyLOContentEmbed(item, guild, appendToDescription)
         title: item.Title,
         url: link,
         description: `${item.Description.Text} ${appendToDescription ?? ""}`,
+        footer: { text: link.substr(0,2000) }
     };
     
 }
