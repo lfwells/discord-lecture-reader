@@ -237,7 +237,7 @@ async function doMyLOPageSelectCommand(interaction)
 
     //get if the interaction was private
     var cachedInteraction = await getCachedInteraction(interaction.guild, interaction.message.interaction.id);
-    var priv = cachedInteraction?.private;
+    var priv = cachedInteraction?.priv;
 
     //get if the interaction was to tag another member
     var member = cachedInteraction?.mem;
