@@ -1,10 +1,10 @@
 import { getCachedInteraction, registerCommand,registerApplicationCommand, } from '../guild/commands.js';
 import { deleteStudentProperty, isStudentMyLOConnected } from '../student/student.js';
 
-import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOData } from './mylo.js';
+import { checkMyLOAccessAndReply, getMyLOConnectedMessageForInteraction, getMyLOContentLink, getMyLOData } from './mylo.js';
 import { MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
 import { setGuildContextForInteraction } from '../core/errors.js';
-import { traverseContentTreeSearch } from './routes.js';
+import { traverseContentTree, traverseContentTreeSearch } from './routes.js';
 import { pluralize } from '../core/utils.js';
 
 export default async function(client)
@@ -217,7 +217,11 @@ async function doMyLOPageSelectCommand(interaction)
     //get the id of the page from the interaction
     var pageID = interaction.customId.replace("mylo_page_", "");
     if (pageID == "select")
-        pageID = interaction.values[0];
+        pageID = interaction.values[0].replace("mylo_page_", "");
     await interaction.deferReply({ ephemeral: false });
-    await interaction.editReply({ content: "Posting link..."+pageID });
+
+    let root = traverseContentTree((await getMyLOData(interaction.guild, "content")).data().data, pageID);
+    console.log({root});
+    let link = await getMyLOContentLink(root, interaction.guild);
+    await interaction.editReply({ content: "Posting link..."+link });
 }
