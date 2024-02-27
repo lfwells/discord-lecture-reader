@@ -237,7 +237,7 @@ export function loadGuildProperty(property, required, now)
         {
           var channelProperty = property.replace("ChannelID", "Channel");
           
-          console.log(`CHANNELS FETCH ${req[property]} ${GUILD_CACHE[req.guild.id][channelProperty]}, guild load`);
+          //console.log(`CHANNELS FETCH ${req[property]} ${GUILD_CACHE[req.guild.id][channelProperty]}, guild load`);
           if (req[property] == undefined) return undefined;
           req[channelProperty] = GUILD_CACHE[req.guild.id][channelProperty] ?? await client.channels.fetch(req[property]);
           res.locals[channelProperty] = req[channelProperty];
@@ -255,7 +255,7 @@ export function loadGuildProperty(property, required, now)
         {
           var categoryProperty = property.replace("CategoryID", "Category");
           
-        console.log(`CHANNELS FETCH ${req[property]} ${GUILD_CACHE[req.guild.id][categoryProperty]} guild load 2`);
+        //console.log(`CHANNELS FETCH ${req[property]} ${GUILD_CACHE[req.guild.id][categoryProperty]} guild load 2`);
         if (req[property] == undefined) return undefined;
           req[categoryProperty] = GUILD_CACHE[req.guild.id][categoryProperty] ?? await req.guild.channels.fetch(req[property]);
           res.locals[categoryProperty] = req[categoryProperty];

@@ -447,11 +447,12 @@ async function resultsText(guild, interaction)
     var scheduledOptions = cache.scheduledOptions ? JSON.parse(cache.scheduledOptions) : undefined;
     var options = cache.pollOptions ? JSON.parse(cache.pollOptions) : undefined;
     var question = cache.question;
-    var answers = cache.answers;
+    var answers = Object.entries(cache.answers);
     var results = cache.results ? JSON.parse(cache.results) : undefined;
     var checklist = cache.checklist ?? false;
     
     var poll_emoji = scheduledOptions ? scheduledOptions.poll_emoji : cache.options.getString("poll_emoji") ?? "█"; //":white_large_square:"
+    console.log({poll_emoji, answers, results});
 
     var resultsEmbed = {
         title: question,
@@ -469,8 +470,10 @@ async function resultsText(guild, interaction)
     else
     {
         var text = "";
+        console.log({len: answers.length});
         for (let i = 0; i < answers.length; i++) {
-            const answer = answers[i];
+            const answer = answers[i][1];
+            console.log({answer});
             const result = results[i].length;
             
             resultsEmbed.fields.push({
@@ -481,6 +484,7 @@ async function resultsText(guild, interaction)
             });
         }
     }
+    console.log({resultsEmbed});
 
     return resultsEmbed;
 }

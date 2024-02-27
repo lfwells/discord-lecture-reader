@@ -186,7 +186,11 @@ export async function getCachedInteraction(guild, interactionID)
     //add helpers for the options getters
     if (interaction.options)
     {
-        interaction.options.getString = function(key)  { var r = interaction.options.find(e => e.type ==  "STRING"  && e.name == key); return r ? r.value : null; }
+        interaction.options.find = function(predicate) {
+            //console.log("finding", predicate, Object.values(interaction.options));
+            return Object.values(interaction.options).find(predicate);
+        };
+        interaction.options.getString = function(key)  { var r = interaction.options.find((e) => { /*console.log({e, typeCheck:e.type=="STRING", nameCheck: e.name == key, key});*/ return e.type ==  "STRING"  && e.name == key;}); console.log({r, key});return r ? r.value : null; }
         interaction.options.getBoolean = function(key) { var r =  interaction.options.find(e => e.type == "BOOLEAN" && e.name == key); return r ? r.value : null; }
         interaction.options.getInteger = function(key) { var r =  interaction.options.find(e => e.type == "INTEGER" && e.name == key); return r ? r.value : null; }
         interaction.options.getUser = function(key) { var r =  interaction.options.find(e => e.type == "USER" && e.name == key); return r ? r.user : null; }
