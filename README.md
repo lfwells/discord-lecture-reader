@@ -38,3 +38,12 @@ pm2 monit
 https://pm2.keymetrics.io/docs/usage/quick-start/#:~:text=Restart%20application%20on%20changes&text=This%20will%20watch%20%26%20restart%20the,check%20for%20restarted%20app%20logs.
 
 See the built-in user guid for more info on how to use the actual bot.
+
+## Renew SSL
+- Set `server.js` to `app.use('/', express.static(path.join(__dirname, 'www')))`
+- `pm2 restart all`
+- `sudo certbot certonly --force-renew -d utasbot.dev --http-01-port=8080`
+- Choose 2 webroot
+- Enter webroot `discord/www`
+- Change the `server.js` back to   `app.use('/static', express.static(path.join(__dirname, 'www')))`
+- `pm2 restart all`
