@@ -181,7 +181,7 @@
                         }
                         %>
                         <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
-                        <% if (locals.discordUser && locals.isUTASBotAdmin && locals.isUTASBotAdmin())
+                        <% if (locals.discordUser && ((locals.isUTASBotAdmin && locals.isUTASBotAdmin()) || locals.hasPermission("restart")))
                         {
                             %>
                             <li><a href="/restart">Restart Server</a></li>
