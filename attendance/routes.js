@@ -198,7 +198,9 @@ export async function getSectionProgressAll(req, res, next)
 //new fancy version
 export async function getProgressData(req,res,next)
 {
-    var data = await req.guildDocument.collection("progress").get();
+    //HACK: OVERRIDE THIS TO GET TO ALWAYS get data from 2022 sem 1
+    var data = await (await getGuildDocument("987158529569853480")).collection("progress").get();
+    //var data = await req.guildDocument.collection("progress").get();
     req.data = [];
     res.locals.tutorials = [];
 
