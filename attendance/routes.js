@@ -7,6 +7,7 @@ import { getPostsData } from "../analytics/analytics.js";
 import { KIT109_S2_2021_SERVER, KIT207_S2_2021_SERVER, KIT308_S2_2021_SERVER } from "../core/config.js";
 import { beginStreamingRes } from "../core/server.js";
 import { getGuildDocument, getGuildProperty, setGuildProperty } from "../guild/guild.js";
+import studentIDMap from "./studentIDMap.js";
 
 export var ATTENDANCE_CACHE = {}; //because querying the db for all attendances on demand is bad (cannot cache on node js firebase it seems)s
 
@@ -200,6 +201,9 @@ export async function getProgressData(req,res,next)
 {
     //HACK: OVERRIDE THIS TO GET TO ALWAYS get data from 2022 sem 1
     var data = await (await getGuildDocument("987158529569853480")).collection("progress").get();
+
+    //HACK Part 2 Electric Boogalo: map usernames to student IDs to fix missing data
+    
     //var data = await req.guildDocument.collection("progress").get();
     req.data = [];
     res.locals.tutorials = [];
@@ -272,6 +276,7 @@ export async function getProgressData(req,res,next)
         return section.pages.length - 1;
     }
 
+    var names = new Set();
     data.forEach(doc =>
     {
         var d = doc.data();
@@ -285,6 +290,7 @@ export async function getProgressData(req,res,next)
         d.timestamp = new Date(d.timestamp).toUTCString();
         req.data.push(d);
         //console.log(d);
+        names.add(d.username);
 
         //tutorial
         var tuteIndex = addTutorial(d.tutorial);
@@ -303,6 +309,10 @@ export async function getProgressData(req,res,next)
         //cache the page-data at page level too
         res.locals.tutorials[tuteIndex].sections[sectionIndex].pages[pageIndex].cache.push(d);
     });
+    //convert names set to array
+    //names = names.values.toArray().sort();
+    res.locals.names = names;
+    console.log({names})
 
     //sort the tutorials (annoyingly cant sort by section? wait can)
     res.locals.tutorials = res.locals.tutorials.sort((a,b) => a.name.localeCompare(b.name));
@@ -321,6 +331,8 @@ export async function getProgressData(req,res,next)
     
     res.locals.checkAttendance = function(student, section)
     {
+        var lookupById = studentIDMap[student.username] != undefined;
+        var studentID = studentIDMap[student.username];
         var text = "";
         for (var p in section.pages)
         {
@@ -330,7 +342,16 @@ export async function getProgressData(req,res,next)
             var found = false;
             for (var i in page.cache)
             {
-                if (page.cache[i].username == student.username)
+                var match = page.cache[i].username == student.username;
+                if (match == false)
+                {
+                    if (lookupById)
+                    {
+                        match = page.cache[i].studentID == studentID;
+                    }
+                }
+                
+                if (match)
                 {
                     text += '<td title="'+page.name+'" class="pageResult complete" sortValue="1">&nbsp;</td>';
                     found = true; 
@@ -555,7 +576,7 @@ export async function getProgressTimelineData(req, res, next)
             }
         }
         if (tutorial)
-            return '<td title="Tutorial '+tutorial+'-'+section+'" style="background-color:'+color+a+';">&nbsp;</td>';
+            return '<td title="Tutorial '+tutorial+'-'+section+'" style="background-color:'+color+a+';">X</td>';
         else
             return '<td></td>';
     };

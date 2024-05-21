@@ -17,3 +17,4 @@ carers-care-service-account.json
 
 sessions/*
 .vscode/sftp.json
+attendance/studentIDMap.js

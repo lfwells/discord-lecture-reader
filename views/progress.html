@@ -66,4 +66,10 @@ table th {
   <% }) %>
 </table>
 
+<ul>
+  <% locals.names.forEach(function(name){ %>
+    <li><%= name %></li>
+  <% }) %>
+</ul>
+
 <%- include('footer.html') %>
