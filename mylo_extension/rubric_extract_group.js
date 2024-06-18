@@ -235,7 +235,7 @@ let classlist = await api(`/d2l/api/le/1.40/${ou}/classlist/`, { });
 classlist = Object.fromEntries(classlist.map(s => [s.Identifier, s]));
 
 let groupcategories = await api(`/d2l/api/lp/1.22/${ou}/groupcategories/`, { });
-let groupCategoryNameEntered = prompt(`Enter the number of the group category that the assignment groups are in. The group categories available are:\n${groupcategories.map((g, i) => `${i}: ${g.Name}`).join("\n")}`, "Assignment Groups");
+let groupCategoryNameEntered = prompt(`Enter the number of the group category that the assignment groups are in.\n\nThe group categories available are:\n${groupcategories.map((g, i) => `${i}: ${g.Name}`).join("\n")}.\n\nPlease enter a number between 0 and ${Object.values(groupcategories).length-1}`, Object.values(groupcategories).length-1);
 //groups = Object.fromEntries(classlist.map(s => [s.Identifier, s]));
 let groupcategory = Object.values(groupcategories)[groupCategoryNameEntered];//.find(g => g.Name == groupCategoryNameEntered);
 if (groupcategory == null)
