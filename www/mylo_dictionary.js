@@ -16,6 +16,12 @@ var DICTIONARY = {
         'blenderVersion': '<a href="https://www.blender.org/download/release/Blender4.0/blender-4.0.2-windows-x64.msi/">Blender 4.0.2</a>'
     },
 
+    //KIT109 Semester 2 2024
+    "674786": {
+        "unityVersion": '<a href="https://unity.com/releases/editor/archive">Unity 6000.0.XXX (any version is fine)</a>',
+    },
+    
+
     //KIT207 Semester 1 2024 (just inherits from KIT109)
     "641666": {
         "__inherit": "641665"
@@ -61,6 +67,13 @@ let url = window.top.document.location.href.replace("d2l", "");
 //extract numbers from the url
 let orgID = url.match(/\d+/g);
 orgID = orgID ? orgID[0] : null;
+
+//if the orgID is undefined or not 6 characters, its in valid, give it another try using the window search params for "ou"
+if (!orgID || orgID.length != 6)
+{
+    let searchParams = new URLSearchParams(window.top.location.search);
+    orgID = searchParams.get("ou");
+}
 
 //go through the outerHTML of the entire page and find any instances of ${key} and replace it with the value from the dictionary
 let html = $("body").html();

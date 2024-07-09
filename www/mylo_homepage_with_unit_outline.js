@@ -30,7 +30,8 @@ console.log({mylo_homepage_override_announcement});
 mylo_homepage_override_announcement = $(mylo_homepage_override_announcement).parent().parent().parent().parent();
 console.log({mylo_homepage_override_announcement}); 
 
-mylo_homepage_override_announcement.html('<iframe width="100%" height="450" src="https://utasbot.dev/chat/'+DISCORD_CHANNEL_ID+'?previous_messages=10&mylo=true" />');
+var channelID = typeof(getDiscordServerID) !== "undefined" ? getDiscordServerID() : DISCORD_CHANNEL_ID;
+mylo_homepage_override_announcement.html('<iframe width="100%" height="450" src="https://utasbot.dev/chat/'+channelID+'?previous_messages=10&mylo=true" />');
 
 //announcementsPanel.html("yo");
 

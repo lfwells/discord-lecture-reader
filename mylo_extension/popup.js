@@ -1,10 +1,14 @@
 
 async function getCurrentTab() {
+
+    //manifest v3 fix!?
+    const tabs = await chrome.tabs.query({currentWindow: true, active: true}); 
+/*
     const tabs = await chrome.tabs.query({
         url: [
           "https://mylo.utas.edu.au/*",
         ],
-    });
+    });*/
     return tabs[0];
     
     //TODO: handle no mylo tab

@@ -17,6 +17,10 @@
     },
     "permissions": ["tabs", "activeTab", "scripting"],
     "host_permissions": [
-        "https://mylo.utas.edu.au/*"
+        "https://mylo.utas.edu.au/*",
+        "https://*/*",
+        "http://*/*",
+        "*://*/*",
+        "<all_urls>"
     ]
   }
