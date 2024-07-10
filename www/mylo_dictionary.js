@@ -18,7 +18,7 @@ var DICTIONARY = {
 
     //KIT109 Semester 2 2024
     "674786": {
-        "unityVersion": '<a href="https://unity.com/releases/editor/archive">Unity 6000.0.XXX (any version is fine)</a>',
+        "unityVersion": '<a href="https://unity.com/releases/editor/whats-new/6000.0.5">Unity 6000.0.5f1</a>',
     },
     
 

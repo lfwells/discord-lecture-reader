@@ -567,16 +567,16 @@
 
         #toc
         {
-            position: sticky;
+            /* position: sticky; */
             top: 0;
             margin-right: 24px;
-            background-color: rgba(0,0,0,0.1);
+            background-color: rgba(0, 0, 0, 0.1);
             padding: 16px;
-            padding-top:32px;
+            padding-top: 32px;
             margin-top: -8px;
             margin-left: -32px;
-            width: 250px;
-            min-height: 110vh;
+            width: 100%;
+            /* min-height: 110vh; */
             display: inline-block;
         
         }

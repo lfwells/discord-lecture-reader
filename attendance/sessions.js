@@ -167,7 +167,7 @@ async function scheduleAllSessionsOfTypeWeeklyItem(res, guild, config, semester,
         guild, config.type, startTime, endTime, scheduleInfo.channelID, scheduleInfo.textChannelID, week, scheduleInfo.day, scheduleInfo.hour, scheduleInfo.minute, config.duration, description, scheduleInfo.location
     );
 
-    res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.format("dddd, MMMM Do YYYY, h:mm:ss a")}\n`);
+    res.write(`Scheduled ${config.type} (Week ${week}) -- ${startTime.format("dddd, MMMM Do YYYY, h:mm:ss a")} (${createdSession.id})\n`);
     return createdSession;
 }
 function getSemesterWeekStart(res, semester, week, day)
