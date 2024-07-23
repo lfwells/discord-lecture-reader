@@ -300,14 +300,18 @@ export async function parseCSV(req, fileUpload)
 
     //first line is headers
     var headers = content.shift();
-    console.log(headers);
+    console.log({headers});
+    console.log({content});
     content = content.map(function (row) {
         var obj = {};
+        
+    console.log({row});
         for (var i = 0; i < headers.length; i++)
         {
             obj[headers[i]] = row[i];
         }
-        obj["Username"] = obj["Username"].substring(0, obj["Username"].indexOf("@"));
+        console.log({obj});
+        //obj["Username"] = obj["Username"].substring(0, obj["Username"].indexOf("@"));
         return obj;
     });
 

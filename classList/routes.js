@@ -42,7 +42,7 @@ export async function uploadMyLOCSV(req,res,next)
   else
   {
     req.unengagedClassList = await parseCSV(req, req.files.csv);
-    console.log(req.unengagedClassList);;
+    //console.log(req.unengagedClassList);;
     next();
   }
 }
