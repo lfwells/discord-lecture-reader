@@ -199,8 +199,8 @@ export async function getSectionProgressAll(req, res, next)
 //new fancy version
 export async function getProgressData(req,res,next)
 {
-    //HACK: OVERRIDE THIS TO GET TO ALWAYS get data from 2022 sem 1
-    var data = await (await getGuildDocument("987158529569853480")).collection("progress").get();
+
+    var data = await req.guildDocument.collection("progress").get();
 
     //HACK Part 2 Electric Boogalo: map usernames to student IDs to fix missing data
     

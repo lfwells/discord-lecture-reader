@@ -35,9 +35,14 @@ import { getClient } from './client.js';
 import { exec } from 'child_process';
 import { getPermissions, hasPermissionCached, isUTASBotAdminCached } from './permissions.js';
 
+import init_kit214 from '../kit214/index.js';
+
 export function init_server()
 {
-  app.use(cors())
+  app.use(cors());
+
+  //add in extra routes for just mashing in the KIT214 stuff here
+  //init_kit214(app);
 
   app.use(cookieParser())
   
@@ -81,8 +86,11 @@ export function init_server()
   // Optional since express defaults to CWD/views
   const __dirname = path.resolve(); //todo put in export
   
-  app.set('views', path.join(__dirname, 'views')); 
+  app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'kit214','views')]); 
   app.set('view engine', 'html');
+
+  //for the mooc, serve the file www/mooc.js as /mooc.js
+  app.use("/mooc.js", express.static(path.join(__dirname, 'www/mooc.js')));
 
   //   ||
   //   ||
@@ -93,6 +101,7 @@ export function init_server()
   //  \||/
   //when doing lets-encrypt rewnal and they want a challenge, need to adjust this to be just `/`
   app.use('/static', express.static(path.join(__dirname, 'www')))
+  //app.use('/', express.static(path.join(__dirname, 'www')))
   //  /||\
   // / || \
   //   ||
@@ -156,7 +165,6 @@ export function init_server()
   {
     console.log("failed to start https server");
   }
-
   
   //web server routes
   init_routes(app);

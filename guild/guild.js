@@ -19,6 +19,7 @@ import { setGuildContextForRoute } from "../core/errors.js";
 import { getPermissions, isUTASBotAdminCached } from "../core/permissions.js";
 import { loadClassList } from "../classList/classList.js";
 import { profileIsPublic } from "../profile/profile.js";
+import { unarchiveAllThreads } from "../mylo/mylo.js";
 
 export var GUILD_CACHE = {}; //because querying the db every min is bad (cannot cache on node js firebase it seems)
 
@@ -62,6 +63,11 @@ export default async function init(client)
     await init_sheet_for_guild(guild);
     init_status_channels(guild); //not awaiting, so that it can happen in background
     init_presence_scrape(guild); //not awaiting, so that it can happen in background
+
+    // Run unarchiveAllThreads in its own thread
+    setImmediate(() => {
+      unarchiveAllThreads(guild);
+    });
 
     console.log("Initialised Guild",guild.name, guild.id);
   })

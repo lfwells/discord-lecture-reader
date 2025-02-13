@@ -20,6 +20,11 @@ var DICTIONARY = {
     "674786": {
         "unityVersion": '<a href="https://unity.com/releases/editor/whats-new/6000.0.5">Unity 6000.0.5f1</a>',
     },
+
+    //KIT109 Semester 1 2025
+    "691741": {
+        "unityVersion": '<a href="https://unity.com/releases/editor/whats-new/6000.0.35">Unity 6000.0.35f1</a>',
+    },
     
 
     //KIT207 Semester 1 2024 (just inherits from KIT109)
@@ -34,6 +39,16 @@ var DICTIONARY = {
         "androidStudioVersion": '<a href="https://developer.android.com/studio/archive">Hedgehog 2023.1.1 -- this is no longer the latest version</a>',
         "xcodeVersion": '<a href="https://apps.apple.com/au/app/xcode/id497799835?mt=12">15.2 -- latest</a>',
         "flutterVersion": '<a href="https://docs.flutter.dev/release/archive?tab=windows">3.16.9 -- latest</a>',
+        
+    },
+
+    //KIT305 Semester 1 2025
+    "706453": {
+        "__inherit": "641209",
+        "balsamiqVersion": '<a href="https://balsamiq.com/wireframes/desktop/archives/">4.8.0 -- latest</a>',
+        "androidStudioVersion": '<a href="https://developer.android.com/studio/archive">Ladybug 2024.2.2 -- latest</a>',
+        "xcodeVersion": '<a href="https://developer.apple.com/services-account/download?path=/Developer_Tools/Xcode_15.2/Xcode_15.2.xip">15.2</a>',
+        "flutterVersion": '<a href="https://docs.flutter.dev/get-started/install">3.27.3 -- latest</a>',
         
     },
 };

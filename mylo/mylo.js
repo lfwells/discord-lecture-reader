@@ -5,6 +5,7 @@ import { oauthDiscordMyLOConnect } from "../_oathDiscordMyLOFlow.js";
 import { getGuildDocument, getGuildProperty } from "../guild/guild.js";
 import { ROBO_LINDSAY_ID } from "../core/config.js";
 import fetch, { Headers } from 'node-fetch';
+import { setInterval } from 'timers';
 
 async function getMyLODataDoc(guild, key) { return (await getGuildDocument(guild.id)).collection("mylo").doc(key); }
 export async function storeMyLOData(guild, data)
@@ -30,13 +31,15 @@ export async function getMyLOData(guild, key)
 export async function postChannelThreads(res, channel, forumChannel, root, singleLevel) 
 {    
     var messages = [];
-    if (root.Structure)
+    let topics = root.Structure;
+    if (root.Topics != undefined) topics = root.Topics;
+    if (topics)
     {
         if (forumChannel)
         {
-            root.Structure.reverse();
+            topics.reverse();
         }
-        for (var topic of root.Structure)
+        for (var topic of topics) 
         {
             if(topic.IsHidden) continue;
             
@@ -46,19 +49,39 @@ export async function postChannelThreads(res, channel, forumChannel, root, singl
                 content: await getMyLOContentLink(topic, channel.guild)
             };
 
-            var newThread = forumChannel ? await channel.threads.create({
-                name: topic.Title,
-                message
-            }) :  await channel.threads.create({
-                name: topic.Title
-            });
             if (forumChannel)
             {
+                
+                //look in the topic description for a youtube embed url, and extract the youtube link from it
+                let foundYoutube = topic.Description.Html.match(/<iframe.*?src="https:\/\/www.youtube.com\/embed\/(.*?)".*?<\/iframe>/);
+                if (foundYoutube)
+                {
+                    message.content += `\nhttps://www.youtube.com/watch?v=${foundYoutube[1]}`;
+                }
+
+                var newThread = await channel.threads.create({
+                    name: topic.Title,
+                    message
+                });
                 messages.push(newThread);
             }
             else
             {
-                var newMessage = newThread.send(message);
+                message.content = "# [" + topic.Title + "]("+message.content+")";
+                let foundYoutube = topic.Description.Html.match(/<iframe.*?src="https:\/\/www.youtube.com\/embed\/(.*?)".*?<\/iframe>/);
+                if (foundYoutube)
+                {
+                    message.content += `\n[YouTube Video](https://www.youtube.com/watch?v=${foundYoutube[1]})`;
+                }
+
+                var newMessage = await channel.send(message);
+                console.log({newMessage});
+                
+                var newThread = await newMessage.startThread({
+                    name: topic.Title
+                });
+
+                //var newMessage = newThread.send(message);
                 messages.push(newMessage);
             }
         }
@@ -68,9 +91,11 @@ export async function postChannelThreads(res, channel, forumChannel, root, singl
 export async function postChannelLinks(res, channel, forumChannel, root, singleLevel) 
 { 
     var messages = [];
-    if (root.Structure)
+    let topics = root.Structure;
+    if (root.Topics != undefined) topics = root.Topics;
+    if (topics)
     {
-        for (var topic of root.Structure)
+        for (var topic of topics)
         {
             if(topic.IsHidden) continue;
             
@@ -84,11 +109,17 @@ export async function postChannelLinks(res, channel, forumChannel, root, singleL
                             `${topic.Title}` :
                             `${getModuleTitle(root.Title)} - ${topic.Title}`,
                         description:`${await getMyLOContentLink(topic, channel.guild)}`
-                    }
+                    },
                 ]
             };
+            //look in the topic description for a youtube embed url, and extract the youtube link from it
+            let foundYoutube = topic.Description.Html.match(/<iframe.*?src="https:\/\/www.youtube.com\/embed\/(.*?)".*?<\/iframe>/);
+            if (foundYoutube)
+            {
+                message.content = `https://www.youtube.com/watch?v=${foundYoutube[1]}`;
+            }
 
-            var newMessage = channel.send(message);
+            var newMessage = await channel.send(message);
             messages.push(newMessage);
         }
     }
@@ -103,12 +134,16 @@ async function createChannels(res, category, root, forumChannel, doWithChannel)
 {
     let everyoneRole = category.guild.roles.cache.find(r => r.name === '@everyone');
 
+    console.log({root});    
     var messages = [];
-    for (var module of root.Structure)
+    var modules = root.Structure;
+    if (root.Modules != undefined) modules = root.Modules;
+    for (var module of modules)
     {
+        console.log({module});
         if(module.isHidden) continue;
             
-        if (module.Type == 0)
+        if (module.Type == 0 || module.ModuleId != undefined)
         {
             let title = getModuleTitle(module.Title);
             title = title.replace(/[^\w\s]/gi, '').replaceAll(" ", "-").toLowerCase();
@@ -141,6 +176,40 @@ export async function deleteCategoryChannels(res, category)
         res.write(`\tDeleting ${c.name}.\n`);
         await c.delete();
     }
+}
+export async function unarchiveAllThreads(guild)
+{
+    async function un(guild) { 
+        for (const channel of guild.channels.cache.values()) {
+            if (channel.isText() && !channel.isThread() && !channel.isVoice()) { 
+                try {
+                    // Fetch both active and archived threads
+                    const activeThreads = await channel.threads.fetchActive();
+                    const archivedThreads = await channel.threads.fetchArchived({ limit: 100 });
+
+                    const allThreads = [...activeThreads.threads.values(), ...archivedThreads.threads.values()];
+
+                    for (const thread of allThreads) {
+                        if (thread.ownerId && (await thread.fetchOwner())?.user?.bot) {
+                            if (thread.archived) {
+                                console.log(`Unarchiving thread: ${thread.name}`);
+                                await thread.setArchived(false);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error fetching threads for ${channel.name}:`, error);
+                }
+            }
+        }
+    }
+
+    un(guild).catch(console.error);
+    // Schedule the unarchiveAllThreads function to run every 10 minutes
+    setInterval(() => {
+        // Replace 'yourGuild' with the actual guild object
+        un(guild).catch(console.error);
+    }, 10 * 60 * 1000);
 }
 export async function postChannelsWithThreads(res, category, forumChannel, root) 
 { 
