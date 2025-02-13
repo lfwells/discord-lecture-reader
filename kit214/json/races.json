@@ -1,0 +1,1 @@
+[{"id":0,"track":0,"entrants":["https://utasbot.dev/kit214/teams-api/car/0","https://utasbot.dev/kit214/teams-api/car/1"],"startingPositions":[0,1],"laps":[{"number":1,"lapTimes":[{"entrant":0,"time":0,"crashed":true},{"entrant":1,"time":82.109,"crashed":false}]},{"number":2,"lapTimes":[{"entrant":0,"time":79.292,"crashed":false},{"entrant":1,"time":82.420,"crashed":false}]}]}]

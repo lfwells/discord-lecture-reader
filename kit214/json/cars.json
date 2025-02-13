@@ -1,0 +1,23 @@
+[
+    { 
+        "id": 0, 
+        "driver": 3, 
+        "suitability": 
+        { 
+          "race": 40, 
+          "street": 60 
+        }, 
+        "reliability": 50 
+    },
+    
+    { 
+        "id": 1, 
+        "driver": 4, 
+        "suitability": 
+        { 
+          "race": 40, 
+          "street": 60 
+        }, 
+        "reliability": 50 
+    }
+]

@@ -1,0 +1,63 @@
+<%- include('header.html') %>
+<input type="text" id="baseURI" value="https://utasbot.dev/kit214/timing-api" />
+<button onclick="getTracks()">Get Tracks</button>
+<div id="result">
+</div>
+
+
+<button onclick="getRaces()">Get Races</button>
+<div id="resultRaces">
+</div>
+
+
+<script>
+    function getTracks() {
+        var baseURI = document.getElementById('baseURI').value;
+        var url = baseURI + '/track';
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                data = data.result;
+                var result = document.getElementById('result');
+                result.innerHTML = '';
+                data.forEach(track => {
+                    var div = document.createElement('div');
+                    div.innerHTML = track.name + '<button onclick="startRace('+track.id+')">Start Race</button>';
+                    result.appendChild(div);
+                });
+            });
+    }
+
+    function startRace(track)
+    {
+        var baseURI = document.getElementById('baseURI').value;
+        var url = baseURI + "/race";
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                track
+            })})
+            .then(getRaces);
+        
+    }
+
+    function getRaces() {
+        var baseURI = document.getElementById('baseURI').value;
+        var url = baseURI + "/race";
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                data = data.result;
+                var result = document.getElementById('resultRaces');
+                result.innerHTML = '';
+                data.forEach(race => {
+                    var div = document.createElement('div');
+                    div.innerHTML = race.id + race.track?.name;
+                    result.appendChild(div);
+                });
+            });
+    }
+</script>
