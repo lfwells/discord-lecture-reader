@@ -20,3 +20,9 @@ sessions/*
 attendance/studentIDMap.js
 logs/output.log
 *.log
+
+
+*.log
+logs/
+google_cloud_key.json
+node_modules/
