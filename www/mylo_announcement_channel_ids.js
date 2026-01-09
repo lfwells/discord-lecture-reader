@@ -10,6 +10,8 @@ const MYLO_UNIT_ORGS_TO_DISCORD_SERVERS = {
     "731032": "1382569864165589082",
 
 
+    //KIT305 Semester 1 2026
+    "771103": "1459162086864195647",
 };
 
 function getDiscordServerID()

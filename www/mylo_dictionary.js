@@ -47,8 +47,19 @@ var DICTIONARY = {
         "__inherit": "641209",
         "balsamiqVersion": '<a href="https://balsamiq.com/wireframes/desktop/archives/">4.8.0 -- latest</a>',
         "androidStudioVersion": '<a href="https://developer.android.com/studio/archive">Ladybug 2024.2.2 -- latest</a>',
-        "xcodeVersion": '<a href="https://developer.apple.com/services-account/download?path=/Developer_Tools/Xcode_15.2/Xcode_15.2.xip">15.2</a>',
+        "xcodeVersion": '<a href="https://developer.apple.com/services-account/download?path=/Developer_Tools/Xcode_15.2/Xcode_15.2.xip">Latest (Via App/a>',
         "flutterVersion": '<a href="https://docs.flutter.dev/get-started/install">3.27.3 -- latest</a>',
+        
+    },
+
+
+    //KIT305 Semester 1 2026
+    "771103": {
+        "__inherit": "706453",
+        "balsamiqVersion": '<a href="https://balsamiq.com/wireframes/desktop/archives/">4.8.6 -- latest</a>',
+        "androidStudioVersion": '<a href="https://developer.android.com/studio/">Otter -- latest</a>',
+        "xcodeVersion": 'Latest (App Store)',
+        "flutterVersion": '<a href="https://docs.flutter.dev/get-started/install">3.38.5 -- latest</a>',
         
     },
 };
