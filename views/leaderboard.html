@@ -1,0 +1,12 @@
+<%- include('header.html', { title: "Award Leaderboard" }) %>
+
+<style>
+    th { text-align: left; padding-right: 1ex; }
+</style>
+
+<%- locals.classlistFilters() %>
+
+<%- include("subViews/leaderboardTable.html", { data:locals.classList }) %>
+
+
+<%- include('footer.html') %>

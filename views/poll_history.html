@@ -1,0 +1,49 @@
+<script>$("main p").html("");</script>
+<style>
+    .question { font-size:16pt; }
+    th { text-align: left; padding-right: 1ex; }
+    .votes { padding-left: 1ex; text-align: center; }
+    * {
+        text-shadow: 0px 0px 4px #2C2F33;
+    }
+    .bar {
+        box-shadow: 0px 0px 4px #2C2F33;
+    }
+</style>
+
+<%
+    locals.polls.forEach(poll =>
+    {
+        var save = "/poll \"";
+        save += poll.question.replace("Poll: ", "");
+        save += "\" ";
+
+        save += poll.results.map(function(e) { return '"'+e.answer+'"'; }).join(" ");
+
+        var command = "/poll question: ";
+        command += poll.question.replace("Poll: ", "");
+        command += poll.results.map(function(e, i) { return 'option_'+(i+1)+': '+e.answer; }).join(" ");
+        poll.command = command;
+
+
+        %><%- include("/home/ubuntu/discord/views/pollTableHistory.html", poll);%>
+        <p>
+            <%- include("/home/ubuntu/discord/views/subViews/download_csv.html", { data:poll.results, filename:poll.question }) ; %> 
+            Save: <input type="text" style="width:500px" value="<%=save%>" /> <button class="copy">Copy</button>
+        </p>
+
+        <hr />
+        
+        <%
+    });
+%>
+<script>
+    $(".copy").on("click", (e) => {
+        var txt = $(e.target).parent().find("input").first().text();
+        copyToClipboard(txt);
+        e.stopPropagation();
+        return false;
+    });
+</script>
+
+<%- include('/home/ubuntu/discord/views/footer.html') %>

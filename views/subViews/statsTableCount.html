@@ -1,0 +1,32 @@
+<%
+if (Object.keys(data).length == 0)
+{
+    %>No data<%
+}
+else
+{
+    %>
+    <table>
+        <% if (typeof showHeaders == 'undefined'  || showHeaders) { %>
+        <tr>
+            <th>Name</th>
+            <th>Post Count</th>
+        </tr>
+        <%
+        }
+        for (var i in data)
+        {
+            var row = data[i];
+            if (locals.limit && i >= limit) break;
+
+            %><tr>
+                <th><%=row.name%></th>
+                <td><%=row.posts.toLocaleString() %></td>
+            </tr><%
+        }
+        %>
+    </table>
+
+    <%
+}
+%>

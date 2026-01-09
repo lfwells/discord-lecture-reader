@@ -1,0 +1,147 @@
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+//init
+let container;
+let progressContainer;
+async function init()
+{
+    window.console.log("init");
+    progressContainer = $("#progress");
+    progressContainer.find(".row").hide();
+    
+    //create another div for our rendering
+    container = $("<div id='gamification' class='row'></div>");
+    $(progressContainer).append(container);
+
+    await listenToUpdates();
+    let data = await parseData(progressContainer);
+    await onRender(container, data);
+
+    //create a div for the avatar which is fixed overlaid on the bottom right of the page
+    let avatarContainer = $("<div id='avatar' class='row' style='position: fixed; bottom: 0; right: 0;'></div>");
+    $("body").append(avatarContainer);
+    onRenderAvatar(avatarContainer, data);
+}
+init();
+
+//ian begin here:
+async function onRender(container, data)
+{
+    $(container).html("ian stuff here"+JSON.stringify(data));
+    testD3(container);//remove this later or whatever i am a comment not a cop
+}
+async function onReRender(container, data)
+{
+    $(container).html("ian stuff here (Renrendered)"+JSON.stringify(data));
+}
+async function onRenderAvatar(avatarContainer, data)
+{
+    $(avatarContainer).css("background-color", "white");//so you can see it
+    $(avatarContainer).html("ian avatar stuff here");
+}
+
+//delete this later if needed
+function testD3(container)
+{
+    // Declare the chart dimensions and margins.
+    const width = 640;
+    const height = 400;
+    const marginTop = 20;
+    const marginRight = 20;
+    const marginBottom = 30;
+    const marginLeft = 40;
+
+    // Declare the x (horizontal position) scale.
+    const x = d3.scaleUtc()
+        .domain([new Date("2023-01-01"), new Date("2024-01-01")])
+        .range([marginLeft, width - marginRight]);
+
+    // Declare the y (vertical position) scale.
+    const y = d3.scaleLinear()
+        .domain([0, 100])
+        .range([height - marginBottom, marginTop]);
+
+    // Create the SVG container.
+    const svg = d3.create("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    // Add the x-axis.
+    svg.append("g")
+        .attr("transform", `translate(0,${height - marginBottom})`)
+        .call(d3.axisBottom(x));
+
+    // Add the y-axis.
+    svg.append("g")
+        .attr("transform", `translate(${marginLeft},0)`)
+        .call(d3.axisLeft(y));
+
+    // Append the SVG element.
+    container.append(svg.node());
+}
+
+
+
+//lindsay's private don't touch ;)
+async function parseData(progressContainer)
+{
+    var data = {};
+    var user_progress_container = $(progressContainer).find("#user_progress_container");
+    var progress_quiz_container = $(progressContainer).find("#progress_quiz_container");
+
+    var chapters = [];
+    $(user_progress_container).find("li").each(function(e)
+    {
+        var name = $(this).find(".chapter-name-text").text();
+        var progress = $(this).find(".page-num-text").text().split("/");
+        var isActive = $(this).hasClass("active");
+        var isCurrent = $(this).find(".badge-user:visible").length > 0;
+        var onClick = $(this).attr("onclick");
+        chapters.push({name, progress,isActive,isCurrent,onClick});
+
+    });
+    data.chapters = chapters;
+
+    var quizzes = [];
+    $(user_progress_container).find(".badge-quiz").each(function(e)
+    {
+        if ( $(this).data("original-title"))
+        {
+            var name = $(this).data("original-title").replace("Quiz: ","");
+            quizzes.push({name});
+        }
+    });
+    $(progress_quiz_container).find("tr").each(function(e)
+    {
+        if ($(this).find("h5").length == 0)
+        {
+            console.log("skip");
+            return;
+        }
+        var title = $(this).find("td:first h5").text();
+        var score = $(this).find(".label").text();
+        var retryClick = $(this).find("button").attr("onclick");
+        //use the title to update the quiz with teh matching name
+        var quiz = quizzes.find(q=>q.name == title);
+        if (quiz)
+        {
+            quiz.score = score;
+            quiz.retryClick = retryClick;
+        }
+    });
+    data.quizzes = quizzes;
+
+    console.log({data});
+    return data;
+} 
+
+async function listenToUpdates()
+{
+    var temp = View.renderCourseNav;
+    View.renderCourseNav = async function(...args) 
+    {
+        temp(...args);
+        var data = await parseData(progressContainer);
+        await onReRender(container, data);
+    };
+}

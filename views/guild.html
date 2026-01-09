@@ -1,0 +1,145 @@
+<%- include('header.html', { title: "Configure Server" }) %>
+
+<!-- undercooked feature, not completed 
+<p><a href="/guild/<%= guild.id %>/clone" class="btn">Copy Settings From Existing Server</a></p>-->
+
+<form method="post">
+
+    <p><%- include("subViews/guildSettingText.html", 
+        { 
+            label: "Bot Name in Server:",
+            id: "setBotName",
+            value: locals.botName ? locals.botName : "UTAS Bot",
+            help: "How the bot will appear in your unit. Go on, call it 'Robo-Lindsay'!"
+        }) %></p>
+
+    <h3>Role Set Up</h3>
+
+    <p><%- include("subViews/roleSelect.html", 
+        { 
+            label: "Admin/Staff Role:",
+            selectDefaultText:"-- Select Role--",
+            id: "setAdminRoleID",
+            value: locals.adminRole ? locals.adminRole.id : undefined,
+            help: "Admin bot commands can only be run by users with this role."
+        }) %></p>
+    <p><%- include("subViews/roleSelect.html", 
+        { 
+            label: "Current Students Role:",
+            selectDefaultText:"-- Select Role--",
+            id: "setStudentRoleID",
+            value: locals.studentRole ? locals.studentRole.id : undefined,
+            help: "Used for tracking stats of only students (e.g. don't include staff posts in stats)"
+        }) %></p>
+
+    <h3>Channel Set Up</h3>
+
+    <p><%- include("subViews/channelSelect.html", 
+        { 
+            label: "Rules Channel:",
+            selectDefaultText:"-- Select Channel--",
+            id: "setRuleChannelID",
+            value: locals.ruleChannelID,
+            type: "GUILD_TEXT",
+            help: "Which channel is the one that contains the server's rules?"
+        }) %></p>
+
+<p><%- include("subViews/channelSelect.html", 
+    { 
+        label: "Lecture Channel:",
+        selectDefaultText:"-- Select Channel--",
+        id: "setLectureChannelID",
+        value: locals.lectureChannel ? locals.lectureChannel.id : undefined,
+        type: "GUILD_TEXT",
+        help: "Which channel do lectures take place in? Useful for polls feature if used."
+    }) %></p>
+
+    <p><%- include("subViews/channelSelect.html", 
+        { 
+            label: "Off Topic Channel:",
+            selectDefaultText:"-- Select Channel--", 
+            id: "setOffTopicChannelID",
+            value: locals.offTopicChannel ? locals.offTopicChannel.id : undefined,
+            type: "GUILD_TEXT",
+            help: "Used for tracking stats of how many posts are on/off topic."
+        }) %></p>
+    <p><%- include("subViews/channelCategorySelect.html", 
+        { 
+            label: "Off Topic Category:",
+            selectDefaultText:"-- Select Category--", 
+            id: "setOffTopicCategoryID",
+            value: locals.offTopicCategory ? locals.offTopicCategory.id : undefined,
+            help: "Used for tracking stats of how many posts are on/off topic."
+        }) %></p>
+
+    <p><input type="submit" value="Save Configuration"/></p>  
+
+    <hr />
+    <h4>Delete Category</h4>
+    <p><%- include("subViews/channelCategorySelect.html", 
+        { 
+            label: "Delete Catgory:",
+            selectDefaultText:"-- Select Category--", 
+            id: "deleteCategoryID",
+            help: "Use this tool to delete a category, because deleting in Discord just orphans the child channels. Use with care."
+        }) %></p>
+        
+<script>
+    var resultWindows = {};
+    $('#deleteCategoryID').on('change',function(e) 
+    {
+        //prompt the user to confirm by typing DELETE
+        var catName = e.target.options[e.target.selectedIndex].text;
+        var catID = e.target.value;
+        if (catID == "__DISCORD_BOT_NONE__") return;
+
+        var catNameConfirm = prompt("Are you sure you want to delete the category '" + catName + "'? Type DELETE to confirm.");
+        if (catNameConfirm?.toLocaleLowerCase() != "delete") {
+            $(this).val("__DISCORD_BOT_NONE__");
+            return;
+        }
+
+        //make a popup to display the output
+        if (resultWindows['deleteCatgoryID']) resultWindows['deleteCatgoryID'].close();
+        resultWindows['deleteCatgoryID'] = window.open("", "Deleting Category...", "width=650,height=600");
+
+        try
+        {
+            resultWindows['deleteCatgoryID'].document.querySelector('pre').remove();
+        } catch (e) {}
+        resultWindows['deleteCatgoryID'].document.write("<html><head><title>Deleting Category...</title><style>body { background-color: #2C2F33; color:white; }</style></head><body><pre>Loading...\n");
+
+        var last_response_len  = false;
+        $.ajax({
+            url:"<%= guild.id %>/deleteCategory/" + e.target.value,
+            method:"get",
+            contentType: 'application/json',
+            xhrFields: {
+                onprogress: function(e)
+                {
+                    var this_response, response = e.currentTarget.response;
+                    if(last_response_len === false)
+                    {
+                        this_response = response;
+                        last_response_len = response.length;
+                    }
+                    else
+                    {
+                        this_response = response.substring(last_response_len);
+                        last_response_len = response.length;
+                    }
+                    console.log(this_response);
+                    resultWindows['deleteCatgoryID'].document.write(this_response);
+                },
+                success: function(data)
+                {
+                    resultWindows['deleteCatgoryID'].document.write("</pre>");
+                }
+            },
+        });
+      }
+    );
+  </script>
+</form>
+
+<%- include('footer.html') %>

@@ -1,0 +1,100 @@
+<%- include('../guideHeader.html') %>
+<% 
+//have to include these in each file sadly
+function inGuild()
+{
+    return !(typeof(locals.guild) === 'undefined');
+}
+function getGuilds()
+{
+    if (typeof(guilds) === 'undefined') return [];
+    return guilds.map(g => g.id);
+}
+function hasGuilds()
+{    
+    return getGuilds().length > 0;
+}
+function guideTabLink(text, link)
+{
+    return include("../guideTabLink.html", {
+        text, link
+    });
+}
+%>
+       
+      
+     
+        <a>
+            <h2>Feature: Achievement System</h2>
+            <p class="description">Give out achievements to students for various things. Add achievement icons that can appear next to student names.</p>
+        </a>
+        <div>
+            <p class="centered">
+                <img src="/static/guide/awards_popup.png" />
+            </p>
+
+            <p>To use this feature, you need to enable <strong>Achievements</strong> on the <%-guideTabLink("Features Tab", "features")%>. With this feature enabled, you will be able to see the <%-guideTabLink("Achievements Tab", "awards")%></p>
+            <% if (inGuild()) {
+                %><p>
+                <%- include("../../subViews/featureSelect.html", 
+                { 
+                    label: "Achievements",
+                    feature: "achievements",
+                    className:"botFunction"
+                }) %></p>  
+                <%
+            }%>
+
+            <h3>Achievement List</h3>
+            <p>You can specify achievements by posting them in a dedicated <strong>#achievements</strong> channel. You can name this channel whatever you want, as long as it is set up on the <%-guideTabLink("Features Tab", "features")%>.</p>
+            <p>To work, achievements must use a standard emoji (no custom emoji, sorry!), followed by the name of the achievement (good achievements have a fun name, with an understandable description of how to earn it afterwards). Write ONE message per achievement. Here are some samples we regularly use, which you can paste into your <strong>#achievements</strong> channel.</p>
+            <ul id="awards">
+                <li>🖐️ Please allow me to introduce myself... -- allowed us to get to know them in #introduce-yourself</li>
+                <li>⭐ Gold Star -- Answered a question / participated in discussion in lecture-chat (during lecture)</li>
+                <li>🐛 We'll Fix it in Post -- Pointed out a mistake in the tutorials or MyLO </li>
+                <li>❔ There Are No Stupid Questions -- Asked a question in the lecture-chat  (during lecture)</li>
+                <li>🧠 Making Big Brains Bigger -- Attended a consultation session </li>
+                <li>📈 I Would Like To Speak To The Manager -- Gave genuinely useful feedback about the unit</li>
+                <li>🙌 Teamwork Makes the Dreamwork -- Helped another student solve their problem on Discord </li>
+                <li>📖 The Oracle --- Posted a link in #references-resources </li>
+                <li>🏅 Completionist -- Finished all of the practical exercises</li>
+                <li>🐦 Early Bird -- Submitted an assignment at least one day early</li>
+            </ul>
+            
+            <% if (inGuild())
+            {
+                %><p><%- include("../../subViews/longBotCommandButton.html", 
+                    { 
+                        text: "Get Bot to Post Achievements Above",
+                        url: "postAwards",
+                        data: '{ awards: $("#awards").html() }'
+                    }) %> -- If you choose this option, you can delete ones you don't want, but you cannot edit them. This requires your achievements channel to be set up.</p><%
+            }
+            %>
+
+            <h3>Awarding Achievements</h3>
+            <p>On the <%-guideTabLink("Achievements Tab", "awards")%> you will see a table with students for rows, and achievements for columns. Select the intersection of a student/achievement to award that achievement. </p>
+            <p class="centered">
+                <img src="/static/guide/awards_table.png" />
+            </p>
+            <p>A popup will appear when the student is given the achievement. This defaults to your <strong>#off-topic</strong> channel, but you can choose any channel, or <strong>No Popup</strong>.</p>
+            <p>You can also award achievements using the <code>/award</code> command.</p>
+
+            <%- include("../commandInfo.html", {
+                command: "award",
+            }) %>
+
+            <p class="hint">Note that you (the server owner) cannot have achievement icons in your name, as the bot isn't allowed to do that. The same applies to anyone with <a href="https://support.discord.com/hc/en-us/articles/214836687-Role-Management-101">a higher-level role</a>.</p>
+        
+        
+            <hr />
+            <h3>Set the Bot to a Higher Role Priority</h3>
+            <p>To ensure the bot has full access to give out awards (and for other features), you should set the bot's role priority to the highest possible.</p>
+            <p>Go to <strong>Server Settings</strong> then <strong>Roles</strong>. Here you can re-order the bot's role to be as high as you like.</p>
+            <p class="centered">
+                <img src="/static/guide/role_reorder.png" />
+            </p>
+
+        </div>
+    
+<%- include('../guideFooter.html') %>

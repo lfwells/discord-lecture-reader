@@ -1,0 +1,131 @@
+<%- include('header.html', { title: "Award Nominations" }) %>
+<style>
+.pageResult {
+  width:2px;
+  min-width: 4px;
+  border: 0.5px solid #ffffff42;
+}
+.complete { background-color: green; }
+.not_complete { background-color: black; }
+
+.awardName {
+  writing-mode: vertical-rl;
+  text-align: left;
+  min-width: 25px; /* for firefox */
+  transform: rotate(180deg);
+}
+.studentName {
+  width:fit-content;
+  text-align: left;
+}
+.studentRow {
+  height:25px;
+}
+td, th { white-space: nowrap; }
+table th,table tr.header {
+    position: -webkit-sticky; 
+    position: sticky;
+    top: 0;
+    left:0;
+    z-index: 10;
+    background-color: #2c2f33; 
+}
+
+tr:hover, tr:hover button, tr:hover th {
+    background-color: indianred !important;
+}
+</style>
+<script>
+function award(studentDiscordID, emoji, button)
+{
+    $.ajax({
+        url:"giveAward",
+        data:{
+            studentDiscordID:studentDiscordID,
+            emoji:emoji,
+            popupChannelID:$('select#popupChannelID').val(),
+        },
+        dataType: "json",
+        success:(json) =>
+        {
+            if (json.error)
+            {
+                alert(json.error);
+            }
+            else
+            {
+                var $button = $(button);
+                $button.parent("td").addClass("complete").removeClass("not_complete").text("Awarded!");
+                $button.remove();
+            }
+        }
+    })
+    
+}
+</script>
+
+
+<div>
+    <%- include("subViews/channelSelect.html", { 
+        label: "Post popup in channel:",
+        selectDefaultText:"-- No Popup --",
+        id: "popupChannelID",
+        value: (typeof locals.offTopicChannelID != 'undefined' && locals.offTopicChannelID) ? locals.offTopicChannelID : "__DISCORD_BOT_NONE__"
+    }) %>
+</div>
+<style>
+    .desc { font-size: smaller; margin-left:4ex; font-weight:normal !important; }
+    .nom_table { margin-left:4ex; font-weight:normal !important; }
+    .nom_table td { padding:1em !important; }
+    .nom_table th, .nom_table td { min-width:200px; text-align: center;}
+</style>
+
+<%
+locals.awards = locals.awards.filter(award => award.nominations != null && Object.entries(award.nominations).length > 0)
+locals.awards.forEach(award => award.nominations = Object.fromEntries(Object.entries(award.nominations)
+    .filter(nom => Object.keys(award.earned ?? {}).findIndex(earner => earner == nom[0]) == -1)
+    .filter(nom => locals.classList.find(s => s.discordID == nom[0]) != undefined))
+);
+
+
+locals.awards
+    .filter(award => award.nominations != null && Object.entries(award.nominations).length > 0)
+    .forEach(function(award)
+    { 
+        %>
+        <h3><%=award.emoji%> <%=award.title%><br/><span class="desc"><%=award.description%></span></h3>
+
+        <table class="nom_table">
+            <thead>
+                <tr>
+                    <th>Nominee</th>
+                    <th>Nominated By</th>
+                    <th>Award</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+            Object.entries(award.nominations).forEach(function(nomination)
+            {
+                %><tr>
+                    <th><%=locals.classList.find(s => s.member.id == nomination[0]).discordName %></th>
+                    <td><%-nomination[1].map(function(info){
+                        if (info.type == "Message")
+                        {
+                            return '<a href="'+info.messageUrl+'">Message Link</a>';
+                        }
+                        else
+                        {
+                            return locals.classList.find(s => s.member.id == info.nominatedBy)?.discordName ?? "Unknown";
+                        }
+                    }).join("<br />")%></td>
+                    <td><button onclick="award('<%=nomination[0]%>', '<%=award.emoji%>', this)">Give Award</button></td>
+                </tr><%
+            });
+            %>
+            </tbody>
+        </table><%
+    });
+%>
+
+<%- include('footer.html') %>

@@ -1,0 +1,50 @@
+<%- include('header.html', { title:"Stats" }) %>
+<style>
+th, td {
+    text-transform: capitalize;
+    text-align: left;
+    border-bottom: 1px solid white;
+}
+th, td {
+    padding:0.5em;
+}
+.col {
+    vertical-align: top;
+}
+</style>
+
+
+
+<% 
+
+function hasFeature(feature)
+{
+    return locals["feature_"+feature];
+}
+
+if (hasFeature("analytics") && hasFeature("experimental") )
+{
+    %>
+    <div><a class="btn" href="/guild/<%= guild.id %>/sheets/">Google Sheet Export</a></div>
+    <%
+}
+%>
+
+<%- locals.classlistFilters() %>
+
+<p><%=locals.statsData.total%> Total Posts</p>
+
+<table>
+    <tr>
+        <td class="col">
+            <h3>Channel Post Counts</h3>
+            <%- include("subViews/statsTableCount.html", {data:locals.statsData.channels, sum:true}) %>
+        </td>
+        <td class="col">
+            <h3>Member Post Counts</h3>
+            <%- include("subViews/statsTableCount.html", {data:locals.statsData.members, sum:true}) %>
+        </td>
+    </tr>
+</table>
+
+<%- include('footer.html') %>

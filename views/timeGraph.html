@@ -1,0 +1,24 @@
+<script>$("main p").html("");</script>
+
+<style>
+main { width: 100% !important; max-width: 100% !important; }
+</style>
+
+<form method="post">
+    <div><input type="submit" value="Generate More Graphs" /></div>
+</form>
+
+<%- locals.classlistFilters(true, "post", graphs.map(graph => '<input type="hidden" name="'+graph.title+'" value="on" />').join("<br/>")) %>
+
+<% for (var graph of graphs)
+{
+    console.log(graph.title);
+    %>
+    <h3><%=graph.title%> <%- include("/home/ubuntu/discord/views/subViews/download_csv.html", { data:graph.data, filename:graph.title }) %></h3>
+    <%- include("/home/ubuntu/discord/views/subViews/barplot.html", {data:graph.data}) %>
+    <%
+}
+%>
+
+
+<%- include('/home/ubuntu/discord/views/footer.html') %>

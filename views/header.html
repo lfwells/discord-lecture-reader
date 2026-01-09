@@ -1,0 +1,294 @@
+<html>
+    <head>
+        <% if ( typeof title != 'undefined' )
+        {
+            if (locals.guild && locals.discordUser)
+            {
+                %><title><%=title%> - <%= guild.name %> - UTAS Discord Bot</title><%
+            }
+            else
+            {
+                %><title><%=title%> - UTAS Discord Bot</title><%
+            }
+        }
+        else
+        {
+            %><title>UTAS Discord Bot</title><%
+        }
+        %>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.5/build/pure-min.css" integrity="sha384-LTIDeidl25h2dPxrB2Ekgc9c7sEC3CWGM6HeFmuDNUjX76Ert4Z4IY714dhZHPLd" crossorigin="anonymous /">
+        <link rel="stylesheet" href="/static/style.css">
+        <style type="text/css">
+            body{
+                padding:1em
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+        <!-- Font Awesome icons (Bootstrap, Foundation, and jQueryUI also supported) -->
+        <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+
+        <script src="/static/dist/jsoneditor.js"></script>
+        <script src="/static/dist/jquery.toc.min.js"></script>
+    
+        <script>
+        // Set the default CSS theme and icon library globally
+        JSONEditor.defaults.theme = 'foundation5';
+        JSONEditor.defaults.iconlib = 'fontawesome4';
+        </script>
+        
+    </head>
+    <body>
+        <% 
+        if ( (typeof showTitle == 'undefined' || showTitle)) 
+        { 
+            %>
+            <header>
+            <% 
+            if (locals.guild && locals.discordUser && locals.guild.isGuildAdmin)
+            {
+                %>
+                <h1>
+                    <img src="<%=guild.iconURL()%>" />
+                    <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
+                </h1>
+                <% 
+                   
+                if (locals.query && locals.query.message) 
+                { 
+                    %>
+                    <p><strong><%= locals.query.message %></strong></p>
+                    <% 
+                } 
+                
+                function currentTab(checkFor)
+                {
+                    var path = locals.path.replace("/guild/"+guild.id+"/",  "")
+                    if (typeof locals.profile != "undefined")
+                        path = path.replace("/profile/"+profile.id+"/",  "");
+
+                    var isCurrent = false;
+                    if (path.length == 0 && checkFor == "")
+                    {
+                        isCurrent = true;
+                    } 
+                    else if (checkFor != "" && (path.endsWith(checkFor) || path.endsWith(checkFor+"/")))
+                    {
+                        isCurrent = true;
+                    }
+                    return isCurrent ? ' class=current ' : "";
+                }
+
+                function hasFeature(feature)
+                {
+                    return locals["feature_"+feature];
+                }
+
+                %>
+                
+                <nav>
+                            
+                    <% if (locals.discordUser)
+                    {
+                        %>
+                        <div class="discordUser">
+                            <% if (locals.discordUser.avatar) { %>
+                                <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                            <% }%>
+                            <div>
+                                <a href="/profile/<%=locals.discordUser.id%>"><%=locals.discordUser.username%></a><br />
+                                <a href="/logout" class="logout">Logout</a>
+                            </div>
+                        </div>
+                        <%
+                    }
+                    else if ((locals.path ?? "").indexOf("/guide") >= 0)
+                    {
+                        %>
+                        <div class="discordUser loginButton" style="top:4em">
+                            <a href="/login" class="login">Login</a>
+                        </div>
+                        <%
+                    } %>
+            
+                    <ul>
+                        <li><a <%=currentTab("")%> href="/guild/<%= guild.id %>/">Configure Server</a></li>
+                        <li><a <%=currentTab("classList")%> href="/guild/<%= guild.id %>/classList/">Class List</a></li>
+                        <li><a <%=currentTab("features")%> href="/guild/<%= guild.id %>/features/">Features</a></li>
+
+                        <% if (hasFeature("attendance"))
+                        {
+                            %>
+                            <li><a <%=currentTab("attendance")%> href="/guild/<%= guild.id %>/attendance/">Attendance</a></li>
+                            <%
+                        }
+                        %>
+
+                        <% if (hasFeature("sessions"))
+                        {
+                            %>
+                            <li><a <%=currentTab("sessions")%> href="/guild/<%= guild.id %>/sessions/">Sessions</a></li>
+                            <%
+                        }
+                        %>
+
+                        <% if (hasFeature("analytics"))
+                        {
+                            %>
+                            <li><a <%=currentTab("analytics")%> href="/guild/<%= guild.id %>/analytics/">Stats</a></li>
+                            <li><a <%=currentTab("timeGraph")%> href="/guild/<%= guild.id %>/analytics/timeGraph">Graphs</a></li>
+                            <%
+                        }
+                        %>
+                        
+                        <% if (hasFeature("achievements") && locals.awardChannelID)
+                        {
+                            %><li><a <%=currentTab("awards")%> href="/guild/<%= guild.id %>/awards/">Awards</a></li><%
+                        }
+                        %>
+                    
+                        
+                        <% if (hasFeature("invites"))
+                        {
+                            %>
+                            <li><a <%=currentTab("invites")%> href="/guild/<%= guild.id %>/invites/">Invites</a></li>
+                            <%
+                        }
+                        %>
+
+                        <li><a <%=currentTab("pollSchedule")%> href="/guild/<%= guild.id %>/pollSchedule/">Scheduled Polls</a></li>
+                        <% if (hasFeature("obs") && locals.lectureChannelID) { %>
+                            <!--<li><a href="/guild/<%= guild.id %>/clearpoll/">Clear Current Poll</a></li>-->
+                            <li><a <%=currentTab("text")%> href="/guild/<%= guild.id %>/text/input/">Lecture Popups</a></li>
+                            <li><a <%=currentTab("obs")%> href="/guild/<%= guild.id %>/obs/">OBS Links</a></li>
+                        <% } %>
+                        
+                        <% if (hasFeature("experimental"))
+                        {
+                            %>
+                            <li><a <%=currentTab("pptx")%> href="/guild/<%= guild.id %>/pptx">PPTX Reader</a></li>
+                            <li><a <%=currentTab("clone_channel")%> href="/guild/<%= guild.id %>/clone_channel">Clone Channels</a></li>
+                            <%
+                        }
+                        %>
+                        <% if (hasFeature("mylo") )
+                        {
+                            %>
+                            <li><a <%=currentTab("mylo")%> href="/guild/<%= guild.id %>/mylo/content/links">MyLO Content</a></li>
+                            <%
+                        }
+                        %>
+                        <li><a <%=currentTab("help")%> href="/guild/<%= guild.id %>/guide">User Guide</a></li>
+                        <% if (locals.discordUser && ((locals.isUTASBotAdmin && locals.isUTASBotAdmin()) || locals.hasPermission("restart")))
+                        {
+                            %>
+                            <li><a href="/restart">Restart Server</a></li>
+                            <%
+                        }
+                        %>
+                    </ul>
+                </nav>
+                <%
+            
+            } 
+            else
+            {
+                function currentTab(checkFor)
+                {
+                    var path = locals.path ?? "";
+                    var isCurrent = false;
+                    if (path.length == 0 && checkFor == "")
+                    {
+                        isCurrent = true;
+                    } 
+                    else if (checkFor != "" && (path.endsWith(checkFor) || path.endsWith(checkFor+"/")))
+                    {
+                        isCurrent = true;
+                    }
+                    return isCurrent ? ' class=current ' : "";
+                }
+                
+                if (locals.guild && locals.discordUser && !locals.guild.isGuildAdmin)
+                {
+                    %>
+                    <h1>
+                        <img src="<%=guild.iconURL()%>" />
+                        <div><a href="/guild/<%= guild.id %>/"><%= guild.name %></a><br /><a href="/" style="font-size:small">Change Server</a></div>
+                    </h1>
+                    <% 
+                }
+                else
+                {
+                    %>
+                    <h1><a href="/">UTAS Discord Bot</a></h1>
+                    <%
+                }
+                %>
+                
+                <nav>
+
+                    <% if (locals.discordUser)
+                    {
+                        %>
+                        <div class="discordUser">
+                            <% if (locals.discordUser.avatar) { %>
+                                <img src="https://cdn.discordapp.com/avatars/<%=locals.discordUser.id%>/<%=locals.discordUser.avatar%>.png" />
+                            <% }%>
+                            <div>
+                                <a href="/profile/<%=locals.discordUser.id%>"><%=locals.discordUser.username%></a><br />
+                                <a href="/logout" class="logout">Logout</a>
+                            </div>
+                        </div>
+                        <%
+                    }
+                    else if ((locals.path ?? "").indexOf("/guide") >= 0)
+                    {
+                        %>
+                        <div class="discordUser loginButton" style="top:4em">
+                            <a href="/login" class="login">Login</a>
+                        </div>
+                        <%
+                    } %>
+
+                    <ul>
+                        <li><a <%=currentTab("")%> href="/"><%=locals.discordUser ? "Unit List" : "Home" %></a></li>
+                        <% if (locals.discordUser)
+                        {
+                            %><li><a <%=currentTab("profile")%> href="/profile/<%=locals.discordUser.id%>">My Profile</a></li><%
+                        }
+                        %>
+                        <li><a <%=currentTab("guide")%> href="/guide">User Guide</a></li>
+                        <% if (locals.discordUser && locals.isUTASBotAdmin && locals.isUTASBotAdmin())
+                        {
+                            %><li><a href="/restart">Restart Server</a></li><%
+                            
+                        }
+                        %>
+                    </ul>
+                </nav>
+                <%
+            }
+            %>
+
+            </header>
+            <%
+        }
+        
+if ( (typeof showTitle == 'undefined' || showTitle)) 
+{ 
+    %>
+    <main>
+        <% if ( typeof title != 'undefined' )
+        {
+            %><h2 style="float:<%=( typeof floatTitle != 'undefined') ? floatTitle : 'none'%>">
+                <% if ( typeof icon != 'undefined')
+                {   
+                    %><img src="<%=icon%>" /><%
+                }%>
+                <%=title%>
+            </h2><%
+        }
+}
+%>

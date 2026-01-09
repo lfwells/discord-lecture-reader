@@ -1,0 +1,211 @@
+<%- include('header.html', { title: "Features" }) %>
+<% 
+function hasFeature(feature)
+{
+    return locals["feature_"+feature];
+}
+%>
+
+<p>You will need to refresh this page once you have enabled a feature, for the relevant tabs to appear along the top.</p>
+
+<dl>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Achievements",
+        feature: "achievements",
+        onChanged: '$(".achievementsFeature").toggle(value)',
+        featureHasTab: true
+    }) %>
+</dt>
+
+    <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+     <%- include("subViews/channelSelect.html", 
+        { 
+            label: "Achievements Channel:",
+            selectDefaultText:"-- Select Channel--",
+            id: "setAwardChannelID",
+            value: locals.awardChannelID,
+            onChangedURL: "setGuildProperty"
+        }) %>
+    </dd>
+    <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+        <%- include("subViews/channelSelect.html", 
+           { 
+               label: "Achievement Pop Channel:",
+               selectDefaultText:"-- Select Channel--",
+               id: "setAwardPopChannelID",
+               value: locals.awardPopChannelID,
+               onChangedURL: "setGuildProperty"
+           }) %>
+       </dd>
+    <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+        <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Use New Achievement System",
+                id: "setUseNewAwardsSystem",
+                value: locals.useNewAwardsSystem ? locals.useNewAwardsSystem : "true",
+                help:"true or false (too hard to make a checkbox right now)",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
+        <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Default Number of Required Nominations",
+                id: "setAwardsDefaultRequiredNominations",
+                value: locals.awardsDefaultRequiredNominations ? locals.awardsDefaultRequiredNominations : "1",
+                help:"How many nominations are required to either award/notify admin (used when not defined for an award)",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
+        <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Auto-award When Nominations Obtained by Default?",
+                id: "setAwardsDefaultAutoPop",
+                value: locals.awardsDefaultAutoPop ? locals.awardsDefaultAutoPop : "true",
+                help:"Used when not defined for an award",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
+        <dd class="achievementsFeature" style="display:<%=hasFeature("achievements") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "Allow Nominations for Awards by Default?",
+                id: "setAwardsDefaultCanNominate",
+                value: locals.awardsDefaultCanNominate ? locals.awardsDefaultCanNominate : "true",
+                help:"Used when not defined for an award",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>
+
+
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Attendance Tracking",
+        feature: "attendance",
+        featureHasTab: true
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Scheduled Sessions",
+        feature: "sessions",
+        featureHasTab: true
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Post Tracking",
+        feature: "analytics"
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Open Broadcaster Studio Integration",
+        feature: "obs",
+        featureHasTab: true
+    }) %></dt>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Custom Invites",
+        feature: "invites",
+        featureHasTab: true
+    }) %></dt>
+</dl>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Bot DMs Students On Joining Server",
+        feature: "dm_intro",
+    }) %></dt>
+
+    <dd>
+<dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "TODOs",
+        feature: "todos",
+        onChanged: '$("#todoFeature").toggle(value)'
+    }) %>
+</dt>
+
+<div id="todoFeature" >
+    <dd style="display:<%=hasFeature("todos") ? "block" : "none"%>""><%- include("subViews/channelSelect.html", 
+        { 
+            label: "TODOs Channel:",
+            selectDefaultText:"-- Select Channel--", 
+            id: "setTodoChannelID",
+            value: locals.todoChannelID,
+            onChangedURL: "setGuildProperty"
+        }) %>
+    </dd>
+
+    <!--<dd>
+        <%- include("subViews/guildSettingText.html", 
+            { 
+                label: "TODOs Emoji (For tagging on mobile):",
+                id: "setTodoEmoji",
+                value: locals.todoEmoji ? locals.todoEmoji : "",
+                help:"You can paste from <a href='https://emojipedia.org/'>https://emojipedia.org/</a>.",
+                onChangedURL: "setGuildProperty"
+            }) %>
+        </dd>-->
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "Experimental Features",
+            feature: "experimental"
+        }) %></dt>
+    </dl>
+
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "MyLO Integration",
+            feature: "mylo",
+            onChanged: '$("#myloFeature").toggle(value)',
+            featureHasTab: true
+        }) %>
+    </dt>
+    
+        <dd id="myloFeature" style="display:<%=hasFeature("mylo") ? "block" : "none"%>">
+            <%- include("subViews/guildSettingText.html", 
+                { 
+                    label: "MyLO Unit Organisation ID:",
+                    id: "setMyLOOrgID",
+                    value: locals.myLOOrgID ? locals.myLOOrgID : "",
+                    help:"You can find this in the address bar for your MyLO unit",
+                    onChangedURL: "setGuildProperty"
+                }) %>
+        </dd>
+</div>
+
+    <h3>Status Channels</h3>
+    <p>These appear at the top of the channel list, showing status information. They update slowly, and may take up to 10 minutes before they appear for the first time.</p>
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Online Member Count",
+        feature: "showOnlineMemberCount"
+    }) %></dt>
+        
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "Show Enrolled Member Count",
+            feature: "showMemberCount"
+        }) %></dt>
+        
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "Show Total Post Count",
+            feature: "showPostCount"
+        }) %></dt>
+                
+    <dt><%- include("subViews/featureSelect.html", 
+        { 
+            label: "Show Next Lecture Session",
+            feature: "showNextSession"
+        }) %></dt>
+
+    <dt><%- include("subViews/featureSelect.html", 
+    { 
+        label: "Show Current Week",
+        feature: "showCurrentWeek"
+    }) %></dt>
+        
+
+
+<%- include('footer.html') %>

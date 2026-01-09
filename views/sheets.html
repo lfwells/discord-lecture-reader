@@ -1,0 +1,77 @@
+<%- include('header.html', { title: "Google Sheets Export" }) %>
+<style>
+th, td {
+    text-transform: capitalize;
+    text-align: left;
+    border-bottom: 1px solid white;
+}
+th, td {
+    padding:0.5em;
+}
+.col {
+    vertical-align: top;
+}
+</style>
+
+<!--TODO: bring this back
+<p>
+    <a target="_blank" class="btn" href="https://docs.google.com/spreadsheets/d/<%=locals.googleSheetID%>/edit#gid=0">Open Google Sheet</a> 
+    <button id="addSheetAccess" class="btn outline">Get Sheet Access</button>
+</p>-->
+<p><a href="#" class="btn outline" id="updateSheetContents">Update Sheet Contents</a></p>
+<pre id="log">
+
+</pre>
+<script>
+    $("#updateSheetContents").on("click", function()
+    {
+        $("#log").html("Loading...");
+        
+        var last_response_len = false;
+        $.ajax({
+            url:"/guild/<%=guild.id%>/sheets/update",
+            xhrFields: {
+                onprogress: function(e)
+                {
+                    var this_response, response = e.currentTarget.response;
+                    if(last_response_len === false)
+                    {
+                        this_response = response;
+                        last_response_len = response.length;
+                    }
+                    else
+                    {
+                        this_response = response.substring(last_response_len);
+                        last_response_len = response.length;
+                    }
+                    console.log(this_response);
+                    $("#log").html(response);
+                }
+            },
+            success: function(data){
+                $("#log").html(data);
+            }
+        })
+    });
+
+    $("#addSheetAccess").on("click", function() 
+    {
+        var email = prompt("Please enter your google account email address (this is not stored)");
+        if (email)
+        {
+            $("#log").html("Loading...");
+            
+            var last_response_len = false;
+            $.ajax({
+                url:"/guild/<%=guild.id%>/sheets/addSheetAccess",
+                data: { email },
+                dataType: "json",
+                success: function(data){
+                    $("#log").html(data.success);
+                }
+            });
+        }
+
+    });
+</script>
+<%- include('footer.html') %>

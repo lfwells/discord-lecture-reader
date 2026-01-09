@@ -1,0 +1,64 @@
+<% if (data.length == 0)
+{
+    %>No data<%
+}
+else
+{
+    %>
+    <select 
+        id="<%=typeof id !== 'undefined' ? id : "" %>"
+        onchange="onChange(this)">
+        <% if (typeof defaultText !== 'undefined') 
+        { 
+            var value = -1;
+            if (typeof defaultValue !== 'undefined')
+            {
+                value = defaultValue;
+            }
+            var isSelected = false;
+            if (typeof selected == 'undefined')
+            {
+                isSelected = true;
+            }
+            %>
+            <option value="<%=value%>" <% if (isSelected) { %>selected<% } %>><%=defaultText%></option>
+        <% } %>
+        <%
+        for (var i in data)
+        {
+            var item = data[i];
+            
+            var text = item.text;
+            
+            var value = item.text;
+            if (typeof item.value !== 'undefined')
+            {
+                value = item.value;
+            }
+
+            var isSelected = false;
+            if (typeof selected !== 'undefined')
+            {
+                isSelected = value == selected;
+            }
+
+            %><option value="<%=value%>" <% if (isSelected) { %>selected<% } %>><%=text%></option><%
+
+        }
+        %>
+    </select>
+    <% if (typeof onChange !== 'undefined')
+    {
+        %>
+        <script>
+        function onChange(sel) {
+            var id = sel.id;
+            var value = sel.value;
+            <%=onChange%>
+        }
+        </script>
+        <%
+    }
+
+}
+%>

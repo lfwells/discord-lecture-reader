@@ -1,0 +1,15 @@
+<%
+function inGuild()
+{
+    return locals.guild;
+}
+
+if (inGuild())
+{
+    %><a href="/guild/<%=locals.guild.id%><%=link%>" target="_blank" class="guideTabLink" ><%=text%></a><%
+}
+else
+{
+    %><strong><%=text%></strong><%
+}
+%>

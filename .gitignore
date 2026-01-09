@@ -1,0 +1,22 @@
+token.txt
+*firebase-adminsdk*
+node_modules
+users.js
+awards/namesBackup kit109.json
+awards/namesBackup kit305.json
+.vscode/sftp.json
+.vscode/sftp.json
+~*.docx
+~*.tmp
+.DS_Store
+.vscode/sftp.json
+
+_oath*.js
+google_cloud_key.js
+carers-care-service-account.json
+
+sessions/*
+.vscode/sftp.json
+attendance/studentIDMap.js
+logs/output.log
+*.log

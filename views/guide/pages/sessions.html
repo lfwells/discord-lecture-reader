@@ -1,0 +1,35 @@
+<%- include('../guideHeader.html') %>
+<% 
+//have to include these in each file sadly
+function inGuild()
+{
+    return !(typeof(locals.guild) === 'undefined');
+}
+function getGuilds()
+{
+    if (typeof(guilds) === 'undefined') return [];
+    return guilds.map(g => g.id);
+}
+function hasGuilds()
+{    
+    return getGuilds().length > 0;
+}
+function guideTabLink(text, link)
+{
+    return include("../guideTabLink.html", {
+        text, link
+    });
+}
+%>
+       
+      
+     
+        <a>
+            <h2>Feature: Scheduled Sessions</h2>
+            <p class="description">TODO</p>
+        </a>
+        <div>
+TODO
+        </div>
+    
+<%- include('../guideFooter.html') %>

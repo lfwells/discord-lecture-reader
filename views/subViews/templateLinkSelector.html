@@ -1,0 +1,39 @@
+<label><input type="checkbox" id="templateLectures" class="templateSelector"  checked /> Include Lecture Channels</label><br /><br />
+<label><input type="checkbox" id="templateTutorials" class="templateSelector" checked /> Include Tutorial Channels</label>
+
+<script type="text/javascript">
+var fullTemplate = "https://discord.com/template/8BGa8AJbaCHR";
+var lecturesTemplate = "https://discord.new/yXdcwaFYrQAH"; //no tutorials
+var tutorialsTemplate = "https://discord.new/vW7rMGCvaM2n"; //no lectures
+var basicTemplate = "https://discord.com/template/RMmbM8Trwscc"; //no tutorials, no lectures
+$(document).ready(() => 
+{
+    updateTemplateLink();
+    $(".templateSelector").on("change", updateTemplateLink);
+});
+function updateTemplateLink()
+{
+    var templateLectures = $("#templateLectures").is(":checked");
+    var templateTutorials = $("#templateTutorials").is(":checked");
+
+    var link = "";
+    if (templateLectures && templateTutorials)
+    {
+        link = fullTemplate;
+    }
+    else if (templateLectures && !templateTutorials)
+    {
+        link = lecturesTemplate;
+    }
+    else if (!templateLectures && templateTutorials)
+    {
+        link = tutorialsTemplate;
+    }
+    else if (!templateLectures && !templateTutorials)
+    {
+        link = basicTemplate;
+    }
+    
+    $("#templateLink").attr("href", link);
+}
+</script>

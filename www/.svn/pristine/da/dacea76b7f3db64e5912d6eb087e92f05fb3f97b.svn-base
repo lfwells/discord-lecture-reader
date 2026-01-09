@@ -1,0 +1,93 @@
+//init
+var container;
+var progressContainer;
+async function init()
+{
+    window.console.log("init");
+    progressContainer = $("#progress");
+    progressContainer.find(".row").hide();
+    
+    //createa another div for our rendering
+    container = $("<div id='gamification' class='row'></div>");
+    $(progressContainer).append(container);
+
+    await listenToUpdates();
+    var data = await parseData(progressContainer);
+    await onRender(container, data);
+}
+init();
+
+//ian begin here:
+async function onRender(container, data)
+{
+    $(container).html("ian stuff here"+JSON.stringify(data));
+}
+async function onReRender(container, data)
+{
+    $(container).html("ian stuff here (Renrendered)"+JSON.stringify(data));
+}
+
+
+//lindsay's private don't touch ;)
+async function parseData(progressContainer)
+{
+    var data = {};
+    var user_progress_container = $(progressContainer).find("#user_progress_container");
+    var progress_quiz_container = $(progressContainer).find("#progress_quiz_container");
+
+    var chapters = [];
+    $(user_progress_container).find("li").each(function(e)
+    {
+        var name = $(this).find(".chapter-name-text").text();
+        var progress = $(this).find(".page-num-text").text().split("/");
+        var isActive = $(this).hasClass("active");
+        var isCurrent = $(this).find(".badge-user:visible").length > 0;
+        var onClick = $(this).attr("onclick");
+        chapters.push({name, progress,isActive,isCurrent,onClick});
+
+    });
+    data.chapters = chapters;
+
+    var quizzes = [];
+    $(user_progress_container).find(".badge-quiz").each(function(e)
+    {
+        if ( $(this).data("original-title"))
+        {
+            var name = $(this).data("original-title").replace("Quiz: ","");
+            quizzes.push({name});
+        }
+    });
+    $(progress_quiz_container).find("tr").each(function(e)
+    {
+        if ($(this).find("h5").length == 0)
+        {
+            console.log("skip");
+            return;
+        }
+        var title = $(this).find("td:first h5").text();
+        var score = $(this).find(".label").text();
+        var retryClick = $(this).find("button").attr("onclick");
+        //use the title to update the quiz with teh matching name
+        var quiz = quizzes.find(q=>q.name == title);
+        if (quiz)
+        {
+            quiz.score = score;
+            quiz.retryClick = retryClick;
+        }
+    });
+    data.quizzes = quizzes;
+
+    console.log({data});
+    return data;
+} 
+
+async function listenToUpdates()
+{
+    var temp = View.renderCourseNav;
+    View.renderCourseNav = async function(...args) 
+    {
+        temp(...args);
+        var data = await parseData(progressContainer);
+        await onReRender(container, data);
+    };
+}

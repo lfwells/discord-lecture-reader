@@ -1,0 +1,21 @@
+{
+  "name": "ai-archetype-identifier",
+  "version": "1.0.0",
+  "description": "An interactive app that helps users identify their AI utilization archetype based on their goals. The app uses Gemini to analyze user input and match it to predefined archetypes.",
+  "private": true,
+  "scripts": {
+    "start": "echo \"To run this project, serve the index.html file with a simple web server.\" && echo \"You can use a tool like 'live-server' or the VS Code Live Server extension.\"",
+    "build": "echo \"This project uses an importmap and a CDN for dependencies, so no build step is required to run it as-is.\"",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^1.5.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.3"
+  }
+}

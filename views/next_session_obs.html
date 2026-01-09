@@ -1,0 +1,15 @@
+<% if (typeof(locals.session) !== "undefined")
+{
+    var title = locals.session.description;
+
+    //some kit305 specific stuff here
+    if (title.indexOf("\n") > 0)
+        title = title.split("\n")[1];
+        
+    %><h1><%=title%></h1><%
+}
+else
+{
+    %><h1>No next session</h1><%
+}
+%>

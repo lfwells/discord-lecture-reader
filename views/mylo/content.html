@@ -1,0 +1,43 @@
+<%- include('../header.html') %>
+
+<h2>MyLO Content</h2>
+<%
+function printModule(module)
+{
+    //TODO: OrgID
+    let OrgID = 505363;
+    
+    let url = "";
+    if (module.Type == 0)
+        url = `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/Home?itemIdentifier=D2L.LE.Content.ContentObject.ModuleCO-${module.Id}`;
+    else if (module.Type == 1)
+        url = `https://mylo.utas.edu.au/d2l/le/content/${OrgID}/viewContent/${module.Id}/View`;
+    
+    %>
+    <li>
+        <a href="<%=url%>"><%=module.Title%></a>
+        <% if (module.Structure)
+        {
+            %><ul><%
+            module.Structure.forEach(printModule);
+            %></ul><%
+        }
+        %>
+    </li>
+    <% 
+}
+if (locals.data.Structure.length == 0)
+{
+    %><p>No content cached. Contact Lindsay for access to Chrome extension to scan MyLO content.</p><%
+}
+else
+{
+    %><ul><%
+    locals.data.Structure.forEach(printModule);
+    %>
+    </ul>
+    <%
+}
+%>
+
+<%- include('../footer.html') %>

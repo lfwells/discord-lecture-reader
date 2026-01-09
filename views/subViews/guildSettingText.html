@@ -1,0 +1,92 @@
+<% 
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+var id = locals.id ?? uuid(); %>
+
+<label
+    id="<%=id%>"
+    class="<%=typeof className !== 'undefined' ? className : "" %>">
+    <span><%=typeof label !== 'undefined' ? label : "" %></span>
+    <input 
+        id="<%= id %>" 
+        name="<%=typeof name !== 'undefined' ? name : id %>"
+        class="<%=typeof className !== 'undefined' ? className : "" %>"
+        value="<%=typeof value !== 'undefined' ? value : "" %>"
+        />
+        <% if (typeof onChangedURL !== 'undefined')
+        {
+            %>
+            <button>Save</button>
+            <%
+        }
+        %>
+
+        <% if (typeof help !== 'undefined') { %><br/><span class="help"><%-help%></span><% } %>
+
+</label>
+<script>
+    (function() //closure to allow local vars
+    {
+        var label = $("#<%=id%>");
+        var input = label.find("input");
+        var onChanged = '<%-typeof onChanged !== 'undefined' ? onChanged : "" %>';
+        function changed (e) 
+        {
+            <% if (typeof onChangedURL !== 'undefined')
+            {
+                %>
+                var value = $(input).val();
+                var previousHtml = $(label).html();
+
+                $(label).text("Loading...");
+
+                $.ajax({
+                    url: "/guild/<%=locals.guild.id%>/<%=onChangedURL%>",
+                    method:"post",
+                    data: JSON.stringify({
+                        id: "<%=id%>",
+                        value
+                    }),
+                    contentType: 'application/json',
+                    success: (data) => {
+                        $(label).html(previousHtml);
+                        $(label).append('<span class="saved">Saved.</span>');
+                        $(label).find("input").val(value);
+                        $(label).find("button").on("click", changed);
+
+                        if (onChanged != "") eval(onChanged);
+                    }
+                });
+                <%
+            }
+            else
+            {
+                %>
+                if (onChanged != "") eval(onChanged);
+                <%
+            }
+            %>
+        }
+        label.find("button").on("click", changed);
+    })();
+</script>
+
+<% 
+/* 
+usage:
+
+<p>include("subViews/guildSettingText.html", 
+    { 
+        label: "Bot Name in Server:",
+        id: "botName",
+        value: locals.botName ? locals.botName : "UTAS Discord Bot",
+        help: "instructions"
+    })</p>
+
+*/ 
+%>

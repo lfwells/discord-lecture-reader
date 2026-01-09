@@ -1,0 +1,3 @@
+alert(window);
+alert($);
+$("#user_progress_container").hide();

@@ -1,0 +1,16 @@
+[
+    { 
+        "id": 0,
+        "name": "Monaco", 
+        "type": "street", 
+        "laps": 78,
+        "baseLapTime": 72.909 
+    },
+    { 
+        "id": 1,
+        "name": "Silverstone",
+        "type": "race",
+        "laps": 52,
+        "baseLapTime": 90.000
+    }
+]

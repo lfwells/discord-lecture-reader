@@ -1,0 +1,104 @@
+<%- include('header.html') %>
+Race <%= locals.params.id %>
+<input type="text" id="baseURI" value="https://utasbot.dev/kit214/timing-api" />
+<button onclick="getData()">Get Data</button>
+<div id="result">
+</div>
+
+<input type="text" id="newEntrant" value="https://utasbot.dev/kit214/teams-api/car/0" />
+<button onclick="createEntrant()">Add Entrant</button>
+<button onclick="qualify()">Qualify</button>
+<button onclick="lap()">Record Lap</button>
+<div id="resultStarting">
+</div>
+<div id="resultLap">
+</div>
+
+
+<script>
+    function getData() {
+        var raceID = <%= locals.params.id %>;
+        var baseURI = document.getElementById('baseURI').value;
+        var url = baseURI + '/race/' + raceID;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                data = data.result;
+
+                var result = document.getElementById('result');
+                result.innerHTML = data.track?.name;
+                var resultStarting = document.getElementById('resultStarting');
+                resultStarting.innerHTML = '';
+                var resultLap = document.getElementById('resultLap');
+                resultLap.innerHTML = '';
+
+                if (data.entrants)
+                    data.entrants.forEach(entrant => {
+                        var div = document.createElement('div');
+                        div.innerHTML = entrant;
+                        result.appendChild(div);
+                    });
+                
+                    if (data.startingPositions)
+                        data.startingPositions.forEach(entrant => {
+                            var div = document.createElement('div');
+                            div.innerHTML = entrant;
+                            resultStarting.appendChild(div);
+                        });
+                
+                    if (data.laps)
+                        data.laps.forEach(lap => {
+                            var div = document.createElement('div');
+                            div.innerHTML = JSON.stringify(lap);
+                            resultLap.appendChild(div);
+                        });
+            });
+    }
+
+    function createEntrant()
+    {
+        var entrant = document.getElementById('newEntrant').value;
+        var raceID = <%= locals.params.id %>;
+        var baseURI = document.getElementById('baseURI').value;
+        var url = baseURI + '/race/' + raceID + '/entrant';
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                entrant
+            })})
+            .then(getData);
+        
+    }
+
+    function qualify()
+    {
+        var raceID = <%= locals.params.id %>;
+        var baseURI = document.getElementById('baseURI').value;
+        var url = baseURI + '/race/' + raceID + '/qualify';
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(getData);
+        
+    }
+
+    function lap()
+    {
+        var raceID = <%= locals.params.id %>;
+        var baseURI = document.getElementById('baseURI').value;
+        var url = baseURI + '/race/' + raceID + '/lap';
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(getData);
+    }
+</script>

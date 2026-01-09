@@ -1,0 +1,124 @@
+<%- include('header.html', { title: "Attendance" }) %>
+<style>
+main { width: 100% !important; max-width: 100% !important; }
+
+.pageResult {
+  width:2px;
+  min-width: 4px;
+  border: 0.5px solid #ffffff42;
+}
+
+
+tr:hover td {
+  background-color: rgba(255,0,0,0.2) !important;
+}
+
+.complete { background-color: green; }
+.not_complete { background-color: black; }
+tr:hover .complete { background-color: rgba(0, 128, 0, 0.897) !important; }
+tr:hover .not_complete { background-color: rgba(255,0,0,0.2) !important; }
+
+.sectionName {
+  writing-mode: vertical-rl;
+  text-align: left;
+  min-width: 25px; /* for firefox */
+  transform: rotate(180deg);
+}
+.studentName {
+  width:fit-content;
+  text-align: left;
+}
+.studentRow {
+  height:25px;
+}
+td, th { white-space: nowrap; }
+table th {
+    position: -webkit-sticky; 
+    position: sticky;
+    top: 0;
+    left:0;
+    z-index: 10;
+    background-color: #2c2f33; 
+}
+
+th { 
+  padding:4px;
+}
+
+</style>
+
+<%- locals.classlistFilters() %>
+
+<!--<div><a href="../attendanceOld/">View old interface for this (perfect for if you dont have sessions defined)</a></div>-->
+<% 
+var students = locals.classList;
+var studentCount = students.length;
+var sessionsCount = 0;
+
+console.log(locals.weeks);
+%>
+<table border="1" cellpadding="0" cellspacing="0" class="sortable">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <% Object.values(locals.weeks).forEach(function(session)
+      { 
+        %><th class="week sectionName" title="<%= session.description %>">
+            Week <%= session.week %> <%= session.type %><br />
+            <%= session.startTime.format("ddd Do HH:mm") %>
+        </th><% 
+      }) %>
+      <th>% Attendance</th>
+    </tr>
+    <tr>
+      <% Object.values(locals.weeks).forEach(function(session)
+      { 
+      }) %>
+    </tr>
+  </thead>
+  <tbody>
+    <% 
+    var weekSummary = [];
+    Object.values(locals.weeks).forEach(function(session)
+    {
+      weekSummary.push(0);
+    });
+
+    students.forEach(function(student){ 
+      %>
+      <tr class="studentRow">
+        %><th class="studentName" sortValue="<%= student.discordName %>"><%= student.discordName %></th>  
+        <% 
+        var studentSessionCount = 0;
+        var sessionsCount = 0;
+        Object.values(locals.weeks).forEach(function(session, sessionIndex)
+          {
+            var sessionData = locals.checkAttendance(student, session);
+            if (sessionData.indexOf("not_complete") == -1)
+            {
+              weekSummary[sessionIndex]++;
+              studentSessionCount++; 
+            }
+            sessionsCount++;
+            %><%- sessionData %><%
+        }) %>
+        <td sortValue="<%=studentSessionCount%>">
+          <%=Math.round(((studentSessionCount / sessionsCount)*100)*10)/10 %>% (<%=studentSessionCount%>)
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Class %</th>
+      <% 
+      console.log(weekSummary);
+      weekSummary.forEach(function(sessionCount)
+      { 
+          %><td class="center pad"><%= Math.round(((sessionCount / studentCount)*100)*10)/10 %>%<br />(<%=sessionCount %>)</td><%
+      }) %>
+      <td>&nbsp;</td>
+    </tr>
+  </tfoot>
+</table>
+<%- include('footer.html') %>

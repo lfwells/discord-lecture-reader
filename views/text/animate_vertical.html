@@ -1,0 +1,25 @@
+<!--https://stackoverflow.com/questions/49545440/expressing-css3-keyframes-using-seconds-instead-of-percentages -->
+<style type="text/css">
+    body { background-color: rgba(0, 0, 0, 0) !important; margin: 0px auto; overflow: hidden; }
+    body {
+        animation-fill-mode:forwards;
+        animation-name: scalein, idle, scaleout;
+        animation-duration:<%=inout%>s, <%=duration%>s, <%=inout%>s;
+        animation-delay:0s,<%=inout%>s, <%=parseInt(duration)+parseInt(inout)%>s;
+        animation-timing-function: ease-out, linear, ease-in;
+        overflow:hidden;
+    }
+    
+    @keyframes scalein {
+        from { transform: translatey(-100%);}
+        to {
+        transform: translatey(0);
+        }
+    }
+    @keyframes idle {}
+    @keyframes scaleout {
+        to {
+        transform: translatey(100%);
+        }
+    }
+    </style>

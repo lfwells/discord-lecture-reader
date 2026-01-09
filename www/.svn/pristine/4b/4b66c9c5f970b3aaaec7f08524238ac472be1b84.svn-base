@@ -1,0 +1,63 @@
+//init
+async function init()
+{
+    window.console.log("init");
+    var progressContainer = $("#progress");
+    var data = await parseData(progressContainer);
+    await modifyUserProgress(progressContainer, data);
+}
+init();
+
+//ian begin here:
+async function modifyUserProgress(progressContainer, data)
+{
+
+}
+
+
+//lindsay's private don't touch ;)
+async function parseData(progressContainer)
+{
+    var data = {};
+    var user_progress_container = $(progressContainer).find("#user_progress_container");
+    var progress_quiz_container = $(progressContainer).find("#progress_quiz_container");
+
+    var chapters = [];
+    $(user_progress_container).find("li").each(function(e)
+    {
+        var name = $(this).find(".chapter-name-text").text();
+        var progress = $(this).find(".page-num-text").text().split("/");
+        var isActive = $(this).hasClass("active");
+        var isCurrent = $(this).find(".badge-user:visible").length > 0;
+        var onClick = $(this).attr("onclick");
+        chapters.push({name, progress,isActive,isCurrent,onClick});
+
+    });
+    data.chapters = chapters;
+
+    var quizzes = [];
+    $(user_progress_container).find(".badge-quiz").each(function(e)
+    {
+        var name = $(this).data("original-title").replace("Quiz: ","");
+        quizzes.push({name});
+    });
+    $(progress_quiz_container).find("tr").each(function(e)
+    {
+        if ($(this).find("h5").length == 0)
+        {
+            console.log("skip");
+            return;
+        }
+        var title = $(this).find("td:first h5").text();
+        var score = $(this).find(".label").text();
+        var retryClick = $(this).find("button").attr("onclick");
+        //use the title to update the quiz with teh matching name
+        var quiz = quizzes.find(q=>q.name == title);
+        quiz.score = score;
+        quiz.retryClick = retryClick;
+    });
+    data.quizzes = quizzes;
+
+    console.log({data});
+    return data;
+} 

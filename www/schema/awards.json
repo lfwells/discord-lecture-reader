@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "title": "Awards - Use JSON button to edit raw JSON (and import previous years raw JSON) ->",
+  
+  "required": ["awards"],
+  "properties": {
+      "awards": {
+        "type": "array",
+        "title": "Awards List",
+        "items":{
+          "type": "object",
+          "title": "Award",
+          
+          "required": ["emoji", "title", "description"],
+          "properties": {
+            "emoji": {
+              "type": "string",
+              "description": "Cannot be changed after first creation",
+              "title": "Award Emoji"
+            },
+            "title": {
+              "type": "string",
+              "title": "Title"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description"
+            },
+            "canNominate": {
+              "type": "boolean",
+              "title": "Can Nominate?",
+              "description": "Allow users to nominate themselves or others for this award.",
+              "default": true
+            },
+            "requiredNominations": {
+              "type": "number",
+              "title": "Required Nominations",
+              "description": "How many nominations must a user get before they either get the achievement, or admin are asked to review?",
+              "default": 1
+            },
+            "autoPop": {
+              "type": "boolean",
+              "title": "Auto-Pop on Nomination Count Reached?",
+              "description": "Automatically award the achievement if required nominations are reached?",
+              "default": true
+            },
+            "autoPopChannel": {
+              "title": "Auto-Award When User Posts In Channel",
+              "description": "Can be overridden for nomination instead of auto-award.",
+              "type": "string",
+              "enumSource": [
+                {
+                  "value": "",
+                  "title": "-- Select Channel --"
+                },
+                {
+                  "source": "textChannels",
+                  "value": "{{item.id}}",
+                  "title": "{{item.category}} - {{item.name}}"
+                }
+              ]
+            },
+            "onlyNominateWhenPostInChannel": {
+              "type": "boolean",
+              "title": "Only Nominate When User Posts In Channel",
+              "description": "Overrides default behaviour of auto-awarding when the user posts in the specified channel, to just creating a nomination.",
+              "default": false
+            },
+            "popInPostedChannel": {
+              "type": "boolean",
+              "title": "Pop in Channel User Posted In?",
+              "description": "If false, will pop in the the configured achievement spam channel, or off topic channel if not found.",
+              "default": false
+            }
+          }
+        }
+      
+      }
+    }
+
+}

@@ -1,0 +1,5 @@
+{
+  "name": "AI Archetype Identifier",
+  "description": "An interactive app that helps users identify their AI utilization archetype based on their goals. The app uses Gemini to analyze user input and match it to predefined archetypes.",
+  "requestFramePermissions": []
+}
