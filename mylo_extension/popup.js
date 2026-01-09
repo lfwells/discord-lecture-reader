@@ -111,11 +111,40 @@ async function runMyLOScript()
 
     async function getClassList()
     {
-        return await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/classlist/`);
+        var all = await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/classlist/`);
+        return all.map(student => {
+            return {
+                DisplayName: student.DisplayName,
+                OrgDefinedId: student.OrgDefinedId,
+                Username: student.Username
+            }; 
+        });
     }
     async function getContent()
     {
-        return (await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/toc`))[0];
+        var toc = (await api(`/d2l/api/le/1.40/${GetOrgIdLindsay()}/content/toc`))[0];
+        
+        function trim(item) {
+             var clean = {};
+             // Requested keys: ModuleId, TopicId, Title, Description, Url
+             if(item.ModuleId !== undefined) clean.ModuleId = item.ModuleId;
+             if(item.TopicId !== undefined) clean.TopicId = item.TopicId;
+             if(item.Title !== undefined) clean.Title = item.Title;
+             if(item.IsHidden !== undefined) clean.IsHidden = item.IsHidden;
+             // Description is often an object { Html, Text }, keeping as requested
+             if(item.Description !== undefined) {
+                clean.Description = {};
+                if (item.Description.Text) clean.Description.Text = item.Description.Text.substring(0, 200);
+                if (item.Description.Html) clean.Description.Html = item.Description.Html.substring(0, 200);
+             }
+             if(item.Url !== undefined) clean.Url = item.Url;
+             
+             if(item.Modules) clean.Modules = item.Modules.map(trim);
+             if(item.Topics) clean.Topics = item.Topics.map(trim);
+             
+             return clean;
+        }
+        return trim(toc);
     }
 
 
