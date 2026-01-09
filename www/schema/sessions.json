@@ -6,7 +6,7 @@
       "semester": {
         "title": "Semester",
         "type": "string",
-        "default": "sem1_2025",
+        "default": "sem1_2026",
         "enum": [
           "sem1_2021",
           "sem2_2021",
@@ -17,7 +17,9 @@
           "sem1_2024",
           "sem2_2024",
           "sem1_2025",
-          "sem2_2025"
+          "sem2_2025",
+          "sem1_2026",
+          "sem2_2026"
         ],
         "options":{
           "enum_titles": [
@@ -30,7 +32,9 @@
             "Semester 1 2024",
             "Semester 2 2024",
             "Semester 1 2025",
-            "Semester 2 2025"
+            "Semester 2 2025",
+            "Semester 1 2026",
+            "Semester 2 2026"
           ]
         }
       },
