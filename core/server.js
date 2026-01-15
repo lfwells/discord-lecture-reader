@@ -36,6 +36,7 @@ import { exec } from 'child_process';
 import { getPermissions, hasPermissionCached, isUTASBotAdminCached } from './permissions.js';
 
 import init_kit214 from '../kit214_2025/index.js';
+import init_kit305_2026 from '../kit305_2026/index.js';
 
 export function init_server()
 {
@@ -43,6 +44,7 @@ export function init_server()
 
   //add in extra routes for just mashing in the KIT214 stuff here
   init_kit214(app);
+  init_kit305_2026(app);
 
   app.use(cookieParser())
   
