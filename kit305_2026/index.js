@@ -1,71 +1,70 @@
-import express  from 'express';
-import path from 'path'; 
+import express from 'express';
+import path from 'path';
 import { fileURLToPath } from 'url';
 
 // These lines help resolve paths in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default function(app)
-{  
+export default function (app) {
 
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-    const staticPath = path.join(__dirname, '/img');
-    console.log("Serving images from:", staticPath);
-    app.use("/kit305_2026/img", express.static(staticPath));
+  const staticPath = path.join(__dirname, '/img');
+  console.log("Serving images from:", staticPath);
+  app.use("/kit305_2026/img", express.static(staticPath));
 
-    // Middleware to parse JSON bodies. It only runs if the
-    // Content-Type header matches 'application/json'.
-    app.use(express.json());
-    
-    // Middleware to parse URL-encoded bodies. It only runs if the
-    // Content-Type header matches 'application/x-www-form-urlencoded'.
-    app.use("/kit305_2026", express.json());
+  // Middleware to parse JSON bodies. It only runs if the
+  // Content-Type header matches 'application/json'.
+  app.use(express.json());
 
-    //enable cors
-    app.use((req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        next();
-    });
+  // Middleware to parse URL-encoded bodies. It only runs if the
+  // Content-Type header matches 'application/x-www-form-urlencoded'.
+  app.use("/kit305_2026", express.json());
 
-    app.get("/kit305_2026", (req, res) => {
-        //generate the full url so we can display it in the links
-        let url = req.protocol + '://' + req.get('host') + req.originalUrl;
-        //remove trailing slash if exists
-        if (url.endsWith('/')) {
-            url = url.slice(0, -1);
-        }
-        res.send(`<h1>KIT305/721 Sample Data API</h1><p>This is a sample API for KIT305/721.</p><p>Make a web request to <a href='${url}/product'>${url}/product</a> to see the products.</p><p>Make a web request to <a href='${url}/product/1'>${url}/product/:id</a> to see a specific product.</p><p>Make a web request to <a href='${url}/product?category=floor'>${url}/product?category=floor</a> or <a href='${url}/product?category=window'>${url}/product?category=window</a> for a filtered list.</p><p>To download a JSON file in your browser now, use <a href='${url}/products_json'>${url}/products_json</a>, <a href='${url}/products_json?category=floor'>${url}/products_json?category=floor</a>, or <a href='${url}/products_json?category=window'>${url}/products_json?category=window</a>.</p>`);
-    });
+  //enable cors
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    next();
+  });
 
-    app.get("/kit305_2026/product", (req, res) => {
-        if (req.query.category) {
-            const filtered = data.filter(p => p.category === req.query.category);
-            return res.json({ data: filtered });
-        }
-        return res.json({ data });
-    });
-    app.get("/kit305_2026/product/:id", (req, res) => {
-        const product = data.find(p => p.id == req.params.id);
-        if (product) {
-            return res.json({ data: product });
-        }
-        return res.status(404).json({ error: "Product not found" });
-    });
+  app.get("/kit305_2026", (req, res) => {
+    //generate the full url so we can display it in the links
+    let url = req.protocol + '://' + req.get('host') + req.originalUrl;
+    //remove trailing slash if exists
+    if (url.endsWith('/')) {
+      url = url.slice(0, -1);
+    }
+    res.send(`<h1>KIT305/721 Sample Data API</h1><p>This is a sample API for KIT305/721.</p><p>Make a web request to <a href='${url}/product'>${url}/product</a> to see the products.</p><p>Make a web request to <a href='${url}/product/1'>${url}/product/:id</a> to see a specific product.</p><p>Make a web request to <a href='${url}/product?category=floor'>${url}/product?category=floor</a> or <a href='${url}/product?category=window'>${url}/product?category=window</a> for a filtered list.</p><p>To download a JSON file in your browser now, use <a href='${url}/products_json'>${url}/products_json</a>, <a href='${url}/products_json?category=floor'>${url}/products_json?category=floor</a>, or <a href='${url}/products_json?category=window'>${url}/products_json?category=window</a>.</p>`);
+  });
 
-    app.get("/kit305_2026/products_json", (req, res) => {
-        let filtered = data;
-        if (req.query.category) {
-            filtered = data.filter(p => p.category === req.query.category);
-        }
-        const jsonData = JSON.stringify({ data: filtered }, null, 2);
-        res.setHeader('Content-disposition', 'attachment; filename=products.json');
-        res.setHeader('Content-type', 'application/json');
-        res.send(jsonData); 
-    });
+  app.get("/kit305_2026/product", (req, res) => {
+    if (req.query.category) {
+      const filtered = data.filter(p => p.category === req.query.category);
+      return res.json({ data: filtered });
+    }
+    return res.json({ data });
+  });
+  app.get("/kit305_2026/product/:id", (req, res) => {
+    const product = data.find(p => p.id == req.params.id);
+    if (product) {
+      return res.json({ data: product });
+    }
+    return res.status(404).json({ error: "Product not found" });
+  });
+
+  app.get("/kit305_2026/products_json", (req, res) => {
+    let filtered = data;
+    if (req.query.category) {
+      filtered = data.filter(p => p.category === req.query.category);
+    }
+    const jsonData = JSON.stringify({ data: filtered }, null, 2);
+    res.setHeader('Content-disposition', 'attachment; filename=products.json');
+    res.setHeader('Content-type', 'application/json');
+    res.send(jsonData);
+  });
 
 }
 
@@ -81,7 +80,8 @@ const data = [
     "min_height": 500,
     "max_height": 2400,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-001.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["White", "Beige", "Grey", "Black"]
   },
   {
     "id": "win-002",
@@ -94,7 +94,8 @@ const data = [
     "min_height": 1000,
     "max_height": 3000,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-002.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Cream", "Slate", "Charcoal"]
   },
   {
     "id": "win-003",
@@ -107,7 +108,8 @@ const data = [
     "min_height": 1000,
     "max_height": 2000,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-003.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Natural Oak", "Painted White", "Walnut"]
   },
   {
     "id": "win-004",
@@ -120,7 +122,8 @@ const data = [
     "min_height": 1200,
     "max_height": 4000,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-004.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Pure White", "Off-White", "Silver"]
   },
   {
     "id": "win-005",
@@ -133,7 +136,8 @@ const data = [
     "min_height": 600,
     "max_height": 2200,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-005.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Navy Blue", "Deep Grey", "Midnight Black"]
   },
   {
     "id": "win-006",
@@ -146,7 +150,8 @@ const data = [
     "min_height": 400,
     "max_height": 1000,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-006.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Antique White", "Sage Green"]
   },
   {
     "id": "win-007",
@@ -159,7 +164,8 @@ const data = [
     "min_height": 300,
     "max_height": 3000,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-007.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Brushed Silver", "Gloss White", "Matte Black"]
   },
   {
     "id": "win-008",
@@ -172,7 +178,8 @@ const data = [
     "min_height": 2000,
     "max_height": 5000,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-008.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Royal Red", "Deep Purple", "Emerald Green"]
   },
   {
     "id": "win-009",
@@ -185,7 +192,8 @@ const data = [
     "min_height": 800,
     "max_height": 2600,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-009.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Natural", "Carbonized", "Tiger Stripe"]
   },
   {
     "id": "win-010",
@@ -198,7 +206,8 @@ const data = [
     "min_height": 600,
     "max_height": 1800,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/win-010.png",
-    "category": "window"
+    "category": "window",
+    "variants": ["Solar Grey", "Steel Blue"]
   },
   {
     "id": "flr-001",
@@ -211,7 +220,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-001.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Snowy Peak", "River Stone", "Earth Brown"]
   },
   {
     "id": "flr-002",
@@ -224,7 +234,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-002.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Office Grey", "Industrial Blue", "Desert Sand"]
   },
   {
     "id": "flr-003",
@@ -237,7 +248,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-003.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Light Oak", "American Walnut", "Smoked Grey"]
   },
   {
     "id": "flr-004",
@@ -250,7 +262,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-004.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Solid Black", "Blue Fleck", "Red Fleck"]
   },
   {
     "id": "flr-005",
@@ -263,7 +276,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-005.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Weathered Wood", "Limed Oak", "Rustic Pine"]
   },
   {
     "id": "flr-006",
@@ -276,7 +290,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-006.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Ash", "Obsidian", "Cement"]
   },
   {
     "id": "flr-007",
@@ -289,7 +304,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-007.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Oatmeal", "Pebble", "Hearth"]
   },
   {
     "id": "flr-008",
@@ -302,7 +318,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-008.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Original", "Dark Roast", "Bleached"]
   },
   {
     "id": "flr-009",
@@ -315,7 +332,8 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-009.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Honey", "Raw", "Cognac"]
   },
   {
     "id": "flr-010",
@@ -328,6 +346,7 @@ const data = [
     "min_height": null,
     "max_height": null,
     "imageUrl": "https://utasbot.dev/kit305_2026/img/flr-010.png",
-    "category": "floor"
+    "category": "floor",
+    "variants": ["Spring Green", "Everglade"]
   }
 ];
